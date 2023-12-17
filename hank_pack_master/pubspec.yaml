@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   bitsdojo_window: ^0.1.5
   desktop_window: ^0.4.0
+  process_run: ^0.13.3
 
 dev_dependencies:
   flutter_test:

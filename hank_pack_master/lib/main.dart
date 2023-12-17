@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
+import 'package:hank_pack_master/info_page.dart';
+import 'package:process_run/process_run.dart';
 
 void main() {
   runApp(const MyApp());
@@ -89,11 +93,33 @@ class _LeftSideState extends State<LeftSide> {
             Column(
               children: [
                 WindowTitleBarBox(child: MoveWindow()),
-                Expanded(child: Container())
+                Expanded(
+                    child: Column(
+                  children: [
+                    _getBtn(),
+                    _getBtn(),
+                    _getBtn(),
+                  ],
+                ))
               ],
             )
           ],
         ));
+  }
+
+  Widget _getBtn() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: () async {
+          List<ProcessResult> list = await run("dir", workingDirectory: "E:\\util");
+          for (var r in list) {
+            debugPrint("${r.exitCode}");
+          }
+        },
+        child: const Text('git'),
+      ),
+    );
   }
 }
 
@@ -119,7 +145,8 @@ class RightSide extends StatelessWidget {
             child: Row(
               children: [Expanded(child: MoveWindow()), const WindowButtons()],
             ),
-          )
+          ),
+          const MyInfoPage(title: "title")
         ]),
       ),
     );
