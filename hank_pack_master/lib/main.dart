@@ -116,8 +116,8 @@ class _LeftSideState extends State<LeftSide> {
                           ]),
                           _getBtn(
                               binRoot: flutterPath,
-                              cmd: "flutter",
-                              params: []),
+                              cmd: "flutter.bat",
+                              params: ["doctor"]),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -169,16 +169,14 @@ class _LeftSideState extends State<LeftSide> {
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
           onPressed: () async {
-            var process = await Process.start("${flutterPath}flutter", [],
+            reset();
+            var process = await Process.start("$binRoot$cmd", params,
                 workingDirectory: workDir);
-            // reset();
-            // var process = await Process.start("$binRoot$cmd", params,
-            //     workingDirectory: workDir);
-            // process.stdout.listen((data) => syncData(data));
-            // process.stderr.listen((data) => syncData(data));
-            // // 等待命令执行完成
-            // var exitCode = await process.exitCode;
-            // addRes('Command exited with code: $exitCode');
+            process.stdout.listen((data) => syncData(data));
+            process.stderr.listen((data) => syncData(data));
+            // 等待命令执行完成
+            var exitCode = await process.exitCode;
+            addRes('Command exited with code: $exitCode');
           },
           child: Text(cmd)),
     );
