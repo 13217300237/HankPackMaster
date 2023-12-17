@@ -1,78 +1,174 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MyApp());
+
+  doWhenWindowReady(() {
+    final win = appWindow;
+
+    DesktopWindow.getWindowSize().then((size) {
+      Size initialSize = Size(size.width * .9, size.height * .8);
+      win.minSize = initialSize;
+      win.size = initialSize;
+      win.alignment = Alignment.center;
+      win.title = "Custom window with Flutter";
+      win.show();
+    });
+  });
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+const borderColor = Color(0xFF805306);
 
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors),
-        useMaterial3: true,
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: WindowBorder(
+          color: borderColor,
+          width: 1,
+          child: const Row(
+            children: [
+              LeftSide(),
+              RightSide(),
+            ],
+          ),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+const sidebarColor = Colors.lightGreen;
 
-  final String title;
+class LeftSide extends StatefulWidget {
+  const LeftSide({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<LeftSide> createState() => _LeftSideState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _LeftSideState extends State<LeftSide> {
+  String _windowSize = 'Unknown';
 
-  void _incrementCounter() {
+  Future _getWindowSize() async {
+    var size = await DesktopWindow.getWindowSize();
     setState(() {
-      _counter++;
+      _windowSize = '${size.width} x ${size.height}';
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getWindowSize();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        color: sidebarColor,
+        width: 200,
+        child: Stack(
+          children: [
+            Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Center(
+                  child: Text(_windowSize,
+                      style: const TextStyle(color: Colors.white)))
+            ]),
+            Column(
+              children: [
+                WindowTitleBarBox(child: MoveWindow()),
+                Expanded(child: Container())
+              ],
+            )
+          ],
+        ));
+  }
+}
+
+const backgroundStartColor = Color(0xFFFFD500);
+const backgroundEndColor = Color(0xFFF6A00C);
+
+class RightSide extends StatelessWidget {
+  const RightSide({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [backgroundStartColor, backgroundEndColor],
+              stops: [0.0, 1.0]),
+        ),
+        child: Column(children: [
+          WindowTitleBarBox(
+            child: Row(
+              children: [Expanded(child: MoveWindow()), const WindowButtons()],
+            ),
+          )
+        ]),
+      ),
+    );
+  }
+}
+
+final buttonColors = WindowButtonColors(
+    iconNormal: const Color(0xFF805306),
+    mouseOver: const Color(0xFFF6A00C),
+    mouseDown: const Color(0xFF805306),
+    iconMouseOver: const Color(0xFF805306),
+    iconMouseDown: const Color(0xFFFFD500));
+
+final closeButtonColors = WindowButtonColors(
+    mouseOver: const Color(0xFFD32F2F),
+    mouseDown: const Color(0xFFB71C1C),
+    iconNormal: const Color(0xFF805306),
+    iconMouseOver: Colors.white);
+
+class WindowButtons extends StatefulWidget {
+  const WindowButtons({Key? key}) : super(key: key);
+
+  @override
+  WindowButtonsState createState() => WindowButtonsState();
+}
+
+class WindowButtonsState extends State<WindowButtons> {
+  void maximizeOrRestore() {
+    setState(() {
+      appWindow.maximizeOrRestore();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('''
-              这是一个流水线作业工具，它目前的功能只针对安卓工程:
-              1. 调用git指令克隆git仓库，并切换到指定分支，并且合并指定分支的代码
-              2. 执行gradle命令，对安卓工程进行编译，随后执行打包指令，最后产出apk文件
-              3. 执行签名指令，对apk进行再签名
-              4. 执行加固命令，对apk进行加固并再签名
-              5. 将加固后的apk文件上传到 pgy 这种托管平台
-              其中各种指令的执行结果，通过stream 显示在日志面板上
-              
-              我做这个的目的，就是将打包出产物的流程一体化，人为的操作只有 设置好 git仓库以及 工作分支然后点击开始打包即可。
-              生成的产物apk将会以 下载链接，下载二维码，以及 文件本身的方式，呈现在 用户设置好的目标目录上
-              ''',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500),),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.dangerous),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    return Row(
+      children: [
+        MinimizeWindowButton(colors: buttonColors),
+        appWindow.isMaximized
+            ? RestoreWindowButton(
+                colors: buttonColors,
+                onPressed: maximizeOrRestore,
+              )
+            : MaximizeWindowButton(
+                colors: buttonColors,
+                onPressed: maximizeOrRestore,
+              ),
+        CloseWindowButton(colors: closeButtonColors),
+      ],
     );
   }
 }
