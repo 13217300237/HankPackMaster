@@ -4,9 +4,10 @@ import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_window/desktop_window.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hank_pack_master/info_page.dart';
-import 'package:process_run/process_run.dart';
+import 'package:jiffy/jiffy.dart';
 
 void main() {
   runApp(const MyApp());
@@ -82,11 +83,15 @@ class _LeftSideState extends State<LeftSide> {
     _getWindowSize();
   }
 
+  String flutterPath =
+      "D:/env/flutterSDK/flutter_windows_3.3.8-stable/flutter/bin/";
+
   @override
   Widget build(BuildContext context) {
     return Container(
         color: sidebarColor,
-        width: 200,
+        width: 600,
+        padding: const EdgeInsets.all(20),
         child: Stack(
           children: [
             Column(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -100,12 +105,24 @@ class _LeftSideState extends State<LeftSide> {
                 Expanded(
                     child: SingleChildScrollView(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _getBtn(),
-                      Text(
-                        _executeResult,
-                        style: const TextStyle(color: Colors.white),
+                      Row(
+                        children: [
+                          _getBtn(cmd: "git", params: [
+                            "clone",
+                            "git@github.com:18598925736/HankPackMaster.git"
+                          ]),
+                          _getBtn(
+                              binRoot: flutterPath,
+                              cmd: "flutter",
+                              params: []),
+                        ],
                       ),
+                      const SizedBox(height: 20),
+                      Text(_executeResult,
+                          style: const TextStyle(color: Colors.white)),
                     ],
                   ),
                 ))
@@ -115,62 +132,55 @@ class _LeftSideState extends State<LeftSide> {
         ));
   }
 
-  Widget _getBtn() {
+  void addRes(String res) {
+    setState(() {
+      _executeResult +=
+          "${Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss")} : ${res.trim()}\n";
+    });
+  }
+
+  void reset() {
+    setState(() {
+      _executeResult = "";
+    });
+  }
+
+  void syncData(data) {
+    try {
+      // 将字节数组解码为字符串(这种写法，如果结果中包含中文，则 无法识别)
+      String str = utf8.decode(data);
+      addRes(str);
+    } on Exception catch (e) {
+      printErr(e, data);
+    }
+  }
+
+  void printErr(e, data) {
+    debugPrint('$e');
+    debugPrint('无法用utf8转化如下数组：$data');
+  }
+
+  _getBtn(
+      {required String cmd,
+      required List<String> params,
+      String binRoot = "",
+      String workDir = "E:\\packTest"}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
-        onPressed: () async {
-          setState(() {
-            _executeResult = "";
-          });
-
-          String cmds = '''
-              git --version
-              dir
-              flutter --version
-          ''';
-
-          String gitClone =
-              'git clone git@github.com:18598925736/HankPackMaster.git';
-
-          List<ProcessResult>? list;
-          try {
-            var shell = Shell(
-              workingDirectory: "E:\\util",
-            );
-
-            // 执行 git clone 命令
-            list = await shell.run(gitClone);
-
-            for (var cloneProcess in list) {
-              // 获取命令执行的结果
-              if (cloneProcess.exitCode == 0) {
-                debugPrint('Clone completed successfully.');
-              } else {
-                debugPrint('Clone failed.');
-              }
-            }
-
-          } on ShellException catch (e) {
-            setState(() {
-              _executeResult = e.result?.stderr;
-            });
-          }
-
-          if (list == null) return;
-
-          for (var r in list) {
-            setState(() {
-              if (r.exitCode == 0) {
-                _executeResult += "执行完毕：${r.outText}\n";
-              } else {
-                _executeResult += "执行报错：${r.errText}\n";
-              }
-            });
-          }
-        },
-        child: const Text('git'),
-      ),
+          onPressed: () async {
+            var process = await Process.start("${flutterPath}flutter", [],
+                workingDirectory: workDir);
+            // reset();
+            // var process = await Process.start("$binRoot$cmd", params,
+            //     workingDirectory: workDir);
+            // process.stdout.listen((data) => syncData(data));
+            // process.stderr.listen((data) => syncData(data));
+            // // 等待命令执行完成
+            // var exitCode = await process.exitCode;
+            // addRes('Command exited with code: $exitCode');
+          },
+          child: Text(cmd)),
     );
   }
 }
