@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
@@ -122,16 +124,33 @@ class _LeftSideState extends State<LeftSide> {
             _executeResult = "";
           });
 
+          String cmds = '''
+              git --version
+              dir
+              flutter --version
+          ''';
+
+          String gitClone =
+              'git clone git@github.com:18598925736/HankPackMaster.git';
+
           List<ProcessResult>? list;
           try {
-            list = await run('''
-              git --version
-              
-              dir
-              
-              flutter --version
-              
-            ''', workingDirectory: "E:\\util");
+            var shell = Shell(
+              workingDirectory: "E:\\util",
+            );
+
+            // 执行 git clone 命令
+            list = await shell.run(gitClone);
+
+            for (var cloneProcess in list) {
+              // 获取命令执行的结果
+              if (cloneProcess.exitCode == 0) {
+                debugPrint('Clone completed successfully.');
+              } else {
+                debugPrint('Clone failed.');
+              }
+            }
+
           } on ShellException catch (e) {
             setState(() {
               _executeResult = e.result?.stderr;
@@ -143,9 +162,9 @@ class _LeftSideState extends State<LeftSide> {
           for (var r in list) {
             setState(() {
               if (r.exitCode == 0) {
-                _executeResult += "${r.outText}\n";
+                _executeResult += "执行完毕：${r.outText}\n";
               } else {
-                _executeResult += "${r.errText}\n";
+                _executeResult += "执行报错：${r.errText}\n";
               }
             });
           }
