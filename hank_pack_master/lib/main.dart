@@ -65,6 +65,8 @@ class LeftSide extends StatefulWidget {
 class _LeftSideState extends State<LeftSide> {
   String _windowSize = 'Unknown';
 
+  String _executeResult = "";
+
   Future _getWindowSize() async {
     var size = await DesktopWindow.getWindowSize();
     setState(() {
@@ -94,12 +96,16 @@ class _LeftSideState extends State<LeftSide> {
               children: [
                 WindowTitleBarBox(child: MoveWindow()),
                 Expanded(
-                    child: Column(
-                  children: [
-                    _getBtn(),
-                    _getBtn(),
-                    _getBtn(),
-                  ],
+                    child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _getBtn(),
+                      Text(
+                        _executeResult,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ))
               ],
             )
@@ -112,9 +118,36 @@ class _LeftSideState extends State<LeftSide> {
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
         onPressed: () async {
-          List<ProcessResult> list = await run("dir", workingDirectory: "E:\\util");
+          setState(() {
+            _executeResult = "";
+          });
+
+          List<ProcessResult>? list;
+          try {
+            list = await run('''
+              git --version
+              
+              dir
+              
+              flutter --version
+              
+            ''', workingDirectory: "E:\\util");
+          } on ShellException catch (e) {
+            setState(() {
+              _executeResult = e.result?.stderr;
+            });
+          }
+
+          if (list == null) return;
+
           for (var r in list) {
-            debugPrint("${r.exitCode}");
+            setState(() {
+              if (r.exitCode == 0) {
+                _executeResult += "${r.outText}\n";
+              } else {
+                _executeResult += "${r.errText}\n";
+              }
+            });
           }
         },
         child: const Text('git'),
