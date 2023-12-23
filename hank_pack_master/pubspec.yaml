@@ -38,6 +38,7 @@ dependencies:
   bitsdojo_window: 0.1.5
   desktop_window: 0.4.0
   jiffy: 6.2.1
+  oktoast: 3.4.0
 
 dev_dependencies:
   flutter_test:

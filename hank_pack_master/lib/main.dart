@@ -5,7 +5,9 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:hank_pack_master/info_page.dart';
+import 'package:hank_pack_master/toast_util.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:oktoast/oktoast.dart';
 
 import 'command_util.dart';
 
@@ -38,17 +40,19 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: WindowBorder(
-          color: borderColor,
-          width: 1,
-          child: const Row(
-            children: [
-              LeftSide(),
-              RightSide(),
-            ],
+    return OKToast(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: WindowBorder(
+            color: borderColor,
+            width: 1,
+            child: const Row(
+              children: [
+                LeftSide(),
+                RightSide(),
+              ],
+            ),
           ),
         ),
       ),
@@ -56,7 +60,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-const sidebarColor = Colors.lightGreen;
+const sidebarColor = Colors.blueGrey;
 
 class LeftSide extends StatefulWidget {
   const LeftSide({Key? key}) : super(key: key);
@@ -83,31 +87,54 @@ class _LeftSideState extends State<LeftSide> {
     _getWindowSize();
   }
 
-  String flutterPath =
-      "D:/env/flutterSDK/flutter_windows_3.3.8-stable/flutter/bin/";
-
   @override
   Widget build(BuildContext context) {
     var windowSizeWidget = Center(
         child: Text(_windowSize, style: const TextStyle(color: Colors.white)));
 
     var gitBtn = _getBtn(
+        btnName: "git clone",
         cmd: "git",
         params: ["clone", "git@github.com:18598925736/HankPackMaster.git"]);
 
-    var flutterDoctorBtn =
-        _getBtn(binRoot: flutterPath, cmd: "flutter.bat", params: ["doctor"]);
+    var gradlew = _getBtn(
+        btnName: "gradlew -version",
+        cmd: "gradlew.bat",
+        binRoot: "E:\\MyApplication\\",
+        params: ["-version"]);
 
-    var flutterDartBtn =
-        _getBtn(binRoot: flutterPath, cmd: "dart.bat", params: []);
+    String flutterPath =
+        "D:\\env\\flutterSDK\\flutter_windows_3.3.8-stable\\flutter\\bin\\";
 
-    var adbDevicesBtn = _getBtn(cmd: "adb", params: ["devices"]);
+    var flutterDoctorBtn = _getBtn(
+      btnName: "flutter doctor",
+      binRoot: flutterPath,
+      cmd: "flutter.bat",
+      params: ["doctor"],
+    );
 
-    var adbLogcatBtn = _getBtn(cmd: "adb", params: ["logcat"]);
+    var flutterDartBtn = _getBtn(
+      btnName: "dart -version",
+      binRoot: flutterPath,
+      cmd: "dart.bat",
+    );
+
+    var adbDevicesBtn = _getBtn(
+      btnName: "adb devices",
+      cmd: "adb",
+      params: ["devices"],
+    );
+
+    var adbLogcatBtn = _getBtn(
+      btnName: "adb logcat",
+      cmd: "adb",
+      params: ["logcat"],
+    );
     var monkeyrunner = _getBtn(
-        binRoot: "D:\\env\\sdk\\tools\\bin",
-        cmd: "monkeyrunner.bat",
-        params: []);
+      btnName: "monkeyrunner",
+      binRoot: "D:\\env\\sdk\\tools\\bin\\",
+      cmd: "monkeyrunner.bat",
+    );
 
     var executeResWidget =
         Text(_executeResult, style: const TextStyle(color: Colors.white));
@@ -128,13 +155,23 @@ class _LeftSideState extends State<LeftSide> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
+                    Wrap(children: [
                       gitBtn,
+                      gradlew,
                       flutterDoctorBtn,
                       flutterDartBtn,
                       adbDevicesBtn,
                       adbLogcatBtn,
                       monkeyrunner,
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                            onPressed: () async {
+                              // 带有渐变背景和动画的 toast
+                              ToastUtil.showPrettyToast("我是一个兵！");
+                            },
+                            child: const Text("Toast test!")),
+                      )
                     ]),
                     const SizedBox(height: 20),
                     executeResWidget,
@@ -175,8 +212,9 @@ class _LeftSideState extends State<LeftSide> {
   }
 
   _getBtn(
-      {required String cmd,
-      required List<String> params,
+      {required String btnName,
+      required String cmd,
+      List<String> params = const [],
       String binRoot = "",
       String workDir = "E:\\packTest"}) {
     return Padding(
@@ -192,7 +230,7 @@ class _LeftSideState extends State<LeftSide> {
               onLoadRes: addRes,
             );
           },
-          child: Text(cmd)),
+          child: Text(btnName)),
     );
   }
 }
@@ -203,17 +241,19 @@ const backgroundEndColor = Color(0xFFF6A00C);
 class RightSide extends StatelessWidget {
   const RightSide({Key? key}) : super(key: key);
 
+  final BoxDecoration bg = const BoxDecoration(
+    gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [backgroundStartColor, backgroundEndColor],
+        stops: [0.0, 1.0]),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [backgroundStartColor, backgroundEndColor],
-              stops: [0.0, 1.0]),
-        ),
+        decoration: bg,
         child: Column(children: [
           WindowTitleBarBox(
             child: Row(

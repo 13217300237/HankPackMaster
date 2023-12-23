@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:oktoast/oktoast.dart';
+
 ///
 /// 执行命令行的唯一类
 ///
@@ -21,20 +23,28 @@ class CommandUtil {
   ///
   ///
   ///
-  static Future<Process> execute({
+  static void execute({
     required String binRoot,
     required String cmd,
     required List<String> params,
     required String workDir,
     required Function(String res) onLoadRes,
   }) async {
-    var process =
-        await Process.start("$binRoot$cmd", params, workingDirectory: workDir);
-    process.stdout.listen((data) => onLoadRes(utf8.decode(data)));
-    process.stderr.listen((data) => onLoadRes(utf8.decode(data)));
-    // 等待命令执行完成
-    var exitCode = await process.exitCode;
-    onLoadRes("命令执行完成，exitCode = $exitCode");
-    return process;
+    if (binRoot != "" && !binRoot.endsWith(Platform.pathSeparator)) {
+      showToast("binRoot 必须以分隔符结尾");
+      return;
+    }
+
+    try {
+      var process = await Process.start("$binRoot$cmd", params,
+          workingDirectory: workDir);
+      process.stdout.listen((data) => onLoadRes(utf8.decode(data)));
+      process.stderr.listen((data) => onLoadRes(utf8.decode(data)));
+      // 等待命令执行完成
+      var exitCode = await process.exitCode;
+      onLoadRes("命令执行完成，exitCode = $exitCode");
+    } catch (e) {
+      showToast("$e");
+    }
   }
 }
