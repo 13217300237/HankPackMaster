@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:hank_pack_master/info_page.dart';
 import 'package:jiffy/jiffy.dart';
 
+import 'command_util.dart';
+
 void main() {
   runApp(const MyApp());
 
@@ -170,13 +172,13 @@ class _LeftSideState extends State<LeftSide> {
       child: ElevatedButton(
           onPressed: () async {
             reset();
-            var process = await Process.start("$binRoot$cmd", params,
-                workingDirectory: workDir);
-            process.stdout.listen((data) => syncData(data));
-            process.stderr.listen((data) => syncData(data));
-            // 等待命令执行完成
-            var exitCode = await process.exitCode;
-            addRes('Command exited with code: $exitCode');
+            CommandUtil.execute(
+              binRoot: binRoot,
+              cmd: cmd,
+              params: params,
+              workDir: workDir,
+              onLoadRes: addRes,
+            );
           },
           child: Text(cmd)),
     );
