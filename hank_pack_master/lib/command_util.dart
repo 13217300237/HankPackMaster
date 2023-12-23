@@ -6,14 +6,22 @@ import 'dart:io';
 ///
 ///
 ///
+///
 class CommandUtil {
+  ///
+  /// 注意事项，
+  /// 1、如果是.exe结尾的命令，比如 git ，[cmd] 参数 直接赋值为 git即可，但是如果是 .bat结尾的命令，就必须写全 flutter.bat
+  /// 2、如果是同时执行多个命令，那么多个命令的 执行结果都有可能通过 [onLoadRes] 函数输出出去，如果向结束执行，取得 [execute] 的返回值Process之后，执行kill
   ///
   /// [binRoot] 可执行文件的路径
   /// [cmd] 命令
   /// [params] 命令执行的参数列表
   /// [workDir] 命令执行的当前目录
   /// [onLoadRes] 当有执行结果输出时执行的函数
-  static void execute({
+  ///
+  ///
+  ///
+  static Future<Process> execute({
     required String binRoot,
     required String cmd,
     required List<String> params,
@@ -27,5 +35,6 @@ class CommandUtil {
     // 等待命令执行完成
     var exitCode = await process.exitCode;
     onLoadRes("命令执行完成，exitCode = $exitCode");
+    return process;
   }
 }

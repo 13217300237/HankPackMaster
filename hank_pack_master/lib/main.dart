@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_window/desktop_window.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hank_pack_master/info_page.dart';
 import 'package:jiffy/jiffy.dart';
@@ -90,48 +88,62 @@ class _LeftSideState extends State<LeftSide> {
 
   @override
   Widget build(BuildContext context) {
+    var windowSizeWidget = Center(
+        child: Text(_windowSize, style: const TextStyle(color: Colors.white)));
+
+    var gitBtn = _getBtn(
+        cmd: "git",
+        params: ["clone", "git@github.com:18598925736/HankPackMaster.git"]);
+
+    var flutterDoctorBtn =
+        _getBtn(binRoot: flutterPath, cmd: "flutter.bat", params: ["doctor"]);
+
+    var flutterDartBtn =
+        _getBtn(binRoot: flutterPath, cmd: "dart.bat", params: []);
+
+    var adbDevicesBtn = _getBtn(cmd: "adb", params: ["devices"]);
+
+    var adbLogcatBtn = _getBtn(cmd: "adb", params: ["logcat"]);
+    var monkeyrunner = _getBtn(
+        binRoot: "D:\\env\\sdk\\tools\\bin",
+        cmd: "monkeyrunner.bat",
+        params: []);
+
+    var executeResWidget =
+        Text(_executeResult, style: const TextStyle(color: Colors.white));
+
     return Container(
         color: sidebarColor,
-        width: 600,
+        width: 900,
         padding: const EdgeInsets.all(20),
-        child: Stack(
-          children: [
-            Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-              Center(
-                  child: Text(_windowSize,
-                      style: const TextStyle(color: Colors.white)))
-            ]),
-            Column(
-              children: [
-                WindowTitleBarBox(child: MoveWindow()),
-                Expanded(
-                    child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          _getBtn(cmd: "git", params: [
-                            "clone",
-                            "git@github.com:18598925736/HankPackMaster.git"
-                          ]),
-                          _getBtn(
-                              binRoot: flutterPath,
-                              cmd: "flutter.bat",
-                              params: ["doctor"]),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Text(_executeResult,
-                          style: const TextStyle(color: Colors.white)),
-                    ],
-                  ),
-                ))
-              ],
-            )
-          ],
-        ));
+        child: Stack(children: [
+          Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [windowSizeWidget]),
+          Column(children: [
+            WindowTitleBarBox(child: MoveWindow()),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      gitBtn,
+                      flutterDoctorBtn,
+                      flutterDartBtn,
+                      adbDevicesBtn,
+                      adbLogcatBtn,
+                      monkeyrunner,
+                    ]),
+                    const SizedBox(height: 20),
+                    executeResWidget,
+                  ],
+                ),
+              ),
+            ),
+          ]),
+        ]));
   }
 
   void addRes(String res) {
