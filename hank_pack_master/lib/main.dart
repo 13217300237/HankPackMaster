@@ -139,45 +139,43 @@ class _LeftSideState extends State<LeftSide> {
     var executeResWidget =
         Text(_executeResult, style: const TextStyle(color: Colors.white));
 
+    var actionButtons = Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(children: [
+          gitBtn,
+          gradlew,
+          flutterDoctorBtn,
+          flutterDartBtn,
+          adbDevicesBtn,
+          adbLogcatBtn,
+          monkeyrunner,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+                onPressed: () async {
+                  // 带有渐变背景和动画的 toast
+                  ToastUtil.showPrettyToast("我是一个兵！");
+                },
+                child: const Text("Toast test!")),
+          )
+        ]),
+      ],
+    );
+
     return Container(
         color: sidebarColor,
-        width: 900,
+        width: 700,
         padding: const EdgeInsets.all(20),
         child: Stack(children: [
-          Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [windowSizeWidget]),
+          Column(children: [windowSizeWidget]),
           Column(children: [
             WindowTitleBarBox(child: MoveWindow()),
+            actionButtons,
+            const SizedBox(height: 20),
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(children: [
-                      gitBtn,
-                      gradlew,
-                      flutterDoctorBtn,
-                      flutterDartBtn,
-                      adbDevicesBtn,
-                      adbLogcatBtn,
-                      monkeyrunner,
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              // 带有渐变背景和动画的 toast
-                              ToastUtil.showPrettyToast("我是一个兵！");
-                            },
-                            child: const Text("Toast test!")),
-                      )
-                    ]),
-                    const SizedBox(height: 20),
-                    executeResWidget,
-                  ],
-                ),
-              ),
+              child: SingleChildScrollView(child: executeResWidget),
             ),
           ]),
         ]));
