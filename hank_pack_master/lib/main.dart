@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_window/desktop_window.dart';
@@ -8,8 +7,10 @@ import 'package:hank_pack_master/info_page.dart';
 import 'package:hank_pack_master/toast_util.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:provider/provider.dart';
 
 import 'command_util.dart';
+import 'models.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,17 +42,20 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return OKToast(
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: WindowBorder(
-            color: borderColor,
-            width: 1,
-            child: const Row(
-              children: [
-                LeftSide(),
-                RightSide(),
-              ],
+      child: ChangeNotifierProvider(
+        create: (BuildContext context) => ExecutorModel(),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            body: WindowBorder(
+              color: borderColor,
+              width: 1,
+              child: const Row(
+                children: [
+                  LeftSide(),
+                  RightSide(),
+                ],
+              ),
             ),
           ),
         ),
@@ -72,7 +76,7 @@ class LeftSide extends StatefulWidget {
 class _LeftSideState extends State<LeftSide> {
   String _windowSize = 'Unknown';
 
-  String _executeResult = "";
+  late ExecutorModel executorModel;
 
   Future _getWindowSize() async {
     var size = await DesktopWindow.getWindowSize();
@@ -85,6 +89,7 @@ class _LeftSideState extends State<LeftSide> {
   void initState() {
     super.initState();
     _getWindowSize();
+    executorModel = context.read<ExecutorModel>();
   }
 
   @override
@@ -144,9 +149,6 @@ class _LeftSideState extends State<LeftSide> {
       cmd: "monkeyrunner.bat",
     );
 
-    var executeResWidget =
-        Text(_executeResult, style: const TextStyle(color: Colors.white));
-
     var actionButtons = Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +177,7 @@ class _LeftSideState extends State<LeftSide> {
 
     return Container(
         color: sidebarColor,
-        width: 700,
+        width: 400,
         padding: const EdgeInsets.all(20),
         child: Stack(children: [
           Column(children: [windowSizeWidget]),
@@ -183,39 +185,17 @@ class _LeftSideState extends State<LeftSide> {
             WindowTitleBarBox(child: MoveWindow()),
             actionButtons,
             const SizedBox(height: 20),
-            Expanded(
-              child: SingleChildScrollView(child: executeResWidget),
-            ),
           ]),
         ]));
   }
 
   void addRes(String res) {
-    setState(() {
-      _executeResult +=
-          "${Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss")} : ${res.trim()}\n";
-    });
+    executorModel.append(
+        "${Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss")} : ${res.trim()}");
   }
 
   void reset() {
-    setState(() {
-      _executeResult = "";
-    });
-  }
-
-  void syncData(data) {
-    try {
-      // 将字节数组解码为字符串(这种写法，如果结果中包含中文，则 无法识别)
-      String str = utf8.decode(data);
-      addRes(str);
-    } on Exception catch (e) {
-      printErr(e, data);
-    }
-  }
-
-  void printErr(e, data) {
-    debugPrint('$e');
-    debugPrint('无法用utf8转化如下数组：$data');
+    executorModel.reset();
   }
 
   _getBtn(
@@ -246,7 +226,7 @@ class _LeftSideState extends State<LeftSide> {
   }
 }
 
-const backgroundStartColor = Color(0xCCCCCC);
+const backgroundStartColor = Color(0x00cccccc);
 const backgroundEndColor = Color(0xFFF6A00C);
 
 class RightSide extends StatelessWidget {
@@ -263,18 +243,20 @@ class RightSide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        decoration: bg,
-        child: Column(children: [
-          WindowTitleBarBox(
-            child: Row(
-              children: [Expanded(child: MoveWindow()), const WindowButtons()],
-            ),
-          ),
-          const MyInfoPage(title: "title")
-        ]),
-      ),
-    );
+        child: Container(
+            decoration: bg,
+            child: Column(children: [
+              WindowTitleBarBox(
+                  child: Row(children: [
+                Expanded(child: MoveWindow()),
+                const WindowButtons()
+              ])),
+              Expanded(
+                child: Consumer<ExecutorModel>(
+                    builder: (context, value, child) =>
+                        InfoPage(content: value.getRes)),
+              )
+            ])));
   }
 }
 

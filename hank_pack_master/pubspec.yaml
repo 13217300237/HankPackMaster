@@ -39,6 +39,7 @@ dependencies:
   desktop_window: 0.4.0
   jiffy: 6.2.1
   oktoast: 3.4.0
+  provider: 6.1.1
 
 dev_dependencies:
   flutter_test:
