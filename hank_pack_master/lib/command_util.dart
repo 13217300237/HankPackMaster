@@ -23,7 +23,7 @@ class CommandUtil {
   ///
   ///
   ///
-  static void execute({
+  static Future<Process?> execute({
     required String binRoot,
     required String cmd,
     required List<String> params,
@@ -32,7 +32,7 @@ class CommandUtil {
   }) async {
     if (binRoot != "" && !binRoot.endsWith(Platform.pathSeparator)) {
       showToast("binRoot 必须以分隔符结尾");
-      return;
+      return null;
     }
 
     try {
@@ -40,11 +40,12 @@ class CommandUtil {
           workingDirectory: workDir);
       process.stdout.listen((data) => onLoadRes(utf8.decode(data)));
       process.stderr.listen((data) => onLoadRes(utf8.decode(data)));
-      // 等待命令执行完成
-      var exitCode = await process.exitCode;
-      onLoadRes("命令执行完成，exitCode = $exitCode");
+
+      return process;
     } catch (e) {
       showToast("$e");
     }
+
+    return null;
   }
 }

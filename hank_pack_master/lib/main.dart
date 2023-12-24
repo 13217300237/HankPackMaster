@@ -97,12 +97,19 @@ class _LeftSideState extends State<LeftSide> {
         cmd: "git",
         params: ["clone", "git@github.com:18598925736/HankPackMaster.git"]);
 
+    var gradlewVersion = _getBtn(
+        btnName: "gradlew -version",
+        cmd: "gradlew.bat",
+        binRoot: "E:\\MyApplication\\",
+        workDir: "E:\\MyApplication\\",
+        params: ["-version"]); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
+
     var gradlew = _getBtn(
         btnName: "gradlew assembleDebug",
         cmd: "gradlew.bat",
         binRoot: "E:\\MyApplication\\",
         workDir: "E:\\MyApplication\\",
-        params: ["installDebug"]); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
+        params: ["clean", "assembleDebug"]); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
 
     String flutterPath =
         "D:\\env\\flutterSDK\\flutter_windows_3.3.8-stable\\flutter\\bin\\";
@@ -146,6 +153,7 @@ class _LeftSideState extends State<LeftSide> {
       children: [
         Wrap(children: [
           gitBtn,
+          gradlewVersion,
           gradlew,
           flutterDoctorBtn,
           flutterDartBtn,
@@ -221,20 +229,24 @@ class _LeftSideState extends State<LeftSide> {
       child: ElevatedButton(
           onPressed: () async {
             reset();
-            CommandUtil.execute(
+            var process = await CommandUtil.execute(
               binRoot: binRoot,
               cmd: cmd,
               params: params,
               workDir: workDir,
               onLoadRes: addRes,
             );
+
+            // 等待命令执行完成
+            var exitCode = await process?.exitCode;
+            ToastUtil.showPrettyToast("$btnName  执行完成，exitCode = $exitCode");
           },
           child: Text(btnName)),
     );
   }
 }
 
-const backgroundStartColor = Color(0xFFFFD500);
+const backgroundStartColor = Color(0xCCCCCC);
 const backgroundEndColor = Color(0xFFF6A00C);
 
 class RightSide extends StatelessWidget {

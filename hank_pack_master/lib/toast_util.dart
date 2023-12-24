@@ -1,35 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 
+const backgroundStartColor = Color(0xFFFFD500);
+const backgroundEndColor = Color(0xFFF6A00C);
+
+class CustomToast extends StatelessWidget {
+  final String message;
+
+  const CustomToast({Key? key, required this.message}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[700],
+        gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [backgroundStartColor, backgroundEndColor],
+            stops: [0.0, 1.0]),
+        borderRadius: BorderRadius.circular(25.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.message, color: Colors.white),
+          const SizedBox(width: 10.0),
+          Text(
+            message,
+            style: const TextStyle(color: Colors.white),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class ToastUtil {
   static void showPrettyToast(String msg) {
-    showToastWidget(
-      AnimatedContainer(
-        duration: const Duration(milliseconds: 1500),
-        curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25.0),
-          gradient: const LinearGradient(
-            colors: [Colors.green, Colors.yellow],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        width: 200,
-        height: 50,
-        child: Center(
-          child: Text(
-            msg,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-      position: ToastPosition.center,
-      duration: const Duration(seconds: 2),
-    );
+    showToastWidget(CustomToast(message: msg));
   }
 }
