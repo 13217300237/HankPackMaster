@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_window/desktop_window.dart';
@@ -149,11 +150,22 @@ class _LeftSideState extends State<LeftSide> {
       cmd: "monkeyrunner.bat",
     );
 
+    var toastTest = Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+          onPressed: () async {
+            // 带有渐变背景和动画的 toast
+            ToastUtil.showPrettyToast("我是一个兵！");
+          },
+          child: const Text("Toast test!")),
+    );
+
     var actionButtons = Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Wrap(children: [
+          toastTest,
           gitBtn,
           gradlewVersion,
           gradlew,
@@ -163,13 +175,12 @@ class _LeftSideState extends State<LeftSide> {
           adbLogcatBtn,
           monkeyrunner,
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8),
             child: ElevatedButton(
-                onPressed: () async {
-                  // 带有渐变背景和动画的 toast
-                  ToastUtil.showPrettyToast("我是一个兵！");
+                onPressed: () {
+                  makePack();
                 },
-                child: const Text("Toast test!")),
+                child: const Text("Make Pack")),
           )
         ]),
       ],
@@ -196,6 +207,79 @@ class _LeftSideState extends State<LeftSide> {
 
   void reset() {
     executorModel.reset();
+  }
+
+  Future createAndWriteFile(String filePath, String content) async {
+    debugPrint("准备写入环境参数");
+    File file = File(filePath);
+    debugPrint("1");
+    // 创建文件
+    file.createSync(recursive: true);
+    debugPrint("2");
+    // 写入内容
+    await file.writeAsString(content);
+    debugPrint("3");
+  }
+
+  ///
+  /// 打包动作
+  ///
+  void makePack() async {
+    reset();
+
+    // 检查当前环境变量即可
+    var echoAndroidHome = await CommandUtil.execute(
+      workDir: "E:\\packTest",
+      cmd: "cmd",
+      params: ['/c', "echo", "%ANDROID_HOME%"],
+      onLoadRes: addRes,
+    );
+
+    var exitCode = await echoAndroidHome?.exitCode;
+    if (0 != exitCode) {
+      String failedStr = "echoAndroidHome 执行失败.$exitCode";
+      addRes(failedStr);
+      return;
+    } else {
+      addRes("echoAndroidHome执行 完毕");
+    }
+
+    // clone
+    var gitClone = await CommandUtil.execute(
+      workDir: "E:\\packTest",
+      cmd: "git",
+      params: ["clone", "git@github.com:18598925736/MyApp20231224.git"],
+      onLoadRes: addRes,
+    );
+
+    exitCode = await gitClone?.exitCode;
+    if (0 != exitCode) {
+      String failedStr = "clone 执行失败.$exitCode";
+      ToastUtil.showPrettyToast(failedStr);
+      addRes(failedStr);
+      return;
+    } else {
+      addRes("clone完毕");
+    }
+
+    // assemble
+    var assemble = await CommandUtil.execute(
+        cmd: "gradlew.bat",
+        binRoot: "E:\\packTest\\MyApp20231224\\",
+        workDir: "E:\\packTest\\MyApp20231224\\",
+        params: ["clean", "assembleDebug", "--stacktrace"],
+        onLoadRes: addRes);
+
+    // 检查打包结果
+    exitCode = await assemble?.exitCode;
+    if (0 != exitCode) {
+      String failedStr = "assemble 执行失败.$exitCode";
+      ToastUtil.showPrettyToast(failedStr);
+      addRes(failedStr);
+      return;
+    } else {
+      addRes("assemble完毕");
+    }
   }
 
   _getBtn(

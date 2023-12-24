@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:oktoast/oktoast.dart';
 
 ///
@@ -24,7 +25,7 @@ class CommandUtil {
   ///
   ///
   static Future<Process?> execute({
-    required String binRoot,
+    String binRoot = "",
     required String cmd,
     required List<String> params,
     required String workDir,
@@ -38,14 +39,23 @@ class CommandUtil {
     try {
       var process = await Process.start("$binRoot$cmd", params,
           workingDirectory: workDir);
-      process.stdout.listen((data) => onLoadRes(utf8.decode(data)));
-      process.stderr.listen((data) => onLoadRes(utf8.decode(data)));
+      process.stdout.listen((data) => onLoadRes(_utf8Trans(data)));
+      process.stderr.listen((data) => onLoadRes(_utf8Trans(data)));
 
       return process;
-    } catch (e) {
-      showToast("$e");
+    } catch (e, r) {
+      showToast("$e  $r");
+      debugPrint("$e  $r");
     }
 
     return null;
+  }
+
+  static String _utf8Trans(List<int> ori) {
+    try {
+      return utf8.decode(ori);
+    } catch (e, r) {
+      return ori.toString();
+    }
   }
 }
