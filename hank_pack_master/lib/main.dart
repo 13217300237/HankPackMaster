@@ -98,10 +98,11 @@ class _LeftSideState extends State<LeftSide> {
         params: ["clone", "git@github.com:18598925736/HankPackMaster.git"]);
 
     var gradlew = _getBtn(
-        btnName: "gradlew -version",
+        btnName: "gradlew assembleDebug",
         cmd: "gradlew.bat",
         binRoot: "E:\\MyApplication\\",
-        params: ["-version"]);
+        workDir: "E:\\MyApplication\\",
+        params: ["installDebug"]); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
 
     String flutterPath =
         "D:\\env\\flutterSDK\\flutter_windows_3.3.8-stable\\flutter\\bin\\";
