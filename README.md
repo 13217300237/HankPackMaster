@@ -53,4 +53,4 @@
 可以从这里获得技术支持。
 
 
-桌面版本的UI组件库：fluent_ui，可用。
+桌面版本的UI组件库：fluent_ui（UI库），native_context_menu(右键菜单)，可用。
