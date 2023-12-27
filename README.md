@@ -51,3 +51,6 @@
 收集到了一个 flutterDesktop技术支持的 案例和package集。`https://github.com/leanflutter/awesome-flutter-desktop`
 
 可以从这里获得技术支持。
+
+
+桌面版本的UI组件库：fluent_ui，可用。
