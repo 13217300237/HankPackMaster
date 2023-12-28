@@ -10,7 +10,13 @@ class InfoPage extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.all(20),
       itemBuilder: (context, i) {
-        return Text(content[i]);
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            content[i],
+            style: const TextStyle(fontSize: 16),
+          ),
+        );
       },
       itemCount: content.length,
     );
