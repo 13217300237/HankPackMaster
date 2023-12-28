@@ -98,66 +98,85 @@ class _LeftSideState extends State<LeftSide> {
     var windowSizeWidget = Center(
         child: Text(_windowSize, style: const TextStyle(color: Colors.white)));
 
-    var gitBtn = _getBtn(
+    var gitCloneBtn = _getCmdBtn(
         btnName: "git clone",
         cmd: "git",
-        params: ["clone", "git@github.com:18598925736/HankPackMaster.git"]);
+        params: ["clone", "git@github.com:18598925736/HankPackMaster.git"],
+        btnColor: Colors.blue);
 
-    var gradlewVersion = _getBtn(
+    var gitVersionBtn = _getCmdBtn(
+        btnName: "git version",
+        cmd: "git",
+        params: ["--version"],
+        btnColor: Colors.blue);
+
+    var gradlewVersion = _getCmdBtn(
         btnName: "gradlew -version",
         cmd: "gradlew.bat",
         binRoot: "E:\\MyApplication\\",
         workDir: "E:\\MyApplication\\",
-        params: ["-version"]); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
+        params: ["-version"],
+        btnColor: Colors.greenAccent); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
 
-    var gradlew = _getBtn(
+    var gradlew = _getCmdBtn(
         btnName: "gradlew assembleDebug",
         cmd: "gradlew.bat",
         binRoot: "E:\\MyApplication\\",
         workDir: "E:\\MyApplication\\",
-        params: ["clean", "assembleDebug"]); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
+        params: ["clean", "assembleDebug"],
+        btnColor: Colors.deepPurpleAccent); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
 
-    String flutterPath =
-        "D:\\env\\flutterSDK\\flutter_windows_3.3.8-stable\\flutter\\bin\\";
+    String flutterPath = "";
+    if (EnvParams.flutterRoot.isNotEmpty) {
+      flutterPath = EnvParams.flutterRoot[0];
+    }
 
-    var flutterDoctorBtn = _getBtn(
-      btnName: "flutter doctor",
-      binRoot: flutterPath,
-      cmd: "flutter.bat",
-      params: ["doctor"],
-    );
+    var flutterVersionBtn = _getCmdBtn(
+        btnName: "flutter version",
+        binRoot: flutterPath,
+        cmd: "flutter.bat",
+        params: ["--version"],
+        btnColor: Colors.tealAccent);
 
-    var flutterDartBtn = _getBtn(
-      btnName: "dart -version",
-      binRoot: flutterPath,
-      cmd: "dart.bat",
-    );
+    var flutterDoctorBtn = _getCmdBtn(
+        btnName: "flutter doctor",
+        binRoot: flutterPath,
+        cmd: "flutter.bat",
+        params: ["doctor"],
+        btnColor: Colors.tealAccent);
 
-    var adbDevicesBtn = _getBtn(
-      btnName: "adb devices",
-      cmd: "adb",
-      params: ["devices"],
-    );
+    var flutterDartBtn = _getCmdBtn(
+        btnName: "dart -version",
+        binRoot: flutterPath,
+        cmd: "dart.bat",
+        btnColor: Colors.deepOrangeAccent);
 
-    var adbLogcatBtn = _getBtn(
-      btnName: "adb logcat",
-      cmd: "adb",
-      params: ["logcat"],
-    );
-    var monkeyrunner = _getBtn(
-      btnName: "monkeyrunner",
-      binRoot: "D:\\env\\sdk\\tools\\bin\\",
-      cmd: "monkeyrunner.bat",
-    );
+    var adbDevicesBtn = _getCmdBtn(
+        btnName: "adb devices",
+        cmd: "adb",
+        params: ["devices"],
+        btnColor: Colors.amber);
 
-    var toastTest = Padding(
-      padding: const EdgeInsets.all(8.0),
+    var adbLogcatBtn = _getCmdBtn(
+        btnName: "adb logcat",
+        cmd: "adb",
+        params: ["logcat"],
+        btnColor: Colors.amber);
+
+    var monkeyrunner = _getCmdBtn(
+        btnName: "monkeyrunner",
+        binRoot: "D:\\env\\sdk\\tools\\bin\\",
+        cmd: "monkeyrunner.bat",
+        btnColor: Colors.white60);
+
+    var envInitBtn = Padding(
+      padding: const EdgeInsets.all(8),
       child: ElevatedButton(
-          onPressed: () async {
-            // 带有渐变背景和动画的 toast
-            ToastUtil.showPrettyToast("我是一个兵！");
+          onPressed: () {
+            reset();
+            CommandUtil.initEnvParam(action: addRes);
           },
-          child: const Text("Toast test!")),
+          child: const Text("initEnvParam")),
     );
 
     var actionButtons = Column(
@@ -165,23 +184,22 @@ class _LeftSideState extends State<LeftSide> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Wrap(children: [
-          toastTest,
-          gitBtn,
+          envInitBtn,
+          gitVersionBtn,
+          gitCloneBtn,
           gradlewVersion,
           gradlew,
+          flutterVersionBtn,
           flutterDoctorBtn,
           flutterDartBtn,
           adbDevicesBtn,
           adbLogcatBtn,
           monkeyrunner,
           Padding(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             child: ElevatedButton(
-                onPressed: () {
-                  makePack();
-                },
-                child: const Text("Make Pack")),
-          )
+                onPressed: makePack, child: const Text("Make Pack")),
+          ),
         ]),
       ],
     );
@@ -201,6 +219,7 @@ class _LeftSideState extends State<LeftSide> {
   }
 
   void addRes(String res) {
+    if (res.trim().isEmpty) return;
     executorModel.append(
         "${Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss")} : ${res.trim()}");
   }
@@ -212,10 +231,8 @@ class _LeftSideState extends State<LeftSide> {
   Future createAndWriteFile(String filePath, String content) async {
     debugPrint("准备写入环境参数");
     File file = File(filePath);
-    debugPrint("1");
     // 创建文件
     file.createSync(recursive: true);
-    debugPrint("2");
     // 写入内容
     await file.writeAsString(content);
     debugPrint("3");
@@ -232,7 +249,7 @@ class _LeftSideState extends State<LeftSide> {
       workDir: "E:\\packTest",
       cmd: "cmd",
       params: ['/c', "echo", "%ANDROID_HOME%"],
-      onLoadRes: addRes,
+      action: addRes,
     );
 
     var exitCode = await echoAndroidHome?.exitCode;
@@ -249,7 +266,7 @@ class _LeftSideState extends State<LeftSide> {
       workDir: "E:\\packTest",
       cmd: "git",
       params: ["clone", "git@github.com:18598925736/MyApp20231224.git"],
-      onLoadRes: addRes,
+      action: addRes,
     );
 
     exitCode = await gitClone?.exitCode;
@@ -268,7 +285,7 @@ class _LeftSideState extends State<LeftSide> {
         binRoot: "E:\\packTest\\MyApp20231224\\",
         workDir: "E:\\packTest\\MyApp20231224\\",
         params: ["clean", "assembleDebug", "--stacktrace"],
-        onLoadRes: addRes);
+        action: addRes);
 
     // 检查打包结果
     exitCode = await assemble?.exitCode;
@@ -282,15 +299,20 @@ class _LeftSideState extends State<LeftSide> {
     }
   }
 
-  _getBtn(
+  _getCmdBtn(
       {required String btnName,
       required String cmd,
       List<String> params = const [],
       String binRoot = "",
-      String workDir = "E:\\packTest"}) {
+      String workDir = "D:\\packTest",
+      Color btnColor = Colors.green}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
+          style: ButtonStyle(
+              backgroundColor: ButtonStyleButton.allOrNull<Color>(btnColor),
+              foregroundColor:
+                  ButtonStyleButton.allOrNull<Color>(Colors.white)),
           onPressed: () async {
             reset();
             var process = await CommandUtil.execute(
@@ -298,7 +320,7 @@ class _LeftSideState extends State<LeftSide> {
               cmd: cmd,
               params: params,
               workDir: workDir,
-              onLoadRes: addRes,
+              action: addRes,
             );
 
             // 等待命令执行完成
