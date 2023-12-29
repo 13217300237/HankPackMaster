@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_window/desktop_window.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hank_pack_master/info_page.dart';
 import 'package:hank_pack_master/toast_util.dart';
@@ -13,21 +14,33 @@ import 'package:provider/provider.dart';
 import 'command_util.dart';
 import 'models.dart';
 
+/// Checks if the current environment is a desktop environment.
+bool get isDesktop {
+  if (kIsWeb) return false;
+  return [
+    TargetPlatform.windows,
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+  ].contains(defaultTargetPlatform);
+}
+
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 
-  doWhenWindowReady(() {
-    final win = appWindow;
-
-    DesktopWindow.getWindowSize().then((size) {
-      Size initialSize = Size(size.width * .9, size.height * .8);
-      win.minSize = initialSize;
-      win.size = initialSize;
-      win.alignment = Alignment.center;
-      win.title = "Custom window with Flutter";
-      win.show();
+  if (isDesktop) {
+    doWhenWindowReady(() {
+      final win = appWindow;
+      DesktopWindow.getWindowSize().then((size) {
+        Size initialSize = Size(size.width * .9, size.height * .8);
+        win.minSize = initialSize;
+        win.size = initialSize;
+        win.alignment = Alignment.center;
+        win.title = "Custom window with Flutter";
+        win.show();
+      });
     });
-  });
+  }
 }
 
 const borderColor = Color(0xFF805306);
@@ -86,30 +99,93 @@ class _LeftSideState extends State<LeftSide> {
     });
   }
 
+  void alertErr(String r) {
+    debugPrint("弹出错误 $r");
+  }
+
   @override
   void initState() {
     super.initState();
     _getWindowSize();
     executorModel = context.read<ExecutorModel>();
+
+    CommandUtil.getInstance().onError = (String r) {
+      alertErr(r);
+    };
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var windowSizeWidget = Center(
-        child: Text(_windowSize, style: const TextStyle(color: Colors.white)));
+  List<Widget> _flutterGroup() {
+    String? rootPath = EnvParams.flutterRoot.distinctAndFirst();
+
+    if (rootPath == null || rootPath.isEmpty) return [];
+
+    var flutterVersionBtn = _getCmdBtn(
+        btnName: "flutter version",
+        binRoot: rootPath,
+        cmd: "flutter.bat",
+        params: ["--version"],
+        workDir: EnvParams.workRoot,
+        btnColor: Colors.tealAccent);
+
+    var flutterDoctorBtn = _getCmdBtn(
+        btnName: "flutter doctor",
+        binRoot: rootPath,
+        cmd: "flutter.bat",
+        params: ["doctor"],
+        workDir: EnvParams.workRoot,
+        btnColor: Colors.tealAccent);
+
+    var flutterDartBtn = _getCmdBtn(
+        btnName: "dart -version",
+        binRoot: rootPath,
+        cmd: "dart.bat",
+        workDir: EnvParams.workRoot,
+        btnColor: Colors.tealAccent);
+
+    return [flutterVersionBtn, flutterDoctorBtn, flutterDartBtn];
+  }
+
+  List<Widget> _gitGroup() {
+    String? rootPath = EnvParams.gitRoot.distinctAndFirst();
+    if (rootPath == null || rootPath.isEmpty) return [];
 
     var gitCloneBtn = _getCmdBtn(
         btnName: "git clone",
+        workDir: EnvParams.workRoot,
         cmd: "git",
         params: ["clone", "git@github.com:18598925736/HankPackMaster.git"],
         btnColor: Colors.blue);
 
     var gitVersionBtn = _getCmdBtn(
         btnName: "git version",
+        workDir: EnvParams.workRoot,
         cmd: "git",
         params: ["--version"],
         btnColor: Colors.blue);
 
+    return [gitCloneBtn, gitVersionBtn];
+  }
+
+  List<Widget> _adbGroup() {
+    String? rootPath = EnvParams.gitRoot.distinctAndFirst();
+    if (rootPath == null || rootPath.isEmpty) return [];
+    var adbDevicesBtn = _getCmdBtn(
+        workDir: EnvParams.workRoot,
+        btnName: "adb devices",
+        cmd: "adb",
+        params: ["devices"],
+        btnColor: Colors.amber);
+
+    var adbLogcatBtn = _getCmdBtn(
+        btnName: "adb logcat",
+        cmd: "adb",
+        workDir: EnvParams.workRoot,
+        params: ["logcat", "|", "findStr", "com.kbzbank.kpaycustomer.uat"],
+        btnColor: Colors.amber);
+    return [adbDevicesBtn, adbLogcatBtn];
+  }
+
+  List<Widget> _gradlewBtns() {
     var gradlewVersion = _getCmdBtn(
         btnName: "gradlew -version",
         cmd: "gradlew.bat",
@@ -124,57 +200,29 @@ class _LeftSideState extends State<LeftSide> {
         binRoot: "E:\\MyApplication\\",
         workDir: "E:\\MyApplication\\",
         params: ["clean", "assembleDebug"],
-        btnColor: Colors.deepPurpleAccent); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
+        btnColor: Colors.greenAccent); // 执行打包命令还必须将工作目录和可执行目录都设置为 工程主目录
+    return [gradlewVersion, gradlew];
+  }
 
-    String flutterPath = "";
-    if (EnvParams.flutterRoot.isNotEmpty) {
-      flutterPath = EnvParams.flutterRoot[0];
-    }
-
-    var flutterVersionBtn = _getCmdBtn(
-        btnName: "flutter version",
-        binRoot: flutterPath,
-        cmd: "flutter.bat",
-        params: ["--version"],
-        btnColor: Colors.tealAccent);
-
-    var flutterDoctorBtn = _getCmdBtn(
-        btnName: "flutter doctor",
-        binRoot: flutterPath,
-        cmd: "flutter.bat",
-        params: ["doctor"],
-        btnColor: Colors.tealAccent);
-
-    var flutterDartBtn = _getCmdBtn(
-        btnName: "dart -version",
-        binRoot: flutterPath,
-        cmd: "dart.bat",
-        btnColor: Colors.deepOrangeAccent);
-
-    var adbDevicesBtn = _getCmdBtn(
-        btnName: "adb devices",
-        cmd: "adb",
-        params: ["devices"],
-        btnColor: Colors.amber);
-
-    var adbLogcatBtn = _getCmdBtn(
-        btnName: "adb logcat",
-        cmd: "adb",
-        params: ["logcat"],
-        btnColor: Colors.amber);
+  @override
+  Widget build(BuildContext context) {
+    var windowSizeWidget = Center(
+        child: Text(_windowSize, style: const TextStyle(color: Colors.white)));
 
     var monkeyrunner = _getCmdBtn(
         btnName: "monkeyrunner",
         binRoot: "D:\\env\\sdk\\tools\\bin\\",
         cmd: "monkeyrunner.bat",
+        workDir: EnvParams.workRoot,
         btnColor: Colors.white60);
 
     var envInitBtn = Padding(
       padding: const EdgeInsets.all(8),
       child: ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             reset();
-            CommandUtil.initEnvParam(action: addRes);
+            await CommandUtil.getInstance().initEnvParam(action: addRes);
+            setState(() {});
           },
           child: const Text("initEnvParam")),
     );
@@ -185,20 +233,23 @@ class _LeftSideState extends State<LeftSide> {
       children: [
         Wrap(children: [
           envInitBtn,
-          gitVersionBtn,
-          gitCloneBtn,
-          gradlewVersion,
-          gradlew,
-          flutterVersionBtn,
-          flutterDoctorBtn,
-          flutterDartBtn,
-          adbDevicesBtn,
-          adbLogcatBtn,
+          ..._gitGroup(),
+          ..._adbGroup(),
+          ..._gradlewBtns(),
+          ..._flutterGroup(),
           monkeyrunner,
           Padding(
             padding: const EdgeInsets.all(8),
+            child:
+                ElevatedButton(onPressed: makePack, child: const Text("完整打包")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
             child: ElevatedButton(
-                onPressed: makePack, child: const Text("Make Pack")),
+                onPressed: () {
+                  CommandUtil.getInstance().stopAllExec();
+                },
+                child: const Text("停止所有指令")),
           ),
         ]),
       ],
@@ -228,16 +279,6 @@ class _LeftSideState extends State<LeftSide> {
     executorModel.reset();
   }
 
-  Future createAndWriteFile(String filePath, String content) async {
-    debugPrint("准备写入环境参数");
-    File file = File(filePath);
-    // 创建文件
-    file.createSync(recursive: true);
-    // 写入内容
-    await file.writeAsString(content);
-    debugPrint("3");
-  }
-
   ///
   /// 打包动作
   ///
@@ -245,8 +286,8 @@ class _LeftSideState extends State<LeftSide> {
     reset();
 
     // 检查当前环境变量即可
-    var echoAndroidHome = await CommandUtil.execute(
-      workDir: "E:\\packTest",
+    var echoAndroidHome = await CommandUtil.getInstance().execute(
+      workDir: EnvParams.workRoot,
       cmd: "cmd",
       params: ['/c', "echo", "%ANDROID_HOME%"],
       action: addRes,
@@ -262,8 +303,8 @@ class _LeftSideState extends State<LeftSide> {
     }
 
     // clone
-    var gitClone = await CommandUtil.execute(
-      workDir: "E:\\packTest",
+    var gitClone = await CommandUtil.getInstance().execute(
+      workDir: EnvParams.workRoot,
       cmd: "git",
       params: ["clone", "git@github.com:18598925736/MyApp20231224.git"],
       action: addRes,
@@ -280,10 +321,10 @@ class _LeftSideState extends State<LeftSide> {
     }
 
     // assemble
-    var assemble = await CommandUtil.execute(
+    var assemble = await CommandUtil.getInstance().execute(
         cmd: "gradlew.bat",
-        binRoot: "E:\\packTest\\MyApp20231224\\",
-        workDir: "E:\\packTest\\MyApp20231224\\",
+        binRoot: "${EnvParams.workRoot}\\MyApp20231224\\",
+        workDir: "${EnvParams.workRoot}\\MyApp20231224\\",
         params: ["clean", "assembleDebug", "--stacktrace"],
         action: addRes);
 
@@ -304,7 +345,7 @@ class _LeftSideState extends State<LeftSide> {
       required String cmd,
       List<String> params = const [],
       String binRoot = "",
-      String workDir = "D:\\packTest",
+      required String workDir,
       Color btnColor = Colors.green}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -315,7 +356,7 @@ class _LeftSideState extends State<LeftSide> {
                   ButtonStyleButton.allOrNull<Color>(Colors.white)),
           onPressed: () async {
             reset();
-            var process = await CommandUtil.execute(
+            var process = await CommandUtil.getInstance().execute(
               binRoot: binRoot,
               cmd: cmd,
               params: params,
@@ -335,8 +376,21 @@ class _LeftSideState extends State<LeftSide> {
 const backgroundStartColor = Color(0x00cccccc);
 const backgroundEndColor = Color(0xFFF6A00C);
 
-class RightSide extends StatelessWidget {
+class RightSide extends StatefulWidget {
   const RightSide({Key? key}) : super(key: key);
+
+  @override
+  State<RightSide> createState() => _RightSideState();
+}
+
+class _RightSideState extends State<RightSide> {
+  late ExecutorModel executorModel;
+
+  @override
+  void initState() {
+    super.initState();
+    executorModel = context.read<ExecutorModel>();
+  }
 
   final BoxDecoration bg = const BoxDecoration(
     gradient: LinearGradient(
@@ -359,8 +413,10 @@ class RightSide extends StatelessWidget {
               ])),
               Expanded(
                 child: Consumer<ExecutorModel>(
-                    builder: (context, value, child) =>
-                        InfoPage(content: value.getRes)),
+                    builder: (context, value, child) => InfoPage(
+                          content: value.getRes,
+                          scrollController: executorModel.scrollController,
+                        )),
               )
             ])));
   }
