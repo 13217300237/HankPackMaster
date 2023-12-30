@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 
 class MyProcess {
   Process process;
@@ -39,11 +39,11 @@ class CommandUtil {
   final List<MyProcess> _allProcess = [];
 
   void restEnvParam() {
-    EnvParams.gitRoot = [];
-    EnvParams.flutterRoot = [];
-    EnvParams.adbRoot = [];
-    EnvParams.jdkRoot = [];
-    EnvParams.androidSdkRoot = [];
+    EnvParams.gitRoot = <String>{};
+    EnvParams.flutterRoot = <String>{};
+    EnvParams.adbRoot = <String>{};
+    EnvParams.jdkRoot = <String>{};
+    EnvParams.androidSdkRoot = <String>{};
   }
 
   Function(String res)? onError;
@@ -86,14 +86,14 @@ class CommandUtil {
     stopExec(process);
   }
 
-  void _addToEnv(String e, List<String> listEnv) {
+  void _addToEnv(String e, Set<String> listEnv) {
     File f = File(e);
     if (f.parent.existsSync()) {
       listEnv.add(f.parent.path + Platform.pathSeparator);
     }
   }
 
-  void _saveEnv(String path, Function(String) action, List<String> listEnv) {
+  void _saveEnv(String path, Function(String) action, Set<String> listEnv) {
     // 检查结果里面有没有换行符
     if (path.contains("\n")) {
       // 包含换行符就按照换行符截断成多段，按照多段来解析
@@ -112,27 +112,22 @@ class CommandUtil {
     await whereCmd(
         order: "git",
         action: (path) => _saveEnv(path, action, EnvParams.gitRoot));
-    action("gitRoot = ${EnvParams.gitRoot.distinct()}");
+    action("gitRoot = ${EnvParams.gitRoot}");
 
     await whereCmd(
         order: "flutter",
         action: (path) => _saveEnv(path, action, EnvParams.flutterRoot));
-    action("flutterRoot =${EnvParams.flutterRoot.distinct()}");
+    action("flutterRoot =${EnvParams.flutterRoot}");
 
     await whereCmd(
         order: "adb",
         action: (path) => _saveEnv(path, action, EnvParams.adbRoot));
-    action("flutterRoot =${EnvParams.adbRoot.distinct()}");
+    action("adbRoot =${EnvParams.adbRoot}");
 
-    await echoCmd(
-        order: "%JAVA_HOME%",
-        action: (path) {
-          Directory d = Directory(path);
-          if (d.existsSync()) {
-            EnvParams.jdkRoot.add(d.path);
-          }
-        });
-    action("javaRoot = ${EnvParams.jdkRoot.distinct()}");
+    await whereCmd(
+        order: "java",
+        action: (path) => _saveEnv(path, action, EnvParams.jdkRoot));
+    action("jdkRoot =${EnvParams.jdkRoot}");
 
     await echoCmd(
         order: "%ANDROID_HOME%",
@@ -142,7 +137,7 @@ class CommandUtil {
             EnvParams.androidSdkRoot.add(d.path);
           }
         });
-    action("javaRoot = ${EnvParams.androidSdkRoot.distinct()}");
+    action("androidRoot = ${EnvParams.androidSdkRoot}");
 
     action("环境参数读取完毕...");
   }
@@ -232,44 +227,12 @@ class CommandUtil {
 }
 
 class EnvParams {
-  static List<String> gitRoot = [];
-  static List<String> flutterRoot = [];
-  static List<String> adbRoot = [];
+  static Set<String> gitRoot = <String>{};
+  static Set<String> flutterRoot = <String>{};
+  static Set<String> adbRoot = <String>{};
 
-  static List<String> androidSdkRoot = [];
-  static List<String> jdkRoot = [];
+  static Set<String> androidSdkRoot = <String>{};
+  static Set<String> jdkRoot = <String>{};
 
-  static String workRoot = "D:\\packTest";
-}
-
-// 给 List<String> 类型增加一个扩展方法
-extension ListExtension on List<String> {
-  List<String> distinct() {
-    List<String> list = this;
-    if (list.isEmpty) return [];
-
-    Set<String> uniqueItems = {};
-    for (var item in list) {
-      if (!uniqueItems.contains(item)) {
-        uniqueItems.add(item);
-      }
-    }
-
-    return uniqueItems.toList();
-  }
-
-  String? distinctAndFirst() {
-    List<String> list = this;
-    if (list.isEmpty) return null;
-
-    Set<String> uniqueItems = {};
-    for (var item in list) {
-      if (!uniqueItems.contains(item)) {
-        uniqueItems.add(item);
-        return item;
-      }
-    }
-
-    return null;
-  }
+  static String workRoot = "E:\\packTest";
 }

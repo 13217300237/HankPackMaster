@@ -115,7 +115,7 @@ class _LeftSideState extends State<LeftSide> {
   }
 
   List<Widget> _flutterGroup() {
-    String? rootPath = EnvParams.flutterRoot.distinctAndFirst();
+    String? rootPath = EnvParams.flutterRoot.firstOrNull;
 
     if (rootPath == null || rootPath.isEmpty) return [];
 
@@ -146,7 +146,7 @@ class _LeftSideState extends State<LeftSide> {
   }
 
   List<Widget> _gitGroup() {
-    String? rootPath = EnvParams.gitRoot.distinctAndFirst();
+    String? rootPath = EnvParams.gitRoot.firstOrNull;
     if (rootPath == null || rootPath.isEmpty) return [];
 
     var gitCloneBtn = _getCmdBtn(
@@ -167,7 +167,7 @@ class _LeftSideState extends State<LeftSide> {
   }
 
   List<Widget> _adbGroup() {
-    String? rootPath = EnvParams.gitRoot.distinctAndFirst();
+    String? rootPath = EnvParams.gitRoot.firstOrNull;
     if (rootPath == null || rootPath.isEmpty) return [];
     var adbDevicesBtn = _getCmdBtn(
         workDir: EnvParams.workRoot,
@@ -285,23 +285,6 @@ class _LeftSideState extends State<LeftSide> {
   void makePack() async {
     reset();
 
-    // 检查当前环境变量即可
-    var echoAndroidHome = await CommandUtil.getInstance().execute(
-      workDir: EnvParams.workRoot,
-      cmd: "cmd",
-      params: ['/c', "echo", "%ANDROID_HOME%"],
-      action: addRes,
-    );
-
-    var exitCode = await echoAndroidHome?.exitCode;
-    if (0 != exitCode) {
-      String failedStr = "echoAndroidHome 执行失败.$exitCode";
-      addRes(failedStr);
-      return;
-    } else {
-      addRes("echoAndroidHome执行 完毕");
-    }
-
     // clone
     var gitClone = await CommandUtil.getInstance().execute(
       workDir: EnvParams.workRoot,
@@ -310,7 +293,7 @@ class _LeftSideState extends State<LeftSide> {
       action: addRes,
     );
 
-    exitCode = await gitClone?.exitCode;
+    var exitCode = await gitClone?.exitCode;
     if (0 != exitCode) {
       String failedStr = "clone 执行失败.$exitCode";
       ToastUtil.showPrettyToast(failedStr);
