@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 
-const backgroundStartColor = Color(0xFFFFD500);
-const backgroundEndColor = Color(0xFFF6A00C);
+import 'const.dart';
 
 class CustomToast extends StatelessWidget {
   final String message;
