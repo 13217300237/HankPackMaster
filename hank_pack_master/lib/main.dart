@@ -3,6 +3,7 @@ import 'package:desktop_window/desktop_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:hank_pack_master/test/test_page.dart';
 
 /// Checks if the current environment is a desktop environment.
 bool get isDesktop {
@@ -52,7 +53,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: m.Scaffold(
         body: WindowBorder(
-          color: const Color(0xFF805306),
+          color: Colors.yellow,
           width: 1,
           child: FluentTheme(
             data: FluentThemeData(
@@ -63,7 +64,27 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             child: NavigationView(
-              appBar: const NavigationAppBar(title: Text('NavigationView')),
+              appBar: NavigationAppBar(
+                automaticallyImplyLeading: false,
+                title: () {
+                  return WindowTitleBarBox(child: MoveWindow());
+                }(),
+                actions:
+                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8.0),
+                      child: ToggleSwitch(
+                        content: const Text('Dark Mode'),
+                        checked: false,
+                        onChanged: (v) {},
+                      ),
+                    ),
+                  ),
+                  if (!kIsWeb) const WindowButtons(),
+                ]),
+              ),
               pane: NavigationPane(
                 selected: topIndex,
                 onChanged: (index) => setState(() => topIndex = index),

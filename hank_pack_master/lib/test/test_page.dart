@@ -1,15 +1,18 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
-import 'package:hank_pack_master/toast_util.dart';
+import 'package:hank_pack_master/utils/toast_util.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 
-import 'command_util.dart';
-import 'const.dart';
+import '../core/command_util.dart';
+import '../const/const_colors.dart';
 import 'info_page.dart';
 import 'models.dart';
 
+///
+/// 用于测试命令行核心功能的页面
+///
 class TestPage extends StatelessWidget {
   const TestPage({super.key});
 
