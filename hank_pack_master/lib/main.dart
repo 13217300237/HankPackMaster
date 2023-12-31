@@ -45,6 +45,8 @@ class _MyAppState extends State<MyApp> {
   int topIndex = 0;
   PaneDisplayMode displayMode = PaneDisplayMode.auto;
 
+  bool disabled = false;
+
   @override
   Widget build(BuildContext context) {
     return m.MaterialApp(
@@ -66,8 +68,26 @@ class _MyAppState extends State<MyApp> {
             child: NavigationView(
               appBar: NavigationAppBar(
                 automaticallyImplyLeading: false,
+                leading: IconButton(
+                  icon: const Icon(FluentIcons.graph_symbol, size: 24.0),
+                  onPressed:
+                      disabled ? null : () => debugPrint('pressed button'),
+                ),
                 title: () {
-                  return WindowTitleBarBox(child: MoveWindow());
+                  return WindowTitleBarBox(
+                      child: Container(
+                    color: Colors.transparent,
+                    child: Stack(children: [
+                      MoveWindow(),
+                       const Column(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                           Text("安卓打包大师",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+                         ],
+                       ),
+                    ]),
+                  ));
                 }(),
                 actions:
                     Row(mainAxisAlignment: MainAxisAlignment.end, children: [
