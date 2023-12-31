@@ -82,9 +82,9 @@ class _MainPageState extends State<MainPage> {
         child: Container(
       color: Colors.transparent,
       child: Stack(children: [
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+         const Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text("安卓打包大师",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
