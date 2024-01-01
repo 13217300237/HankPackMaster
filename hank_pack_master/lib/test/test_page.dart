@@ -33,14 +33,12 @@ class LeftSide extends StatefulWidget {
 }
 
 class _LeftSideState extends State<LeftSide> {
-
   late ExecutorModel executorModel;
 
   @override
   void initState() {
     super.initState();
     executorModel = context.read<ExecutorModel>();
-
   }
 
   List<Widget> _flutterGroup() {
@@ -135,8 +133,8 @@ class _LeftSideState extends State<LeftSide> {
 
   @override
   Widget build(BuildContext context) {
-    var windowSizeWidget = Center(
-        child: Text("_windowSize", style: const TextStyle(color: Colors.white)));
+    var windowSizeWidget = const Center(
+        child: Text("_windowSize", style: TextStyle(color: Colors.white)));
 
     var monkeyrunner = _getCmdBtn(
         btnName: "monkeyrunner",

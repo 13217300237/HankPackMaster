@@ -10,6 +10,16 @@ class EnvPage extends StatefulWidget {
 class _EnvPageState extends State<EnvPage> {
   @override
   Widget build(BuildContext context) {
-    return const Text("环境页面");
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Button(
+            onPressed: () => debugPrint('pressed button'),
+            child: const Text('Standard Button'),
+          ),
+        ],
+      ),
+    );
   }
 }

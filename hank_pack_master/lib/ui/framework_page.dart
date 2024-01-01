@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/link.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
@@ -13,9 +12,9 @@ import 'app.dart';
 ///
 class FrameworkPage extends StatefulWidget {
   const FrameworkPage({
-  super.key,
-  required this.child,
-  required this.shellContext,
+    super.key,
+    required this.child,
+    required this.shellContext,
   });
 
   final Widget child;
@@ -42,7 +41,6 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       title: const Text('Home'),
       body: const SizedBox.shrink(),
     ),
-    PaneItemHeader(header: const Text('Inputs')),
     PaneItem(
       key: const ValueKey('/env'),
       icon: const Icon(FluentIcons.button_control),
@@ -78,9 +76,13 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         }).toList(),
       );
     }
-    if (e is PaneItem) return buildPaneItem(e);
+    if (e is PaneItem) {
+      return buildPaneItem(e);
+    }
+
     return e;
   }).toList();
+
   late final List<NavigationPaneItem> footerItems = [
     PaneItemSeparator(),
     PaneItem(
@@ -93,12 +95,6 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
           context.go('/settings');
         }
       },
-    ),
-    _LinkPaneItemAction(
-      icon: const Icon(FluentIcons.open_source),
-      title: const Text('Source code'),
-      link: 'https://github.com/bdlukaa/fluent_ui',
-      body: const SizedBox.shrink(),
     ),
   ];
 
@@ -132,9 +128,9 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         return 0;
       }
       return originalItems
-          .where((element) => element.key != null)
-          .toList()
-          .length +
+              .where((element) => element.key != null)
+              .toList()
+              .length +
           indexFooter;
     } else {
       return indexOriginal;
@@ -161,11 +157,11 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
 
           final onPressed = enabled
               ? () {
-            if (router.canPop()) {
-              context.pop();
-              setState(() {});
-            }
-          }
+                  if (router.canPop()) {
+                    context.pop();
+                    setState(() {});
+                  }
+                }
               : null;
           return NavigationPaneTheme(
             data: NavigationPaneTheme.of(context).merge(NavigationPaneThemeData(
@@ -231,7 +227,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       ),
       paneBodyBuilder: (item, child) {
         final name =
-        item?.key is ValueKey ? (item!.key as ValueKey).value : null;
+            item?.key is ValueKey ? (item!.key as ValueKey).value : null;
         return FocusTraversalGroup(
           key: ValueKey('body$name'),
           child: widget.child,
@@ -291,7 +287,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
               ...originalItems
                   .where(
                     (item) => item is PaneItem && item is! PaneItemExpander,
-              )
+                  )
                   .cast<PaneItem>(),
             ].map((item) {
               assert(item.title is Text);
@@ -376,42 +372,4 @@ class WindowButtons extends StatelessWidget {
       ),
     );
   }
-}
-
-class _LinkPaneItemAction extends PaneItem {
-  _LinkPaneItemAction({
-  required super.icon,
-  required this.link,
-  required super.body,
-  super.title,
-});
-
-final String link;
-
-@override
-Widget build(
-    BuildContext context,
-    bool selected,
-    VoidCallback? onPressed, {
-      PaneDisplayMode? displayMode,
-      bool showTextOnTop = true,
-      bool? autofocus,
-      int? itemIndex,
-    }) {
-  return Link(
-    uri: Uri.parse(link),
-    builder: (context, followLink) => Semantics(
-      link: true,
-      child: super.build(
-        context,
-        selected,
-        followLink,
-        displayMode: displayMode,
-        showTextOnTop: showTextOnTop,
-        itemIndex: itemIndex,
-        autofocus: autofocus,
-      ),
-    ),
-  );
-}
 }
