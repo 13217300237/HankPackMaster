@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:provider/provider.dart';
 
+import 'comm/deferred_widget.dart';
 import 'env/env_page.dart';
 import 'framework_page.dart';
 import 'home/home_page.dart';
+import 'routes/inputs.dart' deferred as inputs;
 
 final _appTheme = AppTheme();
 const String appTitle = '安小助';
@@ -42,13 +44,14 @@ class App extends StatelessWidget {
           ),
           locale: appTheme.locale,
           builder: (context, child) {
+            debugPrint("App builder");
             return Directionality(
               textDirection: appTheme.textDirection,
               child: NavigationPaneTheme(
                 data: NavigationPaneThemeData(
                   backgroundColor: appTheme.windowEffect !=
                           flutter_acrylic.WindowEffect.disabled
-                      ? Colors.transparent
+                      ? Colors.grey
                       : null,
                 ),
                 child: child!,
@@ -64,6 +67,9 @@ class App extends StatelessWidget {
   }
 }
 
+
+
+
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -72,16 +78,27 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
     navigatorKey: _shellNavigatorKey,
     builder: (context, state, child) {
       return FrameworkPage(
-        shellContext: _shellNavigatorKey.currentContext,
-        child: child,
-      );
+          shellContext: _shellNavigatorKey.currentContext, child: child);
     },
     routes: [
-      /// Home
-      GoRoute(path: '/', builder: (context, state) => const HomePage()),
+      /// 首页
+      GoRoute(
+        path: '/',
+        builder: (context, state) => DeferredWidget(
+          inputs.loadLibrary,
+              () => inputs.HomePage(),
+        ),
+      ),
 
-      /// EnvPage 打包环境设置页面
-      GoRoute(path: '/env', builder: (context, state) => const EnvPage()),
+      /// 打包环境设置页面
+
+      GoRoute(
+        path: '/env',
+        builder: (context, state) => DeferredWidget(
+          inputs.loadLibrary,
+              () => inputs.EnvPage(),
+        ),
+      ),
     ],
   ),
 ]);

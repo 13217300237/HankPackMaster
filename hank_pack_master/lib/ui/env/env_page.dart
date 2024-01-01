@@ -27,6 +27,13 @@ class _EnvPageState extends State<EnvPage> {
   void initState() {
     super.initState();
     checkAction();
+    debugPrint("envPage initState");
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    debugPrint("envPage dispose");
   }
 
   Widget envTile(String title, Set<String> content, AppTheme appTheme) {
@@ -59,7 +66,7 @@ class _EnvPageState extends State<EnvPage> {
 
   checkAction() async {
     envs = await CommandUtil.getInstance().initEnvParam(action: (r) {
-      debugPrint("环境检索的日志输出:$r");
+      // debugPrint("环境检索的日志输出:$r");
     });
 
     setState(() {});

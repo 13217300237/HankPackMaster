@@ -23,7 +23,7 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
-  ThemeMode _mode = ThemeMode.system;
+  ThemeMode _mode = ThemeMode.dark;
   ThemeMode get mode => _mode;
   set mode(ThemeMode mode) {
     _mode = mode;

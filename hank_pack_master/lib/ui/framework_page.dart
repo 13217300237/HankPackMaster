@@ -170,6 +170,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   @override
   Widget build(BuildContext context) {
     final localizations = FluentLocalizations.of(context);
+    debugPrint("frameworkPage->build ");
 
     final appTheme = context.watch<AppTheme>();
     final theme = FluentTheme.of(context);
@@ -184,6 +185,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         automaticallyImplyLeading: false,
         leading: () {
           final enabled = widget.shellContext != null && router.canPop();
+          debugPrint("enabled->$enabled ");
 
           final onPressed = enabled
               ? () {
