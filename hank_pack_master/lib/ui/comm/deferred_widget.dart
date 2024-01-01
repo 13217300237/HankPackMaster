@@ -29,6 +29,10 @@ class DeferredWidget extends StatefulWidget {
   static final Set<LibraryLoader> _loadedModules = {};
 
   static Future<void> preload(LibraryLoader loader) {
+
+    debugPrint("-----DeferredWidget---------------loader preload!");
+
+
     if (!_moduleLoaders.containsKey(loader)) {
       _moduleLoaders[loader] = loader().then((dynamic _) {
         _loadedModules.add(loader);
@@ -49,6 +53,7 @@ class _DeferredWidgetState extends State<DeferredWidget> {
 
   @override
   void initState() {
+    debugPrint("-----_DeferredWidgetState---------------initState!");
     /// If module was already loaded immediately create widget instead of
     /// waiting for future or zone turn.
     if (DeferredWidget._loadedModules.contains(widget.libraryLoader)) {
@@ -69,6 +74,7 @@ class _DeferredWidgetState extends State<DeferredWidget> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("-----_DeferredWidgetState---------------build!");
     /// If closure to create widget changed, create new instance, otherwise
     /// treat as const Widget.
     if (_loadedCreator != widget.createWidget && _loadedCreator != null) {

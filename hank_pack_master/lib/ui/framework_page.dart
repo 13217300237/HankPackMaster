@@ -223,12 +223,6 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
           );
         }(),
         title: () {
-          if (kIsWeb) {
-            return const Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(appTitle),
-            );
-          }
           return const DragToMoveArea(
             child: Align(
               alignment: AlignmentDirectional.centerStart,
@@ -254,7 +248,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
               ),
             ),
           ),
-          if (!kIsWeb) const WindowButtons(),
+          const WindowButtons(),
         ]),
       ),
       paneBodyBuilder: (item, child) {

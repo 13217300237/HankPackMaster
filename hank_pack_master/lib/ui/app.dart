@@ -5,9 +5,7 @@ import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:provider/provider.dart';
 
 import 'comm/deferred_widget.dart';
-import 'env/env_page.dart';
 import 'framework_page.dart';
-import 'home/home_page.dart';
 import 'routes/inputs.dart' deferred as inputs;
 
 final _appTheme = AppTheme();

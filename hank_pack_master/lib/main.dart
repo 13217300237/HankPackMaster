@@ -1,11 +1,13 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:hank_pack_master/ui/comm/deferred_widget.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'comm/functions.dart';
 import 'ui/app.dart';
+import 'ui/routes/inputs.dart' deferred as inputs;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,8 @@ void main() async {
   }
 
   runApp(const App());
+
+  Future.wait([
+    DeferredWidget.preload(inputs.loadLibrary),
+  ]);
 }
-
-
