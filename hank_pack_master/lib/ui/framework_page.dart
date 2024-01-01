@@ -38,13 +38,43 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     PaneItem(
       key: const ValueKey('/'),
       icon: const Icon(FluentIcons.home),
-      title: const Text('Home'),
+      title: const Text('主页'),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/env'),
       icon: const Icon(FluentIcons.button_control),
       title: const Text('环境参数'),
+      body: const SizedBox.shrink(),
+    ),
+    PaneItem(
+      key: const ValueKey('/projects'),
+      icon: const Icon(FluentIcons.a_t_p_logo),
+      title: const Text('工程管理'),
+      body: const SizedBox.shrink(),
+    ),
+    PaneItem(
+      key: const ValueKey('/trace'),
+      icon: const Icon(FluentIcons.analytics_query),
+      title: const Text('应用包回溯'),
+      body: const SizedBox.shrink(),
+    ),
+    PaneItem(
+      key: const ValueKey('/timer'),
+      icon: const Icon(FluentIcons.timer),
+      title: const Text('定时任务'),
+      body: const SizedBox.shrink(),
+    ),
+    PaneItem(
+      key: const ValueKey('/statistics'),
+      icon: const Icon(FluentIcons.archive),
+      title: const Text('工作统计'),
+      body: const SizedBox.shrink(),
+    ),
+    PaneItem(
+      key: const ValueKey('/information'),
+      icon: const Icon(FluentIcons.info),
+      title: const Text('技术资讯'),
       body: const SizedBox.shrink(),
     ),
   ].map<NavigationPaneItem>((e) {
