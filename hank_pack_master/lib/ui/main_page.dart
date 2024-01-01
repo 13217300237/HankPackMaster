@@ -1,8 +1,5 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as m;
-import 'package:hank_pack_master/test/test_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -77,24 +74,6 @@ class _MainPageState extends State<MainPage> {
     ),
   ];
 
-  Widget titleBar() {
-    return WindowTitleBarBox(
-        child: Container(
-      color: Colors.transparent,
-      child: Stack(children: [
-         const Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text("安卓打包大师",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        MoveWindow(),
-      ]),
-    ));
-  }
-
   Widget actions() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -110,7 +89,6 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
         ),
-        const WindowButtons(),
       ],
     );
   }
@@ -128,7 +106,6 @@ class _MainPageState extends State<MainPage> {
         appBar: NavigationAppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
-          title: titleBar(),
           actions: actions(),
         ),
         pane: NavigationPane(
@@ -174,11 +151,7 @@ class _MainPageState extends State<MainPage> {
       supportedLocales: FluentLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
       home: m.Scaffold(
-        body: WindowBorder(
-          color: Colors.yellow,
-          width: 1,
-          child: uiFramework(),
-        ),
+        body: uiFramework(),
       ),
     );
   }

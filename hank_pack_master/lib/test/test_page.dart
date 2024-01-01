@@ -1,5 +1,3 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:hank_pack_master/utils/toast_util.dart';
 import 'package:jiffy/jiffy.dart';
@@ -35,30 +33,14 @@ class LeftSide extends StatefulWidget {
 }
 
 class _LeftSideState extends State<LeftSide> {
-  String _windowSize = 'Unknown';
 
   late ExecutorModel executorModel;
-
-  Future _getWindowSize() async {
-    var size = await DesktopWindow.getWindowSize();
-    setState(() {
-      _windowSize = '${size.width} x ${size.height}';
-    });
-  }
-
-  void alertErr(String r) {
-    debugPrint("弹出错误 $r");
-  }
 
   @override
   void initState() {
     super.initState();
-    _getWindowSize();
     executorModel = context.read<ExecutorModel>();
 
-    CommandUtil.getInstance().onError = (String r) {
-      alertErr(r);
-    };
   }
 
   List<Widget> _flutterGroup() {
@@ -154,7 +136,7 @@ class _LeftSideState extends State<LeftSide> {
   @override
   Widget build(BuildContext context) {
     var windowSizeWidget = Center(
-        child: Text(_windowSize, style: const TextStyle(color: Colors.white)));
+        child: Text("_windowSize", style: const TextStyle(color: Colors.white)));
 
     var monkeyrunner = _getCmdBtn(
         btnName: "monkeyrunner",
@@ -209,7 +191,6 @@ class _LeftSideState extends State<LeftSide> {
         child: Stack(children: [
           Column(children: [windowSizeWidget]),
           Column(children: [
-            WindowTitleBarBox(child: MoveWindow()),
             actionButtons,
             const SizedBox(height: 20),
           ]),
@@ -333,11 +314,6 @@ class _RightSideState extends State<RightSide> {
         child: Container(
             decoration: bg,
             child: Column(children: [
-              WindowTitleBarBox(
-                  child: Row(children: [
-                Expanded(child: MoveWindow()),
-                const WindowButtons()
-              ])),
               Expanded(
                 child: Consumer<ExecutorModel>(
                     builder: (context, value, child) => InfoPage(
@@ -346,39 +322,5 @@ class _RightSideState extends State<RightSide> {
                         )),
               )
             ])));
-  }
-}
-
-class WindowButtons extends StatefulWidget {
-  const WindowButtons({Key? key}) : super(key: key);
-
-  @override
-  WindowButtonsState createState() => WindowButtonsState();
-}
-
-class WindowButtonsState extends State<WindowButtons> {
-  void maximizeOrRestore() {
-    setState(() {
-      appWindow.maximizeOrRestore();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        MinimizeWindowButton(colors: buttonColors),
-        appWindow.isMaximized
-            ? RestoreWindowButton(
-                colors: buttonColors,
-                onPressed: maximizeOrRestore,
-              )
-            : MaximizeWindowButton(
-                colors: buttonColors,
-                onPressed: maximizeOrRestore,
-              ),
-        CloseWindowButton(colors: closeButtonColors),
-      ],
-    );
   }
 }
