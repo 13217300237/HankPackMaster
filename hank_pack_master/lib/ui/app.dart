@@ -5,8 +5,8 @@ import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:provider/provider.dart';
 
 import 'env/env_page.dart';
-import 'home/home.dart';
 import 'framework_page.dart';
+import 'home/home_page.dart';
 
 final _appTheme = AppTheme();
 const String appTitle = '安小助';

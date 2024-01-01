@@ -42,7 +42,7 @@ class CommandUtil {
     EnvParams.gitRoot = <String>{};
     EnvParams.flutterRoot = <String>{};
     EnvParams.adbRoot = <String>{};
-    EnvParams.jdkRoot = <String>{};
+    EnvParams.javaRoot = <String>{};
     EnvParams.androidSdkRoot = <String>{};
   }
 
@@ -106,7 +106,8 @@ class CommandUtil {
     }
   }
 
-  Future initEnvParam({required Function(String) action}) async {
+  Future<Map<String, Set<String>>> initEnvParam(
+      {required Function(String) action}) async {
     restEnvParam();
 
     await whereCmd(
@@ -126,8 +127,8 @@ class CommandUtil {
 
     await whereCmd(
         order: "java",
-        action: (path) => _saveEnv(path, action, EnvParams.jdkRoot));
-    action("jdkRoot =${EnvParams.jdkRoot}");
+        action: (path) => _saveEnv(path, action, EnvParams.javaRoot));
+    action("jdkRoot =${EnvParams.javaRoot}");
 
     await echoCmd(
         order: "%ANDROID_HOME%",
@@ -140,6 +141,16 @@ class CommandUtil {
     action("androidRoot = ${EnvParams.androidSdkRoot}");
 
     action("环境参数读取完毕...");
+
+    Map<String, Set<String>> params = {};
+
+    params["git"] = EnvParams.gitRoot;
+    params["adb"] = EnvParams.adbRoot;
+    params["flutter"] = EnvParams.flutterRoot;
+    params["java"] = EnvParams.javaRoot;
+    params["android"] = EnvParams.androidSdkRoot;
+
+    return params;
   }
 
   ///
@@ -232,7 +243,7 @@ class EnvParams {
   static Set<String> adbRoot = <String>{};
 
   static Set<String> androidSdkRoot = <String>{};
-  static Set<String> jdkRoot = <String>{};
+  static Set<String> javaRoot = <String>{};
 
   static String workRoot = "E:\\packTest";
 }

@@ -7,6 +7,15 @@ import 'package:fluent_ui/fluent_ui.dart';
 enum NavigationIndicators { sticky, end }
 
 class AppTheme extends ChangeNotifier {
+
+  String? _gitRoot;
+  String get gitRoot => _gitRoot ?? "";
+  set gitRoot(String root) {
+    _gitRoot = root;
+    notifyListeners();
+  }
+
+
   AccentColor? _color;
   AccentColor get color => _color ?? systemAccentColor;
   set color(AccentColor color) {
