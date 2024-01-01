@@ -1,18 +1,18 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hank_pack_master/theme.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:go_router/go_router.dart';
+import 'package:hank_pack_master/ui/comm/theme.dart';
+import 'package:provider/provider.dart';
 
-import 'deferred_widget.dart';
-import 'home.dart';
-import 'my_home_page.dart';
+import 'env/env_page.dart';
+import 'home/home.dart';
+import 'framework_page.dart';
 
 final _appTheme = AppTheme();
 const String appTitle = '安小助';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +71,7 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
   ShellRoute(
     navigatorKey: _shellNavigatorKey,
     builder: (context, state, child) {
-      return MyHomePage(
+      return FrameworkPage(
         shellContext: _shellNavigatorKey.currentContext,
         child: child,
       );
@@ -79,6 +79,9 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
     routes: [
       /// Home
       GoRoute(path: '/', builder: (context, state) => const HomePage()),
+
+      /// EnvPage 打包环境设置页面
+      GoRoute(path: '/env', builder: (context, state) => const EnvPage()),
     ],
   ),
 ]);

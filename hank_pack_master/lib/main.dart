@@ -5,7 +5,7 @@ import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'comm/functions.dart';
-import 'my_app.dart';
+import 'ui/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,7 @@ void main() async {
     });
   }
 
-  runApp(const MyApp());
+  runApp(const App());
 }
 
 

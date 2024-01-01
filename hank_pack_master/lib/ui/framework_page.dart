@@ -1,15 +1,18 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hank_pack_master/theme.dart';
+import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/link.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'my_app.dart';
+import 'app.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({
+///
+/// 主框架界面
+///
+class FrameworkPage extends StatefulWidget {
+  const FrameworkPage({
   super.key,
   required this.child,
   required this.shellContext,
@@ -19,10 +22,10 @@ class MyHomePage extends StatefulWidget {
   final BuildContext? shellContext;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<FrameworkPage> createState() => _FrameworkPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WindowListener {
+class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   bool value = false;
 
   // int index = 0;
@@ -41,179 +44,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     ),
     PaneItemHeader(header: const Text('Inputs')),
     PaneItem(
-      key: const ValueKey('/inputs/buttons'),
+      key: const ValueKey('/env'),
       icon: const Icon(FluentIcons.button_control),
-      title: const Text('Button'),
+      title: const Text('环境参数'),
       body: const SizedBox.shrink(),
     ),
-    PaneItem(
-      key: const ValueKey('/inputs/checkbox'),
-      icon: const Icon(FluentIcons.checkbox_composite),
-      title: const Text('Checkbox'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/inputs/slider'),
-      icon: const Icon(FluentIcons.slider),
-      title: const Text('Slider'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/inputs/toggle_switch'),
-      icon: const Icon(FluentIcons.toggle_left),
-      title: const Text('ToggleSwitch'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItemHeader(header: const Text('Form')),
-    PaneItem(
-      key: const ValueKey('/forms/text_box'),
-      icon: const Icon(FluentIcons.text_field),
-      title: const Text('TextBox'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/forms/auto_suggest_box'),
-      icon: const Icon(FluentIcons.page_list),
-      title: const Text('AutoSuggestBox'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/forms/combobox'),
-      icon: const Icon(FluentIcons.combobox),
-      title: const Text('ComboBox'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/forms/numberbox'),
-      icon: const Icon(FluentIcons.number),
-      title: const Text('NumberBox'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/forms/passwordbox'),
-      icon: const Icon(FluentIcons.password_field),
-      title: const Text('PasswordBox'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/forms/time_picker'),
-      icon: const Icon(FluentIcons.time_picker),
-      title: const Text('TimePicker'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/forms/date_picker'),
-      icon: const Icon(FluentIcons.date_time),
-      title: const Text('DatePicker'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItemHeader(header: const Text('Navigation')),
-    PaneItem(
-      key: const ValueKey('/navigation/navigation_view'),
-      icon: const Icon(FluentIcons.navigation_flipper),
-      title: const Text('NavigationView'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/navigation/tab_view'),
-      icon: const Icon(FluentIcons.table_header_row),
-      title: const Text('TabView'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/navigation/tree_view'),
-      icon: const Icon(FluentIcons.bulleted_tree_list),
-      title: const Text('TreeView'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/navigation/breadcrumb_bar'),
-      icon: const Icon(FluentIcons.breadcrumb),
-      title: const Text('BreadcrumbBar'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItemHeader(header: const Text('Surfaces')),
-    PaneItem(
-      key: const ValueKey('/surfaces/acrylic'),
-      icon: const Icon(FluentIcons.un_set_color),
-      title: const Text('Acrylic'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/surfaces/command_bar'),
-      icon: const Icon(FluentIcons.customize_toolbar),
-      title: const Text('CommandBar'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/surfaces/expander'),
-      icon: const Icon(FluentIcons.expand_all),
-      title: const Text('Expander'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/surfaces/info_bar'),
-      icon: const Icon(FluentIcons.info_solid),
-      title: const Text('InfoBar'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/surfaces/progress_indicators'),
-      icon: const Icon(FluentIcons.progress_ring_dots),
-      title: const Text('Progress Indicators'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/surfaces/tiles'),
-      icon: const Icon(FluentIcons.tiles),
-      title: const Text('Tiles'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItemHeader(header: const Text('Popups')),
-    PaneItem(
-      key: const ValueKey('/popups/content_dialog'),
-      icon: const Icon(FluentIcons.comment_urgent),
-      title: const Text('ContentDialog'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/popups/tooltip'),
-      icon: const Icon(FluentIcons.hint_text),
-      title: const Text('Tooltip'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/popups/flyout'),
-      icon: const Icon(FluentIcons.pop_expand),
-      title: const Text('Flyout'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItemHeader(header: const Text('Theming')),
-    PaneItem(
-      key: const ValueKey('/theming/colors'),
-      icon: const Icon(FluentIcons.color_solid),
-      title: const Text('Colors'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/theming/typography'),
-      icon: const Icon(FluentIcons.font_color_a),
-      title: const Text('Typography'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/theming/icons'),
-      icon: const Icon(FluentIcons.icon_sets_flag),
-      title: const Text('Icons'),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/theming/reveal_focus'),
-      icon: const Icon(FluentIcons.focus),
-      title: const Text('Reveal Focus'),
-      body: const SizedBox.shrink(),
-    ),
-    // TODO: Scrollbar, RatingBar
   ].map<NavigationPaneItem>((e) {
     PaneItem buildPaneItem(PaneItem item) {
       return PaneItem(
