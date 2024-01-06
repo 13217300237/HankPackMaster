@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/gestures.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
@@ -52,7 +53,8 @@ class _EnvPageState extends State<EnvPage> {
                     child: const Text('测试'),
                     onPressed: () async {
                       // 每一种命令的检查方法还有所不同！
-                      var usable = await CommandUtil.getInstance().checkEnv(title,binRoot);
+                      var usable = await CommandUtil.getInstance()
+                          .checkEnv(title, binRoot);
                       showToast("$title 测试结果为 $usable");
                     },
                   )
@@ -68,6 +70,13 @@ class _EnvPageState extends State<EnvPage> {
               padding: const EdgeInsets.all(20),
               margin: const EdgeInsets.all(10),
               decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey[10],
+                      blurRadius: 4, // 控制卡片的模糊程度
+                      offset: const Offset(0, 2), // 控制卡片的偏移量
+                    ),
+                  ],
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(color: Colors.grey[200], width: .5)),
@@ -107,10 +116,13 @@ class _EnvPageState extends State<EnvPage> {
 
     return Container(
       padding: const EdgeInsets.all(30),
-      child: SingleChildScrollView(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [...envWidgets])),
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false), // 隐藏scrollBar
+        child: SingleChildScrollView(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [...envWidgets])),
+      ),
     );
   }
 }
