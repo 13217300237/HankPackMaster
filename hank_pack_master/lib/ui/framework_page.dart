@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -314,29 +315,11 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   void onWindowClose() async {
     bool isPreventClose = await windowManager.isPreventClose();
     if (isPreventClose && mounted) {
-      showDialog(
+      DialogUtil.showConfirmDialog(
         context: context,
-        builder: (_) {
-          return ContentDialog(
-            title: const Text('Confirm close'),
-            content: const Text('Are you sure you want to close this window?'),
-            actions: [
-              FilledButton(
-                child: const Text('Yes'),
-                onPressed: () {
-                  Navigator.pop(context);
-                  windowManager.destroy();
-                },
-              ),
-              Button(
-                child: const Text('No'),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        },
+        onConfirm: () => windowManager.destroy(),
+        title: "提示",
+        content: "关闭应用吗？",
       );
     }
   }

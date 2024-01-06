@@ -155,7 +155,7 @@ class CommandUtil {
   }
 
   // 2024年1月4日 检查gitRoot的可用性，尝试执行version指令
-  Future<bool> checkEnv(String title, String binRoot) async {
+  Future<String> checkEnv(String title, String binRoot) async {
     switch (title) {
       case "git":
         return checkGit(binRoot);
@@ -168,13 +168,15 @@ class CommandUtil {
       case "java":
         return checkJava(binRoot);
     }
-    return false;
+    return "";
   }
 
   ///
   /// 如果git --version命令能走通，那就说明可用
   ///
-  Future<bool> checkGit(String binRoot) async {
+  Future<String> checkGit(String binRoot) async {
+    StringBuffer sb = StringBuffer();
+
     var process = await execute(
       binRoot: binRoot,
       cmd: "git",
@@ -182,18 +184,20 @@ class CommandUtil {
       workDir: EnvParams.workRoot,
       action: (res) {
         debugPrint("checkGit---> $res");
+        sb.writeln(res);
       },
     );
     var exitCode = await process?.exitCode;
     stopExec(process);
 
-    return 0 == exitCode;
+    return "$exitCode $sb";
   }
 
   ///
   /// 如果 adb --version 命令能走通，那就说明可用
   ///
-  Future<bool> checkAdb(String binRoot) async {
+  Future<String> checkAdb(String binRoot) async {
+    StringBuffer sb = StringBuffer();
     var process = await execute(
       binRoot: binRoot,
       cmd: "adb",
@@ -201,17 +205,19 @@ class CommandUtil {
       workDir: EnvParams.workRoot,
       action: (res) {
         debugPrint("checkAdb---> $res");
+        sb.writeln(res);
       },
     );
     var exitCode = await process?.exitCode;
     stopExec(process);
-    return 0 == exitCode;
+    return "$exitCode $sb";
   }
 
   ///
   /// 如果 flutter.bat doctor 命令能走通，那就说明可用
   ///
-  Future<bool> checkFlutter(String binRoot) async {
+  Future<String> checkFlutter(String binRoot) async {
+    StringBuffer sb = StringBuffer();
     var process = await execute(
       binRoot: binRoot,
       cmd: "flutter.bat",
@@ -219,17 +225,19 @@ class CommandUtil {
       workDir: EnvParams.workRoot,
       action: (res) {
         debugPrint("checkFlutter---> $res");
+        sb.writeln(res);
       },
     );
     var exitCode = await process?.exitCode;
     stopExec(process);
-    return 0 == exitCode;
+    return "$exitCode $sb";
   }
 
   ///
   /// 如果 java -version 命令能走通，那就说明可用
   ///
-  Future<bool> checkJava(String binRoot) async {
+  Future<String> checkJava(String binRoot) async {
+    StringBuffer sb = StringBuffer();
     var process = await execute(
       binRoot: binRoot,
       cmd: "java",
@@ -237,30 +245,32 @@ class CommandUtil {
       workDir: EnvParams.workRoot,
       action: (res) {
         debugPrint("checkJava---> $res");
+        sb.writeln(res);
       },
     );
     var exitCode = await process?.exitCode;
     stopExec(process);
-    return 0 == exitCode;
+    return "$exitCode $sb";
   }
 
   ///
-  /// 如果 java -version 命令能走通，那就说明可用
+  /// 如果 sdkmanager --version 命令能走通，那就说明可用
   ///
-  Future<bool> checkAndroid(String binRoot) async {
+  Future<String> checkAndroid(String binRoot) async {
+    StringBuffer sb = StringBuffer();
     var process = await execute(
-      binRoot:
-          "$binRoot\\cmdline-tools\\latest\\bin\\",
+      binRoot: "$binRoot\\cmdline-tools\\latest\\bin\\",
       cmd: "sdkmanager.bat",
       params: ["--version"],
       workDir: EnvParams.workRoot,
       action: (res) {
         debugPrint("checkAndroid---> $res");
+        sb.writeln(res);
       },
     );
     var exitCode = await process?.exitCode;
     stopExec(process);
-    return 0 == exitCode;
+    return "$exitCode $sb";
   }
 
   Future<Map<String, Set<String>>> initEnvParam(

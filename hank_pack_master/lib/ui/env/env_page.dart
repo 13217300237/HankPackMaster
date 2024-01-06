@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/gestures.dart';
+import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
@@ -35,6 +35,32 @@ class _EnvPageState extends State<EnvPage> {
     debugPrint("envPage dispose");
   }
 
+
+  void showContentDialog(BuildContext context) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => ContentDialog(
+        title: const Text('Delete file permanently?'),
+        content: const Text(
+          'If you delete this file, you won\'t be able to recover it. Do you want to delete it?',
+        ),
+        actions: [
+          Button(
+            child: const Text('Delete'),
+            onPressed: () {
+              Navigator.pop(context, 'User deleted file');
+              // Delete file here
+            },
+          ),
+          FilledButton(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(context, 'User canceled dialog'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEnvTile(
       String title, Set<String> content, EnvParamVm envParamModel) {
     List<Widget> muEnv = [];
@@ -53,9 +79,10 @@ class _EnvPageState extends State<EnvPage> {
                     child: const Text('测试'),
                     onPressed: () async {
                       // 每一种命令的检查方法还有所不同！
-                      var usable = await CommandUtil.getInstance()
-                          .checkEnv(title, binRoot);
-                      showToast("$title 测试结果为 $usable");
+                      showCmdResultDialog(await CommandUtil.getInstance()
+                          .checkEnv(title, binRoot));
+                      // showContentDialog(context);
+
                     },
                   )
                 ],
@@ -63,6 +90,7 @@ class _EnvPageState extends State<EnvPage> {
         ),
       );
     }
+
 
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
@@ -115,14 +143,23 @@ class _EnvPageState extends State<EnvPage> {
         envWidgets.add(_buildEnvTile(key, value, envParamModel)));
 
     return Container(
-      padding: const EdgeInsets.all(30),
-      child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false), // 隐藏scrollBar
-        child: SingleChildScrollView(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [...envWidgets])),
-      ),
+        padding: const EdgeInsets.all(30),
+        child: ScrollConfiguration(
+            // 隐藏scrollBar
+            behavior:
+                ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [...envWidgets]))));
+  }
+
+  void showCmdResultDialog(String res) {
+    DialogUtil.showCustomContentDialog(
+      context: context,
+      onConfirm: null,
+      child: Text(res),
+      title: "测试结果",
     );
   }
 }
