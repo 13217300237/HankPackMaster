@@ -11,7 +11,7 @@ final _homeKey = GlobalKey<NavigatorState>();
 
 final statefulRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/env',
+  initialLocation: '/',
   routes: <RouteBase>[
     StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

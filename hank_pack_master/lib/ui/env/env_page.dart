@@ -92,7 +92,13 @@ class _EnvPageState extends State<EnvPage> {
                       title,
                       style: const TextStyle(fontSize: 30),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 15),
+                    if (envParamModel.isEnvSet(title)) ...[
+                      Text(
+                        "你必须指定一个环境参数...",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
                     ...muEnv,
                     const SizedBox(height: 5),
                   ])))
@@ -100,10 +106,11 @@ class _EnvPageState extends State<EnvPage> {
   }
 
   checkAction() async {
-    envs = await CommandUtil.getInstance().initEnvParam(action: (r) {
+    EasyLoading.show(status: '正在初始化环境参数...');
+    envs = await CommandUtil.getInstance().initAllEnvParam(action: (r) {
       debugCmdPrint("环境检索的日志输出:$r");
     });
-
+    EasyLoading.dismiss();
     if (mounted) {
       setState(() {});
     }

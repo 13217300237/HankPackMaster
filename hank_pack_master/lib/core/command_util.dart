@@ -13,6 +13,13 @@ debugCmdPrint(String msg) {
   }
 }
 
+class EnvCheckEntity {
+  String cmd;
+  String param;
+
+  EnvCheckEntity(this.cmd, this.param);
+}
+
 class MyProcess {
   Process process;
 
@@ -66,14 +73,14 @@ class CommandUtil {
   ///
   Future whereCmd(
       {required String order, required Function(String) action}) async {
-    var process = await execute(
+    var process = await _execute(
       cmd: "where",
       params: [order],
       workDir: EnvParams.workRoot,
       action: action,
     );
     await process?.exitCode;
-    stopExec(process);
+    _stopExec(process);
   }
 
   ///
@@ -85,14 +92,14 @@ class CommandUtil {
   ///
   Future echoCmd(
       {required String order, required Function(String) action}) async {
-    var process = await execute(
+    var process = await _execute(
       workDir: EnvParams.workRoot,
       cmd: "cmd",
       params: ['/c', "echo", order],
       action: action,
     );
     await process?.exitCode;
-    stopExec(process);
+    _stopExec(process);
   }
 
   void _addToEnv(String e, Set<String> listEnv) {
@@ -159,15 +166,15 @@ class CommandUtil {
   Future<String> checkEnv(String title, String binRoot) async {
     switch (title) {
       case "git":
-        return checkGit(binRoot);
+        return _checkGit(binRoot);
       case "flutter":
-        return checkFlutter(binRoot);
+        return _checkFlutter(binRoot);
       case "adb":
-        return checkAdb(binRoot);
+        return _checkAdb(binRoot);
       case "android":
-        return checkAndroid(binRoot);
+        return _checkAndroid(binRoot);
       case "java":
-        return checkJava(binRoot);
+        return _checkJava(binRoot);
     }
     return "";
   }
@@ -175,107 +182,64 @@ class CommandUtil {
   ///
   /// 如果git --version命令能走通，那就说明可用
   ///
-  Future<String> checkGit(String binRoot) async {
+  Future<String> _commCheckFunc(
+      EnvCheckEntity envCheckEntity, String binRoot) async {
     StringBuffer sb = StringBuffer();
 
-    var process = await execute(
+    var process = await _execute(
       binRoot: binRoot,
-      cmd: "git",
-      params: ["--version"],
+      cmd: envCheckEntity.cmd,
+      params: [envCheckEntity.param],
       workDir: EnvParams.workRoot,
       action: (res) {
-        debugPrint("checkGit---> $res");
-        sb.writeln(res);
-      },
-    );
-    var exitCode = await process?.exitCode;
-    stopExec(process);
-
-    return "$exitCode $sb";
-  }
-
-  ///
-  /// 如果 adb --version 命令能走通，那就说明可用
-  ///
-  Future<String> checkAdb(String binRoot) async {
-    StringBuffer sb = StringBuffer();
-    var process = await execute(
-      binRoot: binRoot,
-      cmd: "adb",
-      params: ["--version"],
-      workDir: EnvParams.workRoot,
-      action: (res) {
-        debugPrint("checkAdb---> $res");
-        sb.writeln(res);
-      },
-    );
-    var exitCode = await process?.exitCode;
-    stopExec(process);
-    return "$exitCode $sb";
-  }
-
-  ///
-  /// 如果 flutter.bat doctor 命令能走通，那就说明可用
-  ///
-  Future<String> checkFlutter(String binRoot) async {
-    StringBuffer sb = StringBuffer();
-    var process = await execute(
-      binRoot: binRoot,
-      cmd: "flutter.bat",
-      params: ["doctor"],
-      workDir: EnvParams.workRoot,
-      action: (res) {
-        debugPrint("checkFlutter---> $res");
+        debugPrint("${envCheckEntity.cmd}---> $res");
         EasyLoading.show(status: res);
         sb.writeln(res);
       },
     );
     var exitCode = await process?.exitCode;
-    stopExec(process);
-    return "$exitCode $sb";
+    _stopExec(process);
+
+    return "exitCode : $exitCode\n \n$sb";
+  }
+
+  ///
+  /// 如果git --version命令能走通，那就说明可用
+  ///
+  Future<String> _checkGit(String binRoot) async {
+    return _commCheckFunc(EnvCheckEntity("git", "--version"), binRoot);
+  }
+
+  ///
+  /// 如果 adb --version 命令能走通，那就说明可用
+  ///
+  Future<String> _checkAdb(String binRoot) async {
+    return _commCheckFunc(EnvCheckEntity("adb", "--version"), binRoot);
+  }
+
+  ///
+  /// 如果 flutter.bat doctor 命令能走通，那就说明可用
+  ///
+  Future<String> _checkFlutter(String binRoot) async {
+    return _commCheckFunc(EnvCheckEntity("flutter.bat", "doctor"), binRoot);
   }
 
   ///
   /// 如果 java -version 命令能走通，那就说明可用
   ///
-  Future<String> checkJava(String binRoot) async {
-    StringBuffer sb = StringBuffer();
-    var process = await execute(
-      binRoot: binRoot,
-      cmd: "java",
-      params: ["-version"],
-      workDir: EnvParams.workRoot,
-      action: (res) {
-        debugPrint("checkJava---> $res");
-        sb.writeln(res);
-      },
-    );
-    var exitCode = await process?.exitCode;
-    stopExec(process);
-    return "$exitCode $sb";
+  Future<String> _checkJava(String binRoot) async {
+    return _commCheckFunc(EnvCheckEntity("java", "--version"), binRoot);
   }
 
   ///
   /// 如果 sdkmanager --version 命令能走通，那就说明可用
   ///
-  Future<String> checkAndroid(String binRoot) async {
-    StringBuffer sb = StringBuffer();
-    var process = await execute(
-      binRoot: "$binRoot\\cmdline-tools\\latest\\bin\\",
-      cmd: "sdkmanager.bat",
-      params: ["--version"],
-      workDir: EnvParams.workRoot,
-      action: (res) {
-        debugPrint("checkAndroid---> $res");
-        sb.writeln(res);
-      },
-    );
-    var exitCode = await process?.exitCode;
-    stopExec(process);
-    return "$exitCode $sb";
+  Future<String> _checkAndroid(String binRoot) async {
+    return _commCheckFunc(EnvCheckEntity("sdkmanager.bat", "--version"),
+        "$binRoot\\cmdline-tools\\latest\\bin\\");
   }
 
-  Future<Map<String, Set<String>>> initEnvParam(
+  Future<Map<String, Set<String>>> initAllEnvParam(
       {required Function(String) action}) async {
     restEnvParam();
 
@@ -300,7 +264,7 @@ class CommandUtil {
   ///
   /// 注意事项，
   /// 1、如果是.exe结尾的命令，比如 git ，[cmd] 参数 直接赋值为 git即可，但是如果是 .bat结尾的命令，就必须写全 flutter.bat
-  /// 2、如果是同时执行多个命令，那么多个命令的 执行结果都有可能通过 [action] 函数输出出去，如果向结束执行，取得 [execute] 的返回值Process之后，执行kill
+  /// 2、如果是同时执行多个命令，那么多个命令的 执行结果都有可能通过 [action] 函数输出出去，如果向结束执行，取得 [_execute] 的返回值Process之后，执行kill
   ///
   /// [binRoot] 可执行文件的路径
   /// [cmd] 命令
@@ -310,7 +274,7 @@ class CommandUtil {
   ///
   ///
   ///
-  Future<Process?> execute({
+  Future<Process?> _execute({
     String binRoot = "",
     required String cmd,
     required List<String> params,
@@ -355,7 +319,7 @@ class CommandUtil {
     }
   }
 
-  void stopExec(Process? p) {
+  void _stopExec(Process? p) {
     debugCmdPrint("准备kill $pid");
     if (p == null) {
       return;

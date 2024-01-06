@@ -30,6 +30,28 @@ class EnvParamVm extends ChangeNotifier {
   String _androidSdkRoot = "";
   String _javaRoot = "";
 
+  bool isEnvSet(String title) {
+    String? v;
+    switch (title) {
+      case "git":
+        v = _gitRoot;
+        break;
+      case "flutter":
+        v = _flutterRoot;
+        break;
+      case "adb":
+        v = _adbRoot;
+        break;
+      case "android":
+        v = _androidSdkRoot;
+        break;
+      case "java":
+        v = _javaRoot;
+        break;
+    }
+    return v?.isEmpty ?? false;
+  }
+
   bool judgeEnv(String title, String value) {
     switch (title) {
       case "git":

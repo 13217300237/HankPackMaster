@@ -45,11 +45,17 @@ class DialogUtil {
       context: context,
       builder: (context) {
         return ContentDialog(
-          title: Text(title),
-          content: Text(content),
+          title: Text(
+            title,
+            style: const TextStyle(color: Colors.black, fontSize: 30),
+          ),
+          content: SelectableText(content,
+              style: const TextStyle(color: Colors.grey, fontSize: 16)),
           actions: [
             Button(
-              child: const Text('拷贝结果'),
+              child: const Text(
+                '拷贝结果',
+              ),
               onPressed: () {
                 Navigator.pop(context);
                 FlutterClipboard.copy(content).then((value) {
