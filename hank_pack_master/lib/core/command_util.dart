@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 bool cmdDebug = true;
 
@@ -225,6 +226,7 @@ class CommandUtil {
       workDir: EnvParams.workRoot,
       action: (res) {
         debugPrint("checkFlutter---> $res");
+        EasyLoading.show(status: res);
         sb.writeln(res);
       },
     );

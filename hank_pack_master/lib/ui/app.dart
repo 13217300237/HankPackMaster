@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/test/env_param_vm.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:hank_pack_master/ui/routes/route.dart';
@@ -28,7 +30,13 @@ class _AppState extends State<App> {
         ],
         builder: (context, child) {
           final appTheme = context.watch<AppTheme>();
-          return OKToast(child: fluentUi(appTheme));
+          return MaterialApp(
+            // 是否显示debug标记
+            debugShowCheckedModeBanner: false,
+            title: 'Flutter EasyLoading',
+            home: OKToast(child: fluentUi(appTheme)),
+            builder: EasyLoading.init(),
+          );
         });
   }
 

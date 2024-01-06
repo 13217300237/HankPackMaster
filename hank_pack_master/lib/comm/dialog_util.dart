@@ -1,4 +1,6 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class DialogUtil {
   static void showConfirmDialog({
@@ -33,10 +35,10 @@ class DialogUtil {
     );
   }
 
-  static void showCustomContentDialog({
+  static void showEnvCheckDialog({
     required BuildContext context,
     Function? onConfirm,
-    required Widget child,
+    required String content,
     required String title,
   }) async {
     await showDialog<String>(
@@ -44,19 +46,20 @@ class DialogUtil {
       builder: (context) {
         return ContentDialog(
           title: Text(title),
-          content: child,
+          content: Text(content),
           actions: [
             Button(
-              child: const Text('确认'),
+              child: const Text('拷贝结果'),
               onPressed: () {
                 Navigator.pop(context);
-                // Delete file here
+                FlutterClipboard.copy(content).then((value) {
+                  EasyLoading.showToast("拷贝成功");
+                });
               },
             ),
             FilledButton(
-              child: const Text('取消'),
-              onPressed: () => Navigator.pop(context),
-            ),
+                child: const Text('关闭'),
+                onPressed: () => Navigator.pop(context)),
           ],
         );
       },
