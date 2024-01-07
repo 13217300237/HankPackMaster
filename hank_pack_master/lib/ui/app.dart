@@ -33,9 +33,6 @@ class _AppState extends State<App> {
           return MaterialApp(
             // 是否显示debug标记
             debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              fontFamily: 'STKAITI', // 设置默认的字体
-            ),
             title: 'Flutter EasyLoading',
             home: OKToast(child: fluentUi(appTheme)),
             builder: EasyLoading.init(),
@@ -55,21 +52,21 @@ class _AppState extends State<App> {
       color: appTheme.accentColor,
       // 黑暗模式主题
       darkTheme: FluentThemeData(
-        brightness: Brightness.dark,
-        accentColor: appTheme.accentColor,
-        visualDensity: VisualDensity.standard,
-        focusTheme: FocusThemeData(
-          glowFactor: is10footScreen(context) ? 2.0 : 0.0,
-        ),
-      ),
+          brightness: Brightness.dark,
+          accentColor: appTheme.accentColor,
+          visualDensity: VisualDensity.standard,
+          focusTheme: FocusThemeData(
+            glowFactor: is10footScreen(context) ? 2.0 : 0.0,
+          ),
+          fontFamily: 'STKAITI'),
       // 白天模式主题
       theme: FluentThemeData(
-        accentColor: appTheme.accentColor,
-        visualDensity: VisualDensity.standard,
-        focusTheme: FocusThemeData(
-          glowFactor: is10footScreen(context) ? 2.0 : 0.0,
-        ),
-      ),
+          accentColor: appTheme.accentColor,
+          visualDensity: VisualDensity.standard,
+          focusTheme: FocusThemeData(
+            glowFactor: is10footScreen(context) ? 2.0 : 0.0,
+          ),
+          fontFamily: 'STKAITI'),
       // 语言环境
       locale: appTheme.locale,
       // 子widget包装器

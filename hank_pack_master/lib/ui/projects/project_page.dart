@@ -4,6 +4,11 @@ import 'package:provider/provider.dart';
 
 import '../../test/env_param_vm.dart';
 
+///
+/// 此模块用来添加新的安卓工程
+///
+/// 表单操作
+///
 class ProjectPage extends StatefulWidget {
   const ProjectPage({super.key});
 
@@ -41,15 +46,22 @@ class _ProjectPageState extends State<ProjectPage> {
             );
           } else {
             return Center(
-              child: Button(
-                onPressed: () {
-                  _showInfo("提示", "环境已就绪，随时可以打包");
-                },
-                child: const Text("环境就绪"),
-              ),
+              child: _mainLayout(),
             );
           }
         });
+  }
+
+  Widget _mainLayout(){
+    return Column(children: [
+      InfoLabel(
+        label: '工程名',
+        child: const TextBox(
+          placeholder: 'Name',
+          expands: false,
+        ),
+      )
+    ],);
   }
 
   Future<void> _showInfo(String title, String content) async {
