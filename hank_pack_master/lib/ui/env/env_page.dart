@@ -69,6 +69,11 @@ class _EnvPageState extends State<EnvPage> {
       );
     }
 
+    var boxColor = Colors.errorSecondaryColor;
+    if (!envParamModel.isEnvSet(title)) {
+      boxColor = Colors.successSecondaryColor;
+    }
+
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
           child: Container(
@@ -77,8 +82,8 @@ class _EnvPageState extends State<EnvPage> {
               decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey[10],
-                      blurRadius: 4, // 控制卡片的模糊程度
+                      color: boxColor,
+                      blurRadius: 2, // 控制卡片的模糊程度
                       offset: const Offset(0, 2), // 控制卡片的偏移量
                     ),
                   ],
