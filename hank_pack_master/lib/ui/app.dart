@@ -33,6 +33,9 @@ class _AppState extends State<App> {
           return MaterialApp(
             // 是否显示debug标记
             debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              fontFamily: 'STKAITI', // 设置默认的字体
+            ),
             title: 'Flutter EasyLoading',
             home: OKToast(child: fluentUi(appTheme)),
             builder: EasyLoading.init(),

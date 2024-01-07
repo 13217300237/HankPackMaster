@@ -47,7 +47,10 @@ class _EnvPageState extends State<EnvPage> {
       if (!_envParamModel.isEnvEmpty("workSpaceRoot")) ...[
         Padding(
           padding: const EdgeInsets.only(bottom: 20),
-          child: Text("当前路径: ${_envParamModel.workSpaceRoot}"),
+          child: Text(
+            "当前路径: ${_envParamModel.workSpaceRoot}",
+            style: const TextStyle(fontFamily: "STKAITI"),
+          ),
         )
       ],
       Button(

@@ -138,7 +138,16 @@ class EnvParamVm extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> isAndroidEnvOk() async{
-    return _androidSdkRoot.isNotEmpty;
+  Future<bool> isAndroidEnvOk() async {
+
+    if(_workSpaceRoot.isEmpty){
+      return false;
+    }
+
+    if(_androidSdkRoot.isEmpty){
+      return false;
+    }
+
+    return true;
   }
 }
