@@ -71,3 +71,4 @@ flutter:
     - family: STKAITI
       fonts:
        - asset: fonts/STKAITI.TTF
+       - asset: fonts/STXIHEI.TTF

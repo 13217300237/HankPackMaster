@@ -77,7 +77,7 @@ class CommandUtil {
   ///
   Future whereCmd(
       {required String order, required Function(String) action}) async {
-    var process = await _execute(
+    var process = await execute(
       cmd: "where",
       params: [order],
       workDir: EnvParams.workRoot,
@@ -96,7 +96,7 @@ class CommandUtil {
   ///
   Future echoCmd(
       {required String order, required Function(String) action}) async {
-    var process = await _execute(
+    var process = await execute(
       workDir: EnvParams.workRoot,
       cmd: "cmd",
       params: ['/c', "echo", order],
@@ -190,7 +190,7 @@ class CommandUtil {
       String binRoot) async {
     StringBuffer sb = StringBuffer();
 
-    var process = await _execute(
+    var process = await execute(
       binRoot: binRoot,
       cmd: envCheckEntity.cmd,
       params: [envCheckEntity.param],
@@ -275,7 +275,7 @@ class CommandUtil {
   ///
   /// 注意事项，
   /// 1、如果是.exe结尾的命令，比如 git ，[cmd] 参数 直接赋值为 git即可，但是如果是 .bat结尾的命令，就必须写全 flutter.bat
-  /// 2、如果是同时执行多个命令，那么多个命令的 执行结果都有可能通过 [action] 函数输出出去，如果向结束执行，取得 [_execute] 的返回值Process之后，执行kill
+  /// 2、如果是同时执行多个命令，那么多个命令的 执行结果都有可能通过 [action] 函数输出出去，如果向结束执行，取得 [execute] 的返回值Process之后，执行kill
   ///
   /// [binRoot] 可执行文件的路径
   /// [cmd] 命令
@@ -285,7 +285,7 @@ class CommandUtil {
   ///
   ///
   ///
-  Future<Process?> _execute({
+  Future<Process?> execute({
     String binRoot = "",
     required String cmd,
     required List<String> params,
@@ -293,6 +293,7 @@ class CommandUtil {
     required Function(String res) action,
   }) async {
     try {
+      debugCmdPrint("$binRoot$cmd");
       var process = await Process.start("$binRoot$cmd", params,
           workingDirectory: workDir);
 

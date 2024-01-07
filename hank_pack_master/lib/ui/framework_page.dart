@@ -50,7 +50,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       body: const SizedBox.shrink(),
     ),
     PaneItem(
-      key: const ValueKey('/projects'),
+      key: const ValueKey('/files'),
       icon: const Icon(FluentIcons.a_t_p_logo),
       title: const Text('缓存文件迁移'),
       body: const SizedBox.shrink(),

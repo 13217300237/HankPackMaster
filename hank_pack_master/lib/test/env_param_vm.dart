@@ -138,7 +138,7 @@ class EnvParamVm extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> isAndroidEnvOk() async {
+  bool isAndroidEnvOk()  {
 
     if(_workSpaceRoot.isEmpty){
       return false;

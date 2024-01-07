@@ -58,7 +58,7 @@ class _AppState extends State<App> {
           focusTheme: FocusThemeData(
             glowFactor: is10footScreen(context) ? 2.0 : 0.0,
           ),
-          fontFamily: 'STKAITI'),
+          fontFamily: 'STXIHEI'),
       // 白天模式主题
       theme: FluentThemeData(
           accentColor: appTheme.accentColor,
