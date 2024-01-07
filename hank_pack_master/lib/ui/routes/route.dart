@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../env/env_page.dart';
 import '../framework_page.dart';
 import '../home/home_page.dart';
+import '../projects/project_page.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -23,6 +24,11 @@ final statefulRouter = GoRouter(
           ]),
           StatefulShellBranch(routes: <RouteBase>[
             GoRoute(path: '/env', builder: (context, state) => const EnvPage()),
+          ]),
+          StatefulShellBranch(routes: <RouteBase>[
+            GoRoute(
+                path: '/projects',
+                builder: (context, state) => const ProjectPage()),
           ])
         ]),
   ],
