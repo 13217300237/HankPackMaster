@@ -183,7 +183,12 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       key: viewKey,
       appBar: NavigationAppBar(
         automaticallyImplyLeading: false,
-        title: null,
+        title: const DragToMoveArea(
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: null,
+          ),
+        ),
         actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
           Align(
             alignment: AlignmentDirectional.centerEnd,

@@ -197,7 +197,7 @@ class CommandUtil {
       workDir: EnvParams.workRoot,
       action: (res) {
         debugPrint("${envCheckEntity.cmd}---> $res");
-        EasyLoading.show(status: res);
+        EasyLoading.show(status: res,maskType: EasyLoadingMaskType.clear);
         sb.writeln(res);
       },
     );

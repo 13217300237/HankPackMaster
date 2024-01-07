@@ -49,7 +49,10 @@ class _EnvPageState extends State<EnvPage> {
           padding: const EdgeInsets.only(bottom: 20),
           child: Text(
             "当前路径: ${_envParamModel.workSpaceRoot}",
-            style: const TextStyle(fontFamily: "STKAITI"),
+            style: const TextStyle(
+                fontFamily: "STKAITI",
+                fontWeight: FontWeight.w600,
+                fontSize: 29),
           ),
         )
       ],
