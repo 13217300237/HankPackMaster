@@ -29,8 +29,9 @@ class EnvParamVm extends ChangeNotifier {
   String _adbRoot = "";
   String _androidSdkRoot = "";
   String _javaRoot = "";
+  String _workSpaceRoot = "";
 
-  bool isEnvSet(String title) {
+  bool isEnvEmpty(String title) {
     String? v;
     switch (title) {
       case "git":
@@ -48,6 +49,9 @@ class EnvParamVm extends ChangeNotifier {
       case "java":
         v = _javaRoot;
         break;
+      case "workSpaceRoot":
+        v = _workSpaceRoot;
+        break;
     }
     return v?.isEmpty ?? false;
   }
@@ -64,6 +68,8 @@ class EnvParamVm extends ChangeNotifier {
         return _androidSdkRoot == value;
       case "java":
         return _javaRoot == value;
+      case "workSpaceRoot":
+        return _workSpaceRoot == value;
     }
     return false;
   }
@@ -85,6 +91,8 @@ class EnvParamVm extends ChangeNotifier {
       case "java":
         javaRoot = value;
         break;
+      case "workSpaceRoot":
+        workSpaceRoot = value;
     }
   }
 
@@ -121,5 +129,16 @@ class EnvParamVm extends ChangeNotifier {
   set javaRoot(String r) {
     _javaRoot = r;
     notifyListeners();
+  }
+
+  String get workSpaceRoot => _workSpaceRoot;
+
+  set workSpaceRoot(String r) {
+    _workSpaceRoot = r;
+    notifyListeners();
+  }
+
+  Future<bool> isAndroidEnvOk() async{
+    return _androidSdkRoot.isNotEmpty;
   }
 }

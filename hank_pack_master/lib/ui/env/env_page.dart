@@ -1,6 +1,8 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/command_util.dart';
@@ -21,12 +23,62 @@ class _EnvPageState extends State<EnvPage> {
   Map<String, Set<String>> envs = {};
 
   late AppTheme _appTheme;
+  late EnvParamVm _envParamModel;
 
   @override
   void initState() {
     super.initState();
     checkAction();
     debugPrint("envPage initState");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _envParamModel = context.watch<EnvParamVm>();
+    _appTheme = context.watch<AppTheme>();
+
+    List<Widget> envWidgets = [];
+
+    envs.forEach((key, value) =>
+        envWidgets.add(_buildEnvTile(key, value, _envParamModel)));
+
+    // 工作空间路径设置
+    var workspaceRoot = _card("workSpaceRoot", [
+      if (!_envParamModel.isEnvEmpty("workSpaceRoot")) ...[
+        Padding(
+          padding: EdgeInsets.only(bottom: 20),
+          child: Text("当前路径: ${_envParamModel.workSpaceRoot}"),
+        )
+      ],
+      Button(
+        child: const Text("Click here to set workspaceRoot"),
+        onPressed: () async {
+          String? selectedDirectory =
+              await FilePicker.platform.getDirectoryPath();
+
+          if (selectedDirectory == null) {
+            showToast("选择了空路径");
+          } else {
+            showToast(selectedDirectory);
+            _envParamModel.workSpaceRoot = selectedDirectory;
+          }
+        },
+      )
+    ]);
+
+    return Container(
+        padding: const EdgeInsets.all(30),
+        child: ScrollConfiguration(
+            // 隐藏scrollBar
+            behavior:
+                ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  workspaceRoot,
+                  ...envWidgets,
+                ]))));
   }
 
   @override
@@ -50,7 +102,10 @@ class _EnvPageState extends State<EnvPage> {
                   Text(binRoot, style: const TextStyle(fontSize: 16)),
                   const SizedBox(width: 20),
                   Button(
-                    child: const Text('测试'),
+                    child: Text(
+                      'Test',
+                      style: TextStyle(color: _appTheme.accentColor),
+                    ),
                     onPressed: () async {
                       EasyLoading.show(status: 'loading...');
                       var s = await CommandUtil.getInstance()
@@ -68,27 +123,16 @@ class _EnvPageState extends State<EnvPage> {
       );
     }
 
-    var boxColor = Colors.errorSecondaryColor;
-    if (!envParamModel.isEnvSet(title)) {
-      boxColor = Colors.successSecondaryColor;
-    }
+    return _card(title, muEnv);
+  }
 
+  Widget _card(String title, List<Widget> muEnv) {
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
           child: Container(
               padding: const EdgeInsets.all(20),
               margin: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: boxColor,
-                      blurRadius: 2, // 控制卡片的模糊程度
-                      offset: const Offset(0, 2), // 控制卡片的偏移量
-                    ),
-                  ],
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.grey[200], width: .5)),
+              decoration: _boxBorder(title),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -97,16 +141,29 @@ class _EnvPageState extends State<EnvPage> {
                       style: const TextStyle(fontSize: 30),
                     ),
                     const SizedBox(height: 15),
-                    if (envParamModel.isEnvSet(title)) ...[
-                      Text(
-                        "你必须指定一个环境参数...",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ],
                     ...muEnv,
                     const SizedBox(height: 5),
                   ])))
     ]);
+  }
+
+  BoxDecoration _boxBorder(String title) {
+    var boxColor = _appTheme.bgColorErr;
+    if (!_envParamModel.isEnvEmpty(title)) {
+      boxColor = _appTheme.bgColorSucc;
+    }
+
+    return BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: boxColor,
+            blurRadius: 2, // 控制卡片的模糊程度
+            offset: const Offset(0, 2), // 控制卡片的偏移量
+          ),
+        ],
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.grey[200], width: .5));
   }
 
   checkAction() async {
@@ -118,28 +175,6 @@ class _EnvPageState extends State<EnvPage> {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    EnvParamVm envParamModel = context.watch<EnvParamVm>();
-    _appTheme = context.watch<AppTheme>();
-
-    List<Widget> envWidgets = [];
-
-    envs.forEach((key, value) =>
-        envWidgets.add(_buildEnvTile(key, value, envParamModel)));
-
-    return Container(
-        padding: const EdgeInsets.all(30),
-        child: ScrollConfiguration(
-            // 隐藏scrollBar
-            behavior:
-                ScrollConfiguration.of(context).copyWith(scrollbars: false),
-            child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [...envWidgets]))));
   }
 
   void showCmdResultDialog(String res) {

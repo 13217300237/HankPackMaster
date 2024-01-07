@@ -49,11 +49,11 @@ class _AppState extends State<App> {
       // 是否显示debug标记
       debugShowCheckedModeBanner: false,
       // 主色调
-      color: appTheme.color,
+      color: appTheme.accentColor,
       // 黑暗模式主题
       darkTheme: FluentThemeData(
         brightness: Brightness.dark,
-        accentColor: appTheme.color,
+        accentColor: appTheme.accentColor,
         visualDensity: VisualDensity.standard,
         focusTheme: FocusThemeData(
           glowFactor: is10footScreen(context) ? 2.0 : 0.0,
@@ -61,7 +61,7 @@ class _AppState extends State<App> {
       ),
       // 白天模式主题
       theme: FluentThemeData(
-        accentColor: appTheme.color,
+        accentColor: appTheme.accentColor,
         visualDensity: VisualDensity.standard,
         focusTheme: FocusThemeData(
           glowFactor: is10footScreen(context) ? 2.0 : 0.0,

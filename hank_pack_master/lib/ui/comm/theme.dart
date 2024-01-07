@@ -7,45 +7,64 @@ import 'package:fluent_ui/fluent_ui.dart';
 enum NavigationIndicators { sticky, end }
 
 class AppTheme extends ChangeNotifier {
+  AccentColor? _accentColor; // 主色调
+  AccentColor get accentColor => _accentColor ?? systemAccentColor;
 
-  String? _gitRoot;
-  String get gitRoot => _gitRoot ?? "";
-  set gitRoot(String root) {
-    _gitRoot = root;
+  set accentColor(AccentColor color) {
+    _accentColor = color;
     notifyListeners();
   }
 
+  Color _bgColorErr = Colors.errorSecondaryColor.lightest; // 背景色1
+  Color get bgColorErr {
+    return _bgColorErr;
+  }
 
-  AccentColor? _color;
-  AccentColor get color => _color ?? systemAccentColor;
-  set color(AccentColor color) {
-    _color = color;
-    notifyListeners();
+  Color _bgColorSucc = Colors.successPrimaryColor.withOpacity(.2); // 背景色2
+  Color get bgColorSucc {
+    return _bgColorSucc;
   }
 
   ThemeMode _mode = ThemeMode.light;
+
   ThemeMode get mode => _mode;
+
   set mode(ThemeMode mode) {
     _mode = mode;
+
+    if (_mode == ThemeMode.light) {
+      _bgColorErr = Colors.errorSecondaryColor.lightest;
+      _bgColorSucc = Colors.successPrimaryColor.withOpacity(.2);
+    } else {
+      _bgColorErr = Colors.errorSecondaryColor.dark;
+      _bgColorSucc = Colors.successPrimaryColor;
+    }
+
     notifyListeners();
   }
 
   PaneDisplayMode _displayMode = PaneDisplayMode.auto;
+
   PaneDisplayMode get displayMode => _displayMode;
+
   set displayMode(PaneDisplayMode displayMode) {
     _displayMode = displayMode;
     notifyListeners();
   }
 
   NavigationIndicators _indicator = NavigationIndicators.sticky;
+
   NavigationIndicators get indicator => _indicator;
+
   set indicator(NavigationIndicators indicator) {
     _indicator = indicator;
     notifyListeners();
   }
 
   WindowEffect _windowEffect = WindowEffect.disabled;
+
   WindowEffect get windowEffect => _windowEffect;
+
   set windowEffect(WindowEffect windowEffect) {
     _windowEffect = windowEffect;
     notifyListeners();
@@ -65,14 +84,18 @@ class AppTheme extends ChangeNotifier {
   }
 
   TextDirection _textDirection = TextDirection.ltr;
+
   TextDirection get textDirection => _textDirection;
+
   set textDirection(TextDirection direction) {
     _textDirection = direction;
     notifyListeners();
   }
 
   Locale? _locale;
+
   Locale? get locale => _locale;
+
   set locale(Locale? locale) {
     _locale = locale;
     notifyListeners();

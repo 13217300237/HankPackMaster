@@ -2,7 +2,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:provider/provider.dart';
 
-import '../../core/command_util.dart';
 import '../../test/env_param_vm.dart';
 
 class ProjectPage extends StatefulWidget {
@@ -16,11 +15,11 @@ class _ProjectPageState extends State<ProjectPage> {
   late EnvParamVm envParamModel;
 
   Future<String> getReady() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (envParamModel.androidSdkRoot.isNotEmpty) {
-      return "环境就绪";
+    var s = await envParamModel.isAndroidEnvOk();
+    if (s) {
+      return "android SDK env ready!";
     } else {
-      throw "环境存在问题";
+      throw "AndroidSDK not ok!!!";
     }
   }
 
@@ -33,8 +32,13 @@ class _ProjectPageState extends State<ProjectPage> {
           if (ConnectionState.waiting == snapShot.connectionState) {
             return const Center(child: ProgressRing());
           } else if (snapShot.hasError) {
-            return Text("Error :${snapShot.error}",
-                style: const TextStyle(color: m.Colors.red));
+            return Center(
+              child: FilledButton(
+                child: Text("Error :${snapShot.error}",
+                    style: const TextStyle(color: m.Colors.white)),
+                onPressed: () => debugPrint('pressed button'),
+              ),
+            );
           } else {
             return Center(
               child: Button(

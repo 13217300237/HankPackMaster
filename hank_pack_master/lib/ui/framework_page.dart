@@ -226,7 +226,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
           height: kOneLineTileHeight,
           child: ShaderMask(
             shaderCallback: (rect) {
-              final color = appTheme.color.defaultBrushFor(
+              final color = appTheme.accentColor.defaultBrushFor(
                 theme.brightness,
               );
               return LinearGradient(
