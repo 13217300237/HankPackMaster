@@ -293,7 +293,7 @@ class CommandUtil {
     required Function(String res) action,
   }) async {
     try {
-      debugCmdPrint("$binRoot$cmd");
+      debugCmdPrint("打包命令为：$binRoot$cmd");
       var process = await Process.start("$binRoot$cmd", params,
           workingDirectory: workDir);
 

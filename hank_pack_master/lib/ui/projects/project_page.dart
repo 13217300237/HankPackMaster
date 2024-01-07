@@ -153,7 +153,7 @@ class _ProjectPageState extends State<ProjectPage> {
     debugPrint("开始打包...");
 
     var gitClone = await CommandUtil.getInstance().execute(
-      workDir: envParamModel.gitRoot,
+      workDir: projectRoot,
       cmd: "git",
       params: ["clone", _projectGitController.text],
       action: debugPrint,
