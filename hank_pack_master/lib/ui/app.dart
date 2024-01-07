@@ -43,7 +43,7 @@ class _AppState extends State<App> {
   Widget fluentUi(AppTheme appTheme) {
     return FluentApp.router(
       // 标题
-      title: appTitle,
+      title: "",
       // 白天黑夜模式
       themeMode: appTheme.mode,
       // 是否显示debug标记

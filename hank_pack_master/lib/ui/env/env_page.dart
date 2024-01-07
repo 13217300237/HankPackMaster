@@ -46,7 +46,7 @@ class _EnvPageState extends State<EnvPage> {
     var workspaceRoot = _card("workSpaceRoot", [
       if (!_envParamModel.isEnvEmpty("workSpaceRoot")) ...[
         Padding(
-          padding: EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.only(bottom: 20),
           child: Text("当前路径: ${_envParamModel.workSpaceRoot}"),
         )
       ],

@@ -18,6 +18,11 @@ class EnvCheckEntity {
   String param;
 
   EnvCheckEntity(this.cmd, this.param);
+
+  @override
+  String toString() {
+    return "$cmd  $param";
+  }
 }
 
 class MyProcess {
@@ -26,10 +31,9 @@ class MyProcess {
   StreamSubscription<List<int>> stdoutLis;
   StreamSubscription<List<int>> stderrLis;
 
-  MyProcess(
-      {required this.process,
-      required this.stdoutLis,
-      required this.stderrLis});
+  MyProcess({required this.process,
+    required this.stdoutLis,
+    required this.stderrLis});
 }
 
 ///
@@ -182,8 +186,8 @@ class CommandUtil {
   ///
   /// 如果git --version命令能走通，那就说明可用
   ///
-  Future<String> _commCheckFunc(
-      EnvCheckEntity envCheckEntity, String binRoot) async {
+  Future<String> _commCheckFunc(EnvCheckEntity envCheckEntity,
+      String binRoot) async {
     StringBuffer sb = StringBuffer();
 
     var process = await _execute(
@@ -200,7 +204,14 @@ class CommandUtil {
     var exitCode = await process?.exitCode;
     _stopExec(process);
 
-    return "exitCode : $exitCode\n \n$sb";
+    return """
+    
+    cmd: $envCheckEntity
+    
+    exitCode : $exitCode
+    
+    $sb
+    """;
   }
 
   ///
@@ -293,9 +304,9 @@ class CommandUtil {
       }
 
       StreamSubscription<List<int>> stdoutLis =
-          process.stdout.listen(loadAction);
+      process.stdout.listen(loadAction);
       StreamSubscription<List<int>> stderrLis =
-          process.stderr.listen(loadAction);
+      process.stderr.listen(loadAction);
 
       _allProcess.add(MyProcess(
           process: process, stderrLis: stderrLis, stdoutLis: stdoutLis));

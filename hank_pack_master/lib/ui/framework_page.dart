@@ -183,14 +183,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       key: viewKey,
       appBar: NavigationAppBar(
         automaticallyImplyLeading: false,
-        title: () {
-          return const DragToMoveArea(
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(appTitle),
-            ),
-          );
-        }(),
+        title: null,
         actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
           Align(
             alignment: AlignmentDirectional.centerEnd,
@@ -236,12 +229,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
                 ],
               ).createShader(rect);
             },
-            child: const FlutterLogo(
-              style: FlutterLogoStyle.horizontal,
-              size: 80.0,
-              textColor: Colors.white,
-              duration: Duration.zero,
-            ),
+            child: const Text(appTitle),
           ),
         ),
         displayMode: appTheme.displayMode,
