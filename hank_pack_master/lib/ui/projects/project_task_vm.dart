@@ -181,16 +181,14 @@ class ProjectTaskVm extends ChangeNotifier {
   ///
   /// 开始流水线工作
   ///
-  Future<String> startSchedule() async {
+  startSchedule() async {
     addNewLogLine("开始流程...");
-
     for (int i = 0; i < taskStateList.length; i++) {
       String? result = await taskStateList[i].actionFunc?.call(i);
       if (result != null && result.isNotEmpty) {
         break;
       }
     }
-
-    return "流程结束";
+    addNewLogLine("流程结束...");
   }
 }
