@@ -222,8 +222,7 @@ class _ProjectPageState extends State<ProjectPage> {
   Future<void> start() async {
     projectTaskVm.init();
     projectTaskVm.cleanLog();
-    projectTaskVm.startSchedule(
-        cmdLogCallback: (r) => projectTaskVm.addNewLogLine(r));
+    projectTaskVm.startSchedule();
   }
 
   bool get gitErrVisible {
