@@ -26,42 +26,44 @@ class _ProjectPageState extends State<ProjectPage> {
   late ProjectTaskVm projectTaskVm;
   final TextStyle _labelStyle =
       const TextStyle(fontWeight: FontWeight.w200, fontSize: 22);
-  final _projectGitController = TextEditingController();
-  final _projectPathController = TextEditingController();
-  final _projectBranchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _projectPathController.addListener(checkInput);
-    _projectGitController.addListener(() {
-      var gitText = _projectGitController.text;
-      if (gitText.isNotEmpty) {
-        try {
-          var parse = Uri.parse(gitText);
-          var lastSepIndex = parse.path.lastIndexOf("/");
-          var endIndex = parse.path.length - 4;
-          if (lastSepIndex > 0) {
-            String projectName =
-                parse.path.substring(lastSepIndex + 1, endIndex);
-            _projectPathController.text = envParamModel.workSpaceRoot +
-                Platform.pathSeparator +
-                projectName;
-            _projectBranchController.text = "dev"; // 测试代码
-          } else {
-            _projectPathController.text = "";
-            _projectBranchController.text = ""; // 测试代码
-          }
-          // 直接赋值给 _projectNameController 就行了
-        } catch (e, r) {}
-      }
 
-      checkInput();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 在绘制的第一帧之后执行初始化动作
+      projectTaskVm.projectPathController.addListener(checkInput);
+      projectTaskVm.gitUrlController.addListener(() {
+        var gitText = projectTaskVm.gitUrlController.text;
+        if (gitText.isNotEmpty) {
+          try {
+            var parse = Uri.parse(gitText);
+            var lastSepIndex = parse.path.lastIndexOf("/");
+            var endIndex = parse.path.length - 4;
+            if (lastSepIndex > 0) {
+              String projectName =
+                  parse.path.substring(lastSepIndex + 1, endIndex);
+              projectTaskVm.projectPathController.text =
+                  envParamModel.workSpaceRoot +
+                      Platform.pathSeparator +
+                      projectName;
+              projectTaskVm.gitBranchController.text = "dev"; // 测试代码
+            } else {
+              projectTaskVm.projectPathController.text = "";
+              projectTaskVm.gitBranchController.text = ""; // 测试代码
+            }
+            // 直接赋值给 _projectNameController 就行了
+          } catch (e, r) {}
+        }
+
+        checkInput();
+      });
+
+      // TODO 写死数据进行测试
+      projectTaskVm.gitUrlController.text =
+          "https://github.com/18598925736/MyApp20231224.git";
     });
-
-    // TODO 写死数据进行测试
-    _projectGitController.text =
-        "https://github.com/18598925736/MyApp20231224.git";
   }
 
   bool isValidGitUrl(String url) {
@@ -80,8 +82,8 @@ class _ProjectPageState extends State<ProjectPage> {
   @override
   void dispose() {
     super.dispose();
-    _projectPathController.removeListener(checkInput);
-    _projectGitController.removeListener(checkInput);
+    projectTaskVm.projectPathController.removeListener(checkInput);
+    projectTaskVm.gitUrlController.removeListener(checkInput);
   }
 
   @override
@@ -134,19 +136,19 @@ class _ProjectPageState extends State<ProjectPage> {
             ),
           ),
         ),
-        _input("git地址", "输入git地址", _projectGitController),
+        _input("git地址", "输入git地址", projectTaskVm.gitUrlController),
         _gitErrorText(),
-        _input("工程位置", "输入工程名", _projectPathController,
+        _input("工程位置", "输入工程名", projectTaskVm.projectPathController,
             suffix: Tooltip(
               message: '点击打开目录',
               child: IconButton(
                   icon: const Icon(FluentIcons.open_enrollment, size: 18),
                   onPressed: () async {
-                    String dir = _projectPathController.text;
+                    String dir = projectTaskVm.projectPathController.text;
                     await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
                   }),
             )),
-        _input("分支名称", "输入分支名称", _projectBranchController),
+        _input("分支名称", "输入分支名称", projectTaskVm.gitBranchController),
         Button(
           onPressed: actionButtonDisabled ? null : start,
           child: const Text('START'),
@@ -196,13 +198,13 @@ class _ProjectPageState extends State<ProjectPage> {
   }
 
   bool get actionButtonDisabled {
-    if (_projectPathController.text.isEmpty) {
+    if (projectTaskVm.projectPathController.text.isEmpty) {
       return true;
     }
-    if (_projectGitController.text.isEmpty) {
+    if (projectTaskVm.gitUrlController.text.isEmpty) {
       return true;
     }
-    if (_projectBranchController.text.isEmpty) {
+    if (projectTaskVm.gitBranchController.text.isEmpty) {
       return true;
     }
 
@@ -220,107 +222,13 @@ class _ProjectPageState extends State<ProjectPage> {
   Future<void> start() async {
     projectTaskVm.init();
     projectTaskVm.cleanLog();
-    _start(
-        cmdLogCallback: (r) => projectTaskVm.addNewLogLine(r),
-        stageCallback: (int stageIndex, StageStatue statue) =>
-            projectTaskVm.updateStatue(stageIndex, statue));
-  }
-
-  waitOneSec() async {
-    await Future.delayed(const Duration(milliseconds: 1000));
-  }
-
-  ///
-  /// 打包动作
-  ///
-  Future<String> _start(
-      {required Function(String s) cmdLogCallback,
-      required Function(int stageIndex, StageStatue statue)
-          stageCallback}) async {
-    cmdLogCallback("开始流程...");
-    // 阶段0
-    // 参数准备
-    // git地址
-    await waitOneSec();
-    stageCallback.call(0, StageStatue.executing);
-    String clonePath = envParamModel.workSpaceRoot + Platform.pathSeparator;
-    cmdLogCallback("clonePath-> $clonePath");
-    // 参数：工程本地位置
-    String projectRoot = _projectPathController.text + Platform.pathSeparator;
-    cmdLogCallback("projectRoot-> $projectRoot...");
-    stageCallback.call(0, StageStatue.finished);
-
-    // =========================================================================
-    // clone 阶段
-    await waitOneSec();
-    stageCallback.call(1, StageStatue.executing);
-    cmdLogCallback("clone开始...");
-
-    ExecuteResult gitCloneRes = await CommandUtil.getInstance()
-        .gitClone(clonePath, _projectGitController.text, cmdLogCallback);
-    cmdLogCallback("clone完毕，结果是  $gitCloneRes");
-
-    if (gitCloneRes.exitCode != 0) {
-      cmdLogCallback("clone失败，具体问题请看日志...");
-      stageCallback.call(1, StageStatue.error);
-      return gitCloneRes.res;
-    }
-    stageCallback.call(1, StageStatue.finished);
-    // =========================================================================
-    // checkout 阶段
-    await waitOneSec();
-    stageCallback.call(2, StageStatue.executing);
-    cmdLogCallback("checkout 开始...");
-
-    ExecuteResult gitCheckoutRes = await CommandUtil.getInstance()
-        .gitCheckout(_projectPathController.text, _projectBranchController.text, cmdLogCallback);
-    cmdLogCallback("checkout 完毕，结果是  $gitCheckoutRes");
-
-    if (gitCheckoutRes.exitCode != 0) {
-      cmdLogCallback("checkout  失败，具体问题请看日志...");
-      stageCallback.call(2, StageStatue.error);
-      return gitCheckoutRes.res;
-    }
-    stageCallback.call(2, StageStatue.finished);
-    // =========================================================================
-    await waitOneSec();
-    stageCallback.call(3, StageStatue.executing);
-    cmdLogCallback("开始检查工程目录结构...");
-    // 阶段2，工程结构检查
-    // 检查目录下是否有 gradlew.bat 文件
-    File gradlewFile = File("${projectRoot}gradlew.bat");
-    if (!gradlewFile.existsSync()) {
-      String er = "工程目录下没找到 gradlew 命令文件，流程终止!";
-      cmdLogCallback(er);
-      stageCallback.call(3, StageStatue.error);
-      return er;
-    }
-    cmdLogCallback("工程目录检测成功，工程结构正常，现在开始打包");
-    stageCallback.call(3, StageStatue.finished);
-
-    // =========================================================================
-    await waitOneSec();
-    stageCallback.call(4, StageStatue.executing);
-    // 阶段3，执行打包命令
-    ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
-        .gradleAssemble(projectRoot, cmdLogCallback);
-    cmdLogCallback("打包 完毕，结果是-> $gradleAssembleRes");
-
-    if (gradleAssembleRes.exitCode != 0) {
-      String er = "打包失败，详情请看日志";
-      cmdLogCallback(er);
-      stageCallback.call(4, StageStatue.error);
-      return er;
-    }
-    stageCallback.call(4, StageStatue.finished);
-    // =========================================================================
-
-    return "流程结束";
+    projectTaskVm.startSchedule(
+        cmdLogCallback: (r) => projectTaskVm.addNewLogLine(r));
   }
 
   bool get gitErrVisible {
-    return !isValidGitUrl(_projectGitController.text) &&
-        _projectGitController.text.isNotEmpty;
+    return !isValidGitUrl(projectTaskVm.gitUrlController.text) &&
+        projectTaskVm.gitUrlController.text.isNotEmpty;
   }
 
   Widget _gitErrorText() {

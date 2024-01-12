@@ -358,11 +358,11 @@ class CommandUtil {
         "$pid kill结果为： $killResult, 当前 进程列表中还有 ${_allProcess.length} 个进程");
   }
 
-  Future<ExecuteResult> gitClone(
-    String clonePath,
-    String gitUrl,
-    Function(String s) logOutput,
-  ) async {
+  Future<ExecuteResult> gitClone({
+    required String clonePath,
+    required String gitUrl,
+    required Function(String s) logOutput,
+  }) async {
     StringBuffer sb = StringBuffer();
 
     var process = await execute(
