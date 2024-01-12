@@ -28,6 +28,7 @@ class _ProjectPageState extends State<ProjectPage> {
       const TextStyle(fontWeight: FontWeight.w200, fontSize: 22);
   final _projectGitController = TextEditingController();
   final _projectPathController = TextEditingController();
+  final _projectBranchController = TextEditingController();
 
   @override
   void initState() {
@@ -36,7 +37,6 @@ class _ProjectPageState extends State<ProjectPage> {
     _projectGitController.addListener(() {
       var gitText = _projectGitController.text;
       if (gitText.isNotEmpty) {
-        // 取出工程名，比如：[ ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/testProject_0108.git ] 这个地址，那么工程名就是：testProject_0108
         try {
           var parse = Uri.parse(gitText);
           var lastSepIndex = parse.path.lastIndexOf("/");
@@ -47,8 +47,10 @@ class _ProjectPageState extends State<ProjectPage> {
             _projectPathController.text = envParamModel.workSpaceRoot +
                 Platform.pathSeparator +
                 projectName;
+            _projectBranchController.text = "dev"; // 测试代码
           } else {
             _projectPathController.text = "";
+            _projectBranchController.text = ""; // 测试代码
           }
           // 直接赋值给 _projectNameController 就行了
         } catch (e, r) {}
@@ -59,7 +61,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
     // TODO 写死数据进行测试
     _projectGitController.text =
-        "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/testProject_0108.git";
+        "https://github.com/18598925736/MyApp20231224.git";
   }
 
   bool isValidGitUrl(String url) {
@@ -144,6 +146,7 @@ class _ProjectPageState extends State<ProjectPage> {
                     await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
                   }),
             )),
+        _input("分支名称", "输入分支名称", _projectBranchController),
         Button(
           onPressed: actionButtonDisabled ? null : start,
           child: const Text('START'),
@@ -199,6 +202,9 @@ class _ProjectPageState extends State<ProjectPage> {
     if (_projectGitController.text.isEmpty) {
       return true;
     }
+    if (_projectBranchController.text.isEmpty) {
+      return true;
+    }
 
     if (!envParamModel.isAndroidEnvOk()) {
       return true;
@@ -245,13 +251,13 @@ class _ProjectPageState extends State<ProjectPage> {
     stageCallback.call(0, StageStatue.finished);
 
     // =========================================================================
-    // 阶段1，clone
+    // clone 阶段
     await waitOneSec();
     stageCallback.call(1, StageStatue.executing);
     cmdLogCallback("clone开始...");
 
     ExecuteResult gitCloneRes = await CommandUtil.getInstance()
-        .gitClone(clonePath, _projectGitController.text);
+        .gitClone(clonePath, _projectGitController.text, cmdLogCallback);
     cmdLogCallback("clone完毕，结果是  $gitCloneRes");
 
     if (gitCloneRes.exitCode != 0) {
@@ -261,36 +267,52 @@ class _ProjectPageState extends State<ProjectPage> {
     }
     stageCallback.call(1, StageStatue.finished);
     // =========================================================================
+    // checkout 阶段
     await waitOneSec();
     stageCallback.call(2, StageStatue.executing);
-    cmdLogCallback("clone成功，开始检查工程目录结构");
+    cmdLogCallback("checkout 开始...");
+
+    ExecuteResult gitCheckoutRes = await CommandUtil.getInstance()
+        .gitCheckout(_projectPathController.text, _projectBranchController.text, cmdLogCallback);
+    cmdLogCallback("checkout 完毕，结果是  $gitCheckoutRes");
+
+    if (gitCheckoutRes.exitCode != 0) {
+      cmdLogCallback("checkout  失败，具体问题请看日志...");
+      stageCallback.call(2, StageStatue.error);
+      return gitCheckoutRes.res;
+    }
+    stageCallback.call(2, StageStatue.finished);
+    // =========================================================================
+    await waitOneSec();
+    stageCallback.call(3, StageStatue.executing);
+    cmdLogCallback("开始检查工程目录结构...");
     // 阶段2，工程结构检查
     // 检查目录下是否有 gradlew.bat 文件
     File gradlewFile = File("${projectRoot}gradlew.bat");
     if (!gradlewFile.existsSync()) {
       String er = "工程目录下没找到 gradlew 命令文件，流程终止!";
       cmdLogCallback(er);
-      stageCallback.call(2, StageStatue.error);
+      stageCallback.call(3, StageStatue.error);
       return er;
     }
     cmdLogCallback("工程目录检测成功，工程结构正常，现在开始打包");
-    stageCallback.call(2, StageStatue.finished);
+    stageCallback.call(3, StageStatue.finished);
 
     // =========================================================================
     await waitOneSec();
-    stageCallback.call(3, StageStatue.executing);
+    stageCallback.call(4, StageStatue.executing);
     // 阶段3，执行打包命令
-    ExecuteResult gradleAssembleRes =
-        await CommandUtil.getInstance().gradleAssemble(projectRoot);
+    ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
+        .gradleAssemble(projectRoot, cmdLogCallback);
     cmdLogCallback("打包 完毕，结果是-> $gradleAssembleRes");
 
     if (gradleAssembleRes.exitCode != 0) {
       String er = "打包失败，详情请看日志";
       cmdLogCallback(er);
-      stageCallback.call(3, StageStatue.error);
+      stageCallback.call(4, StageStatue.error);
       return er;
     }
-    stageCallback.call(3, StageStatue.finished);
+    stageCallback.call(4, StageStatue.finished);
     // =========================================================================
 
     return "流程结束";

@@ -17,6 +17,7 @@ class ProjectTaskVm extends ChangeNotifier {
     taskStateList.clear();
     taskStateList.add(TaskState("参数准备"));
     taskStateList.add(TaskState("工程克隆"));
+    taskStateList.add(TaskState("分支切换"));
     taskStateList.add(TaskState("工程结构检测"));
     taskStateList.add(TaskState("生成apk"));
     taskStateList.add(TaskState("apk检测"));

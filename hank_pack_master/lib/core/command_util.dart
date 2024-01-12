@@ -361,6 +361,7 @@ class CommandUtil {
   Future<ExecuteResult> gitClone(
     String clonePath,
     String gitUrl,
+    Function(String s) logOutput,
   ) async {
     StringBuffer sb = StringBuffer();
 
@@ -369,7 +370,7 @@ class CommandUtil {
       params: ["clone", gitUrl],
       workDir: clonePath,
       action: (res) {
-        sb.writeln(res);
+        logOutput(res);
       },
     );
     var exitCode = await process?.exitCode;
@@ -378,12 +379,41 @@ class CommandUtil {
     String res = """
 cmd: git clone
 exitCode : $exitCode
-$sb""".trim();
+$sb"""
+        .trim();
 
     return ExecuteResult(res, exitCode!);
   }
 
-  Future<ExecuteResult> gradleAssemble(String projectRoot) async {
+  Future<ExecuteResult> gitCheckout(
+    String gitProjectDir,
+    String branchName,
+    Function(String s) logOutput,
+  ) async {
+    StringBuffer sb = StringBuffer();
+
+    var process = await execute(
+      cmd: "git",
+      params: ["checkout", branchName],
+      workDir: gitProjectDir,
+      action: (res) {
+        logOutput(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """
+cmd: git checkout
+exitCode : $exitCode
+$sb"""
+        .trim();
+
+    return ExecuteResult(res, exitCode!);
+  }
+
+  Future<ExecuteResult> gradleAssemble(
+      String projectRoot, Function(String s) logOutput) async {
     StringBuffer sb = StringBuffer();
 
     var process = await execute(
@@ -392,7 +422,8 @@ $sb""".trim();
       workDir: projectRoot,
       binRoot: projectRoot,
       action: (res) {
-        sb.writeln(res);
+        logOutput.call(res);
+        debugCmdPrint(res);
       },
     );
     var exitCode = await process?.exitCode;
