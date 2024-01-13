@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
@@ -18,7 +19,7 @@ class PackageSuccessEntity {
 
   @override
   String toString() {
-    return "$title $apkPath";
+    return "$title\n$apkPath";
   }
 }
 
@@ -43,6 +44,8 @@ class ProjectTaskVm extends ChangeNotifier {
   final List<TaskState> taskStateList = [];
 
   final List<String> _cmdExecLog = [];
+
+  final logListViewScrollController = ScrollController();
 
   List<String> get cmdExecLog => _cmdExecLog;
 
@@ -196,6 +199,17 @@ class ProjectTaskVm extends ChangeNotifier {
     _cmdExecLog
         .add("${Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss")}        $s");
     notifyListeners();
+    _scrollToBottom();
+  }
+
+  ///添加一个延时，以确保listView绘制完毕，再来计算最底端的位置
+  void _scrollToBottom() {
+    Timer(const Duration(milliseconds: 100), () {
+      logListViewScrollController.animateTo(
+          logListViewScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.linear);
+    });
   }
 
   ///

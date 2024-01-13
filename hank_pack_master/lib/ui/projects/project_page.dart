@@ -152,7 +152,7 @@ class _ProjectPageState extends State<ProjectPage> {
         Button(
           onPressed:
               actionButtonDisabled ? null : () => start(showApkNotExistInfo),
-          child: const Text('START'),
+          child: const Text('开始流水线工作'),
         ),
         const SizedBox(height: 20),
         buildStageRow(),
@@ -165,18 +165,23 @@ class _ProjectPageState extends State<ProjectPage> {
                   color: Colors.black,
                 ),
                 borderRadius: BorderRadius.circular(6)),
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 1.0, horizontal: 15),
-                  child: Text(
-                    projectTaskVm.cmdExecLog[index],
-                    style: const TextStyle(color: Colors.black, fontSize: 16),
-                  ),
-                );
-              },
-              itemCount: projectTaskVm.cmdExecLog.length,
+            child: ScrollConfiguration(
+              behavior:
+                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: ListView.builder(
+                controller: projectTaskVm.logListViewScrollController,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 1.0, horizontal: 15),
+                    child: Text(
+                      projectTaskVm.cmdExecLog[index],
+                      style: const TextStyle(color: Colors.black, fontSize: 16),
+                    ),
+                  );
+                },
+                itemCount: projectTaskVm.cmdExecLog.length,
+              ),
             ),
           ),
         )
@@ -185,16 +190,14 @@ class _ProjectPageState extends State<ProjectPage> {
   }
 
   Widget _stageBtn({required TaskState stage, required int index}) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: m.ElevatedButton(
-        onPressed: () {},
-        style: m.ElevatedButton.styleFrom(
-          backgroundColor: projectTaskVm.getStatueColor(stage), // 设置按钮背景颜色
-          foregroundColor: Colors.white, // 设置按钮文本颜色
-        ),
-        child: Text(stage.stageName),
+    return m.ElevatedButton(
+      onPressed: () {},
+      style: m.ElevatedButton.styleFrom(
+        backgroundColor: projectTaskVm.getStatueColor(stage), // 设置按钮背景颜色
+        foregroundColor: Colors.white, // 设置按钮文本颜色
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0))),
       ),
+      child: Text(stage.stageName),
     );
   }
 
