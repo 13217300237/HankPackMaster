@@ -29,19 +29,19 @@ class _AppState extends State<App> {
           ChangeNotifierProvider(create: (context) => _envParamModel),
         ],
         builder: (context, child) {
-          final appTheme = context.watch<AppTheme>();
           return MaterialApp(
             // 是否显示debug标记
             localizationsDelegates: FluentLocalizations.localizationsDelegates,
             debugShowCheckedModeBanner: false,
             title: 'Flutter EasyLoading',
-            home: OKToast(child: fluentUi(appTheme)),
+            home: OKToast(child: fluentUi(context)),
             builder: EasyLoading.init(),
           );
         });
   }
 
-  Widget fluentUi(AppTheme appTheme) {
+  Widget fluentUi(BuildContext context) {
+    var appTheme = context.watch<AppTheme>();
     return FluentApp.router(
       // 白天黑夜模式
       themeMode: appTheme.mode,

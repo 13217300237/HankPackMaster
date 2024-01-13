@@ -178,7 +178,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
-    final theme = FluentTheme.of(context);
+    final fluentTheme = FluentTheme.of(context);
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
@@ -196,7 +196,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
               padding: const EdgeInsetsDirectional.only(end: 8.0),
               child: ToggleSwitch(
                 content: const Text('Dark Mode'),
-                checked: FluentTheme.of(context).brightness.isDark,
+                checked: fluentTheme.brightness.isDark,
                 onChanged: (v) {
                   if (v) {
                     appTheme.mode = ThemeMode.dark;
@@ -225,7 +225,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
           child: ShaderMask(
             shaderCallback: (rect) {
               final color = appTheme.accentColor.defaultBrushFor(
-                theme.brightness,
+                fluentTheme.brightness,
               );
               return LinearGradient(
                 colors: [
