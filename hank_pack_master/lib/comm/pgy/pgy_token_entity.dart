@@ -39,3 +39,17 @@ class Params {
     key = json['key'];
   }
 }
+
+class ReleaseResultEntity {
+  int? code;
+  String? message;
+  Map<String,dynamic>? data;
+
+  ReleaseResultEntity({this.code, this.message,this.data});
+
+  ReleaseResultEntity.fromJson(Map<String, dynamic> json) {
+    code = json['code'];
+    message = json['message'];
+    data = json['data'];
+  }
+}

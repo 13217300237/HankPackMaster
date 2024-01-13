@@ -211,7 +211,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
     taskStateList.add(TaskState("获取PGY TOKEN", actionFunc: (i) async {
       updateStatue(i, StageStatue.executing);
-      var pgyToken = await UploadUtil.getInstance().getPgyToken();
+      var pgyToken = await PgyUploadUtil.getInstance().getPgyToken();
 
       if (pgyToken == null) {
         updateStatue(i, StageStatue.error);
@@ -241,11 +241,11 @@ class ProjectTaskVm extends ChangeNotifier {
       String oriFileName = basename(File(apkLocation!).path);
       addNewLogLine("文件名为 $oriFileName");
 
-      var res = await UploadUtil.getInstance().doUpload(
+      var res = await PgyUploadUtil.getInstance().doUpload(
         _pgyEntity!,
         filePath: apkLocation!,
         oriFileName: oriFileName,
-        uploadProgressAction:addNewLogLine,
+        uploadProgressAction: addNewLogLine,
       );
 
       if (res == null) {
@@ -256,6 +256,28 @@ class ProjectTaskVm extends ChangeNotifier {
         addNewLogLine("上传失败,$res");
         updateStatue(i, StageStatue.error);
         return res;
+      }
+    }));
+
+    taskStateList.add(TaskState("检查pgy发布结果", actionFunc: (i) async {
+      updateStatue(i, StageStatue.executing);
+      var s = await PgyUploadUtil.getInstance().checkUploadRelease(
+        _pgyEntity!,
+        onReleaseCheck: addNewLogLine,
+      );
+
+      if (s.code == 1216) {
+        // 发布失败，流程终止
+        updateStatue(i, StageStatue.error);
+        return "发布失败，流程终止";
+      } else {
+        // 发布成功，打印结果
+        addNewLogLine("发布成功，结果为:${s.message.runtimeType} ${s.data}");
+
+        // 开始解析发布结果,
+
+        updateStatue(i, StageStatue.finished);
+        return s.message;
       }
     }));
 

@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_token_entity.dart';
@@ -8,20 +5,20 @@ import 'package:hank_pack_master/comm/pgy/pgy_token_entity.dart';
 import '../ui/projects/project_task_vm.dart';
 
 /// 文件上传工具类，仅支持 apk和 ipa
-class UploadUtil {
-  static UploadUtil? _instance;
+class PgyUploadUtil {
+  static PgyUploadUtil? _instance;
 
   // 私有的构造函数
-  UploadUtil._();
+  PgyUploadUtil._();
 
   static late Dio _dio;
 
   // 公共的静态方法获取实例
-  static UploadUtil getInstance() {
+  static PgyUploadUtil getInstance() {
     if (_instance == null) {
       _dio = Dio();
       _dio.options.contentType = Headers.multipartFormDataContentType;
-      _instance = UploadUtil._();
+      _instance = PgyUploadUtil._();
     }
     return _instance!;
   }
@@ -94,5 +91,61 @@ class UploadUtil {
     } catch (e) {
       return "上传失败，$e";
     }
+  }
+
+  ///
+  /// 判断查询结果是否已确定
+  ///
+  bool judgeReleaseResultEntityConfirmed(
+    ReleaseResultEntity? entity, {
+    required void Function(String s) onReleaseCheck,
+  }) {
+    if (entity == null) {
+      return false;
+    }
+    if (entity.code == null) {
+      return false;
+    }
+    if (entity.code == 1246 || entity.code == 1247) {
+      onReleaseCheck("发布中，稍后重新查询");
+      return false;
+    }
+    return true;
+  }
+
+  /// 上传到蒲公英的第三步，检查发布结果
+  Future<ReleaseResultEntity> checkUploadRelease(
+    PgyEntity pgyEntity, {
+    required void Function(String s) onReleaseCheck,
+  }) async {
+    ReleaseResultEntity? entity;
+
+    while (!judgeReleaseResultEntityConfirmed(entity,
+        onReleaseCheck: onReleaseCheck)) {
+      // 每次循环之前都检查 发布结果是否确定
+      await Future.delayed(const Duration(milliseconds: 5000));
+
+      onReleaseCheck("开始查询发布结果");
+
+      final response = await _dio.post(
+        "https://www.pgyer.com/apiv2/app/buildInfo",
+        queryParameters: {
+          '_api_key': '3e3bb841269ccb9e3fb9b3feffa4273c',
+          'buildKey': pgyEntity.key,
+        },
+      );
+
+      int code = response.statusCode ?? 0;
+
+      if (code >= 200 && code < 300) {
+        entity = ReleaseResultEntity.fromJson(response.data);
+      } else {
+        // 请求失败
+        entity = ReleaseResultEntity();
+        onReleaseCheck("发布请求执行失败 $code  ${response.statusMessage}");
+      }
+    }
+
+    return entity!;
   }
 }
