@@ -34,6 +34,7 @@ class _AppState extends State<App> {
             data: FluentThemeData(),
             child: MaterialApp(
               // 是否显示debug标记
+              localizationsDelegates: FluentLocalizations.localizationsDelegates,
               debugShowCheckedModeBanner: false,
               title: 'Flutter EasyLoading',
               home: OKToast(child: fluentUi(appTheme)),
@@ -45,8 +46,6 @@ class _AppState extends State<App> {
 
   Widget fluentUi(AppTheme appTheme) {
     return FluentApp.router(
-      // 标题
-      title: "",
       // 白天黑夜模式
       themeMode: appTheme.mode,
       // 是否显示debug标记

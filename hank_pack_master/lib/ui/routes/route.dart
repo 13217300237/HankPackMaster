@@ -1,3 +1,4 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,7 +17,8 @@ final statefulRouter = GoRouter(
   routes: <RouteBase>[
     StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return FrameworkPage(navigationShell);
+          return FluentTheme(
+              data: FluentThemeData(), child: FrameworkPage(navigationShell));
         },
         branches: [
           StatefulShellBranch(navigatorKey: _homeKey, routes: <RouteBase>[
@@ -28,7 +30,8 @@ final statefulRouter = GoRouter(
           StatefulShellBranch(routes: <RouteBase>[
             GoRoute(
                 path: '/projects',
-                builder: (context, state) => const ProjectPage()),
+                builder: (context, state) => FluentTheme(
+                    data: FluentThemeData(), child: const ProjectPage())),
           ])
         ]),
   ],
