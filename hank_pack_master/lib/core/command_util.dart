@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-bool cmdDebug = true;
+bool cmdDebug = false;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {

@@ -7,7 +7,7 @@ import 'package:hank_pack_master/ui/projects/project_task_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../test/env_param_vm.dart';
+import '../env/env_param_vm.dart';
 
 ///
 /// 此模块用来添加新的安卓工程

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../comm/sp_util.dart';
+import '../../comm/sp_util.dart';
 
 class EnvParamVm extends ChangeNotifier {
   List<String> logLines = [];
