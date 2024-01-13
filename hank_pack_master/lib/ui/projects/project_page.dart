@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:flutter/rendering.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/ui/projects/project_task_vm.dart';
 import 'package:provider/provider.dart';
@@ -155,7 +156,7 @@ class _ProjectPageState extends State<ProjectPage> {
           child: const Text('开始流水线工作'),
         ),
         const SizedBox(height: 20),
-        buildStageRow(),
+        SingleChildScrollView(child: buildStageRow(),scrollDirection: m.Axis.horizontal),
         const SizedBox(height: 20),
         Expanded(
           child: Container(

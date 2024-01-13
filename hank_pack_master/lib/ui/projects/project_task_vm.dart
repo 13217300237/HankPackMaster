@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/upload_util.dart';
 import 'package:jiffy/jiffy.dart';
 
+import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/sp_util.dart';
 import '../../core/command_util.dart';
 import '../../comm/text_util.dart';
@@ -272,12 +273,32 @@ class ProjectTaskVm extends ChangeNotifier {
         return "发布失败，流程终止";
       } else {
         // 发布成功，打印结果
-        addNewLogLine("发布成功，结果为:${s.message.runtimeType} ${s.data}");
-
+        debugPrint("发布成功，结果为:${s.message.runtimeType} ${s.data}");
+        addNewLogLine("发布成功，开始解析上传成功的参数");
         // 开始解析发布结果,
+        if (s.data is Map<String, dynamic>) {
+          MyAppInfo appInfo =
+              MyAppInfo.fromJson(s.data as Map<String, dynamic>);
 
-        updateStatue(i, StageStatue.finished);
-        return s.message;
+          addNewLogLine("应用名称: ${appInfo.buildName}");
+          addNewLogLine("大小: ${appInfo.buildFileSize}");
+          addNewLogLine("版本号: ${appInfo.buildVersion}");
+          addNewLogLine("编译版本号: ${appInfo.buildVersionNo}");
+          addNewLogLine("应用描述: ${appInfo.buildDescription}");
+          addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
+          addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
+          addNewLogLine("图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
+          addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
+          addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
+          addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
+
+          updateStatue(i, StageStatue.finished);
+        } else {
+          addNewLogLine("发布结果解析失败");
+          updateStatue(i, StageStatue.error);
+        }
+
+        return "发布成功，详情请看日志";
       }
     }));
 

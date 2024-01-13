@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:hank_pack_master/comm/pgy/pgy_token_entity.dart';
+import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 
 import '../ui/projects/project_task_vm.dart';
 
