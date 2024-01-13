@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/ui/projects/project_task_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -149,7 +150,8 @@ class _ProjectPageState extends State<ProjectPage> {
             )),
         _input("分支名称", "输入分支名称", projectTaskVm.gitBranchController),
         Button(
-          onPressed: actionButtonDisabled ? null : start,
+          onPressed:
+              actionButtonDisabled ? null : () => start(showApkNotExistInfo),
           child: const Text('START'),
         ),
         const SizedBox(height: 20),
@@ -218,10 +220,34 @@ class _ProjectPageState extends State<ProjectPage> {
     return false;
   }
 
-  Future<void> start() async {
+  Future<void> start(Function showApkNotExistInfo) async {
     projectTaskVm.init();
     projectTaskVm.cleanLog();
-    projectTaskVm.startSchedule();
+    projectTaskVm.startSchedule((s) {
+      Function onConfirm;
+      String? confirmText;
+      if (s is PackageSuccessEntity) {
+        onConfirm = () async {
+          var apkFile = File(s.apkPath);
+          if (await apkFile.exists()) {
+            await launchUrl(Uri.parse(apkFile.parent.path));
+          } else {
+            showApkNotExistInfo();
+          }
+        };
+        confirmText = "打开文件位置";
+      } else {
+        onConfirm = () async {};
+      }
+
+      DialogUtil.showConfirmDialog(
+        context: context,
+        title: "流程结束",
+        content: s.toString(),
+        onConfirm: onConfirm,
+        confirmText: confirmText ?? "知道了...",
+      );
+    });
   }
 
   bool get gitErrVisible {
@@ -245,5 +271,9 @@ class _ProjectPageState extends State<ProjectPage> {
     }
 
     return Row(children: [...listWidget]);
+  }
+
+  void showApkNotExistInfo() {
+    DialogUtil.showInfo(context: context, content: "出现错误，apk文件不存在");
   }
 }

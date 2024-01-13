@@ -8,6 +8,8 @@ class DialogUtil {
     Function? onConfirm,
     required String title,
     required String content,
+    String confirmText = "是",
+    String cancelText = "取消",
   }) {
     showDialog(
       context: context,
@@ -17,14 +19,14 @@ class DialogUtil {
           content: Text(content),
           actions: [
             FilledButton(
-              child: const Text('是'),
+              child: Text(confirmText),
               onPressed: () {
                 Navigator.pop(context);
                 onConfirm?.call();
               },
             ),
             Button(
-              child: const Text('取消'),
+              child: Text(cancelText),
               onPressed: () {
                 Navigator.pop(context);
               },

@@ -6,9 +6,21 @@ import 'package:jiffy/jiffy.dart';
 import '../../comm/sp_util.dart';
 import '../../core/command_util.dart';
 
-typedef ActionFunc = Future<String?> Function(int);
+typedef ActionFunc = Future<dynamic> Function(int);
 
 enum StageStatue { idle, executing, finished, error }
+
+class PackageSuccessEntity {
+  String title;
+  String apkPath;
+
+  PackageSuccessEntity({required this.title, required this.apkPath});
+
+  @override
+  String toString() {
+    return "$title $apkPath";
+  }
+}
 
 class TaskState {
   String stageName;
@@ -20,7 +32,7 @@ class TaskState {
 
 /// 模拟耗时
 waitOneSec() async {
-  await Future.delayed(const Duration(milliseconds: 1000));
+  await Future.delayed(const Duration(milliseconds: 100));
 }
 
 class ProjectTaskVm extends ChangeNotifier {
@@ -57,6 +69,7 @@ class ProjectTaskVm extends ChangeNotifier {
         return "工程根目录 不能为空";
       }
       updateStatue(i, StageStatue.finished);
+      return null;
     }));
     taskStateList.add(TaskState("工程克隆", actionFunc: (i) async {
       await waitOneSec();
@@ -72,9 +85,10 @@ class ProjectTaskVm extends ChangeNotifier {
       if (gitCloneRes.exitCode != 0) {
         addNewLogLine("clone失败，具体问题请看日志...");
         updateStatue(i, StageStatue.error);
-        return gitCloneRes.res;
+        return "clone失败，具体问题请看日志... \n${gitCloneRes.res}";
       }
       updateStatue(i, StageStatue.finished);
+      return null;
     }));
     taskStateList.add(TaskState("分支切换", actionFunc: (i) async {
       await waitOneSec();
@@ -92,6 +106,7 @@ class ProjectTaskVm extends ChangeNotifier {
         return gitCheckoutRes.res;
       }
       updateStatue(i, StageStatue.finished);
+      return null;
     }));
     taskStateList.add(TaskState("工程结构检测", actionFunc: (i) async {
       await waitOneSec();
@@ -109,6 +124,7 @@ class ProjectTaskVm extends ChangeNotifier {
       }
       addNewLogLine("工程目录检测成功，工程结构正常，现在开始打包");
       updateStatue(i, StageStatue.finished);
+      return null;
     }));
     taskStateList.add(TaskState("生成apk", actionFunc: (i) async {
       await waitOneSec();
@@ -125,6 +141,7 @@ class ProjectTaskVm extends ChangeNotifier {
         return er;
       }
       updateStatue(i, StageStatue.finished);
+      return null;
     }));
     taskStateList.add(TaskState("apk检测", actionFunc: (i) async {
       // 去默认的apk产出位置去查找是否存在apk文件  app\build\outputs\apk\debug
@@ -135,10 +152,13 @@ class ProjectTaskVm extends ChangeNotifier {
       if (await apk.exists()) {
         addNewLogLine("apk文件已找到,$apkLocation");
         updateStatue(i, StageStatue.finished);
+        return PackageSuccessEntity(
+            title: "打包成功，apk输出地址为", apkPath: apkLocation);
       } else {
         addNewLogLine("apk文件未找到,$apkLocation");
         updateStatue(i, StageStatue.error);
       }
+      return null;
     }));
     notifyListeners();
   }
@@ -181,14 +201,19 @@ class ProjectTaskVm extends ChangeNotifier {
   ///
   /// 开始流水线工作
   ///
-  startSchedule() async {
+  startSchedule(Function(dynamic s) endAction) async {
     addNewLogLine("开始流程...");
+
+    dynamic actionResStr;
+
     for (int i = 0; i < taskStateList.length; i++) {
-      String? result = await taskStateList[i].actionFunc?.call(i);
-      if (result != null && result.isNotEmpty) {
+      dynamic result = await taskStateList[i].actionFunc?.call(i);
+      if (result != null) {
+        actionResStr = result;
         break;
       }
     }
     addNewLogLine("流程结束...");
+    endAction(actionResStr);
   }
 }

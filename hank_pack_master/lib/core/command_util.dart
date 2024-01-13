@@ -371,6 +371,7 @@ class CommandUtil {
       workDir: clonePath,
       action: (res) {
         logOutput(res);
+        sb.writeln(res);
       },
     );
     var exitCode = await process?.exitCode;
@@ -398,6 +399,7 @@ $sb"""
       workDir: gitProjectDir,
       action: (res) {
         logOutput(res);
+        sb.writeln(res);
       },
     );
     var exitCode = await process?.exitCode;
@@ -423,6 +425,7 @@ $sb"""
       binRoot: projectRoot,
       action: (res) {
         logOutput.call(res);
+        sb.writeln(res);
         debugCmdPrint(res);
       },
     );
