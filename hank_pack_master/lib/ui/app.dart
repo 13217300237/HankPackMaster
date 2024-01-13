@@ -29,7 +29,7 @@ class _AppState extends State<App> {
           ChangeNotifierProvider(create: (context) => _envParamModel),
         ],
         builder: (context, child) {
-          return MaterialApp(
+          return FluentApp(
             // 是否显示debug标记
             localizationsDelegates: FluentLocalizations.localizationsDelegates,
             debugShowCheckedModeBanner: false,
