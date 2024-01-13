@@ -17,8 +17,7 @@ final statefulRouter = GoRouter(
   routes: <RouteBase>[
     StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return FluentTheme(
-              data: FluentThemeData(), child: FrameworkPage(navigationShell));
+          return FrameworkPage(navigationShell);
         },
         branches: [
           StatefulShellBranch(navigatorKey: _homeKey, routes: <RouteBase>[

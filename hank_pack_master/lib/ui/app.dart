@@ -30,16 +30,13 @@ class _AppState extends State<App> {
         ],
         builder: (context, child) {
           final appTheme = context.watch<AppTheme>();
-          return FluentTheme(
-            data: FluentThemeData(),
-            child: MaterialApp(
-              // 是否显示debug标记
-              localizationsDelegates: FluentLocalizations.localizationsDelegates,
-              debugShowCheckedModeBanner: false,
-              title: 'Flutter EasyLoading',
-              home: OKToast(child: fluentUi(appTheme)),
-              builder: EasyLoading.init(),
-            ),
+          return MaterialApp(
+            // 是否显示debug标记
+            localizationsDelegates: FluentLocalizations.localizationsDelegates,
+            debugShowCheckedModeBanner: false,
+            title: 'Flutter EasyLoading',
+            home: OKToast(child: fluentUi(appTheme)),
+            builder: EasyLoading.init(),
           );
         });
   }
