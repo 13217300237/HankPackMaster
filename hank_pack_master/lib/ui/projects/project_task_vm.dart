@@ -283,7 +283,7 @@ class ProjectTaskVm extends ChangeNotifier {
           addNewLogLine("应用名称: ${appInfo.buildName}");
           addNewLogLine("大小: ${appInfo.buildFileSize}");
           addNewLogLine("版本号: ${appInfo.buildVersion}");
-          addNewLogLine("编译版本号: ${appInfo.buildVersionNo}");
+          addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
           addNewLogLine("应用描述: ${appInfo.buildDescription}");
           addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
           addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
@@ -347,7 +347,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
   ///添加一个延时，以确保listView绘制完毕，再来计算最底端的位置
   void _scrollToBottom() {
-    Timer(const Duration(milliseconds: 100), () {
+    Timer(const Duration(milliseconds: 300), () {
       logListViewScrollController.animateTo(
           logListViewScrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 500),
