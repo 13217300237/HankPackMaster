@@ -14,12 +14,14 @@ class DialogUtil {
     required dynamic content,
     String confirmText = "是",
     String cancelText = "取消",
+    double maxWidth = 500,
   }) {
     showDialog(
       context: context,
       builder: (context) {
         return ContentDialog(
           title: Text(title),
+          constraints: BoxConstraints(maxWidth: maxWidth),
           content: content is Widget ? content : Text(content),
           actions: [
             FilledButton(

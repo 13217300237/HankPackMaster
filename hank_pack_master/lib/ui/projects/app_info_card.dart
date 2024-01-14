@@ -19,17 +19,20 @@ class AppInfoCard extends StatelessWidget {
         children: [
           _line('App名称', "${appInfo.buildName}"),
           _line('App版本', "${appInfo.buildVersion}"),
-          _line('编译版本号', "${appInfo.buildVersionNo}"),
+          _line('编译版本', "${appInfo.buildVersionNo}"),
           _line('上传批次', "${appInfo.buildBuildVersion}"),
           _line('App包名', "${appInfo.buildIdentifier}"),
           _line('应用描述', "${appInfo.buildDescription}"),
           _line('更新日志', "${appInfo.buildUpdateDescription}"),
           _line('更新时间', "${appInfo.buildUpdated}"),
           Center(
-            child: CachedNetworkImage(
-              imageUrl: "${appInfo.buildQRCodeURL}",
-              placeholder: (context, url) => const m.CircularProgressIndicator(),
-              errorWidget: (context, url, error) => const Icon(m.Icons.error),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: CachedNetworkImage(
+                imageUrl: "${appInfo.buildQRCodeURL}",
+                placeholder: (context, url) => const m.CircularProgressIndicator(),
+                errorWidget: (context, url, error) => const Icon(m.Icons.error),
+              ),
             ),
           ),
         ],
