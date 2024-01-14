@@ -29,8 +29,7 @@ final statefulRouter = GoRouter(
           StatefulShellBranch(routes: <RouteBase>[
             GoRoute(
                 path: '/projects',
-                builder: (context, state) => FluentTheme(
-                    data: FluentThemeData(), child: const ProjectPage())),
+                builder: (context, state) => const ProjectPage()),
           ])
         ]),
   ],
