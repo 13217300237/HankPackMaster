@@ -9,6 +9,7 @@ import 'package:hank_pack_master/ui/projects/project_task_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../comm/uis.dart';
 import '../env/env_param_vm.dart';
 
 ///
@@ -52,7 +53,8 @@ class _ProjectPageState extends State<ProjectPage> {
                       Platform.pathSeparator +
                       projectName;
               projectTaskVm.gitBranchController.text = "dev"; // 测试代码
-              projectTaskVm.projectAppDescController.text = "测试用的app，你懂的！"; // 测试代码
+              projectTaskVm.projectAppDescController.text =
+                  "测试用的app，你懂的！"; // 测试代码
             } else {
               projectTaskVm.projectPathController.text = "";
               projectTaskVm.gitBranchController.text = ""; // 测试代码
@@ -148,6 +150,8 @@ class _ProjectPageState extends State<ProjectPage> {
               actionButtonDisabled ? null : () => start(showApkNotExistInfo),
           child: const Text('开始流水线工作'),
         ),
+        const Padding(
+            padding: EdgeInsets.all(20), child: BreathingIndicator(size: 40)),
         SingleChildScrollView(
             child: buildStageRow(), scrollDirection: m.Axis.horizontal),
         Expanded(
@@ -304,7 +308,7 @@ class _ProjectPageState extends State<ProjectPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 15.0,bottom: 5.0),
+      padding: const EdgeInsets.only(top: 15.0, bottom: 5.0),
       child: Row(children: [...listWidget]),
     );
   }
