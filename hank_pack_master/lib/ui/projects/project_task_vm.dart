@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:hank_pack_master/comm/upload_util.dart';
+import 'package:hank_pack_master/comm/pgy_upload_util.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../../comm/pgy/pgy_entity.dart';
@@ -85,6 +85,7 @@ class ProjectTaskVm extends ChangeNotifier {
   final gitUrlController = TextEditingController(); // git地址
   final gitBranchController = TextEditingController(); // 分支名称
   final projectPathController = TextEditingController(); // 工程路径
+  final projectAppDescController = TextEditingController(); // 工程路径
 
   final List<TaskState> taskStateList = [];
 
@@ -147,9 +148,12 @@ class ProjectTaskVm extends ChangeNotifier {
       updateStatue(i, StageStatue.executing);
       addNewLogLine("checkout 开始...");
 
-      ExecuteResult gitCheckoutRes = await CommandUtil.getInstance()
-          .gitCheckout(projectPathController.text, gitBranchController.text,
-              addNewLogLine);
+      ExecuteResult gitCheckoutRes =
+          await CommandUtil.getInstance().gitCheckout(
+        projectPathController.text,
+        gitBranchController.text,
+        addNewLogLine,
+      );
       addNewLogLine("checkout 完毕，结果是  $gitCheckoutRes");
 
       if (gitCheckoutRes.exitCode != 0) {
@@ -216,7 +220,25 @@ class ProjectTaskVm extends ChangeNotifier {
 
     taskStateList.add(TaskState("获取PGY TOKEN", actionFunc: (i) async {
       updateStatue(i, StageStatue.executing);
-      var pgyToken = await PgyUploadUtil.getInstance().getPgyToken();
+
+      // 先获取当前git的最新提交记录
+      var log = await CommandUtil.getInstance().gitLog(
+        projectPathController.text,
+        addNewLogLine,
+      );
+
+      if (log.exitCode != 0) {
+        updateStatue(i, StageStatue.error);
+        return "获取git最近提交记录失败...";
+      }
+
+      debugPrint("获取git最近提交记录成功 $log");
+      debugPrint("获取应用描述成功 ${projectAppDescController.text}");
+
+      var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
+        buildDescription: log.res.replaceAll("\"", ""),
+        buildUpdateDescription: projectAppDescController.text,
+      );
 
       if (pgyToken == null) {
         updateStatue(i, StageStatue.error);

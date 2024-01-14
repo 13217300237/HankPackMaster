@@ -17,19 +17,23 @@ class PgyUploadUtil {
   static PgyUploadUtil getInstance() {
     if (_instance == null) {
       _dio = Dio();
-      _dio.options.contentType = Headers.multipartFormDataContentType;
       _instance = PgyUploadUtil._();
     }
     return _instance!;
   }
 
   /// 上传到蒲公英的第一步，鉴权，获取token
-  Future<PgyTokenEntity?> getPgyToken() async {
+  Future<PgyTokenEntity?> getPgyToken({
+    required String buildDescription,
+    required String buildUpdateDescription,
+  }) async {
     final response = await _dio.post(
       'https://www.pgyer.com/apiv2/app/getCOSToken',
       queryParameters: {
         '_api_key': '3e3bb841269ccb9e3fb9b3feffa4273c',
         'buildType': 'android',
+        'buildDescription': buildDescription,
+        'buildUpdateDescription': buildUpdateDescription,
       },
     );
 

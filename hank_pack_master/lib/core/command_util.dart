@@ -386,6 +386,29 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
+  /// 采集最近一条提交记录
+  Future<ExecuteResult> gitLog(
+    String gitProjectDir,
+    Function(String s) logOutput,
+  ) async {
+    StringBuffer sb = StringBuffer();
+    var process = await execute(
+      cmd: "git",
+      params: ["log", "-1", "--pretty=format:\"%s\""],
+      workDir: gitProjectDir,
+      action: (res) {
+        logOutput(res);
+        sb.writeln(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = "$sb".trim();
+
+    return ExecuteResult(res, exitCode!);
+  }
+
   Future<ExecuteResult> gitCheckout(
     String gitProjectDir,
     String branchName,

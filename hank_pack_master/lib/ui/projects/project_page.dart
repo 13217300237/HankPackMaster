@@ -37,6 +37,7 @@ class _ProjectPageState extends State<ProjectPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 在绘制的第一帧之后执行初始化动作
       projectTaskVm.projectPathController.addListener(checkInput);
+      projectTaskVm.projectAppDescController.addListener(checkInput);
       projectTaskVm.gitUrlController.addListener(() {
         var gitText = projectTaskVm.gitUrlController.text;
         if (gitText.isNotEmpty) {
@@ -52,6 +53,7 @@ class _ProjectPageState extends State<ProjectPage> {
                       Platform.pathSeparator +
                       projectName;
               projectTaskVm.gitBranchController.text = "dev"; // 测试代码
+              projectTaskVm.projectAppDescController.text = "测试用的app，你懂的！"; // 测试代码
             } else {
               projectTaskVm.projectPathController.text = "";
               projectTaskVm.gitBranchController.text = ""; // 测试代码
@@ -152,6 +154,7 @@ class _ProjectPageState extends State<ProjectPage> {
                   }),
             )),
         _input("分支名称", "输入分支名称", projectTaskVm.gitBranchController),
+        _input("应用描述", "输入应用描述...", projectTaskVm.projectAppDescController),
         Button(
           onPressed:
               actionButtonDisabled ? null : () => start(showApkNotExistInfo),
@@ -222,6 +225,10 @@ class _ProjectPageState extends State<ProjectPage> {
       return true;
     }
     if (projectTaskVm.gitBranchController.text.isEmpty) {
+      return true;
+    }
+
+    if (projectTaskVm.projectAppDescController.text.isEmpty) {
       return true;
     }
 
