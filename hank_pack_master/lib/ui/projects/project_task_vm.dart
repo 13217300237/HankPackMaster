@@ -100,6 +100,10 @@ class ProjectTaskVm extends ChangeNotifier {
 
   String get envWorkspaceRoot => SpUtil.getValue(SpConst.envWorkspaceRootKey);
 
+  bool get jobRunning => _jobRunning;
+
+  bool _jobRunning = false;
+
   void init() {
     taskStateList.clear();
 
@@ -287,7 +291,8 @@ class ProjectTaskVm extends ChangeNotifier {
           addNewLogLine("应用描述: ${appInfo.buildDescription}");
           addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
           addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
-          addNewLogLine("图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
+          addNewLogLine(
+              "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
           addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
           addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
           addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
@@ -359,6 +364,12 @@ class ProjectTaskVm extends ChangeNotifier {
   /// 开始流水线工作
   ///
   startSchedule(Function(dynamic s) endAction) async {
+    if (_jobRunning) {
+      return;
+    }
+
+    _jobRunning = true;
+
     addNewLogLine("开始流程...");
 
     dynamic actionResStr;
@@ -371,6 +382,7 @@ class ProjectTaskVm extends ChangeNotifier {
       }
     }
     addNewLogLine("流程结束...");
+    _jobRunning = false;
     endAction(actionResStr);
   }
 }

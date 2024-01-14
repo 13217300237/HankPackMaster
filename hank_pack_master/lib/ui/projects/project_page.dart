@@ -116,7 +116,7 @@ class _ProjectPageState extends State<ProjectPage> {
           child: TextBox(
               placeholder: placeholder,
               expands: false,
-              enabled: true,
+              enabled: !projectTaskVm.jobRunning,
               suffix: suffix,
               controller: controller),
         ));
@@ -156,7 +156,8 @@ class _ProjectPageState extends State<ProjectPage> {
           child: const Text('开始流水线工作'),
         ),
         const SizedBox(height: 20),
-        SingleChildScrollView(child: buildStageRow(),scrollDirection: m.Axis.horizontal),
+        SingleChildScrollView(
+            child: buildStageRow(), scrollDirection: m.Axis.horizontal),
         const SizedBox(height: 20),
         Expanded(
           child: Container(
@@ -196,13 +197,17 @@ class _ProjectPageState extends State<ProjectPage> {
       style: m.ElevatedButton.styleFrom(
         backgroundColor: projectTaskVm.getStatueColor(stage), // 设置按钮背景颜色
         foregroundColor: Colors.white, // 设置按钮文本颜色
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0))),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(0))),
       ),
       child: Text(stage.stageName),
     );
   }
 
   bool get actionButtonDisabled {
+    if (projectTaskVm.jobRunning) {
+      return true;
+    }
     if (projectTaskVm.projectPathController.text.isEmpty) {
       return true;
     }

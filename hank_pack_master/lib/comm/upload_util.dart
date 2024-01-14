@@ -76,7 +76,7 @@ class PgyUploadUtil {
           data: FormData.fromMap(map), onSendProgress: (current, total) {
         double result = (current / total) * 100;
         String formattedResult = result.toStringAsFixed(2);
-        uploadProgressAction("pgy 上传中===> $formattedResult");
+        uploadProgressAction("pgy 上传中  $formattedResult%");
       });
 
       if (response.statusCode == 204) {
