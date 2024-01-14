@@ -186,6 +186,24 @@ class ProjectTaskVm extends ChangeNotifier {
       updateStatue(i, StageStatue.finished);
       return null;
     }));
+    taskStateList.add(TaskState("可用指令查询", actionFunc: (i) async {
+      await waitOneSec();
+      updateStatue(i, StageStatue.executing);
+      ExecuteResult gitAssembleTasksRes =
+          await CommandUtil.getInstance().gradleAssembleTasks(
+        projectPath,
+        addNewLogLine,
+      );
+      if (gitAssembleTasksRes.exitCode != 0) {
+        updateStatue(i, StageStatue.error);
+        addNewLogLine("可用指令查询 完毕，结果是  $gitAssembleTasksRes");
+        return "可用指令查询 存在问题!!!";
+      }
+
+      addNewLogLine("可用指令查询 完毕，结果是  $gitAssembleTasksRes");
+      updateStatue(i, StageStatue.finished);
+      return null;
+    }));
     taskStateList.add(TaskState("生成apk", actionFunc: (i) async {
       await waitOneSec();
       updateStatue(i, StageStatue.executing);

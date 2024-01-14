@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-bool cmdDebug = false;
+bool cmdDebug = true;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {
@@ -436,6 +436,35 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
+  Future<ExecuteResult> gradleAssembleTasks(
+      String projectRoot, Function(String s) logOutput) async {
+    StringBuffer sb = StringBuffer();
+
+    var process = await execute(
+      cmd: "gradlew.bat",
+      params: ["tasks"],
+      workDir: projectRoot,
+      binRoot: projectRoot + Platform.pathSeparator,
+      action: (res) {
+        logOutput.call(res);
+        sb.writeln(res);
+        debugCmdPrint(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """
+    cmd: gradlew tasks
+    
+    exitCode : $exitCode
+    
+    $sb
+    """;
+
+    return ExecuteResult(res, exitCode!);
+  }
+
   Future<ExecuteResult> gradleAssemble(
       String projectRoot, Function(String s) logOutput) async {
     StringBuffer sb = StringBuffer();
@@ -444,7 +473,7 @@ $sb"""
       cmd: "gradlew.bat",
       params: ["clean", "assembleDebug", "--stacktrace"],
       workDir: projectRoot,
-      binRoot: projectRoot,
+      binRoot: projectRoot + Platform.pathSeparator,
       action: (res) {
         logOutput.call(res);
         sb.writeln(res);
