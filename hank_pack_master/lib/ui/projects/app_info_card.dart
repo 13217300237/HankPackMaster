@@ -29,8 +29,11 @@ class AppInfoCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: CachedNetworkImage(
+                width: 260,
+                height: 260,
                 imageUrl: "${appInfo.buildQRCodeURL}",
-                placeholder: (context, url) => const m.CircularProgressIndicator(),
+                placeholder: (context, url) =>
+                    const Center(child: m.CircularProgressIndicator()),
                 errorWidget: (context, url, error) => const Icon(m.Icons.error),
               ),
             ),

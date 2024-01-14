@@ -173,7 +173,7 @@ class _ProjectPageState extends State<ProjectPage> {
                         vertical: 1.0, horizontal: 15),
                     child: Text(
                       projectTaskVm.cmdExecLog[index],
-                      style: const TextStyle(color: Colors.black, fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   );
                 },

@@ -109,6 +109,8 @@ class ProjectTaskVm extends ChangeNotifier {
 
   bool _jobRunning = false;
 
+  final List<String> _enableAssembleOrders = [];
+
   void init() {
     taskStateList.clear();
 
@@ -199,8 +201,19 @@ class ProjectTaskVm extends ChangeNotifier {
         addNewLogLine("可用指令查询 完毕，结果是  $gitAssembleTasksRes");
         return "可用指令查询 存在问题!!!";
       }
+      var ori = gitAssembleTasksRes.res;
+      var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
+      // 排除所有带test的，无论大小写
+      orders = findLinesExceptKeyword(lines: orders, keyword: "test");
+      orders = findLinesExceptKeyword(lines: orders, keyword: "bundle");
+      orders = findLinesExceptKeyword(lines: orders, keyword: "app:assemble -");
 
-      addNewLogLine("可用指令查询 完毕，结果是  $gitAssembleTasksRes");
+      _enableAssembleOrders.clear();
+      for (var e in orders) {
+        _enableAssembleOrders.add(e.substring(4, e.lastIndexOf(" - ")));
+      }
+
+      debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
       updateStatue(i, StageStatue.finished);
       return null;
     }));
@@ -354,6 +367,33 @@ class ProjectTaskVm extends ChangeNotifier {
     }));
 
     notifyListeners();
+  }
+
+  List<String> findLinesWithKeyword(
+      {required String ori, required String keyword}) {
+    List<String> lines = ori.split('\n');
+    List<String> result = [];
+
+    for (String line in lines) {
+      if (line.toLowerCase().contains(keyword.toLowerCase())) {
+        result.add(line.trim());
+      }
+    }
+
+    return result;
+  }
+
+  List<String> findLinesExceptKeyword(
+      {required List<String> lines, required String keyword}) {
+    List<String> result = [];
+
+    for (String line in lines) {
+      if (!line.toLowerCase().contains(keyword.toLowerCase())) {
+        result.add(line.trim());
+      }
+    }
+
+    return result;
   }
 
   PgyEntity? _pgyEntity;
