@@ -97,7 +97,11 @@ class ProjectTaskVm extends ChangeNotifier {
 
   String get gitUrl => gitUrlController.text;
 
+  String get gitBranch => gitBranchController.text;
+
   String get projectPath => projectPathController.text;
+
+  String get projectAppDesc => projectAppDescController.text;
 
   String get envWorkspaceRoot => SpUtil.getValue(SpConst.envWorkspaceRootKey);
 
@@ -150,8 +154,8 @@ class ProjectTaskVm extends ChangeNotifier {
 
       ExecuteResult gitCheckoutRes =
           await CommandUtil.getInstance().gitCheckout(
-        projectPathController.text,
-        gitBranchController.text,
+        projectPath,
+        gitBranch,
         addNewLogLine,
       );
       addNewLogLine("checkout 完毕，结果是  $gitCheckoutRes");
@@ -223,7 +227,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
       // 先获取当前git的最新提交记录
       var log = await CommandUtil.getInstance().gitLog(
-        projectPathController.text,
+        projectPath,
         addNewLogLine,
       );
 
@@ -233,11 +237,11 @@ class ProjectTaskVm extends ChangeNotifier {
       }
 
       addNewLogLine("获取git最近提交记录成功 $log");
-      addNewLogLine("获取应用描述成功 ${projectAppDescController.text}");
+      addNewLogLine("获取应用描述成功 $projectAppDesc");
 
       var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
         buildDescription: "??????",
-        buildUpdateDescription: projectAppDescController.text,
+        buildUpdateDescription: projectAppDesc,
       );
 
       if (pgyToken == null) {
