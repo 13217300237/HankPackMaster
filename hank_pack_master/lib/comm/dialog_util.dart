@@ -3,11 +3,15 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class DialogUtil {
+  ///
+  ///
+  /// [content] 动态类型，如果传 String，则解析成 Text，如果是Widget，则直接赋值
+  ///
   static void showConfirmDialog({
     required BuildContext context,
     Function? onConfirm,
     required String title,
-    required String content,
+    required dynamic content,
     String confirmText = "是",
     String cancelText = "取消",
   }) {
@@ -16,7 +20,7 @@ class DialogUtil {
       builder: (context) {
         return ContentDialog(
           title: Text(title),
-          content: Text(content),
+          content: content is Widget ? content : Text(content),
           actions: [
             FilledButton(
               child: Text(confirmText),

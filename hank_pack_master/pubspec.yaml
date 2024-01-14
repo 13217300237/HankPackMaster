@@ -54,6 +54,7 @@ dependencies:
   shared_preferences: 2.2.2
   dio: 5.4.0
   path: 1.8.3
+  cached_network_image: 3.3.1
 
 dev_dependencies:
   flutter_test:

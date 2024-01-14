@@ -4,6 +4,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:flutter/rendering.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
+import 'package:hank_pack_master/ui/projects/app_info_card.dart';
 import 'package:hank_pack_master/ui/projects/project_task_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -193,7 +195,12 @@ class _ProjectPageState extends State<ProjectPage> {
 
   Widget _stageBtn({required TaskState stage, required int index}) {
     return m.ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        if (stage.stageStatue == StageStatue.finished &&
+            index == projectTaskVm.taskStateList.length - 1) {
+          dealWithScheduleResultByApkUpload(myAppInfo!);
+        }
+      },
       style: m.ElevatedButton.styleFrom(
         backgroundColor: projectTaskVm.getStatueColor(stage), // 设置按钮背景颜色
         foregroundColor: Colors.white, // 设置按钮文本颜色
@@ -229,33 +236,57 @@ class _ProjectPageState extends State<ProjectPage> {
     return false;
   }
 
+  void dealWithScheduleResultByApkGenerate(PackageSuccessEntity s) {
+    onConfirm() async {
+      var apkFile = File(s.apkPath);
+      if (await apkFile.exists()) {
+        await launchUrl(Uri.parse(apkFile.parent.path));
+      } else {
+        showApkNotExistInfo();
+      }
+    }
+
+    String? confirmText = "打开文件位置";
+    DialogUtil.showConfirmDialog(
+      context: context,
+      title: "流程结束",
+      content: s.toString(),
+      onConfirm: onConfirm,
+      confirmText: confirmText,
+    );
+  }
+
+  void dealWithScheduleResultByApkUpload(MyAppInfo s) {
+    var card = AppInfoCard(appInfo: s);
+
+    DialogUtil.showConfirmDialog(
+      context: context,
+      content: card,
+      title: '流程结束',
+    );
+  }
+
+  void dealWithScheduleResultByOthers() {}
+
+  MyAppInfo? myAppInfo;
+
   Future<void> start(Function showApkNotExistInfo) async {
     projectTaskVm.init();
     projectTaskVm.cleanLog();
     projectTaskVm.startSchedule((s) {
-      Function onConfirm;
-      String? confirmText;
       if (s is PackageSuccessEntity) {
-        onConfirm = () async {
-          var apkFile = File(s.apkPath);
-          if (await apkFile.exists()) {
-            await launchUrl(Uri.parse(apkFile.parent.path));
-          } else {
-            showApkNotExistInfo();
-          }
-        };
-        confirmText = "打开文件位置";
+        dealWithScheduleResultByApkGenerate(s);
+      } else if (s is MyAppInfo) {
+        myAppInfo = s;
+        dealWithScheduleResultByApkUpload(s);
       } else {
-        onConfirm = () async {};
+        DialogUtil.showConfirmDialog(
+          context: context,
+          title: "流程结束",
+          content: s.toString(),
+          confirmText: "知道了...",
+        );
       }
-
-      DialogUtil.showConfirmDialog(
-        context: context,
-        title: "流程结束",
-        content: s.toString(),
-        onConfirm: onConfirm,
-        confirmText: confirmText ?? "知道了...",
-      );
     });
   }
 

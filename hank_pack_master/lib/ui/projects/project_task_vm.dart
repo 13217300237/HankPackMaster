@@ -298,6 +298,8 @@ class ProjectTaskVm extends ChangeNotifier {
           addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
 
           updateStatue(i, StageStatue.finished);
+
+          return appInfo;
         } else {
           addNewLogLine("发布结果解析失败");
           updateStatue(i, StageStatue.error);
@@ -381,7 +383,7 @@ class ProjectTaskVm extends ChangeNotifier {
         break;
       }
     }
-    addNewLogLine("流程结束...");
+    addNewLogLine("流程结束,检查成果...");
     _jobRunning = false;
     endAction(actionResStr);
   }
