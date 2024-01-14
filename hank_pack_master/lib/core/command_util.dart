@@ -397,7 +397,6 @@ $sb"""
       params: ["log", "-1", "--pretty=format:\"%s\""],
       workDir: gitProjectDir,
       action: (res) {
-        logOutput(res);
         sb.writeln(res);
       },
     );

@@ -232,11 +232,11 @@ class ProjectTaskVm extends ChangeNotifier {
         return "获取git最近提交记录失败...";
       }
 
-      debugPrint("获取git最近提交记录成功 $log");
-      debugPrint("获取应用描述成功 ${projectAppDescController.text}");
+      addNewLogLine("获取git最近提交记录成功 $log");
+      addNewLogLine("获取应用描述成功 ${projectAppDescController.text}");
 
       var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
-        buildDescription: log.res.replaceAll("\"", ""),
+        buildDescription: "??????",
         buildUpdateDescription: projectAppDescController.text,
       );
 

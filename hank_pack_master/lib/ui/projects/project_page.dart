@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
-import 'package:flutter/rendering.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/ui/projects/app_info_card.dart';
@@ -28,7 +27,7 @@ class _ProjectPageState extends State<ProjectPage> {
   late EnvParamVm envParamModel;
   late ProjectTaskVm projectTaskVm;
   final TextStyle _labelStyle =
-      const TextStyle(fontWeight: FontWeight.w200, fontSize: 22);
+      const TextStyle(fontWeight: FontWeight.w200, fontSize: 18);
 
   @override
   void initState() {
@@ -113,7 +112,7 @@ class _ProjectPageState extends State<ProjectPage> {
       String title, String placeholder, TextEditingController controller,
       {Widget? suffix}) {
     return Padding(
-        padding: const EdgeInsets.only(top: 15.0, bottom: 15),
+        padding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
         child: InfoLabel(
           label: title,
           labelStyle: _labelStyle,
@@ -128,7 +127,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
   Widget _mainLayout() {
     return Padding(
-      padding: const EdgeInsets.all(40.0),
+      padding: const EdgeInsets.all(19.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         InfoLabel(
           label: "当前工作空间",
@@ -160,10 +159,8 @@ class _ProjectPageState extends State<ProjectPage> {
               actionButtonDisabled ? null : () => start(showApkNotExistInfo),
           child: const Text('开始流水线工作'),
         ),
-        const SizedBox(height: 20),
         SingleChildScrollView(
             child: buildStageRow(), scrollDirection: m.Axis.horizontal),
-        const SizedBox(height: 20),
         Expanded(
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
@@ -317,7 +314,10 @@ class _ProjectPageState extends State<ProjectPage> {
       listWidget.add(_stageBtn(stage: e, index: i));
     }
 
-    return Row(children: [...listWidget]);
+    return Padding(
+      padding: const EdgeInsets.only(top: 15.0,bottom: 5.0),
+      child: Row(children: [...listWidget]),
+    );
   }
 
   void showApkNotExistInfo() {
