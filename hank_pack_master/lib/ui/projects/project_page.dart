@@ -129,17 +129,6 @@ class _ProjectPageState extends State<ProjectPage> {
     return Padding(
       padding: const EdgeInsets.all(19.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        InfoLabel(
-          label: "当前工作空间",
-          labelStyle: _labelStyle,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 2),
-            child: Text(
-              envParamModel.workSpaceRoot,
-              style: const TextStyle(fontSize: 27, fontWeight: FontWeight.w700),
-            ),
-          ),
-        ),
         _input("git地址", "输入git地址", projectTaskVm.gitUrlController),
         _gitErrorText(),
         _input("工程位置", "输入工程名", projectTaskVm.projectPathController,

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
+import 'env/env_param_vm.dart';
 
 ///
 /// 主框架界面
@@ -178,6 +179,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
+    final envParamModel = context.watch<EnvParamVm>();
     final fluentTheme = FluentTheme.of(context);
     return NavigationView(
       key: viewKey,
@@ -190,6 +192,14 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
           ),
         ),
         actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          Expanded(
+            child: Center(
+              child: Text(
+                "工作空间: ${envParamModel.workSpaceRoot}",
+                style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ),
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: Padding(

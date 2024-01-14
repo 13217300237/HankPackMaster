@@ -65,7 +65,7 @@ class _AppState extends State<App> {
           focusTheme: FocusThemeData(
             glowFactor: is10footScreen(context) ? 2.0 : 0.0,
           ),
-          fontFamily: 'STXIHEI'),
+          fontFamily: 'STKAITI'),
       // 语言环境
       locale: appTheme.locale,
       // 子widget包装器
