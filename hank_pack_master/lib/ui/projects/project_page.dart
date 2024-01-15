@@ -109,7 +109,7 @@ class _ProjectPageState extends State<ProjectPage> {
       );
     } else {
       return Center(
-          child: Text("请先准备好环境参数", style: TextStyle(color: Colors.red)));
+          child: Text("请先准备好环境参数", style: TextStyle(color: Colors.red,fontSize: 45)));
     }
   }
 

@@ -5,6 +5,13 @@ import '../../comm/sp_util.dart';
 import '../../core/command_util.dart';
 
 class EnvParamVm extends ChangeNotifier {
+  /// 环境有问题时的错误提示
+  final Map<String, String> envGuide = {
+    "git": "请在系统环境变量的path中插入git的可执行路径,形如 D:\\...\\git\\Git\\bin",
+    "adb": "请在系统环境变量的path中插入adb的可执行路径,形如：D:\\...\\Android\\Sdk\\platform-tools",
+    "java": "请在系统环境变量的path中插入java的可执行路径,形如 D:\\...\\as\\jbr\\bin",
+    "android": "请在系统环境变量中插入 ANDROID_HOME变量，值为 SDK根路径，形如：D:\\...\\Android\\SDK"
+  };
 
   Map<String, Set<String>> envs = {};
 
@@ -12,7 +19,9 @@ class EnvParamVm extends ChangeNotifier {
 
   ScrollController get scrollController => _scrollController;
 
-  checkAction({bool showLoading = true}) async {
+  checkAction(
+      {bool showLoading = true,
+      required Function(String warn) warnAction}) async {
     if (showLoading) {
       EasyLoading.show(
           status: '正在初始化环境参数...', maskType: EasyLoadingMaskType.clear);
@@ -20,9 +29,24 @@ class EnvParamVm extends ChangeNotifier {
     envs = await CommandUtil.getInstance().initAllEnvParam(action: (r) {
       debugCmdPrint("环境检索的日志输出:$r");
     });
+    List<String> lostArr = [];
+    envs.forEach((title, value) {
+      var first = value.firstOrNull;
+      if (first != null) {
+        setEnv(title, first);
+      } else {
+        lostArr.add(title);
+      }
+    });
+
     if (showLoading) {
       EasyLoading.dismiss();
     }
+
+    if (lostArr.isNotEmpty) {
+      warnAction('''$lostArr 存在环境缺陷，请补齐环境变量然后重新检测环境...''');
+    }
+
     notifyListeners();
   }
 
@@ -91,9 +115,8 @@ class EnvParamVm extends ChangeNotifier {
     }
   }
 
-
   /// 重置所有环境参数
-  void resetEnv(Function action){
+  void resetEnv(Function action) {
     gitRoot = "";
     flutterRoot = "";
     adbRoot = "";
@@ -163,5 +186,4 @@ class EnvParamVm extends ChangeNotifier {
 
     return true;
   }
-
 }

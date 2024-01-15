@@ -176,6 +176,7 @@ class CommandUtil {
     await echoCmd(
         order: "%ANDROID_HOME%",
         action: (path) {
+          debugPrint("androidHome -> $path");
           Directory d = Directory(path);
           if (d.existsSync()) {
             EnvParams.androidSdkRoot.add(d.path);

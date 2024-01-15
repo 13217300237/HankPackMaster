@@ -22,7 +22,7 @@ class DialogUtil {
         return ContentDialog(
           title: Text(title),
           constraints: BoxConstraints(maxWidth: maxWidth),
-          content: content is Widget ? content : Text(content),
+          content: content is Widget ? content : Text(content,style: const TextStyle(fontSize: 18),),
           actions: [
             FilledButton(
               child: Text(confirmText),

@@ -28,12 +28,21 @@ class _EnvPageState extends State<EnvPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _envParamModel.checkAction(showLoading: false);
+      envCheckAction();
     });
   }
 
   void showWrongInfo(String content) {
     DialogUtil.showInfo(context: context, content: content);
+  }
+
+  void envCheckAction() {
+    _envParamModel.checkAction(
+        showLoading: false,
+        warnAction: (s) {
+          DialogUtil.showConfirmDialog(
+              context: context, title: "警告", content: s);
+        });
   }
 
   @override
@@ -92,7 +101,7 @@ class _EnvPageState extends State<EnvPage> {
                     child: Row(
                       children: [
                         Button(
-                          onPressed: _envParamModel.checkAction,
+                          onPressed: envCheckAction,
                           child: const Text("重新检测"),
                         ),
                         const SizedBox(width: 20),
@@ -136,16 +145,7 @@ class _EnvPageState extends State<EnvPage> {
                       'Test',
                       style: TextStyle(color: _appTheme.accentColor),
                     ),
-                    onPressed: () async {
-                      EasyLoading.show(status: 'loading...');
-                      var s = await CommandUtil.getInstance()
-                          .checkEnv(title, binRoot);
-                      EasyLoading.dismiss();
-
-                      Future.delayed(const Duration(milliseconds: 200), () {
-                        showCmdResultDialog(s);
-                      });
-                    },
+                    onPressed: () async => envTest(title, binRoot),
                   )
                 ],
               )),
@@ -154,6 +154,24 @@ class _EnvPageState extends State<EnvPage> {
     }
 
     return _card(title, muEnv);
+  }
+
+  void envTest(String title, String binRoot) async {
+    EasyLoading.show(status: 'loading...');
+    var s = await CommandUtil.getInstance().checkEnv(title, binRoot);
+    EasyLoading.dismiss();
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      showCmdResultDialog(s);
+    });
+  }
+
+  Widget envErrWidget(String title) {
+    if (_envParamModel.isEnvEmpty(title)) {
+      return Text("${_envParamModel.envGuide[title]}", style: TextStyle(fontSize: 20, color: Colors.red));
+    } else {
+      return const SizedBox();
+    }
   }
 
   Widget _card(String title, List<Widget> muEnv) {
@@ -172,6 +190,8 @@ class _EnvPageState extends State<EnvPage> {
                     ),
                     const SizedBox(height: 15),
                     ...muEnv,
+                    const SizedBox(height: 5),
+                    envErrWidget(title),
                     const SizedBox(height: 5),
                   ])))
     ]);
