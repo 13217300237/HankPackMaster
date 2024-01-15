@@ -1,29 +1,29 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../../comm/sp_util.dart';
+import '../../core/command_util.dart';
 
 class EnvParamVm extends ChangeNotifier {
-  List<String> logLines = [];
+
+  Map<String, Set<String>> envs = {};
 
   final ScrollController _scrollController = ScrollController();
 
   ScrollController get scrollController => _scrollController;
 
-  List<String> get getRes => logLines;
-
-  resetLogPanel() {
-    logLines = [];
+  checkAction({bool showLoading = true}) async {
+    if (showLoading) {
+      EasyLoading.show(
+          status: '正在初始化环境参数...', maskType: EasyLoadingMaskType.clear);
+    }
+    envs = await CommandUtil.getInstance().initAllEnvParam(action: (r) {
+      debugCmdPrint("环境检索的日志输出:$r");
+    });
+    if (showLoading) {
+      EasyLoading.dismiss();
+    }
     notifyListeners();
-  }
-
-  appendLog(String res) {
-    logLines.add(res);
-    notifyListeners();
-    scrollLogPanelToBottom();
-  }
-
-  void scrollLogPanelToBottom() {
-    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
   bool isEnvEmpty(String title) {
@@ -91,6 +91,20 @@ class EnvParamVm extends ChangeNotifier {
     }
   }
 
+
+  /// 重置所有环境参数
+  void resetEnv(Function action){
+    gitRoot = "";
+    flutterRoot = "";
+    adbRoot = "";
+    androidSdkRoot = "";
+    javaRoot = "";
+    workSpaceRoot = "";
+    envs.clear();
+    notifyListeners();
+    action();
+  }
+
   String get gitRoot => SpUtil.getValue(SpConst.envGitKey) ?? "";
 
   set gitRoot(String r) {
@@ -149,4 +163,5 @@ class EnvParamVm extends ChangeNotifier {
 
     return true;
   }
+
 }

@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-bool cmdDebug = false;
+bool cmdDebug = true;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {
@@ -126,7 +126,8 @@ class CommandUtil {
     }
   }
 
-  void _saveEnv(String path, Function(String) action, Set<String> listEnv) {
+  void _saveEnv(
+      String order, String path, Function(String) action, Set<String> listEnv) {
     // 检查结果里面有没有换行符
     if (path.contains("\n")) {
       // 包含换行符就按照换行符截断成多段，按照多段来解析
@@ -142,28 +143,32 @@ class CommandUtil {
   Future initGitRoot(Function(String) action) async {
     await whereCmd(
         order: "git",
-        action: (path) => _saveEnv(path, action, EnvParams.gitRoot));
+        action: (path) => _saveEnv("git", path, action, EnvParams.gitRoot));
     action("gitRoot = ${EnvParams.gitRoot}");
   }
 
   Future initFlutterRoot(Function(String) action) async {
     await whereCmd(
         order: "flutter",
-        action: (path) => _saveEnv(path, action, EnvParams.flutterRoot));
+        action: (path) =>
+            _saveEnv("flutter", path, action, EnvParams.flutterRoot));
     action("flutterRoot =${EnvParams.flutterRoot}");
   }
 
   Future initAdbRoot(Function(String) action) async {
     await whereCmd(
         order: "adb",
-        action: (path) => _saveEnv(path, action, EnvParams.adbRoot));
+        action: (path) {
+          debugPrint("=======================================  $path");
+          _saveEnv("adb", path, action, EnvParams.adbRoot);
+        });
     action("adbRoot =${EnvParams.adbRoot}");
   }
 
   Future initJavaRoot(Function(String) action) async {
     await whereCmd(
         order: "java",
-        action: (path) => _saveEnv(path, action, EnvParams.javaRoot));
+        action: (path) => _saveEnv("java", path, action, EnvParams.javaRoot));
     action("javaRoot =${EnvParams.javaRoot}");
   }
 
@@ -341,7 +346,7 @@ class CommandUtil {
     try {
       return utf8.decode(ori);
     } catch (e) {
-      return ori.toString();
+      return "";
     }
   }
 
@@ -442,7 +447,7 @@ $sb"""
 
     var process = await execute(
       cmd: "gradlew.bat",
-      params: ["tasks","--all"],
+      params: ["tasks", "--all"],
       workDir: projectRoot,
       binRoot: projectRoot + Platform.pathSeparator,
       action: (res) {

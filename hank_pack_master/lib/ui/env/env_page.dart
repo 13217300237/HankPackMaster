@@ -20,17 +20,20 @@ class EnvPage extends StatefulWidget {
 }
 
 class _EnvPageState extends State<EnvPage> {
-  Map<String, Set<String>> envs = {};
-
   late AppTheme _appTheme;
   late EnvParamVm _envParamModel;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 500), () {
-      checkAction(showLoading: false);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _envParamModel.checkAction(showLoading: false);
     });
+  }
+
+  void showWrongInfo(String content) {
+    DialogUtil.showInfo(context: context, content: content);
   }
 
   @override
@@ -40,8 +43,9 @@ class _EnvPageState extends State<EnvPage> {
 
     List<Widget> envWidgets = [];
 
-    envs.forEach((key, value) =>
-        envWidgets.add(_buildEnvTile(key, value, _envParamModel)));
+    _envParamModel.envs.forEach((key, value) {
+      envWidgets.add(_buildEnvTile(key, value));
+    });
 
     // 工作空间路径设置
     var workspaceRoot = _card("workSpaceRoot", [
@@ -64,9 +68,9 @@ class _EnvPageState extends State<EnvPage> {
               await FilePicker.platform.getDirectoryPath();
 
           if (selectedDirectory == null) {
-            showToast("选择了空路径");
+            showWrongInfo("选择了空路径");
           } else {
-            showToast(selectedDirectory);
+            showWrongInfo(selectedDirectory);
             _envParamModel.workSpaceRoot = selectedDirectory;
           }
         },
@@ -85,11 +89,23 @@ class _EnvPageState extends State<EnvPage> {
                     children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Button(
-                        child: const Text("重新检测环境"),
-                        onPressed: () {
-                          checkAction();
-                        }),
+                    child: Row(
+                      children: [
+                        Button(
+                          onPressed: _envParamModel.checkAction,
+                          child: const Text("重新检测"),
+                        ),
+                        const SizedBox(width: 20),
+                        Button(
+                            onPressed: () {
+                              _envParamModel.resetEnv(() {
+                                DialogUtil.showInfo(
+                                    context: context, content: "环境参数已清空");
+                              });
+                            },
+                            child: const Text("清空当前环境")),
+                      ],
+                    ),
                   ),
                   workspaceRoot,
                   ...envWidgets,
@@ -102,16 +118,15 @@ class _EnvPageState extends State<EnvPage> {
     debugPrint("envPage dispose");
   }
 
-  Widget _buildEnvTile(
-      String title, Set<String> content, EnvParamVm envParamModel) {
+  Widget _buildEnvTile(String title, Set<String> content) {
     List<Widget> muEnv = [];
     for (var binRoot in content) {
       muEnv.add(
         Padding(
           padding: const EdgeInsets.only(top: 8.0),
           child: RadioButton(
-              checked: envParamModel.judgeEnv(title, binRoot),
-              onChanged: (v) => envParamModel.setEnv(title, binRoot),
+              checked: _envParamModel.judgeEnv(title, binRoot),
+              onChanged: (v) => _envParamModel.setEnv(title, binRoot),
               content: Row(
                 children: [
                   Text(binRoot, style: const TextStyle(fontSize: 16)),
@@ -179,22 +194,6 @@ class _EnvPageState extends State<EnvPage> {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.grey[200], width: .5));
-  }
-
-  checkAction({bool showLoading = true}) async {
-    if (showLoading) {
-      EasyLoading.show(
-          status: '正在初始化环境参数...', maskType: EasyLoadingMaskType.clear);
-    }
-    envs = await CommandUtil.getInstance().initAllEnvParam(action: (r) {
-      debugCmdPrint("环境检索的日志输出:$r");
-    });
-    if (showLoading) {
-      EasyLoading.dismiss();
-    }
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   void showCmdResultDialog(String res) {

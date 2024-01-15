@@ -37,7 +37,7 @@ class AppTheme extends ChangeNotifier {
       _bgColorSucc = Colors.successPrimaryColor.withOpacity(.2);
     } else {
       _bgColorErr = Colors.errorSecondaryColor.dark.withOpacity(.4);
-      _bgColorSucc = Colors.successPrimaryColor;
+      _bgColorSucc = Colors.successPrimaryColor.withOpacity(.2);
     }
 
     notifyListeners();
