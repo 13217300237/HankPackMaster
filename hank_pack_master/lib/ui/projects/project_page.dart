@@ -36,6 +36,9 @@ class _ProjectPageState extends State<ProjectPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 在绘制的第一帧之后执行初始化动作
+      if(!envParamModel.isAndroidEnvOk()){
+        return;
+      }
       projectTaskVm.projectPathController.addListener(checkInput);
       projectTaskVm.projectAppDescController.addListener(checkInput);
       projectTaskVm.gitUrlController.addListener(() {
