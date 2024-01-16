@@ -347,6 +347,7 @@ class CommandUtil {
     try {
       return utf8.decode(ori);
     } catch (e) {
+      debugPrint('遇到无法解析的结果 $ori');
       return "";
     }
   }

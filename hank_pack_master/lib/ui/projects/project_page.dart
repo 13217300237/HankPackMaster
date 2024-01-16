@@ -36,7 +36,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 在绘制的第一帧之后执行初始化动作
-      if(!envParamModel.isAndroidEnvOk()){
+      if (!envParamModel.isAndroidEnvOk()) {
         return;
       }
       projectTaskVm.projectPathController.addListener(checkInput);
@@ -109,7 +109,8 @@ class _ProjectPageState extends State<ProjectPage> {
       );
     } else {
       return Center(
-          child: Text("请先准备好环境参数", style: TextStyle(color: Colors.red,fontSize: 45)));
+          child: Text("请先准备好环境参数",
+              style: TextStyle(color: Colors.red, fontSize: 45)));
     }
   }
 
@@ -153,8 +154,10 @@ class _ProjectPageState extends State<ProjectPage> {
               actionButtonDisabled ? null : () => start(showApkNotExistInfo),
           child: const Text('开始流水线工作'),
         ),
-        const Padding(
-            padding: EdgeInsets.all(20), child: BreathingIndicator(size: 40)),
+        if (projectTaskVm.jobRunning) ...[
+          const Padding(
+              padding: EdgeInsets.all(20), child: BreathingIndicator(size: 40)),
+        ],
         SingleChildScrollView(
             child: buildStageRow(), scrollDirection: m.Axis.horizontal),
         Expanded(

@@ -71,7 +71,7 @@ class PackageSuccessEntity {
 class TaskState {
   String stageName;
   StageStatue stageStatue = StageStatue.idle;
-  ActionFunc? actionFunc; // 当前阶段的行为
+  ActionFunc? actionFunc; // 当前阶段的行为, 返回null说明当前阶段正常，非null的情况分两种，一是有特殊输出的阶段，第二是结束阶段
 
   TaskState(this.stageName, {this.actionFunc});
 }
@@ -184,7 +184,7 @@ class ProjectTaskVm extends ChangeNotifier {
         updateStatue(i, StageStatue.error);
         return er;
       }
-      addNewLogLine("工程目录检测成功，工程结构正常，现在开始打包");
+      addNewLogLine("工程目录检测成功，工程结构正常.");
       updateStatue(i, StageStatue.finished);
       return null;
     }));
