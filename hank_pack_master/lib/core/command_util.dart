@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-bool cmdDebug = true;
+bool cmdDebug = false;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {
@@ -103,20 +103,30 @@ class CommandUtil {
   ///
   /// 使用where命令查看 可执行文件的根目录
   ///
+  ///
+  /// ！！！！！！ 2024年1月18日 发现，echo命令并不能实时查询环境变量的值  ！！！！！
+  ///
   /// [order] where后面接的参数
   /// [workDir] 工作目录
   /// [action] 输出动作
   ///
-  Future echoCmd(
+  Future<String> echoCmd(
       {required String order, required Function(String) action}) async {
+    StringBuffer sb = StringBuffer();
     var process = await execute(
       workDir: EnvParams.workRoot,
       cmd: "cmd",
       params: ['/c', "echo", order],
-      action: action,
+      action: (r) {
+        action(r);
+        sb.writeln(r);
+      },
     );
     await process?.exitCode;
+    debugPrint("pid : ${process?.pid}");
     _stopExec(process);
+
+    return sb.toString().trim();
   }
 
   void _addToEnv(String e, Set<String> listEnv) {
@@ -202,6 +212,21 @@ class CommandUtil {
     return "";
   }
 
+  Future<String> checkVersion(String binRoot) async {
+    StringBuffer sb = StringBuffer();
+    var process = await CommandUtil.getInstance().execute(
+      cmd: '"$binRoot" --version',
+      params: [],
+      action: (s) {
+        sb.writeln(s);
+      },
+      workDir: EnvParams.workRoot,
+    );
+    await process?.exitCode;
+    _stopExec(process);
+    return sb.toString();
+  }
+
   ///
   /// 如果git --version命令能走通，那就说明可用
   ///
@@ -269,7 +294,7 @@ class CommandUtil {
         "$binRoot\\cmdline-tools\\latest\\bin\\");
   }
 
-  Future<Map<String, Set<String>>> initAllEnvParam(
+  Future<Map<String, Set<String>>> _initAllEnvParam(
       {required Function(String) action}) async {
     restEnvParam();
 
@@ -345,7 +370,7 @@ class CommandUtil {
 
   String _utf8Trans(List<int> ori) {
     try {
-      return utf8.decode(ori);
+      return utf8.decode(ori,);
     } catch (e) {
       debugPrint('遇到无法解析的结果 $ori');
       return "";
@@ -505,6 +530,32 @@ $sb"""
     }
     _allProcess.clear();
     debugCmdPrint("清空完成，当前 size ${_allProcess.length}");
+  }
+
+  /// 设置系统环境变量 {setx}
+  Future<ExecuteResult> setSystemEnvVar(String key, String value) async {
+    StringBuffer sb = StringBuffer();
+    var process = await execute(
+        cmd: "setx",
+        params: [key, value],
+        workDir: EnvParams.workRoot,
+        action: (res) {
+          debugPrint("res---->$res");
+          sb.writeln(res);
+          debugCmdPrint(res);
+        });
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """
+    cmd: setx
+    
+    exitCode : $exitCode
+    
+    $sb
+    """;
+
+    return ExecuteResult(res, exitCode!);
   }
 }
 
