@@ -22,7 +22,12 @@ class DialogUtil {
         return ContentDialog(
           title: Text(title),
           constraints: BoxConstraints(maxWidth: maxWidth),
-          content: content is Widget ? content : Text(content,style: const TextStyle(fontSize: 18),),
+          content: content is Widget
+              ? content
+              : Text(
+                  content,
+                  style: const TextStyle(fontSize: 18),
+                ),
           actions: [
             FilledButton(
               child: Text(confirmText),
@@ -84,6 +89,7 @@ class DialogUtil {
     required BuildContext context,
     String title = "提示",
     required String content,
+    InfoBarSeverity severity = InfoBarSeverity.success,
   }) async {
     await displayInfoBar(context, builder: (context, close) {
       return InfoBar(
@@ -91,7 +97,7 @@ class DialogUtil {
           content: Text(content),
           action: IconButton(
               icon: const Icon(FluentIcons.chrome_close), onPressed: close),
-          severity: InfoBarSeverity.warning);
+          severity: severity);
     });
   }
 }
