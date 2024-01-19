@@ -19,37 +19,6 @@ class EnvParamVm extends ChangeNotifier {
 
   ScrollController get scrollController => _scrollController;
 
-  checkAction(
-      {bool showLoading = true,
-      required Function(String warn) warnAction}) async {
-    if (showLoading) {
-      EasyLoading.show(
-          status: '正在初始化环境参数...', maskType: EasyLoadingMaskType.clear);
-    }
-    envs = await CommandUtil.getInstance().initAllEnvParam(action: (r) {
-      debugCmdPrint("环境检索的日志输出:$r");
-    });
-    List<String> lostArr = [];
-    envs.forEach((title, value) {
-      var first = value.firstOrNull;
-      if (first != null) {
-        setEnv(title, first);
-      } else {
-        lostArr.add(title);
-      }
-    });
-
-    if (showLoading) {
-      EasyLoading.dismiss();
-    }
-
-    if (lostArr.isNotEmpty) {
-      warnAction('''$lostArr 存在环境缺陷，请补齐环境变量然后重新检测环境...''');
-    }
-
-    notifyListeners();
-  }
-
   bool isEnvEmpty(String title) {
     String? v;
     switch (title) {
@@ -93,25 +62,48 @@ class EnvParamVm extends ChangeNotifier {
     return false;
   }
 
-  void setEnv(String title, String value) {
+  ///
+  /// [title]
+  /// [value]
+  /// [needToOverride] 是否需要覆盖写入，false 时，只会给当前值为空时赋值，true则无条件赋值
+  ///
+  void setEnv(
+    String title,
+    String value, {
+    required bool needToOverride,
+  }) {
     switch (title) {
       case "git":
-        gitRoot = value;
+        if (needToOverride || gitRoot.isEmpty) {
+          gitRoot = value;
+        }
         break;
       case "flutter":
-        flutterRoot = value;
+        if (needToOverride || flutterRoot.isEmpty) {
+          flutterRoot = value;
+        }
         break;
       case "adb":
-        adbRoot = value;
+        if (needToOverride || adbRoot.isEmpty) {
+          adbRoot = value;
+        }
+
         break;
       case "android":
-        androidSdkRoot = value;
+        if (needToOverride || androidSdkRoot.isEmpty) {
+          androidSdkRoot = value;
+        }
+
         break;
       case "java":
-        javaRoot = value;
+        if (needToOverride || javaRoot.isEmpty) {
+          javaRoot = value;
+        }
         break;
       case "workSpaceRoot":
-        workSpaceRoot = value;
+        if (needToOverride || workSpaceRoot.isEmpty) {
+          workSpaceRoot = value;
+        }
     }
   }
 
