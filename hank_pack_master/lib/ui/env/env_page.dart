@@ -1,13 +1,14 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
-import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/command_util.dart';
-import 'env_param_vm.dart';
 import '../comm/theme.dart';
+import 'env_param_vm.dart';
 
 ///
 /// 环境参数检测页面
@@ -23,70 +24,42 @@ class _EnvPageState extends State<EnvPage> {
   late AppTheme _appTheme;
   late EnvParamVm _envParamModel;
 
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      envCheckAction();
-    });
-  }
-
-  void showWrongInfo(String content) {
-    DialogUtil.showInfo(context: context, content: content);
-  }
-
-  void envCheckAction() {
-    _envParamModel.checkAction(
-        showLoading: false,
-        warnAction: (s) {
-          DialogUtil.showConfirmDialog(
-              context: context, title: "警告", content: s);
-        });
+  Widget _envChooseWidget(
+      {required String title,
+      required String Function() init,
+      required Function(String r) action}) {
+    return _card(title, [
+      if (!_envParamModel.isEnvEmpty(title)) ...[
+        Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: Text(
+            init(),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 29),
+          ),
+        )
+      ],
+      Row(
+        children: [
+          FilledButton(
+              child: const Text("更换路径"),
+              onPressed: () async {
+                String? selectedDirectory =
+                    await FilePicker.platform.getDirectoryPath();
+                if (selectedDirectory != null) {
+                  action(selectedDirectory);
+                }
+              }),
+        ],
+      ),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
     _envParamModel = context.watch<EnvParamVm>();
     _appTheme = context.watch<AppTheme>();
-
-    List<Widget> envWidgets = [];
-
-    _envParamModel.envs.forEach((key, value) {
-      envWidgets.add(_buildEnvTile(key, value));
-    });
-
-    // 工作空间路径设置
-    var workspaceRoot = _card("workSpaceRoot", [
-      if (!_envParamModel.isEnvEmpty("workSpaceRoot")) ...[
-        Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Text(
-            "当前路径: ${_envParamModel.workSpaceRoot}",
-            style: const TextStyle(
-                fontFamily: "STKAITI",
-                fontWeight: FontWeight.w600,
-                fontSize: 29),
-          ),
-        )
-      ],
-      Button(
-        child: const Text("Click here to set workspaceRoot"),
-        onPressed: () async {
-          String? selectedDirectory =
-              await FilePicker.platform.getDirectoryPath();
-
-          if (selectedDirectory == null) {
-            showWrongInfo("选择了空路径");
-          } else {
-            showWrongInfo(selectedDirectory);
-            _envParamModel.workSpaceRoot = selectedDirectory;
-          }
-        },
-      )
-    ]);
-
     return Container(
+      color: const Color(0xFFF5F5F5),
         padding: const EdgeInsets.all(30),
         child: ScrollConfiguration(
             // 隐藏scrollBar
@@ -96,29 +69,148 @@ class _EnvPageState extends State<EnvPage> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                  const Text("自动环境检测", style: TextStyle(fontSize: 30)),
+                  const EnvGroupCard(order: "java"),
+                  const EnvGroupCard(order: "git"),
+                  const EnvGroupCard(order: "adb"),
+                  const EnvGroupCard(order: "flutter"),
+                  const SizedBox(height: 20),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.only(right: 8),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Button(
-                          onPressed: envCheckAction,
-                          child: const Text("重新检测"),
+                        const Text("手动环境指定", style: TextStyle(fontSize: 30)),
+                        Row(
+                          children: [
+                            FilledButton(
+                                child: const Text("设置环境变量A为随机值"),
+                                onPressed: () async {
+                                  var random = Random.secure().nextInt(100);
+                                  var res = await CommandUtil.getInstance()
+                                      .setSystemEnvVar("A", "$random");
+                                  debugPrint("设置环境变量A的值为： $res  $random ");
+                                }),
+                            const SizedBox(width: 10),
+                            FilledButton(
+                                child: const Text("测试 A 环境变量"),
+                                onPressed: () async {
+                                  String res = await CommandUtil.getInstance()
+                                      .echoCmd(order: "%A%", action: (r) {});
+                                  debugPrint("查询到的A的值为： $res  ");
+                                }),
+                          ],
                         ),
-                        const SizedBox(width: 20),
-                        Button(
-                            onPressed: () {
-                              _envParamModel.resetEnv(() {
-                                DialogUtil.showInfo(
-                                    context: context, content: "环境参数已清空");
-                              });
-                            },
-                            child: const Text("清空当前环境")),
                       ],
                     ),
                   ),
-                  workspaceRoot,
-                  ...envWidgets,
+                  _envChooseWidget(
+                      title: "工作空间",
+                      init: () => _envParamModel.workSpaceRoot,
+                      action: (selectedDirectory) {
+                        DialogUtil.showInfo(
+                            context: context,
+                            title: '选择了路径:',
+                            content: selectedDirectory);
+                        _envParamModel.workSpaceRoot = selectedDirectory;
+                      }),
+                  _envChooseWidget(
+                      title: "Android SDK",
+                      init: () => _envParamModel.androidSdkRoot,
+                      action: (selectedDirectory) async {
+                        String envKey = "ANDROID_HOME";
+
+                        if (_envParamModel.androidSdkRoot ==
+                            selectedDirectory) {
+                          // 当前路径相同
+                          showMyInfo(
+                            title: "选择的路径与当前路径相同 ",
+                            content: selectedDirectory,
+                            severity: InfoBarSeverity.warning,
+                          );
+                          return;
+                        }
+
+                        // 选择了 androidSDK之后，
+                        // 1. 检查SDK的可用性，不可用，终止，可用继续往下
+                        // 2. 检查 echo %ANDROID_HOME% 的值是不是和当前值相同，不同，设置 环境变量 ANDROID_HOME 为选择的路径，相同，结束
+                        bool enable =
+                            await _checkAndroidSdkEnable(selectedDirectory);
+                        if (!enable) {
+                          showMyInfo(
+                            title: '错误:',
+                            content:
+                                "Android SDK  $selectedDirectory 不可用，缺少必要组件",
+                            severity: InfoBarSeverity.warning,
+                          );
+                          return;
+                        }
+
+                        var executeResult = await CommandUtil.getInstance()
+                            .setSystemEnvVar(envKey, selectedDirectory);
+                        if (executeResult.exitCode == 0) {
+                          _envParamModel.androidSdkRoot = selectedDirectory;
+                          showMyInfo(
+                              title: "用户环境变量 $envKey设置成功: ",
+                              content: selectedDirectory);
+
+                          String echoAndroidHome =
+                              await CommandUtil.getInstance().echoCmd(
+                            order: "%$envKey%",
+                            action: (s) {},
+                          );
+
+                          debugPrint('echoAndroidHome -> $echoAndroidHome');
+                        } else {
+                          showMyInfo(
+                              title: "错误",
+                              content: "<3>环境变量设置失败 ${executeResult.res}",
+                              severity: InfoBarSeverity.warning);
+                        }
+                      }),
                 ]))));
+  }
+
+  /// 这是为了解决 context可变的问题
+  showMyInfo({
+    required String title,
+    required String content,
+    InfoBarSeverity severity = InfoBarSeverity.success,
+  }) {
+    DialogUtil.showInfo(
+        context: context, title: title, content: content, severity: severity);
+  }
+
+  bool _checkAllFoldersExist(String directoryPath, List<String> targetFolders) {
+    Directory directory = Directory(directoryPath);
+
+    for (String folder in targetFolders) {
+      bool exists = false;
+      directory.listSync().forEach((FileSystemEntity entity) {
+        if (entity is Directory &&
+            entity.path.endsWith('${Platform.pathSeparator}$folder')) {
+          exists = true;
+        }
+      });
+
+      if (!exists) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  Future<bool> _checkAndroidSdkEnable(String selectedDirectory) async {
+    return true;
+    Directory dir = Directory(selectedDirectory);
+    // 路径实际上不存在时
+    if (!(await dir.exists())) {
+      return false;
+    }
+    // C:\Users\zwx1245985\AppData\Local\Android\Sdk
+    List<String> mustHave = ['build-tools', 'platforms', 'platform-tools'];
+    return _checkAllFoldersExist(selectedDirectory, mustHave);
   }
 
   @override
@@ -127,48 +219,10 @@ class _EnvPageState extends State<EnvPage> {
     debugPrint("envPage dispose");
   }
 
-  Widget _buildEnvTile(String title, Set<String> content) {
-    List<Widget> muEnv = [];
-    for (var binRoot in content) {
-      muEnv.add(
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: RadioButton(
-              checked: _envParamModel.judgeEnv(title, binRoot),
-              onChanged: (v) => _envParamModel.setEnv(title, binRoot),
-              content: Row(
-                children: [
-                  Text(binRoot, style: const TextStyle(fontSize: 16)),
-                  const SizedBox(width: 20),
-                  Button(
-                    child: Text(
-                      'Test',
-                      style: TextStyle(color: _appTheme.accentColor),
-                    ),
-                    onPressed: () async => envTest(title, binRoot),
-                  )
-                ],
-              )),
-        ),
-      );
-    }
-
-    return _card(title, muEnv);
-  }
-
-  void envTest(String title, String binRoot) async {
-    EasyLoading.show(status: 'loading...');
-    var s = await CommandUtil.getInstance().checkEnv(title, binRoot);
-    EasyLoading.dismiss();
-
-    Future.delayed(const Duration(milliseconds: 200), () {
-      showCmdResultDialog(s);
-    });
-  }
-
   Widget envErrWidget(String title) {
     if (_envParamModel.isEnvEmpty(title)) {
-      return Text("${_envParamModel.envGuide[title]}", style: TextStyle(fontSize: 20, color: Colors.red));
+      return Text("${_envParamModel.envGuide[title]}",
+          style: TextStyle(fontSize: 20, color: Colors.red));
     } else {
       return const SizedBox();
     }
@@ -223,5 +277,231 @@ class _EnvPageState extends State<EnvPage> {
       content: res,
       title: "测试结果",
     );
+  }
+}
+
+///
+/// 单独封装一个带动画特效的环境监测卡片
+///
+/// 1，执行where命令，找出 所有可执行文件的路径 (Done)
+/// 2. 逐个进行java指令的 version执行，看看版本号
+/// 3. 将执行的结果动态显示出来
+/// 4. 用单选框展示，默认选中第一个
+///
+class EnvGroupCard extends StatefulWidget {
+  final String order;
+
+  const EnvGroupCard({super.key, required this.order});
+
+  @override
+  State<EnvGroupCard> createState() => _EnvGroupCardState();
+}
+
+class _EnvGroupCardState extends State<EnvGroupCard> {
+  late AppTheme _appTheme;
+  late EnvParamVm _envParamModel;
+  List<String> whereRes = [];
+
+  /// 是否正在加载 环境group
+  bool _isEnvGroupLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    _envParamModel = context.watch<EnvParamVm>();
+    _appTheme = context.watch<AppTheme>();
+
+    return _createDynamicEnvCheckCard();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((timeStamp) => _doWhereAction());
+  }
+
+  /// 可执行文件单选按钮组件
+  Widget _buildEnvRadioBtn(String title, Set<String> content) {
+    List<Widget> muEnv = [];
+    for (var binRoot in content) {
+      muEnv.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Card(
+                  borderColor: Colors.grey,
+                  backgroundColor: Colors.green.withOpacity(.15),
+                  borderRadius: BorderRadius.circular(5),
+                  child: RadioButton(
+                      checked: _envParamModel.judgeEnv(title, binRoot),
+                      onChanged: (v) => _envParamModel.setEnv(title, binRoot,
+                          needToOverride: true),
+                      content: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _titleWidget(binRoot),
+                            EnvCheckWidget(cmdStr: binRoot),
+                          ],
+                        ),
+                      )),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+
+    return _card(title, muEnv);
+  }
+
+  Widget _titleWidget(String binRoot) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(binRoot, style: const TextStyle(fontSize: 22)),
+    );
+  }
+
+  Widget _card(String title, List<Widget> muEnv) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(title, style: const TextStyle(fontSize: 30)),
+      const SizedBox(height: 15),
+      if (_isEnvGroupLoading) ...[
+        ...muEnv,
+        envErrWidget(title),
+      ] else ...[
+        const ProgressBar(),
+      ],
+    ]);
+  }
+
+  bool hasExecutableExtension(String path) {
+    var extensions = ['.exe', '.bat', '.cmd'];
+
+    bool has = false;
+
+    for (var element in extensions) {
+      if (path.toLowerCase().endsWith(element)) {
+        has = true;
+        break;
+      }
+    }
+
+    return has;
+  }
+
+  void appendRes(String e) {
+    // 过滤掉 不带可执行后缀的
+    // 过滤掉重复的
+    if (hasExecutableExtension(e)) {
+      whereRes.add(e);
+    }
+  }
+
+  String getFirstFromResSet() {
+    if (whereRes.isNotEmpty) {
+      return whereRes[0];
+    }
+    return "";
+  }
+
+  /// 初始化
+  void _doWhereAction() async {
+    CommandUtil.getInstance().whereCmd(
+        order: widget.order,
+        action: (s) {
+          var sTrim = s.trim();
+          if (sTrim.contains("\n")) {
+            var split = sTrim.split("\n");
+            for (var e in split) {
+              appendRes(e);
+            }
+          } else {
+            appendRes(s);
+          }
+          _isEnvGroupLoading = true;
+          _envParamModel.setEnv(widget.order, getFirstFromResSet(),
+              needToOverride: false);
+          setState(() {});
+        });
+  }
+
+  void showCmdResultDialog(String res) {
+    DialogUtil.showEnvCheckDialog(
+      context: context,
+      onConfirm: null,
+      content: res,
+      title: "测试结果",
+    );
+  }
+
+  Widget envErrWidget(String title) {
+    if (_envParamModel.isEnvEmpty(title)) {
+      return Text("${_envParamModel.envGuide[title]}",
+          style: TextStyle(fontSize: 20, color: Colors.red));
+    } else {
+      return const SizedBox();
+    }
+  }
+
+  /// 带动态效果的环境监测卡片
+  Widget _createDynamicEnvCheckCard() {
+    return Row(mainAxisSize: MainAxisSize.max, children: [
+      Expanded(
+          child: Card(
+              backgroundColor: _appTheme.bgColorSucc,
+              margin: const EdgeInsets.all(8),
+              borderRadius: BorderRadius.circular(5),
+              borderColor: Colors.black,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildEnvRadioBtn(widget.order, whereRes.toSet()),
+                  ])))
+    ]);
+  }
+}
+
+class EnvCheckWidget extends StatefulWidget {
+  final String cmdStr;
+
+  const EnvCheckWidget({super.key, required this.cmdStr});
+
+  @override
+  State<EnvCheckWidget> createState() => _EnvCheckWidgetState();
+}
+
+class _EnvCheckWidgetState extends State<EnvCheckWidget> {
+  String executeRes = "";
+
+  bool get _executing => executeRes.isEmpty;
+
+  void _envTestCheck(String binRoot) async {
+    executeRes = await CommandUtil.getInstance().checkVersion(binRoot);
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_executing) {
+      return const ProgressBar();
+    }
+    return Text(
+      executeRes,
+      style: TextStyle(fontSize: 16, color: Colors.blue.withOpacity(.8)),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _envTestCheck(widget.cmdStr);
+    });
   }
 }
