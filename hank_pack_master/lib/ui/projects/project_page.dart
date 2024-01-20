@@ -123,83 +123,110 @@ class _ProjectPageState extends State<ProjectPage> {
   Widget _input(
       String title, String placeholder, TextEditingController controller,
       {Widget? suffix}) {
-    return Row(children: [
-      Expanded(
-          child: Card(
-              borderRadius: BorderRadius.circular(10),
-              margin: const EdgeInsets.only(bottom: 5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(fontSize: 25),
-                      ),
-                      if (suffix != null) ...[suffix]
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  TextBox(
-                      style: const TextStyle(decoration: TextDecoration.none),
-                      decoration: BoxDecoration(
-                          color: _appTheme.bgColor.withOpacity(.2)),
-                      placeholder: placeholder,
-                      expands: false,
-                      enabled: !_projectTaskVm.jobRunning,
-                      controller: controller)
-                ],
-              )))
-    ]);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(children: [
+        Expanded(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 19),
+                ),
+                if (suffix != null) ...[suffix]
+              ],
+            ),
+            const SizedBox(height: 5),
+            TextBox(
+                style: const TextStyle(decoration: TextDecoration.none),
+                decoration:
+                    BoxDecoration(color: _appTheme.bgColor.withOpacity(.2)),
+                placeholder: placeholder,
+                expands: false,
+                enabled: !_projectTaskVm.jobRunning,
+                controller: controller)
+          ],
+        ))
+      ]),
+    );
   }
 
   Widget _mainLayout() {
-    var left = Container(
-        margin: const EdgeInsets.symmetric(vertical: 10),
-        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 15),
+    var left = Card(
+        margin: const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 20),
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
+        borderRadius: BorderRadius.circular(10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _input("git地址", "输入git地址", _projectTaskVm.gitUrlController),
-              _gitErrorText(),
-              _input("工程位置", "输入工程名", _projectTaskVm.projectPathController,
-                  suffix: Tooltip(
-                    message: '点击打开目录',
-                    child: IconButton(
-                        icon: const Icon(FluentIcons.open_enrollment, size: 18),
-                        onPressed: () async {
-                          String dir =
-                              _projectTaskVm.projectPathController.text;
-                          await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
-                        }),
-                  )),
-              _input("分支名称", "输入分支名称", _projectTaskVm.gitBranchController),
-              _input(
-                  "应用描述", "输入应用描述...", _projectTaskVm.projectAppDescController),
-            ]),
-            Row(
-              children: [
-                Expanded(
-                    child: FilledButton(
-                  onPressed: actionButtonDisabled
-                      ? null
-                      : () => start(showApkNotExistInfo),
-                  child: const SizedBox(
-                      height: 80,
-                      child: Center(
-                        child: Text(
-                          '开始流水线工作',
-                          style: TextStyle(fontSize: 30),
-                        ),
-                      )),
-                )),
-              ],
+            Expanded(
+              child: ScrollConfiguration(
+                behavior:
+                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _input("git地址", "输入git地址",
+                            _projectTaskVm.gitUrlController),
+                        _gitErrorText(),
+                        _input("工程位置", "输入工程名",
+                            _projectTaskVm.projectPathController,
+                            suffix: Tooltip(
+                              message: '点击打开目录',
+                              child: IconButton(
+                                  icon: const Icon(FluentIcons.open_enrollment,
+                                      size: 18),
+                                  onPressed: () async {
+                                    String dir = _projectTaskVm
+                                        .projectPathController.text;
+                                    await launchUrl(
+                                        Uri.parse(dir)); // 通过资源管理器打开该目录
+                                  }),
+                            )),
+                        _input("分支名称", "输入分支名称",
+                            _projectTaskVm.gitBranchController),
+                        _input("应用描述", "输入应用描述...",
+                            _projectTaskVm.projectAppDescController),
+                        _input("更新日志", "输入更新日志...",
+                            _projectTaskVm.updateLogController),
+                        _input("打包命令", "输入打包命令...",
+                            _projectTaskVm.assembleTaskNameController),
+                      ]),
+                ),
+              ),
             ),
+            _actionButton(
+                title: "项目激活测试",
+                bgColor: Colors.purple.normal,
+                action: () {
+                  DialogUtil.showConfirmDialog(
+                      context: context,
+                      content: "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
+                      title: '提示',onConfirm: (){
+                        start(showApkNotExistInfo);
+                  });
+                }),
+            _actionButton(
+                title: "正式开始打包",
+                bgColor: Colors.orange.lighter,
+                action: actionButtonDisabled
+                    ? null
+                    : () => start(showApkNotExistInfo)),
           ],
         ));
+
+    // TODO 打包前需要设定的参数有，
+    // 强制更改 工程的gradleWrapper版本
+    // 工程克隆阶段的 每次最大可执行时间，可重试次数，和clone失败后每次重试间隔时间。如果超过时间没clone成功，就提示任务失败
+    // 可用指令查询阶段 每次最大可执行时间，可重试次数，和clone失败后每次重试间隔时间。如果超过时间没执行成功，就提示任务失败
+    // 打包的版本号和版本名，如不指定，就用工程自己默认的
+    // pgy的_api_key
+    // pgy上传成功之后查询结果的最大查询次数，每次查询间隔时间，如果超过次数还没查询成功，则认为任务失败
 
     var middle = Padding(
         padding:
@@ -259,6 +286,34 @@ class _ProjectPageState extends State<ProjectPage> {
         Expanded(flex: 2, child: Column(children: [Expanded(child: middle)])),
         Expanded(flex: 4, child: Column(children: [Expanded(child: right)])),
       ],
+    );
+  }
+
+  Widget _actionButton({
+    required String title,
+    required Color bgColor,
+    required Function()? action,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Expanded(
+              child: FilledButton(
+            style: ButtonStyle(
+                backgroundColor: ButtonState.resolveWith((states) => bgColor)),
+            onPressed: action,
+            child: SizedBox(
+                height: 60,
+                child: Center(
+                  child: Text(
+                    title,
+                    style: const TextStyle(fontSize: 30),
+                  ),
+                )),
+          )),
+        ],
+      ),
     );
   }
 

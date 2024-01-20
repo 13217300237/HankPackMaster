@@ -86,7 +86,9 @@ class ProjectTaskVm extends ChangeNotifier {
   final gitUrlController = TextEditingController(); // git地址
   final gitBranchController = TextEditingController(); // 分支名称
   final projectPathController = TextEditingController(); // 工程路径
-  final projectAppDescController = TextEditingController(); // 工程路径
+  final projectAppDescController = TextEditingController(); // 应用描述
+  final updateLogController = TextEditingController();// 更新日志
+  final assembleTaskNameController = TextEditingController();// 可用打包指令名称
 
   final List<TaskState> taskStateList = [];
 
