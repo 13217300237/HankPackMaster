@@ -9,6 +9,7 @@ import 'package:hank_pack_master/ui/projects/project_task_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../comm/theme.dart';
 import '../comm/uis.dart';
 import '../env/env_param_vm.dart';
 
@@ -27,6 +28,8 @@ class ProjectPage extends StatefulWidget {
 class _ProjectPageState extends State<ProjectPage> {
   late EnvParamVm envParamModel;
   late ProjectTaskVm projectTaskVm;
+  late AppTheme _appTheme;
+
   final TextStyle _labelStyle =
       const TextStyle(fontWeight: FontWeight.w200, fontSize: 18);
 
@@ -98,13 +101,16 @@ class _ProjectPageState extends State<ProjectPage> {
   @override
   Widget build(BuildContext context) {
     envParamModel = context.watch<EnvParamVm>();
+    _appTheme = context.watch<AppTheme>();
 
     if (envParamModel.isAndroidEnvOk()) {
       return ChangeNotifierProvider(
         create: (context) => ProjectTaskVm(),
         builder: (context, child) {
           projectTaskVm = context.watch<ProjectTaskVm>();
-          return _mainLayout();
+          return Container(
+            color: _appTheme.bgColor,
+              child: _mainLayout());
         },
       );
     } else {

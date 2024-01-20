@@ -229,23 +229,11 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         );
       },
       pane: NavigationPane(
+        size: const NavigationPaneSize(openMaxWidth: 220,openWidth: 220,compactWidth: 100,openMinWidth: 200),
         selected: _calculateSelectedIndex(context),
-        header: SizedBox(
+        header: const SizedBox(
           height: kOneLineTileHeight,
-          child: ShaderMask(
-            shaderCallback: (rect) {
-              final color = appTheme.accentColor.defaultBrushFor(
-                fluentTheme.brightness,
-              );
-              return LinearGradient(
-                colors: [
-                  color,
-                  color,
-                ],
-              ).createShader(rect);
-            },
-            child: const Text(appTitle),
-          ),
+          child: Text(appTitle,style: TextStyle(fontSize: 20),),
         ),
         displayMode: appTheme.displayMode,
         indicator: () {

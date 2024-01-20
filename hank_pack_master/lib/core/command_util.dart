@@ -129,6 +129,24 @@ class CommandUtil {
     return sb.toString().trim();
   }
 
+  Future<String> openEnvSetting({Function(String)? action}) async {
+    StringBuffer sb = StringBuffer();
+    var process = await execute(
+      workDir: EnvParams.workRoot,
+      cmd: "cmd",
+      params: ['/c', "rundll32", "sysdm.cpl,EditEnvironmentVariables"],
+      action: (r) {
+        action?.call(r);
+        sb.writeln(r);
+      },
+    );
+    await process?.exitCode;
+    debugPrint("pid : ${process?.pid}");
+    _stopExec(process);
+
+    return sb.toString().trim();
+  }
+
   void _addToEnv(String e, Set<String> listEnv) {
     File f = File(e);
     if (f.parent.existsSync()) {
@@ -370,7 +388,9 @@ class CommandUtil {
 
   String _utf8Trans(List<int> ori) {
     try {
-      return utf8.decode(ori,);
+      return utf8.decode(
+        ori,
+      );
     } catch (e) {
       debugPrint('遇到无法解析的结果 $ori');
       return "";

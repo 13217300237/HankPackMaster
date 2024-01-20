@@ -15,6 +15,15 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
+  Color? _bgColor; // 背景色
+  Color get bgColor => _bgColor ?? const Color(0xffDDE1EA);
+
+  set bgColor(Color color) {
+    _bgColor = color;
+    notifyListeners();
+  }
+
+
   Color _bgColorErr = Colors.errorSecondaryColor.lightest; // 背景色1
   Color get bgColorErr {
     return _bgColorErr;
@@ -43,7 +52,7 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
-  PaneDisplayMode _displayMode = PaneDisplayMode.auto;
+  PaneDisplayMode _displayMode = PaneDisplayMode.open;
 
   PaneDisplayMode get displayMode => _displayMode;
 
@@ -116,5 +125,5 @@ AccentColor get systemAccentColor {
       'lightest': SystemTheme.accentColor.lightest,
     });
   }
-  return Colors.blue;
+  return Colors.green;
 }

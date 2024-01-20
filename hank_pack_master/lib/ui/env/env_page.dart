@@ -28,30 +28,21 @@ class _EnvPageState extends State<EnvPage> {
       {required String title,
       required String Function() init,
       required Function(String r) action}) {
-    return _card(title, [
-      if (!_envParamModel.isEnvEmpty(title)) ...[
-        Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Text(
-            init(),
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 29),
-          ),
-        )
-      ],
-      Row(
-        children: [
-          FilledButton(
-              child: const Text("更换路径"),
-              onPressed: () async {
-                String? selectedDirectory =
-                    await FilePicker.platform.getDirectoryPath();
-                if (selectedDirectory != null) {
-                  action(selectedDirectory);
-                }
-              }),
+    return _card(
+        title,
+        [
+          if (!_envParamModel.isEnvEmpty(title)) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 0),
+              child: Text(
+                init(),
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 29),
+              ),
+            )
+          ],
         ],
-      ),
-    ]);
+        action: action);
   }
 
   @override
@@ -59,8 +50,8 @@ class _EnvPageState extends State<EnvPage> {
     _envParamModel = context.watch<EnvParamVm>();
     _appTheme = context.watch<AppTheme>();
     return Container(
-      color: const Color(0xFFF5F5F5),
-        padding: const EdgeInsets.all(30),
+        color: _appTheme.bgColor,
+        padding: const EdgeInsets.all(20),
         child: ScrollConfiguration(
             // 隐藏scrollBar
             behavior:
@@ -87,16 +78,27 @@ class _EnvPageState extends State<EnvPage> {
                                 child: const Text("设置环境变量A为随机值"),
                                 onPressed: () async {
                                   var random = Random.secure().nextInt(100);
-                                  var res = await CommandUtil.getInstance()
-                                      .setSystemEnvVar("A", "$random");
-                                  debugPrint("设置环境变量A的值为： $res  $random ");
+                                  ExecuteResult res =
+                                      await CommandUtil.getInstance()
+                                          .setSystemEnvVar("A", "$random");
+                                  if (res.exitCode == 0) {
+                                    showMyInfo(
+                                        title: "提示",
+                                        content: "设置环境变量A的值为 $random 成功",
+                                        severity: InfoBarSeverity.success);
+                                  } else {
+                                    showMyInfo(
+                                        title: "提示",
+                                        content: "设置环境变量A失败",
+                                        severity: InfoBarSeverity.error);
+                                  }
                                 }),
                             const SizedBox(width: 10),
                             FilledButton(
                                 child: const Text("测试 A 环境变量"),
                                 onPressed: () async {
-                                  String res = await CommandUtil.getInstance()
-                                      .echoCmd(order: "%A%", action: (r) {});
+                                  var res = await CommandUtil.getInstance()
+                                      .openEnvSetting();
                                   debugPrint("查询到的A的值为： $res  ");
                                 }),
                           ],
@@ -202,7 +204,6 @@ class _EnvPageState extends State<EnvPage> {
   }
 
   Future<bool> _checkAndroidSdkEnable(String selectedDirectory) async {
-    return true;
     Directory dir = Directory(selectedDirectory);
     // 路径实际上不存在时
     if (!(await dir.exists())) {
@@ -228,7 +229,8 @@ class _EnvPageState extends State<EnvPage> {
     }
   }
 
-  Widget _card(String title, List<Widget> muEnv) {
+  Widget _card(String title, List<Widget> muEnv,
+      {required Function(String r) action}) {
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
           child: Container(
@@ -238,9 +240,28 @@ class _EnvPageState extends State<EnvPage> {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(fontSize: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(fontSize: 30),
+                        ),
+                        Row(
+                          children: [
+                            FilledButton(
+                                child: const Text("更换路径"),
+                                onPressed: () async {
+                                  String? selectedDirectory = await FilePicker
+                                      .platform
+                                      .getDirectoryPath();
+                                  if (selectedDirectory != null) {
+                                    action(selectedDirectory);
+                                  }
+                                }),
+                          ],
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 15),
                     ...muEnv,
@@ -258,16 +279,9 @@ class _EnvPageState extends State<EnvPage> {
     }
 
     return BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: boxColor,
-            blurRadius: 2, // 控制卡片的模糊程度
-            offset: const Offset(0, 2), // 控制卡片的偏移量
-          ),
-        ],
-        color: Colors.transparent,
+        color: boxColor,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey[200], width: .5));
+        border: Border.all(color: Colors.grey[50], width: .5));
   }
 
   void showCmdResultDialog(String res) {
@@ -326,12 +340,12 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     for (var binRoot in content) {
       muEnv.add(
         Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               Expanded(
                 child: Card(
-                  borderColor: Colors.grey,
+                  borderColor: Colors.transparent,
                   backgroundColor: Colors.green.withOpacity(.15),
                   borderRadius: BorderRadius.circular(5),
                   child: RadioButton(
@@ -456,7 +470,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
               backgroundColor: _appTheme.bgColorSucc,
               margin: const EdgeInsets.all(8),
               borderRadius: BorderRadius.circular(5),
-              borderColor: Colors.black,
+              borderColor: Colors.transparent,
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -491,17 +505,13 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
     if (_executing) {
       return const ProgressBar();
     }
-    return Text(
-      executeRes,
-      style: TextStyle(fontSize: 16, color: Colors.blue.withOpacity(.8)),
-    );
+    return Text(executeRes, style: const TextStyle(fontSize: 16));
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _envTestCheck(widget.cmdStr);
-    });
+    WidgetsBinding.instance
+        .addPostFrameCallback((timeStamp) => _envTestCheck(widget.cmdStr));
   }
 }
