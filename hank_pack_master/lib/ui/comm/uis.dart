@@ -4,7 +4,13 @@ import 'package:flutter/material.dart';
 class BreathingIndicator extends StatefulWidget {
   final double size;
 
-  const BreathingIndicator({Key? key, required this.size}) : super(key: key);
+  final Widget child;
+
+  const BreathingIndicator({
+    Key? key,
+    required this.size,
+    required this.child,
+  }) : super(key: key);
 
   @override
   BreathingIndicatorState createState() => BreathingIndicatorState();
@@ -18,8 +24,8 @@ class BreathingIndicatorState extends State<BreathingIndicator>
   void initState() {
     super.initState();
     _opacityAnimationController =
-    AnimationController(vsync: this, duration: const Duration(seconds: 1))
-      ..repeat(reverse: true);
+        AnimationController(vsync: this, duration: const Duration(seconds: 1))
+          ..repeat(reverse: true);
   }
 
   @override
@@ -30,7 +36,7 @@ class BreathingIndicatorState extends State<BreathingIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.size,
       height: widget.size,
       child: AnimatedBuilder(
@@ -45,6 +51,7 @@ class BreathingIndicatorState extends State<BreathingIndicator>
                 color: Colors.lightGreen
                     .withOpacity(_opacityAnimationController.value),
               ),
+              child: widget.child,
             ),
           );
         },

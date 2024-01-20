@@ -71,7 +71,8 @@ class PackageSuccessEntity {
 class TaskState {
   String stageName;
   StageStatue stageStatue = StageStatue.idle;
-  ActionFunc? actionFunc; // 当前阶段的行为, 返回null说明当前阶段正常，非null的情况分两种，一是有特殊输出的阶段，第二是结束阶段
+  ActionFunc?
+      actionFunc; // 当前阶段的行为, 返回null说明当前阶段正常，非null的情况分两种，一是有特殊输出的阶段，第二是结束阶段
 
   TaskState(this.stageName, {this.actionFunc});
 }
@@ -210,7 +211,9 @@ class ProjectTaskVm extends ChangeNotifier {
 
       _enableAssembleOrders.clear();
       for (var e in orders) {
-        _enableAssembleOrders.add(e.substring(4, e.lastIndexOf(" - ")));
+        if (e.lastIndexOf(" - ") != -1) {
+          _enableAssembleOrders.add(e.substring(4, e.lastIndexOf(" - ")));
+        }
       }
 
       debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
@@ -253,7 +256,7 @@ class ProjectTaskVm extends ChangeNotifier {
       return null;
     }));
 
-    taskStateList.add(TaskState("获取PGY TOKEN", actionFunc: (i) async {
+    taskStateList.add(TaskState("获取pgy token", actionFunc: (i) async {
       updateStatue(i, StageStatue.executing);
 
       // 先获取当前git的最新提交记录
@@ -292,7 +295,7 @@ class ProjectTaskVm extends ChangeNotifier {
       return null;
     }));
 
-    taskStateList.add(TaskState("上传PGY", actionFunc: (i) async {
+    taskStateList.add(TaskState("上传pgy", actionFunc: (i) async {
       if (!_pgyEntity!.isOk()) {
         updateStatue(i, StageStatue.error);
         return "上传参数为空，流程终止!";
@@ -408,7 +411,7 @@ class ProjectTaskVm extends ChangeNotifier {
   Color getStatueColor(TaskState state) {
     switch (state.stageStatue) {
       case StageStatue.idle:
-        return Colors.grey;
+        return Colors.grey.withOpacity(.5);
       case StageStatue.executing:
         return Colors.blue;
       case StageStatue.finished:

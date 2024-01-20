@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../comm/theme.dart';
-import '../comm/uis.dart';
 import '../env/env_param_vm.dart';
 
 ///
@@ -27,7 +26,7 @@ class ProjectPage extends StatefulWidget {
 
 class _ProjectPageState extends State<ProjectPage> {
   late EnvParamVm envParamModel;
-  late ProjectTaskVm projectTaskVm;
+  late ProjectTaskVm _projectTaskVm;
   late AppTheme _appTheme;
 
   final TextStyle _labelStyle =
@@ -42,39 +41,42 @@ class _ProjectPageState extends State<ProjectPage> {
       if (!envParamModel.isAndroidEnvOk()) {
         return;
       }
-      projectTaskVm.projectPathController.addListener(checkInput);
-      projectTaskVm.projectAppDescController.addListener(checkInput);
-      projectTaskVm.gitUrlController.addListener(() {
-        var gitText = projectTaskVm.gitUrlController.text;
+      _projectTaskVm.init();
+      _projectTaskVm.projectPathController.addListener(checkInput);
+      _projectTaskVm.projectAppDescController.addListener(checkInput);
+      _projectTaskVm.gitUrlController.addListener(() {
+        var gitText = _projectTaskVm.gitUrlController.text;
         if (gitText.isNotEmpty) {
-          try {
-            var parse = Uri.parse(gitText);
-            var lastSepIndex = parse.path.lastIndexOf("/");
-            var endIndex = parse.path.length - 4;
-            if (lastSepIndex > 0) {
-              String projectName =
-                  parse.path.substring(lastSepIndex + 1, endIndex);
-              projectTaskVm.projectPathController.text =
-                  envParamModel.workSpaceRoot +
-                      Platform.pathSeparator +
-                      projectName;
-              projectTaskVm.gitBranchController.text = "dev"; // 测试代码
-              projectTaskVm.projectAppDescController.text =
-                  "测试用的app，你懂的！"; // 测试代码
-            } else {
-              projectTaskVm.projectPathController.text = "";
-              projectTaskVm.gitBranchController.text = ""; // 测试代码
-            }
-            // 直接赋值给 _projectNameController 就行了
-          } catch (e, r) {}
+          if (!isValidGitUrl(gitText)) {
+            // 只要是可用的git源，那就直接解析
+            checkInput();
+            return;
+          }
+
+          var lastSepIndex = gitText.lastIndexOf("/");
+          var endIndex = gitText.length - 4;
+          if (lastSepIndex > 0) {
+            String projectName = gitText.substring(lastSepIndex + 1, endIndex);
+            _projectTaskVm.projectPathController.text =
+                envParamModel.workSpaceRoot +
+                    Platform.pathSeparator +
+                    projectName;
+            _projectTaskVm.gitBranchController.text = "dev"; // 测试代码
+            _projectTaskVm.projectAppDescController.text =
+                "测试用的app，你懂的！"; // 测试代码
+          } else {
+            _projectTaskVm.projectPathController.text = "";
+            _projectTaskVm.gitBranchController.text = ""; // 测试代码
+          }
+          // 直接赋值给 _projectNameController 就行了
         }
 
         checkInput();
       });
 
       // TODO 写死数据进行测试
-      projectTaskVm.gitUrlController.text =
-          "https://github.com/18598925736/MyApp20231224.git";
+      _projectTaskVm.gitUrlController.text =
+          "git@github.com:18598925736/MyApp20231224.git";
     });
   }
 
@@ -94,8 +96,8 @@ class _ProjectPageState extends State<ProjectPage> {
   @override
   void dispose() {
     super.dispose();
-    projectTaskVm.projectPathController.removeListener(checkInput);
-    projectTaskVm.gitUrlController.removeListener(checkInput);
+    _projectTaskVm.projectPathController.removeListener(checkInput);
+    _projectTaskVm.gitUrlController.removeListener(checkInput);
   }
 
   @override
@@ -107,10 +109,8 @@ class _ProjectPageState extends State<ProjectPage> {
       return ChangeNotifierProvider(
         create: (context) => ProjectTaskVm(),
         builder: (context, child) {
-          projectTaskVm = context.watch<ProjectTaskVm>();
-          return Container(
-            color: _appTheme.bgColor,
-              child: _mainLayout());
+          _projectTaskVm = context.watch<ProjectTaskVm>();
+          return Container(color: _appTheme.bgColor, child: _mainLayout());
         },
       );
     } else {
@@ -123,114 +123,176 @@ class _ProjectPageState extends State<ProjectPage> {
   Widget _input(
       String title, String placeholder, TextEditingController controller,
       {Widget? suffix}) {
-    return Padding(
-        padding: const EdgeInsets.only(top: 5.0, bottom: 10.0),
-        child: InfoLabel(
-          label: title,
-          labelStyle: _labelStyle,
-          child: TextBox(
-              placeholder: placeholder,
-              expands: false,
-              enabled: !projectTaskVm.jobRunning,
-              suffix: suffix,
-              controller: controller),
-        ));
+    return Row(children: [
+      Expanded(
+          child: Card(
+              borderRadius: BorderRadius.circular(10),
+              margin: const EdgeInsets.only(bottom: 5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(fontSize: 25),
+                      ),
+                      if (suffix != null) ...[suffix]
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  TextBox(
+                      style: const TextStyle(decoration: TextDecoration.none),
+                      decoration: BoxDecoration(
+                          color: _appTheme.bgColor.withOpacity(.2)),
+                      placeholder: placeholder,
+                      expands: false,
+                      enabled: !_projectTaskVm.jobRunning,
+                      controller: controller)
+                ],
+              )))
+    ]);
   }
 
   Widget _mainLayout() {
-    return Padding(
-      padding: const EdgeInsets.all(19.0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _input("git地址", "输入git地址", projectTaskVm.gitUrlController),
-        _gitErrorText(),
-        _input("工程位置", "输入工程名", projectTaskVm.projectPathController,
-            suffix: Tooltip(
-              message: '点击打开目录',
-              child: IconButton(
-                  icon: const Icon(FluentIcons.open_enrollment, size: 18),
-                  onPressed: () async {
-                    String dir = projectTaskVm.projectPathController.text;
-                    await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
-                  }),
-            )),
-        _input("分支名称", "输入分支名称", projectTaskVm.gitBranchController),
-        _input("应用描述", "输入应用描述...", projectTaskVm.projectAppDescController),
-        Button(
-          onPressed:
-              actionButtonDisabled ? null : () => start(showApkNotExistInfo),
-          child: const Text('开始流水线工作'),
-        ),
-        if (projectTaskVm.jobRunning) ...[
-          const Padding(
-              padding: EdgeInsets.all(20), child: BreathingIndicator(size: 40)),
-        ],
-        SingleChildScrollView(
-            child: buildStageRow(), scrollDirection: m.Axis.horizontal),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black,
-                ),
-                borderRadius: BorderRadius.circular(6)),
-            child: ScrollConfiguration(
-              behavior:
-                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: ListView.builder(
-                controller: projectTaskVm.logListViewScrollController,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 1.0, horizontal: 15),
-                    child: Text(
-                      projectTaskVm.cmdExecLog[index],
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  );
-                },
-                itemCount: projectTaskVm.cmdExecLog.length,
-              ),
+    var left = Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 15),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              _input("git地址", "输入git地址", _projectTaskVm.gitUrlController),
+              _gitErrorText(),
+              _input("工程位置", "输入工程名", _projectTaskVm.projectPathController,
+                  suffix: Tooltip(
+                    message: '点击打开目录',
+                    child: IconButton(
+                        icon: const Icon(FluentIcons.open_enrollment, size: 18),
+                        onPressed: () async {
+                          String dir =
+                              _projectTaskVm.projectPathController.text;
+                          await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
+                        }),
+                  )),
+              _input("分支名称", "输入分支名称", _projectTaskVm.gitBranchController),
+              _input(
+                  "应用描述", "输入应用描述...", _projectTaskVm.projectAppDescController),
+            ]),
+            Row(
+              children: [
+                Expanded(
+                    child: FilledButton(
+                  onPressed: actionButtonDisabled
+                      ? null
+                      : () => start(showApkNotExistInfo),
+                  child: const SizedBox(
+                      height: 80,
+                      child: Center(
+                        child: Text(
+                          '开始流水线工作',
+                          style: TextStyle(fontSize: 30),
+                        ),
+                      )),
+                )),
+              ],
             ),
+          ],
+        ));
+
+    var middle = Padding(
+        padding:
+            const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 20),
+        child: Card(
+          borderRadius: BorderRadius.circular(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("任务阶段", style: TextStyle(fontSize: 22)),
+              const SizedBox(height: 10),
+              Expanded(
+                child: SingleChildScrollView(
+                    scrollDirection: m.Axis.vertical,
+                    child: buildStageColumn()),
+              ),
+            ],
           ),
-        )
-      ]),
+        ));
+
+    var right = Padding(
+        padding:
+            const EdgeInsets.only(top: 30, left: 10, right: 20, bottom: 20),
+        child: Card(
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+            borderRadius: BorderRadius.circular(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("执行日志", style: TextStyle(fontSize: 22)),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context)
+                          .copyWith(scrollbars: false),
+                      child: ListView.builder(
+                        controller: _projectTaskVm.logListViewScrollController,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 1.0, horizontal: 4),
+                            child: Text(
+                              _projectTaskVm.cmdExecLog[index],
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          );
+                        },
+                        itemCount: _projectTaskVm.cmdExecLog.length,
+                      )),
+                ),
+              ],
+            )));
+
+    return Row(
+      children: [
+        Expanded(flex: 6, child: Column(children: [Expanded(child: left)])),
+        Expanded(flex: 2, child: Column(children: [Expanded(child: middle)])),
+        Expanded(flex: 4, child: Column(children: [Expanded(child: right)])),
+      ],
     );
   }
 
   Widget _stageBtn({required TaskState stage, required int index}) {
-    return m.ElevatedButton(
+    return FilledButton(
       onPressed: () {
         if (stage.stageStatue == StageStatue.finished &&
-            index == projectTaskVm.taskStateList.length - 1) {
+            index == _projectTaskVm.taskStateList.length - 1) {
           dealWithScheduleResultByApkUpload(myAppInfo!);
         }
       },
-      style: m.ElevatedButton.styleFrom(
-        backgroundColor: projectTaskVm.getStatueColor(stage), // 设置按钮背景颜色
-        foregroundColor: Colors.white, // 设置按钮文本颜色
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(0))),
-      ),
-      child: Text(stage.stageName),
+      style: ButtonStyle(
+          backgroundColor: ButtonState.resolveWith(
+              (states) => _projectTaskVm.getStatueColor(stage))),
+      child: SizedBox(
+          width: double.infinity, child: Center(child: Text(stage.stageName))),
     );
   }
 
   bool get actionButtonDisabled {
-    if (projectTaskVm.jobRunning) {
+    if (_projectTaskVm.jobRunning) {
       return true;
     }
-    if (projectTaskVm.projectPathController.text.isEmpty) {
+    if (_projectTaskVm.projectPathController.text.isEmpty) {
       return true;
     }
-    if (projectTaskVm.gitUrlController.text.isEmpty) {
+    if (_projectTaskVm.gitUrlController.text.isEmpty) {
       return true;
     }
-    if (projectTaskVm.gitBranchController.text.isEmpty) {
+    if (_projectTaskVm.gitBranchController.text.isEmpty) {
       return true;
     }
 
-    if (projectTaskVm.projectAppDescController.text.isEmpty) {
+    if (_projectTaskVm.projectAppDescController.text.isEmpty) {
       return true;
     }
 
@@ -280,9 +342,8 @@ class _ProjectPageState extends State<ProjectPage> {
   MyAppInfo? myAppInfo;
 
   Future<void> start(Function showApkNotExistInfo) async {
-    projectTaskVm.init();
-    projectTaskVm.cleanLog();
-    projectTaskVm.startSchedule((s) {
+    _projectTaskVm.cleanLog();
+    _projectTaskVm.startSchedule((s) {
       if (s is PackageSuccessEntity) {
         dealWithScheduleResultByApkGenerate(s);
       } else if (s is MyAppInfo) {
@@ -300,8 +361,8 @@ class _ProjectPageState extends State<ProjectPage> {
   }
 
   bool get gitErrVisible {
-    return !isValidGitUrl(projectTaskVm.gitUrlController.text) &&
-        projectTaskVm.gitUrlController.text.isNotEmpty;
+    return !isValidGitUrl(_projectTaskVm.gitUrlController.text) &&
+        _projectTaskVm.gitUrlController.text.isNotEmpty;
   }
 
   Widget _gitErrorText() {
@@ -311,17 +372,20 @@ class _ProjectPageState extends State<ProjectPage> {
             style: TextStyle(color: Colors.red, fontSize: 20)));
   }
 
-  buildStageRow() {
+  Widget buildStageColumn() {
     List<Widget> listWidget = [];
 
-    for (int i = 0; i < projectTaskVm.taskStateList.length; i++) {
-      var e = projectTaskVm.taskStateList[i];
-      listWidget.add(_stageBtn(stage: e, index: i));
+    for (int i = 0; i < _projectTaskVm.taskStateList.length; i++) {
+      var e = _projectTaskVm.taskStateList[i];
+      listWidget.add(Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: _stageBtn(stage: e, index: i),
+      ));
     }
 
     return Padding(
       padding: const EdgeInsets.only(top: 15.0, bottom: 5.0),
-      child: Row(children: [...listWidget]),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [...listWidget]),
     );
   }
 

@@ -94,8 +94,8 @@ class _EnvPageState extends State<EnvPage> {
                                   }
                                 }),
                             const SizedBox(width: 10),
-                            FilledButton(
-                                child: const Text("测试 A 环境变量"),
+                            Button(
+                                child: const Text("打开环境变量设置"),
                                 onPressed: () async {
                                   var res = await CommandUtil.getInstance()
                                       .openEnvSetting();
