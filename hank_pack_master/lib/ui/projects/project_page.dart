@@ -32,6 +32,10 @@ class _ProjectPageState extends State<ProjectPage> {
   final TextStyle _labelStyle =
       const TextStyle(fontWeight: FontWeight.w200, fontSize: 18);
 
+  Widget _mainTitleWidget(String title) {
+    return Text(title, style: const TextStyle(fontSize: 22));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -120,38 +124,73 @@ class _ProjectPageState extends State<ProjectPage> {
     }
   }
 
+  /// 输入框
   Widget _input(
       String title, String placeholder, TextEditingController controller,
-      {Widget? suffix}) {
+      {Widget? suffix, bool alwaysDisable = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Row(children: [
-        Expanded(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontSize: 19),
-                ),
-                if (suffix != null) ...[suffix]
-              ],
-            ),
-            const SizedBox(height: 5),
-            TextBox(
+      child: Row(
+        children: [
+          SizedBox(
+              width: 80,
+              child: Text(title, style: const TextStyle(fontSize: 18))),
+          const SizedBox(width: 15),
+          Expanded(
+            child: TextBox(
                 style: const TextStyle(decoration: TextDecoration.none),
-                decoration:
-                    BoxDecoration(color: _appTheme.bgColor.withOpacity(.2)),
                 placeholder: placeholder,
                 expands: false,
-                enabled: !_projectTaskVm.jobRunning,
-                controller: controller)
-          ],
-        ))
-      ]),
+                enabled: !_projectTaskVm.jobRunning && !alwaysDisable,
+                controller: controller),
+          ),
+          if (suffix != null) ...[suffix]
+        ],
+      ),
+    );
+  }
+
+  /// 选择的配置
+  Widget _chooseConfig({required String title, required Widget chooseWidget}) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(children: [
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text(title, style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 5),
+                chooseWidget,
+              ]))
+        ]));
+  }
+
+  Widget _childChoose(
+      {required String title,
+      required String placeholder,
+      required TextEditingController controller,
+      required String unit,
+      double textBoxWidth = 80}) {
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title),
+          Row(
+            children: [
+              SizedBox(
+                width: textBoxWidth,
+                child: TextBox(
+                    suffix: Text(unit),
+                    placeholder: placeholder,
+                    controller: _projectTaskVm.cloneMaxDurationController),
+              ),
+              const SizedBox(width: 10),
+            ],
+          )
+        ],
+      ),
     );
   }
 
@@ -162,7 +201,10 @@ class _ProjectPageState extends State<ProjectPage> {
         borderRadius: BorderRadius.circular(10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _mainTitleWidget("项目配置"),
+            const SizedBox(height: 20),
             Expanded(
               child: ScrollConfiguration(
                 behavior:
@@ -171,11 +213,12 @@ class _ProjectPageState extends State<ProjectPage> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _input("git地址", "输入git地址",
+                        _input("git地址 ", "输入git地址",
                             _projectTaskVm.gitUrlController),
                         _gitErrorText(),
                         _input("工程位置", "输入工程名",
                             _projectTaskVm.projectPathController,
+                            alwaysDisable: true,
                             suffix: Tooltip(
                               message: '点击打开目录',
                               child: IconButton(
@@ -196,6 +239,84 @@ class _ProjectPageState extends State<ProjectPage> {
                             _projectTaskVm.updateLogController),
                         _input("打包命令", "输入打包命令...",
                             _projectTaskVm.assembleTaskNameController),
+                        _chooseConfig(
+                            title: "打包版本号设置",
+                            chooseWidget: Row(children: [
+                              _childChoose(
+                                  title: "versionCode",
+                                  placeholder: "",
+                                  unit: "",
+                                  controller: _projectTaskVm
+                                      .cloneMaxDurationController),
+                              _childChoose(
+                                  title: "versionName",
+                                  placeholder: "",
+                                  unit: "",
+                                  controller:
+                                      _projectTaskVm.cloneMaxTimesController),
+                            ])),
+                        _chooseConfig(
+                            title: "clone设置",
+                            chooseWidget: Row(children: [
+                              _childChoose(
+                                  title: "每次最长执行时间",
+                                  placeholder: "3600",
+                                  unit: "秒",
+                                  controller: _projectTaskVm
+                                      .cloneMaxDurationController),
+                              _childChoose(
+                                  title: "最大可重试次数",
+                                  placeholder: "5",
+                                  unit: "次",
+                                  controller:
+                                      _projectTaskVm.cloneMaxTimesController),
+                            ])),
+                        _chooseConfig(
+                            title: "打包指令查询设置",
+                            chooseWidget: Row(children: [
+                              _childChoose(
+                                  title: "每次最长执行时间",
+                                  placeholder: "3600",
+                                  unit: "秒",
+                                  controller: _projectTaskVm
+                                      .enableOrderCheckMaxDurationController),
+                              _childChoose(
+                                  title: "最大可重试次数",
+                                  placeholder: "5",
+                                  unit: "次",
+                                  controller: _projectTaskVm
+                                      .enableOrderCheckMaxTimesController),
+                            ])),
+                        _chooseConfig(
+                            title: "蒲公英平台设置",
+                            chooseWidget: Column(
+                              children: [
+                                Row(children: [
+                                  _childChoose(
+                                      title: "_api_key",
+                                      placeholder: "必须填写",
+                                      unit: "",
+                                      textBoxWidth: 500,
+                                      controller: _projectTaskVm
+                                          .cloneMaxDurationController),
+                                ]),
+                                const SizedBox(height: 10),
+                                Row(children: [
+                                  _childChoose(
+                                      title: "每次最长执行时间",
+                                      placeholder: "3600",
+                                      unit: "秒",
+                                      controller: _projectTaskVm
+                                          .enableOrderCheckMaxDurationController),
+                                  _childChoose(
+                                      title: "最大可重试次数",
+                                      placeholder: "5",
+                                      unit: "次",
+                                      controller: _projectTaskVm
+                                          .enableOrderCheckMaxTimesController),
+                                ]),
+                              ],
+                            )),
                       ]),
                 ),
               ),
@@ -206,10 +327,12 @@ class _ProjectPageState extends State<ProjectPage> {
                 action: () {
                   DialogUtil.showConfirmDialog(
                       context: context,
-                      content: "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
-                      title: '提示',onConfirm: (){
+                      content:
+                          "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
+                      title: '提示',
+                      onConfirm: () {
                         start(showApkNotExistInfo);
-                  });
+                      });
                 }),
             _actionButton(
                 title: "正式开始打包",
@@ -220,23 +343,16 @@ class _ProjectPageState extends State<ProjectPage> {
           ],
         ));
 
-    // TODO 打包前需要设定的参数有，
-    // 强制更改 工程的gradleWrapper版本
-    // 工程克隆阶段的 每次最大可执行时间，可重试次数，和clone失败后每次重试间隔时间。如果超过时间没clone成功，就提示任务失败
-    // 可用指令查询阶段 每次最大可执行时间，可重试次数，和clone失败后每次重试间隔时间。如果超过时间没执行成功，就提示任务失败
-    // 打包的版本号和版本名，如不指定，就用工程自己默认的
-    // pgy的_api_key
-    // pgy上传成功之后查询结果的最大查询次数，每次查询间隔时间，如果超过次数还没查询成功，则认为任务失败
-
     var middle = Padding(
         padding:
             const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 20),
         child: Card(
           borderRadius: BorderRadius.circular(10),
+          backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("任务阶段", style: TextStyle(fontSize: 22)),
+              _mainTitleWidget("任务阶段"),
               const SizedBox(height: 10),
               Expanded(
                 child: SingleChildScrollView(
@@ -253,10 +369,11 @@ class _ProjectPageState extends State<ProjectPage> {
         child: Card(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
             borderRadius: BorderRadius.circular(10),
+            backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("执行日志", style: TextStyle(fontSize: 22)),
+                _mainTitleWidget("执行日志"),
                 const SizedBox(height: 10),
                 Expanded(
                   child: ScrollConfiguration(

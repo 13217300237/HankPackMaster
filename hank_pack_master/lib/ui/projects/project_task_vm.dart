@@ -90,6 +90,12 @@ class ProjectTaskVm extends ChangeNotifier {
   final updateLogController = TextEditingController();// 更新日志
   final assembleTaskNameController = TextEditingController();// 可用打包指令名称
 
+  final cloneMaxDurationController = TextEditingController();
+  final cloneMaxTimesController = TextEditingController();
+
+  final enableOrderCheckMaxDurationController = TextEditingController();
+  final enableOrderCheckMaxTimesController = TextEditingController();
+
   final List<TaskState> taskStateList = [];
 
   final List<String> _cmdExecLog = [];
