@@ -29,9 +29,6 @@ class _ProjectPageState extends State<ProjectPage> {
   late ProjectTaskVm _projectTaskVm;
   late AppTheme _appTheme;
 
-  final TextStyle _labelStyle =
-      const TextStyle(fontWeight: FontWeight.w200, fontSize: 18);
-
   Widget _mainTitleWidget(String title) {
     return Text(title, style: const TextStyle(fontSize: 22));
   }
@@ -446,7 +443,16 @@ class _ProjectPageState extends State<ProjectPage> {
           backgroundColor: ButtonState.resolveWith(
               (states) => _projectTaskVm.getStatueColor(stage))),
       child: SizedBox(
-          width: double.infinity, child: Center(child: Text(stage.stageName))),
+          width: double.infinity,
+          child: Center(
+              child: Column(
+            children: [
+              Text(stage.stageName),
+              if (stage.stageCostTime != null &&
+                  stage.stageCostTime!.isNotEmpty)
+                Text(stage.stageCostTime!),
+            ],
+          ))),
     );
   }
 
@@ -514,6 +520,7 @@ class _ProjectPageState extends State<ProjectPage> {
   MyAppInfo? myAppInfo;
 
   Future<void> start(Function showApkNotExistInfo) async {
+    _projectTaskVm.init();
     _projectTaskVm.cleanLog();
     _projectTaskVm.startSchedule((s) {
       if (s is PackageSuccessEntity) {
