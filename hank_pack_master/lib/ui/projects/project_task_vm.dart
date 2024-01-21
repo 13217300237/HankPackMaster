@@ -513,9 +513,9 @@ class ProjectTaskVm extends ChangeNotifier {
   ///
   /// 开始流水线工作
   ///
-  startSchedule(Function(dynamic s) endAction) async {
+  Future<String?> startSchedule(Function(dynamic s) endAction) async {
     if (_jobRunning) {
-      return;
+      return "任务正在执行中...";
     }
 
     _jobRunning = true;
@@ -524,22 +524,29 @@ class ProjectTaskVm extends ChangeNotifier {
 
     dynamic actionResStr;
 
+    Stopwatch totalWatch = Stopwatch();
+    totalWatch.start();
+
     for (int i = 0; i < taskStateList.length; i++) {
-      var startTime = DateTime.now();
-
-      dynamic result = await taskStateList[i].actionFunc?.call(i);
-
-      var costTime = DateTime.now().millisecond - startTime.millisecond;
-
-      taskStateList[i].onStateFinished?.call(i, "cost $costTime 毫秒");
+      Stopwatch stageTimeWatch = Stopwatch();
+      stageTimeWatch.start();
+      dynamic result = await taskStateList[i].actionFunc(i);
+      stageTimeWatch.stop(); // 停止计时器
+      taskStateList[i]
+          .onStateFinished
+          ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} 毫秒");
 
       if (result != null) {
         actionResStr = result;
         break;
       }
     }
+
+    totalWatch.stop();
     addNewLogLine("流程结束,检查成果...");
     _jobRunning = false;
     endAction(actionResStr);
+
+    return "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒";
   }
 }

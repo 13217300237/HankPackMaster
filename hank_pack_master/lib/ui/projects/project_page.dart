@@ -352,9 +352,13 @@ class _ProjectPageState extends State<ProjectPage> {
               _mainTitleWidget("任务阶段"),
               const SizedBox(height: 10),
               Expanded(
-                child: SingleChildScrollView(
-                    scrollDirection: m.Axis.vertical,
-                    child: buildStageColumn()),
+                child: ScrollConfiguration(
+                  behavior:
+                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                  child: SingleChildScrollView(
+                      scrollDirection: m.Axis.vertical,
+                      child: buildStageColumn()),
+                ),
               ),
             ],
           ),
@@ -535,6 +539,10 @@ class _ProjectPageState extends State<ProjectPage> {
           content: s.toString(),
           confirmText: "知道了...",
         );
+      }
+    }).then((value) {
+      if (null != value) {
+        DialogUtil.showInfo(context: context, content: value);
       }
     });
   }
