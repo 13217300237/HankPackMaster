@@ -77,7 +77,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
       // TODO 写死数据进行测试
       _projectTaskVm.gitUrlController.text =
-          "git@github.com:18598925736/MyApp20231224.git";
+          "git@github.com:18598925736/MyApplication0016.git";
     });
   }
 
@@ -170,23 +170,26 @@ class _ProjectPageState extends State<ProjectPage> {
       required String unit,
       double textBoxWidth = 80}) {
     return Expanded(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title),
-          Row(
-            children: [
-              SizedBox(
-                width: textBoxWidth,
-                child: TextBox(
-                    suffix: Text(unit),
-                    placeholder: placeholder,
-                    controller: _projectTaskVm.cloneMaxDurationController),
-              ),
-              const SizedBox(width: 10),
-            ],
-          )
-        ],
+      child: m.Padding(
+        padding: const m.EdgeInsets.only(right: 30),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title),
+            Row(
+              children: [
+                SizedBox(
+                  width: textBoxWidth,
+                  child: TextBox(
+                      suffix: Text(unit),
+                      placeholder: placeholder,
+                      controller: controller),
+                ),
+                const SizedBox(width: 10),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -196,6 +199,7 @@ class _ProjectPageState extends State<ProjectPage> {
         margin: const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 20),
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
         borderRadius: BorderRadius.circular(10),
+        backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,20 +241,22 @@ class _ProjectPageState extends State<ProjectPage> {
                         _input("打包命令", "输入打包命令...",
                             _projectTaskVm.assembleTaskNameController),
                         _chooseConfig(
-                            title: "打包版本号设置",
+                            title: "强制指定打包版本参数",
                             chooseWidget: Row(children: [
                               _childChoose(
-                                  title: "versionCode",
-                                  placeholder: "",
-                                  unit: "",
-                                  controller: _projectTaskVm
-                                      .cloneMaxDurationController),
+                                title: "versionCode",
+                                placeholder: "",
+                                unit: "",
+                                controller:
+                                    _projectTaskVm.versionCodeController,
+                              ),
                               _childChoose(
-                                  title: "versionName",
-                                  placeholder: "",
-                                  unit: "",
-                                  controller:
-                                      _projectTaskVm.cloneMaxTimesController),
+                                title: "versionName",
+                                placeholder: "",
+                                unit: "",
+                                controller:
+                                    _projectTaskVm.versionNameController,
+                              ),
                             ])),
                         _chooseConfig(
                             title: "clone设置",
@@ -295,22 +301,22 @@ class _ProjectPageState extends State<ProjectPage> {
                                       unit: "",
                                       textBoxWidth: 500,
                                       controller: _projectTaskVm
-                                          .cloneMaxDurationController),
+                                          .pgyApiKeyController),
                                 ]),
                                 const SizedBox(height: 10),
                                 Row(children: [
                                   _childChoose(
-                                      title: "每次最长执行时间",
+                                      title: "每次上传最长执行时间",
                                       placeholder: "3600",
                                       unit: "秒",
                                       controller: _projectTaskVm
-                                          .enableOrderCheckMaxDurationController),
+                                          .pgyUploadMaxDurationController),
                                   _childChoose(
                                       title: "最大可重试次数",
                                       placeholder: "5",
                                       unit: "次",
                                       controller: _projectTaskVm
-                                          .enableOrderCheckMaxTimesController),
+                                          .pgyUploadMaxTimesController),
                                 ]),
                               ],
                             )),
@@ -318,25 +324,29 @@ class _ProjectPageState extends State<ProjectPage> {
                 ),
               ),
             ),
-            _actionButton(
-                title: "项目激活测试",
-                bgColor: Colors.purple.normal,
-                action: () {
-                  DialogUtil.showConfirmDialog(
-                      context: context,
-                      content:
-                          "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
-                      title: '提示',
-                      onConfirm: () {
-                        start(showApkNotExistInfo);
-                      });
-                }),
-            _actionButton(
-                title: "正式开始打包",
-                bgColor: Colors.orange.lighter,
-                action: actionButtonDisabled
-                    ? null
-                    : () => start(showApkNotExistInfo)),
+            Row(
+              children: [
+                _actionButton(
+                    title: "项目激活测试",
+                    bgColor: Colors.purple.normal,
+                    action: () {
+                      DialogUtil.showConfirmDialog(
+                          context: context,
+                          content:
+                              "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
+                          title: '提示',
+                          onConfirm: () {
+                            start(showApkNotExistInfo);
+                          });
+                    }),
+                _actionButton(
+                    title: "正式开始打包",
+                    bgColor: Colors.orange.lighter,
+                    action: actionButtonDisabled
+                        ? null
+                        : () => start(showApkNotExistInfo)),
+              ],
+            ),
           ],
         ));
 
@@ -353,8 +363,8 @@ class _ProjectPageState extends State<ProjectPage> {
               const SizedBox(height: 10),
               Expanded(
                 child: ScrollConfiguration(
-                  behavior:
-                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                  behavior: ScrollConfiguration.of(context)
+                      .copyWith(scrollbars: false),
                   child: SingleChildScrollView(
                       scrollDirection: m.Axis.vertical,
                       child: buildStageColumn()),
@@ -412,25 +422,23 @@ class _ProjectPageState extends State<ProjectPage> {
     required Color bgColor,
     required Function()? action,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        children: [
-          Expanded(
-              child: FilledButton(
-            style: ButtonStyle(
-                backgroundColor: ButtonState.resolveWith((states) => bgColor)),
-            onPressed: action,
-            child: SizedBox(
-                height: 60,
-                child: Center(
-                  child: Text(
-                    title,
-                    style: const TextStyle(fontSize: 30),
-                  ),
-                )),
-          )),
-        ],
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: FilledButton(
+          style: ButtonStyle(
+              backgroundColor: ButtonState.resolveWith((states) => bgColor)),
+          onPressed: action,
+          child: SizedBox(
+              height: 60,
+              child: Center(
+                child: Text(
+                  title,
+                  style: const TextStyle(fontSize: 30),
+                ),
+              )),
+        ),
       ),
     );
   }
@@ -526,7 +534,7 @@ class _ProjectPageState extends State<ProjectPage> {
   Future<void> start(Function showApkNotExistInfo) async {
     _projectTaskVm.init();
     _projectTaskVm.cleanLog();
-    _projectTaskVm.startSchedule((s) {
+    _projectTaskVm.startSchedule(endAction: (s) {
       if (s is PackageSuccessEntity) {
         dealWithScheduleResultByApkGenerate(s);
       } else if (s is MyAppInfo) {

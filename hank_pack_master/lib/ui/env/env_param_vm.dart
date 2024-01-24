@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../../comm/sp_util.dart';
-import '../../core/command_util.dart';
 
 class EnvParamVm extends ChangeNotifier {
   /// 环境有问题时的错误提示

@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import '../comm/sp_util.dart';
+
 bool cmdDebug = false;
 
 debugCmdPrint(String msg) {
@@ -417,8 +419,10 @@ class CommandUtil {
   }) async {
     StringBuffer sb = StringBuffer();
 
+    var binRoot = SpUtil.getValue(SpConst.envGitKey);
+
     var process = await execute(
-      cmd: "git",
+      cmd: '"$binRoot"',
       params: ["clone", gitUrl],
       workDir: clonePath,
       action: (res) {
@@ -444,8 +448,9 @@ $sb"""
     Function(String s) logOutput,
   ) async {
     StringBuffer sb = StringBuffer();
+    var binRoot = SpUtil.getValue(SpConst.envGitKey);
     var process = await execute(
-      cmd: "git",
+      cmd: '"$binRoot"',
       params: ["log", "-1", "--pretty=format:\"%s\""],
       workDir: gitProjectDir,
       action: (res) {
@@ -467,8 +472,9 @@ $sb"""
   ) async {
     StringBuffer sb = StringBuffer();
 
+    var binRoot = SpUtil.getValue(SpConst.envGitKey);
     var process = await execute(
-      cmd: "git",
+      cmd: '"$binRoot"',
       params: ["checkout", branchName],
       workDir: gitProjectDir,
       action: (res) {
@@ -512,12 +518,27 @@ $sb"""
   }
 
   Future<ExecuteResult> gradleAssemble(
-      String projectRoot, Function(String s) logOutput) async {
+      {required String projectRoot,
+      required String packageOrder,
+      required String versionName,
+      required String versionCode,
+      required Function(String s) logOutput}) async {
     StringBuffer sb = StringBuffer();
+
+    List<String> params = [];
+    params.add("clean");
+    params.add(packageOrder);
+    params.add("--stacktrace");
+    if (versionCode.isNotEmpty) {
+      params.add("-PversionCode=$versionCode");
+    }
+    if (versionName.isNotEmpty) {
+      params.add("-PversionName=$versionName");
+    }
 
     var process = await execute(
       cmd: "gradlew.bat",
-      params: ["clean", "assembleDebug", "--stacktrace"],
+      params: params,
       workDir: projectRoot,
       binRoot: projectRoot + Platform.pathSeparator,
       action: (res) {

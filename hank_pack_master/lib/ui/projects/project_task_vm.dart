@@ -95,11 +95,18 @@ class ProjectTaskVm extends ChangeNotifier {
   final updateLogController = TextEditingController(); // 更新日志
   final assembleTaskNameController = TextEditingController(); // 可用打包指令名称
 
-  final cloneMaxDurationController = TextEditingController();
-  final cloneMaxTimesController = TextEditingController();
+  final versionNameController = TextEditingController(); // 强制指定版本名
+  final versionCodeController = TextEditingController(); // 强制指定版本号
 
-  final enableOrderCheckMaxDurationController = TextEditingController();
-  final enableOrderCheckMaxTimesController = TextEditingController();
+  final cloneMaxDurationController = TextEditingController(); // clone每次执行的最长时间
+  final cloneMaxTimesController = TextEditingController(); // clone的最大可执行次数
+
+  final enableOrderCheckMaxDurationController = TextEditingController(); // 可用指令查询的每次最大可执行时间
+  final enableOrderCheckMaxTimesController = TextEditingController(); // 可用指令查询阶段的最大可执行次数
+
+  final pgyApiKeyController = TextEditingController(); // pgy平台apkKey设置
+  final pgyUploadMaxDurationController = TextEditingController(); // pgy平台每次上传的最大可执行时间
+  final pgyUploadMaxTimesController = TextEditingController(); // pgy平台每次上传的最大可执行次数
 
   final List<TaskState> taskStateList = [];
 
@@ -117,7 +124,15 @@ class ProjectTaskVm extends ChangeNotifier {
 
   String get projectAppDesc => projectAppDescController.text;
 
+  String get updateLog => updateLogController.text;
+
+  String get packageOrder => assembleTaskNameController.text;
+
   String get envWorkspaceRoot => SpUtil.getValue(SpConst.envWorkspaceRootKey);
+
+  String get versionName => versionNameController.text;
+
+  String get versionCode => versionCodeController.text;
 
   bool get jobRunning => _jobRunning;
 
@@ -262,7 +277,11 @@ class ProjectTaskVm extends ChangeNotifier {
         // 阶段3，执行打包命令
         ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
             .gradleAssemble(
-                projectPath + Platform.pathSeparator, addNewLogLine);
+                projectRoot: projectPath + Platform.pathSeparator,
+                packageOrder: packageOrder,
+                versionCode: versionCode,
+                versionName: versionName,
+                logOutput: addNewLogLine);
         addNewLogLine("打包 完毕，结果是-> $gradleAssembleRes");
 
         if (gradleAssembleRes.exitCode != 0) {
@@ -319,8 +338,8 @@ class ProjectTaskVm extends ChangeNotifier {
         addNewLogLine("获取应用描述成功 $projectAppDesc");
 
         var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
-          buildDescription: "??????",
-          buildUpdateDescription: projectAppDesc,
+          buildDescription: projectAppDesc,
+          buildUpdateDescription: "$log \n $updateLog",
         );
 
         if (pgyToken == null) {
@@ -513,7 +532,8 @@ class ProjectTaskVm extends ChangeNotifier {
   ///
   /// 开始流水线工作
   ///
-  Future<String?> startSchedule(Function(dynamic s) endAction) async {
+  Future<String?> startSchedule(
+      {required Function(dynamic s) endAction}) async {
     if (_jobRunning) {
       return "任务正在执行中...";
     }
