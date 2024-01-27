@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../core/command_util.dart';
 import '../comm/theme.dart';
 import 'env_param_vm.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 ///
 /// 环境参数检测页面
@@ -49,6 +50,7 @@ class _EnvPageState extends State<EnvPage> {
   Widget build(BuildContext context) {
     _envParamModel = context.watch<EnvParamVm>();
     _appTheme = context.watch<AppTheme>();
+
     return Container(
         color: _appTheme.bgColor,
         padding: const EdgeInsets.all(20),
@@ -61,10 +63,18 @@ class _EnvPageState extends State<EnvPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                   const Text("自动环境检测", style: TextStyle(fontSize: 30)),
-                  const EnvGroupCard(order: "java"),
-                  const EnvGroupCard(order: "git"),
-                  const EnvGroupCard(order: "adb"),
-                  const EnvGroupCard(order: "flutter"),
+                  const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: EnvGroupCard(order: "java")),
+                        Expanded(child: EnvGroupCard(order: "git")),
+                      ]),
+                  const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: EnvGroupCard(order: "adb")),
+                        Expanded(child: EnvGroupCard(order: "flutter")),
+                      ]),
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -106,70 +116,76 @@ class _EnvPageState extends State<EnvPage> {
                       ],
                     ),
                   ),
-                  _envChooseWidget(
-                      title: "工作空间",
-                      init: () => _envParamModel.workSpaceRoot,
-                      action: (selectedDirectory) {
-                        DialogUtil.showInfo(
-                            context: context,
-                            title: '选择了路径:',
-                            content: selectedDirectory);
-                        _envParamModel.workSpaceRoot = selectedDirectory;
-                      }),
-                  _envChooseWidget(
-                      title: "Android SDK",
-                      init: () => _envParamModel.androidSdkRoot,
-                      action: (selectedDirectory) async {
-                        String envKey = "ANDROID_HOME";
+                  Row(children: [
+                    Expanded(
+                      child: _envChooseWidget(
+                          title: "工作空间",
+                          init: () => _envParamModel.workSpaceRoot,
+                          action: (selectedDirectory) {
+                            DialogUtil.showInfo(
+                                context: context,
+                                title: '选择了路径:',
+                                content: selectedDirectory);
+                            _envParamModel.workSpaceRoot = selectedDirectory;
+                          }),
+                    ),
+                    Expanded(
+                      child: _envChooseWidget(
+                          title: "Android SDK",
+                          init: () => _envParamModel.androidSdkRoot,
+                          action: (selectedDirectory) async {
+                            String envKey = "ANDROID_HOME";
 
-                        if (_envParamModel.androidSdkRoot ==
-                            selectedDirectory) {
-                          // 当前路径相同
-                          showMyInfo(
-                            title: "选择的路径与当前路径相同 ",
-                            content: selectedDirectory,
-                            severity: InfoBarSeverity.warning,
-                          );
-                          return;
-                        }
+                            if (_envParamModel.androidSdkRoot ==
+                                selectedDirectory) {
+                              // 当前路径相同
+                              showMyInfo(
+                                title: "选择的路径与当前路径相同 ",
+                                content: selectedDirectory,
+                                severity: InfoBarSeverity.warning,
+                              );
+                              return;
+                            }
 
-                        // 选择了 androidSDK之后，
-                        // 1. 检查SDK的可用性，不可用，终止，可用继续往下
-                        // 2. 检查 echo %ANDROID_HOME% 的值是不是和当前值相同，不同，设置 环境变量 ANDROID_HOME 为选择的路径，相同，结束
-                        bool enable =
-                            await _checkAndroidSdkEnable(selectedDirectory);
-                        if (!enable) {
-                          showMyInfo(
-                            title: '错误:',
-                            content:
-                                "Android SDK  $selectedDirectory 不可用，缺少必要组件",
-                            severity: InfoBarSeverity.warning,
-                          );
-                          return;
-                        }
+                            // 选择了 androidSDK之后，
+                            // 1. 检查SDK的可用性，不可用，终止，可用继续往下
+                            // 2. 检查 echo %ANDROID_HOME% 的值是不是和当前值相同，不同，设置 环境变量 ANDROID_HOME 为选择的路径，相同，结束
+                            bool enable =
+                                await _checkAndroidSdkEnable(selectedDirectory);
+                            if (!enable) {
+                              showMyInfo(
+                                title: '错误:',
+                                content:
+                                    "Android SDK  $selectedDirectory 不可用，缺少必要组件",
+                                severity: InfoBarSeverity.warning,
+                              );
+                              return;
+                            }
 
-                        var executeResult = await CommandUtil.getInstance()
-                            .setSystemEnvVar(envKey, selectedDirectory);
-                        if (executeResult.exitCode == 0) {
-                          _envParamModel.androidSdkRoot = selectedDirectory;
-                          showMyInfo(
-                              title: "用户环境变量 $envKey设置成功: ",
-                              content: selectedDirectory);
+                            var executeResult = await CommandUtil.getInstance()
+                                .setSystemEnvVar(envKey, selectedDirectory);
+                            if (executeResult.exitCode == 0) {
+                              _envParamModel.androidSdkRoot = selectedDirectory;
+                              showMyInfo(
+                                  title: "用户环境变量 $envKey设置成功: ",
+                                  content: selectedDirectory);
 
-                          String echoAndroidHome =
-                              await CommandUtil.getInstance().echoCmd(
-                            order: "%$envKey%",
-                            action: (s) {},
-                          );
+                              String echoAndroidHome =
+                                  await CommandUtil.getInstance().echoCmd(
+                                order: "%$envKey%",
+                                action: (s) {},
+                              );
 
-                          debugPrint('echoAndroidHome -> $echoAndroidHome');
-                        } else {
-                          showMyInfo(
-                              title: "错误",
-                              content: "<3>环境变量设置失败 ${executeResult.res}",
-                              severity: InfoBarSeverity.warning);
-                        }
-                      }),
+                              debugPrint('echoAndroidHome -> $echoAndroidHome');
+                            } else {
+                              showMyInfo(
+                                  title: "错误",
+                                  content: "<3>环境变量设置失败 ${executeResult.res}",
+                                  severity: InfoBarSeverity.warning);
+                            }
+                          }),
+                    ),
+                  ]),
                 ]))));
   }
 
@@ -327,6 +343,21 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     return _createDynamicEnvCheckCard();
   }
 
+  /// 带动态效果的环境监测卡片
+  Widget _createDynamicEnvCheckCard() {
+    return Card(
+        backgroundColor: _appTheme.bgColorSucc,
+        margin: const EdgeInsets.all(8),
+        borderRadius: BorderRadius.circular(5),
+        borderColor: Colors.transparent,
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              _buildEnvRadioBtn(widget.order, whereRes.toSet()),
+            ]));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -460,24 +491,6 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     } else {
       return const SizedBox();
     }
-  }
-
-  /// 带动态效果的环境监测卡片
-  Widget _createDynamicEnvCheckCard() {
-    return Row(mainAxisSize: MainAxisSize.max, children: [
-      Expanded(
-          child: Card(
-              backgroundColor: _appTheme.bgColorSucc,
-              margin: const EdgeInsets.all(8),
-              borderRadius: BorderRadius.circular(5),
-              borderColor: Colors.transparent,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    _buildEnvRadioBtn(widget.order, whereRes.toSet()),
-                  ])))
-    ]);
   }
 }
 
