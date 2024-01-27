@@ -77,7 +77,8 @@ class _ProjectPageState extends State<ProjectPage> {
 
       // TODO 写死数据进行测试
       _projectTaskVm.gitUrlController.text =
-          "git@github.com:18598925736/MyApplication0016.git";
+          "git@github.com:18598925736/MyApp20231224.git";
+      _projectTaskVm.assembleTaskNameController.text = "assembleDebug";
     });
   }
 
@@ -135,7 +136,8 @@ class _ProjectPageState extends State<ProjectPage> {
           const SizedBox(width: 15),
           Expanded(
             child: TextBox(
-                style: const TextStyle(decoration: TextDecoration.none),
+                style: const TextStyle(
+                    decoration: TextDecoration.none, fontSize: 18),
                 placeholder: placeholder,
                 expands: false,
                 enabled: !_projectTaskVm.jobRunning && !alwaysDisable,
@@ -167,7 +169,6 @@ class _ProjectPageState extends State<ProjectPage> {
       {required String title,
       required String placeholder,
       required TextEditingController controller,
-      required String unit,
       double textBoxWidth = 80}) {
     return Expanded(
       child: m.Padding(
@@ -175,14 +176,16 @@ class _ProjectPageState extends State<ProjectPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title),
+            Text(title, style: const TextStyle(fontSize: 18)),
             Row(
               children: [
                 SizedBox(
                   width: textBoxWidth,
                   child: TextBox(
-                      suffix: Text(unit),
+                      enabled: false,
+                      style: const TextStyle(fontSize: 18),
                       placeholder: placeholder,
+                      textAlign: TextAlign.center,
                       controller: controller),
                 ),
                 const SizedBox(width: 10),
@@ -194,8 +197,20 @@ class _ProjectPageState extends State<ProjectPage> {
     );
   }
 
+  _toolTip() {
+    return Tooltip(
+      message: '点击打开目录',
+      child: IconButton(
+          icon: const Icon(FluentIcons.open_enrollment, size: 18),
+          onPressed: () async {
+            String dir = _projectTaskVm.projectPathController.text;
+            await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
+          }),
+    );
+  }
+
   Widget _mainLayout() {
-    var left = Card(
+    var leftTop = Card(
         margin: const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 20),
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
         borderRadius: BorderRadius.circular(10),
@@ -219,19 +234,7 @@ class _ProjectPageState extends State<ProjectPage> {
                         _gitErrorText(),
                         _input("工程位置", "输入工程名",
                             _projectTaskVm.projectPathController,
-                            alwaysDisable: true,
-                            suffix: Tooltip(
-                              message: '点击打开目录',
-                              child: IconButton(
-                                  icon: const Icon(FluentIcons.open_enrollment,
-                                      size: 18),
-                                  onPressed: () async {
-                                    String dir = _projectTaskVm
-                                        .projectPathController.text;
-                                    await launchUrl(
-                                        Uri.parse(dir)); // 通过资源管理器打开该目录
-                                  }),
-                            )),
+                            alwaysDisable: true, suffix: _toolTip()),
                         _input("分支名称", "输入分支名称",
                             _projectTaskVm.gitBranchController),
                         _input("应用描述", "输入应用描述...",
@@ -241,114 +244,55 @@ class _ProjectPageState extends State<ProjectPage> {
                         _input("打包命令", "输入打包命令...",
                             _projectTaskVm.assembleTaskNameController),
                         _chooseConfig(
-                            title: "强制指定打包版本参数",
+                            title: "强制指定打包版本参数(需要工程中动态获取参数才能达成，待定)",
                             chooseWidget: Row(children: [
                               _childChoose(
                                 title: "versionCode",
                                 placeholder: "",
-                                unit: "",
                                 controller:
                                     _projectTaskVm.versionCodeController,
                               ),
                               _childChoose(
                                 title: "versionName",
                                 placeholder: "",
-                                unit: "",
                                 controller:
                                     _projectTaskVm.versionNameController,
                               ),
                             ])),
-                        _chooseConfig(
-                            title: "clone设置",
-                            chooseWidget: Row(children: [
-                              _childChoose(
-                                  title: "每次最长执行时间",
-                                  placeholder: "3600",
-                                  unit: "秒",
-                                  controller: _projectTaskVm
-                                      .cloneMaxDurationController),
-                              _childChoose(
-                                  title: "最大可重试次数",
-                                  placeholder: "5",
-                                  unit: "次",
-                                  controller:
-                                      _projectTaskVm.cloneMaxTimesController),
-                            ])),
-                        _chooseConfig(
-                            title: "打包指令查询设置",
-                            chooseWidget: Row(children: [
-                              _childChoose(
-                                  title: "每次最长执行时间",
-                                  placeholder: "3600",
-                                  unit: "秒",
-                                  controller: _projectTaskVm
-                                      .enableOrderCheckMaxDurationController),
-                              _childChoose(
-                                  title: "最大可重试次数",
-                                  placeholder: "5",
-                                  unit: "次",
-                                  controller: _projectTaskVm
-                                      .enableOrderCheckMaxTimesController),
-                            ])),
-                        _chooseConfig(
-                            title: "蒲公英平台设置",
-                            chooseWidget: Column(
-                              children: [
-                                Row(children: [
-                                  _childChoose(
-                                      title: "_api_key",
-                                      placeholder: "必须填写",
-                                      unit: "",
-                                      textBoxWidth: 500,
-                                      controller: _projectTaskVm
-                                          .pgyApiKeyController),
-                                ]),
-                                const SizedBox(height: 10),
-                                Row(children: [
-                                  _childChoose(
-                                      title: "每次上传最长执行时间",
-                                      placeholder: "3600",
-                                      unit: "秒",
-                                      controller: _projectTaskVm
-                                          .pgyUploadMaxDurationController),
-                                  _childChoose(
-                                      title: "最大可重试次数",
-                                      placeholder: "5",
-                                      unit: "次",
-                                      controller: _projectTaskVm
-                                          .pgyUploadMaxTimesController),
-                                ]),
-                              ],
-                            )),
                       ]),
                 ),
               ),
             ),
-            Row(
-              children: [
-                _actionButton(
-                    title: "项目激活测试",
-                    bgColor: Colors.purple.normal,
-                    action: () {
-                      DialogUtil.showConfirmDialog(
-                          context: context,
-                          content:
-                              "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
-                          title: '提示',
-                          onConfirm: () {
-                            start(showApkNotExistInfo);
-                          });
-                    }),
-                _actionButton(
-                    title: "正式开始打包",
-                    bgColor: Colors.orange.lighter,
-                    action: actionButtonDisabled
-                        ? null
-                        : () => start(showApkNotExistInfo)),
-              ],
-            ),
           ],
         ));
+
+    var leftBottom = Container(
+      margin: const EdgeInsets.only(top: 0, left: 10, right: 10, bottom: 0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
+      child: Row(
+        children: [
+          _actionButton(
+              title: "项目激活测试",
+              bgColor: Colors.purple.normal,
+              action: () {
+                DialogUtil.showConfirmDialog(
+                    context: context,
+                    content:
+                        "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
+                    title: '提示',
+                    onConfirm: () {
+                      start(showApkNotExistInfo);
+                    });
+              }),
+          _actionButton(
+              title: "正式开始打包",
+              bgColor: Colors.orange.lighter,
+              action: actionButtonDisabled
+                  ? null
+                  : () => start(showApkNotExistInfo)),
+        ],
+      ),
+    );
 
     var middle = Padding(
         padding:
@@ -410,7 +354,9 @@ class _ProjectPageState extends State<ProjectPage> {
 
     return Row(
       children: [
-        Expanded(flex: 6, child: Column(children: [Expanded(child: left)])),
+        Expanded(
+            flex: 6,
+            child: Column(children: [Expanded(child: leftTop), leftBottom])),
         Expanded(flex: 2, child: Column(children: [Expanded(child: middle)])),
         Expanded(flex: 4, child: Column(children: [Expanded(child: right)])),
       ],

@@ -8,6 +8,11 @@ class SpConst {
   static const String envAndroidKey = "envAndroidKey";
   static const String envWorkspaceRootKey = "envWorkspaceRootKey";
   static const String isEnvChecked = "isEnvChecked";
+
+  static const String stageTaskExecuteMaxPeriod = "stageTaskExecuteMaxPeriod"; // 一个阶段任务的单次最大可执行时间（秒）
+  static const String stageTaskExecuteMaxRetryTimes = "stageTaskExecuteMaxRetryTimes";
+
+  static const String pgyApiKey = "pgyApiKey"; // 蒲公英平台的apiKey
 }
 
 class SpUtil {

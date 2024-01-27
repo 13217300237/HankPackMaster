@@ -101,12 +101,16 @@ class ProjectTaskVm extends ChangeNotifier {
   final cloneMaxDurationController = TextEditingController(); // clone每次执行的最长时间
   final cloneMaxTimesController = TextEditingController(); // clone的最大可执行次数
 
-  final enableOrderCheckMaxDurationController = TextEditingController(); // 可用指令查询的每次最大可执行时间
-  final enableOrderCheckMaxTimesController = TextEditingController(); // 可用指令查询阶段的最大可执行次数
+  final enableOrderCheckMaxDurationController =
+      TextEditingController(); // 可用指令查询的每次最大可执行时间
+  final enableOrderCheckMaxTimesController =
+      TextEditingController(); // 可用指令查询阶段的最大可执行次数
 
   final pgyApiKeyController = TextEditingController(); // pgy平台apkKey设置
-  final pgyUploadMaxDurationController = TextEditingController(); // pgy平台每次上传的最大可执行时间
-  final pgyUploadMaxTimesController = TextEditingController(); // pgy平台每次上传的最大可执行次数
+  final pgyUploadMaxDurationController =
+      TextEditingController(); // pgy平台每次上传的最大可执行时间
+  final pgyUploadMaxTimesController =
+      TextEditingController(); // pgy平台每次上传的最大可执行次数
 
   final List<TaskState> taskStateList = [];
 
@@ -140,6 +144,13 @@ class ProjectTaskVm extends ChangeNotifier {
 
   final List<String> _enableAssembleOrders = [];
 
+  void deleteDirectory(String path) {
+    Directory directory = Directory(path);
+    if (directory.existsSync()) {
+      directory.deleteSync(recursive: true);
+    }
+  }
+
   void init() {
     taskStateList.clear();
 
@@ -158,6 +169,16 @@ class ProjectTaskVm extends ChangeNotifier {
           updateStatue(i, StageStatue.error);
           return "工程根目录 不能为空";
         }
+
+        try {
+          deleteDirectory(projectPath);
+        } catch (e) {
+          updateStatue(i, StageStatue.error);
+          String err = "$e";
+          addNewLogLine(err);
+          return err;
+        }
+
         updateStatue(i, StageStatue.finished);
         return null;
       },

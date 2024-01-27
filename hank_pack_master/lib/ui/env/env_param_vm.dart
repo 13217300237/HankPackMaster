@@ -174,6 +174,41 @@ class EnvParamVm extends ChangeNotifier {
       return false;
     }
 
+    if (pgyApiKey.isEmpty) {
+      return false;
+    }
+
     return true;
+  }
+
+  TextEditingController stageTaskExecuteMaxPeriodController =
+      TextEditingController();
+
+  int get stageTaskExecuteMaxPeriod =>
+      SpUtil.getValue(SpConst.stageTaskExecuteMaxPeriod) ?? (5 * 60); // 默认值5分钟
+
+  set stageTaskExecuteMaxPeriod(int max) {
+    SpUtil.putValue(SpConst.stageTaskExecuteMaxPeriod, max);
+    notifyListeners();
+  }
+
+  TextEditingController stageTaskExecuteMaxRetryTimesController =
+      TextEditingController();
+
+  int get stageTaskExecuteMaxRetryTimes =>
+      SpUtil.getValue(SpConst.stageTaskExecuteMaxRetryTimes) ?? 5; // 默认值5次
+
+  set stageTaskExecuteMaxRetryTimes(int max) {
+    SpUtil.putValue(SpConst.stageTaskExecuteMaxRetryTimes, max);
+    notifyListeners();
+  }
+
+  TextEditingController pgyApiKeyController = TextEditingController();
+
+  String get pgyApiKey => SpUtil.getValue(SpConst.pgyApiKey) ?? '';
+
+  set pgyApiKey(String v) {
+    SpUtil.putValue(SpConst.pgyApiKey, v);
+    notifyListeners();
   }
 }

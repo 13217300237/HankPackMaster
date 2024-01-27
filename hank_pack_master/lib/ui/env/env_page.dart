@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import '../../core/command_util.dart';
 import '../comm/theme.dart';
 import 'env_param_vm.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 ///
 /// 环境参数检测页面
@@ -24,6 +23,28 @@ class EnvPage extends StatefulWidget {
 class _EnvPageState extends State<EnvPage> {
   late AppTheme _appTheme;
   late EnvParamVm _envParamModel;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // '${_envParamModel.stageTaskExecuteMaxPeriod}',
+
+      _envParamModel.stageTaskExecuteMaxPeriodController.text =
+          '${_envParamModel.stageTaskExecuteMaxPeriod}';
+      _envParamModel.stageTaskExecuteMaxRetryTimesController.text =
+          '${_envParamModel.stageTaskExecuteMaxRetryTimes}';
+
+      _envParamModel.pgyApiKeyController.text = _envParamModel.pgyApiKey;
+
+      _envParamModel.pgyApiKeyController.addListener(() {
+        if(_envParamModel.pgyApiKeyController.text.isNotEmpty) {
+          _envParamModel.pgyApiKey = _envParamModel.pgyApiKeyController.text;
+        }
+      });
+    });
+  }
 
   Widget _envChooseWidget(
       {required String title,
@@ -68,116 +89,13 @@ class _EnvPageState extends State<EnvPage> {
                   const EnvGroupCard(order: "adb"),
                   const EnvGroupCard(order: "flutter"),
                   const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("手动环境指定", style: TextStyle(fontSize: 30)),
-                        Row(
-                          children: [
-                            FilledButton(
-                                child: const Text("设置环境变量A为随机值"),
-                                onPressed: () async {
-                                  var random = Random.secure().nextInt(100);
-                                  ExecuteResult res =
-                                      await CommandUtil.getInstance()
-                                          .setSystemEnvVar("A", "$random");
-                                  if (res.exitCode == 0) {
-                                    showMyInfo(
-                                        title: "提示",
-                                        content: "设置环境变量A的值为 $random 成功",
-                                        severity: InfoBarSeverity.success);
-                                  } else {
-                                    showMyInfo(
-                                        title: "提示",
-                                        content: "设置环境变量A失败",
-                                        severity: InfoBarSeverity.error);
-                                  }
-                                }),
-                            const SizedBox(width: 10),
-                            Button(
-                                child: const Text("打开环境变量设置"),
-                                onPressed: () async {
-                                  var res = await CommandUtil.getInstance()
-                                      .openEnvSetting();
-                                  debugPrint("查询到的A的值为： $res  ");
-                                }),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  _manullySpecifyEnvTitle(),
                   Row(children: [
-                    Expanded(
-                      child: _envChooseWidget(
-                          title: "工作空间",
-                          init: () => _envParamModel.workSpaceRoot,
-                          action: (selectedDirectory) {
-                            DialogUtil.showInfo(
-                                context: context,
-                                title: '选择了路径:',
-                                content: selectedDirectory);
-                            _envParamModel.workSpaceRoot = selectedDirectory;
-                          }),
-                    ),
-                    Expanded(
-                      child: _envChooseWidget(
-                          title: "Android SDK",
-                          init: () => _envParamModel.androidSdkRoot,
-                          action: (selectedDirectory) async {
-                            String envKey = "ANDROID_HOME";
-
-                            if (_envParamModel.androidSdkRoot ==
-                                selectedDirectory) {
-                              // 当前路径相同
-                              showMyInfo(
-                                title: "选择的路径与当前路径相同 ",
-                                content: selectedDirectory,
-                                severity: InfoBarSeverity.warning,
-                              );
-                              return;
-                            }
-
-                            // 选择了 androidSDK之后，
-                            // 1. 检查SDK的可用性，不可用，终止，可用继续往下
-                            // 2. 检查 echo %ANDROID_HOME% 的值是不是和当前值相同，不同，设置 环境变量 ANDROID_HOME 为选择的路径，相同，结束
-                            bool enable =
-                                await _checkAndroidSdkEnable(selectedDirectory);
-                            if (!enable) {
-                              showMyInfo(
-                                title: '错误:',
-                                content:
-                                    "Android SDK  $selectedDirectory 不可用，缺少必要组件",
-                                severity: InfoBarSeverity.warning,
-                              );
-                              return;
-                            }
-
-                            var executeResult = await CommandUtil.getInstance()
-                                .setSystemEnvVar(envKey, selectedDirectory);
-                            if (executeResult.exitCode == 0) {
-                              _envParamModel.androidSdkRoot = selectedDirectory;
-                              showMyInfo(
-                                  title: "用户环境变量 $envKey设置成功: ",
-                                  content: selectedDirectory);
-
-                              String echoAndroidHome =
-                                  await CommandUtil.getInstance().echoCmd(
-                                order: "%$envKey%",
-                                action: (s) {},
-                              );
-
-                              debugPrint('echoAndroidHome -> $echoAndroidHome');
-                            } else {
-                              showMyInfo(
-                                  title: "错误",
-                                  content: "<3>环境变量设置失败 ${executeResult.res}",
-                                  severity: InfoBarSeverity.warning);
-                            }
-                          }),
-                    ),
+                    Expanded(child: _workspaceChoose()),
+                    Expanded(child: _androidSdkChoose()),
                   ]),
+                  Row(children: [Expanded(child: _stageTaskExecuteSetting())]),
+                  Row(children: [Expanded(child: _pgySetting())]),
                 ]))));
   }
 
@@ -300,6 +218,202 @@ class _EnvPageState extends State<EnvPage> {
       title: "测试结果",
     );
   }
+
+  Widget _manullySpecifyEnvTitle() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text("手动环境指定", style: TextStyle(fontSize: 30)),
+          Row(
+            children: [
+              FilledButton(
+                  child: const Text("设置环境变量A为随机值"),
+                  onPressed: () async {
+                    var random = Random.secure().nextInt(100);
+                    ExecuteResult res = await CommandUtil.getInstance()
+                        .setSystemEnvVar("A", "$random");
+                    if (res.exitCode == 0) {
+                      showMyInfo(
+                          title: "提示",
+                          content: "设置环境变量A的值为 $random 成功",
+                          severity: InfoBarSeverity.success);
+                    } else {
+                      showMyInfo(
+                          title: "提示",
+                          content: "设置环境变量A失败",
+                          severity: InfoBarSeverity.error);
+                    }
+                  }),
+              const SizedBox(width: 10),
+              Button(
+                  child: const Text("打开环境变量设置"),
+                  onPressed: () async {
+                    var res = await CommandUtil.getInstance().openEnvSetting();
+                    debugPrint("查询到的A的值为： $res  ");
+                  }),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _workspaceChoose() {
+    return _envChooseWidget(
+        title: "工作空间",
+        init: () => _envParamModel.workSpaceRoot,
+        action: (selectedDirectory) {
+          DialogUtil.showInfo(
+              context: context, title: '选择了路径:', content: selectedDirectory);
+          _envParamModel.workSpaceRoot = selectedDirectory;
+        });
+  }
+
+  Widget _androidSdkChoose() {
+    return _envChooseWidget(
+        title: "Android SDK",
+        init: () => _envParamModel.androidSdkRoot,
+        action: (selectedDirectory) async {
+          String envKey = "ANDROID_HOME";
+
+          if (_envParamModel.androidSdkRoot == selectedDirectory) {
+            // 当前路径相同
+            showMyInfo(
+              title: "选择的路径与当前路径相同 ",
+              content: selectedDirectory,
+              severity: InfoBarSeverity.warning,
+            );
+            return;
+          }
+
+          // 选择了 androidSDK之后，
+          // 1. 检查SDK的可用性，不可用，终止，可用继续往下
+          // 2. 检查 echo %ANDROID_HOME% 的值是不是和当前值相同，不同，设置 环境变量 ANDROID_HOME 为选择的路径，相同，结束
+          bool enable = await _checkAndroidSdkEnable(selectedDirectory);
+          if (!enable) {
+            showMyInfo(
+              title: '错误:',
+              content: "Android SDK  $selectedDirectory 不可用，缺少必要组件",
+              severity: InfoBarSeverity.warning,
+            );
+            return;
+          }
+
+          var executeResult = await CommandUtil.getInstance()
+              .setSystemEnvVar(envKey, selectedDirectory);
+          if (executeResult.exitCode == 0) {
+            _envParamModel.androidSdkRoot = selectedDirectory;
+            showMyInfo(
+                title: "用户环境变量 $envKey设置成功: ", content: selectedDirectory);
+
+            String echoAndroidHome = await CommandUtil.getInstance().echoCmd(
+              order: "%$envKey%",
+              action: (s) {},
+            );
+
+            debugPrint('echoAndroidHome -> $echoAndroidHome');
+          } else {
+            showMyInfo(
+                title: "错误",
+                content: "<3>环境变量设置失败 ${executeResult.res}",
+                severity: InfoBarSeverity.warning);
+          }
+        });
+  }
+
+  /// 阶段任务执行设置
+  _stageTaskExecuteSetting() {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 9),
+      borderColor: Colors.transparent,
+      backgroundColor: _appTheme.bgColorSucc,
+      borderRadius: BorderRadius.circular(5),
+      child: Row(children: [
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text("阶段任务执行参数设置", style: _cTextStyle),
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text("每次最大可执行时间", style: _cTextStyle),
+                  SizedBox(
+                    width: 100,
+                    child: TextBox(
+                      controller:
+                          _envParamModel.stageTaskExecuteMaxPeriodController,
+                      suffix: Text("秒", style: _cTextStyle),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 19),
+                    ),
+                  )
+                ])),
+            const SizedBox(width: 100),
+            Expanded(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text("最大可执行次数", style: _cTextStyle),
+                  SizedBox(
+                    width: 100,
+                    child: TextBox(
+                      suffix: Text("次", style: _cTextStyle),
+                      controller: _envParamModel
+                          .stageTaskExecuteMaxRetryTimesController,
+                      textAlign: TextAlign.center,
+                      style: _cTextStyle,
+                    ),
+                  ),
+                ]))
+          ])
+        ]))
+      ]),
+    );
+  }
+
+  /// 阶段任务执行设置
+  _pgySetting() {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 9),
+      borderColor: Colors.transparent,
+      backgroundColor: _appTheme.bgColorSucc,
+      borderRadius: BorderRadius.circular(5),
+      child: Row(children: [
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text("蒲公英平台设置", style: _cTextStyle),
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text("_api_key", style: _cTextStyle),
+                  const SizedBox(width: 200),
+                  Expanded(
+                    child: TextBox(
+                      controller: _envParamModel.pgyApiKeyController,
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(fontSize: 19),
+                    ),
+                  )
+                ])),
+          ]),
+        ]))
+      ]),
+    );
+  }
+
+  final _cTextStyle = const TextStyle(fontSize: 19);
 }
 
 ///
@@ -386,7 +500,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             _titleWidget(binRoot),
-                            EnvCheckWidget(cmdStr: binRoot,title:title),
+                            EnvCheckWidget(cmdStr: binRoot, title: title),
                           ],
                         ),
                       )),
@@ -495,7 +609,7 @@ class EnvCheckWidget extends StatefulWidget {
   final String cmdStr;
   final String title;
 
-  const EnvCheckWidget({super.key, required this.cmdStr,required this.title});
+  const EnvCheckWidget({super.key, required this.cmdStr, required this.title});
 
   @override
   State<EnvCheckWidget> createState() => _EnvCheckWidgetState();

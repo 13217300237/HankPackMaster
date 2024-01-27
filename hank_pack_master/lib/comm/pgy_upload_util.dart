@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
+import 'package:hank_pack_master/comm/sp_util.dart';
 
 import '../ui/projects/project_task_vm.dart';
 
@@ -30,7 +31,7 @@ class PgyUploadUtil {
     final response = await _dio.post(
       'https://www.pgyer.com/apiv2/app/getCOSToken',
       queryParameters: {
-        '_api_key': '3e3bb841269ccb9e3fb9b3feffa4273c',
+        '_api_key': SpUtil.getValue(SpConst.pgyApiKey),
         'buildType': 'android',
         'buildDescription': buildDescription,
         'buildUpdateDescription': buildUpdateDescription,
@@ -134,7 +135,7 @@ class PgyUploadUtil {
       final response = await _dio.post(
         "https://www.pgyer.com/apiv2/app/buildInfo",
         queryParameters: {
-          '_api_key': '3e3bb841269ccb9e3fb9b3feffa4273c',
+          '_api_key': SpUtil.getValue(SpConst.pgyApiKey),
           'buildKey': pgyEntity.key,
         },
       );

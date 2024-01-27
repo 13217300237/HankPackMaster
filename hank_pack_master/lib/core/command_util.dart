@@ -529,12 +529,8 @@ $sb"""
     params.add("clean");
     params.add(packageOrder);
     params.add("--stacktrace");
-    if (versionCode.isNotEmpty) {
-      params.add("-PversionCode=$versionCode");
-    }
-    if (versionName.isNotEmpty) {
-      params.add("-PversionName=$versionName");
-    }
+
+    debugPrint("${params}");
 
     var process = await execute(
       cmd: "gradlew.bat",
