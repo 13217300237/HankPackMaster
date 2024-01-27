@@ -12,6 +12,7 @@ class DialogUtil {
     Function? onConfirm,
     required String title,
     required dynamic content,
+    bool showCancel = true,
     String confirmText = "是",
     String cancelText = "取消",
     double maxWidth = 500,
@@ -36,12 +37,13 @@ class DialogUtil {
                 onConfirm?.call();
               },
             ),
-            Button(
-              child: Text(cancelText),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
+            if (showCancel)
+              Button(
+                child: Text(cancelText),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
           ],
         );
       },

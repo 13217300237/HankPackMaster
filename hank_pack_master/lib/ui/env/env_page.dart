@@ -63,18 +63,10 @@ class _EnvPageState extends State<EnvPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                   const Text("自动环境检测", style: TextStyle(fontSize: 30)),
-                  const Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: EnvGroupCard(order: "java")),
-                        Expanded(child: EnvGroupCard(order: "git")),
-                      ]),
-                  const Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: EnvGroupCard(order: "adb")),
-                        Expanded(child: EnvGroupCard(order: "flutter")),
-                      ]),
+                  const EnvGroupCard(order: "java"),
+                  const EnvGroupCard(order: "git"),
+                  const EnvGroupCard(order: "adb"),
+                  const EnvGroupCard(order: "flutter"),
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -345,17 +337,21 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
 
   /// 带动态效果的环境监测卡片
   Widget _createDynamicEnvCheckCard() {
-    return Card(
-        backgroundColor: _appTheme.bgColorSucc,
-        margin: const EdgeInsets.all(8),
-        borderRadius: BorderRadius.circular(5),
-        borderColor: Colors.transparent,
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              _buildEnvRadioBtn(widget.order, whereRes.toSet()),
-            ]));
+    return Row(children: [
+      Expanded(
+        child: Card(
+            backgroundColor: _appTheme.bgColorSucc,
+            margin: const EdgeInsets.all(8),
+            borderRadius: BorderRadius.circular(5),
+            borderColor: Colors.transparent,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _buildEnvRadioBtn(widget.order, whereRes.toSet()),
+                ])),
+      )
+    ]);
   }
 
   @override
@@ -385,11 +381,12 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                           needToOverride: true),
                       content: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             _titleWidget(binRoot),
-                            EnvCheckWidget(cmdStr: binRoot),
+                            EnvCheckWidget(cmdStr: binRoot,title:title),
                           ],
                         ),
                       )),
@@ -496,8 +493,9 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
 
 class EnvCheckWidget extends StatefulWidget {
   final String cmdStr;
+  final String title;
 
-  const EnvCheckWidget({super.key, required this.cmdStr});
+  const EnvCheckWidget({super.key, required this.cmdStr,required this.title});
 
   @override
   State<EnvCheckWidget> createState() => _EnvCheckWidgetState();
@@ -516,9 +514,17 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
   @override
   Widget build(BuildContext context) {
     if (_executing) {
-      return const ProgressBar();
+      return const ProgressRing();
     }
-    return Text(executeRes, style: const TextStyle(fontSize: 16));
+
+    return IconButton(
+      icon: const Icon(FluentIcons.show_results, size: 24.0),
+      onPressed: () => DialogUtil.showConfirmDialog(
+          context: context,
+          title: "${widget.title}测试结果",
+          content: executeRes,
+          showCancel: false),
+    );
   }
 
   @override
