@@ -280,16 +280,12 @@ class _ProjectPageState extends State<ProjectPage> {
                     content:
                         "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
                     title: '提示',
-                    onConfirm: () {
-                      start(showApkNotExistInfo);
-                    });
+                    onConfirm: () => start());
               }),
           _actionButton(
               title: "正式开始打包",
               bgColor: Colors.orange.lighter,
-              action: actionButtonDisabled
-                  ? null
-                  : () => start(showApkNotExistInfo)),
+              action: actionButtonDisabled ? null : () => start()),
         ],
       ),
     );
@@ -477,15 +473,15 @@ class _ProjectPageState extends State<ProjectPage> {
 
   MyAppInfo? myAppInfo;
 
-  Future<void> start(Function showApkNotExistInfo) async {
+  Future<void> start() async {
     _projectTaskVm.init();
     _projectTaskVm.cleanLog();
     _projectTaskVm.startSchedule(endAction: (s) {
-      if (s is PackageSuccessEntity) {
-        dealWithScheduleResultByApkGenerate(s);
-      } else if (s is MyAppInfo) {
-        myAppInfo = s;
-        dealWithScheduleResultByApkUpload(s);
+      if (s.data is PackageSuccessEntity) {
+        dealWithScheduleResultByApkGenerate(s.data);
+      } else if (s.data is MyAppInfo) {
+        myAppInfo = s.data;
+        dealWithScheduleResultByApkUpload(s.data);
       } else {
         DialogUtil.showConfirmDialog(
           context: context,
@@ -493,10 +489,6 @@ class _ProjectPageState extends State<ProjectPage> {
           content: s.toString(),
           confirmText: "知道了...",
         );
-      }
-    }).then((value) {
-      if (null != value) {
-        DialogUtil.showInfo(context: context, content: value);
       }
     });
   }

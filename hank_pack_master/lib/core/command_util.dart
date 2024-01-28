@@ -7,7 +7,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../comm/sp_util.dart';
 
-bool cmdDebug = false;
+bool cmdDebug = true;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {

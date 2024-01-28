@@ -1,17 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy_upload_util.dart';
 import 'package:jiffy/jiffy.dart';
 
+import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/sp_util.dart';
 import '../../core/command_util.dart';
 import '../../comm/text_util.dart';
 import 'package:path/path.dart';
 
-typedef ActionFunc = Future<dynamic> Function(int);
+typedef ActionFunc = Future<OrderExecuteResult> Function(int);
 
 typedef OnStageFinishedFunc = Function(int, String);
 
@@ -87,6 +89,11 @@ waitOneSec() async {
   await Future.delayed(const Duration(milliseconds: 50));
 }
 
+/// 模拟耗时
+waitForever() async {
+  await Future.delayed(const Duration(seconds: 10));
+}
+
 class ProjectTaskVm extends ChangeNotifier {
   final gitUrlController = TextEditingController(); // git地址
   final gitBranchController = TextEditingController(); // 分支名称
@@ -155,6 +162,17 @@ class ProjectTaskVm extends ChangeNotifier {
     taskStateList.clear();
 
     taskStateList.add(TaskState(
+      "TEST TEST",
+      actionFunc: (i) async {
+        updateStatue(i, StageStatue.executing);
+        await waitForever();
+        updateStatue(i, StageStatue.finished);
+        return OrderExecuteResult(msg: "测试结束", succeed: true);
+      },
+      onStateFinished: updateStageCostTime,
+    ));
+
+    taskStateList.add(TaskState(
       "参数准备",
       actionFunc: (i) async {
         await waitOneSec();
@@ -163,11 +181,11 @@ class ProjectTaskVm extends ChangeNotifier {
         addNewLogLine("projectRoot-> $projectPath...");
         if (gitUrl.isEmpty) {
           updateStatue(i, StageStatue.error);
-          return "git仓库地址 不能为空";
+          return OrderExecuteResult(msg: "git仓库地址 不能为空", succeed: false);
         }
         if (projectPath.isEmpty) {
           updateStatue(i, StageStatue.error);
-          return "工程根目录 不能为空";
+          return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
         }
 
         try {
@@ -176,11 +194,11 @@ class ProjectTaskVm extends ChangeNotifier {
           updateStatue(i, StageStatue.error);
           String err = "$e";
           addNewLogLine(err);
-          return err;
+          return OrderExecuteResult(msg: err, succeed: false);
         }
 
         updateStatue(i, StageStatue.finished);
-        return null;
+        return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -200,10 +218,11 @@ class ProjectTaskVm extends ChangeNotifier {
         if (gitCloneRes.exitCode != 0) {
           addNewLogLine("clone失败，具体问题请看日志...");
           updateStatue(i, StageStatue.error);
-          return "clone失败，具体问题请看日志... \n${gitCloneRes.res}";
+          return OrderExecuteResult(
+              msg: "clone失败，具体问题请看日志... \n${gitCloneRes.res}", succeed: false);
         }
         updateStatue(i, StageStatue.finished);
-        return null;
+        return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -225,10 +244,10 @@ class ProjectTaskVm extends ChangeNotifier {
         if (gitCheckoutRes.exitCode != 0) {
           addNewLogLine("checkout  失败，具体问题请看日志...");
           updateStatue(i, StageStatue.error);
-          return gitCheckoutRes.res;
+          return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
         }
         updateStatue(i, StageStatue.finished);
-        return null;
+        return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -246,11 +265,11 @@ class ProjectTaskVm extends ChangeNotifier {
           String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
           addNewLogLine(er);
           updateStatue(i, StageStatue.error);
-          return er;
+          return OrderExecuteResult(msg: er, succeed: false);
         }
         addNewLogLine("工程目录检测成功，工程结构正常.");
         updateStatue(i, StageStatue.finished);
-        return null;
+        return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -267,7 +286,7 @@ class ProjectTaskVm extends ChangeNotifier {
         if (gitAssembleTasksRes.exitCode != 0) {
           updateStatue(i, StageStatue.error);
           addNewLogLine("可用指令查询 完毕，结果是  $gitAssembleTasksRes");
-          return "可用指令查询 存在问题!!!";
+          return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
         }
         var ori = gitAssembleTasksRes.res;
         var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
@@ -286,7 +305,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
         debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
         updateStatue(i, StageStatue.finished);
-        return null;
+        return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -309,10 +328,10 @@ class ProjectTaskVm extends ChangeNotifier {
           String er = "打包失败，详情请看日志";
           addNewLogLine(er);
           updateStatue(i, StageStatue.error);
-          return er;
+          return OrderExecuteResult(msg: er, succeed: false);
         }
         updateStatue(i, StageStatue.finished);
-        return null;
+        return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -334,7 +353,7 @@ class ProjectTaskVm extends ChangeNotifier {
           addNewLogLine("apk文件未找到,$apkLocation");
           updateStatue(i, StageStatue.error);
         }
-        return null;
+        return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -352,7 +371,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
         if (log.exitCode != 0) {
           updateStatue(i, StageStatue.error);
-          return "获取git最近提交记录失败...";
+          return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
         }
 
         addNewLogLine("获取git最近提交记录成功 $log");
@@ -365,7 +384,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
         if (pgyToken == null) {
           updateStatue(i, StageStatue.error);
-          return "pgy token获取失败...";
+          return OrderExecuteResult(msg: "pgy token获取失败...", succeed: false);
         }
 
         _pgyEntity = PgyEntity(
@@ -377,7 +396,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
         addNewLogLine("pgy参数获取成功,$_pgyEntity");
         updateStatue(i, StageStatue.finished);
-        return null;
+        return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -387,7 +406,7 @@ class ProjectTaskVm extends ChangeNotifier {
       actionFunc: (i) async {
         if (!_pgyEntity!.isOk()) {
           updateStatue(i, StageStatue.error);
-          return "上传参数为空，流程终止!";
+          return OrderExecuteResult(msg: "上传参数为空，流程终止!", succeed: false);
         }
         updateStatue(i, StageStatue.executing);
 
@@ -402,14 +421,14 @@ class ProjectTaskVm extends ChangeNotifier {
           uploadProgressAction: addNewLogLine,
         );
 
-        if (res == null) {
-          addNewLogLine("上传成功,$oriFileName");
-          updateStatue(i, StageStatue.finished);
-          return null;
-        } else {
+        if (res != null) {
           addNewLogLine("上传失败,$res");
           updateStatue(i, StageStatue.error);
-          return res;
+          return OrderExecuteResult(msg: "上传失败,$res", succeed: false);
+        } else {
+          addNewLogLine("上传成功,$oriFileName");
+          updateStatue(i, StageStatue.finished);
+          return OrderExecuteResult(succeed: true);
         }
       },
       onStateFinished: updateStageCostTime,
@@ -427,7 +446,7 @@ class ProjectTaskVm extends ChangeNotifier {
         if (s.code == 1216) {
           // 发布失败，流程终止
           updateStatue(i, StageStatue.error);
-          return "发布失败，流程终止";
+          return OrderExecuteResult(succeed: false, msg: "发布失败，流程终止");
         } else {
           // 发布成功，打印结果
           debugPrint("发布成功，结果为:${s.message.runtimeType} ${s.data}");
@@ -452,13 +471,12 @@ class ProjectTaskVm extends ChangeNotifier {
 
             updateStatue(i, StageStatue.finished);
 
-            return appInfo;
+            return OrderExecuteResult(succeed: true, data: appInfo);
           } else {
             addNewLogLine("发布结果解析失败");
             updateStatue(i, StageStatue.error);
+            return OrderExecuteResult(succeed: false, msg: "发布结果解析失败");
           }
-
-          return "发布成功，详情请看日志";
         }
       },
       onStateFinished: updateStageCostTime,
@@ -550,44 +568,75 @@ class ProjectTaskVm extends ChangeNotifier {
     });
   }
 
+  int get maxTimes =>
+      SpUtil.getValue(SpConst.stageTaskExecuteMaxRetryTimes) ?? 5;
+
+  Future<String> timeOutCounter() async {
+    await Future.delayed(Duration(
+        seconds: SpUtil.getValue(SpConst.stageTaskExecuteMaxPeriod) ?? 3));
+    return "任务已超时";
+  }
+
   ///
   /// 开始流水线工作
   ///
-  Future<String?> startSchedule(
-      {required Function(dynamic s) endAction}) async {
+  Future<OrderExecuteResult> startSchedule(
+      {required Function(OrderExecuteResult s) endAction}) async {
     if (_jobRunning) {
-      return "任务正在执行中...";
+      return OrderExecuteResult(succeed: false, msg: "任务正在执行中...");
     }
 
     _jobRunning = true;
 
     addNewLogLine("开始流程...");
 
-    dynamic actionResStr;
+    OrderExecuteResult actionResStr;
 
     Stopwatch totalWatch = Stopwatch();
     totalWatch.start();
 
     for (int i = 0; i < taskStateList.length; i++) {
-      Stopwatch stageTimeWatch = Stopwatch();
-      stageTimeWatch.start();
-      dynamic result = await taskStateList[i].actionFunc(i);
-      stageTimeWatch.stop(); // 停止计时器
-      taskStateList[i]
-          .onStateFinished
-          ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} 毫秒");
+      for (int j = 0; j < maxTimes; j++) {
+        Stopwatch stageTimeWatch = Stopwatch();
+        stageTimeWatch.start();
 
-      if (result != null) {
-        actionResStr = result;
-        break;
+        var taskName = taskStateList[i].stageName;
+        var taskFuture = taskStateList[i].actionFunc(i);
+        var cancelableTask = CancelableOperation.fromFuture(taskFuture);
+
+        var result = await Future.any([taskFuture, timeOutCounter()]); // 计算超时
+
+        stageTimeWatch.stop(); // 停止计时器
+
+        // 如果任务在规定时间之内完成
+        if (result is OrderExecuteResult && result.succeed == true) {
+          taskStateList[i]
+              .onStateFinished
+              ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} 毫秒");
+          break;
+        } else {
+          cancelableTask.cancel(); // 取消任务
+          addNewLogLine("第${j + 1}次: $taskName - $result");
+          // 如果到了最后一次
+          if (j == maxTimes - 1) {
+            actionResStr =
+                OrderExecuteResult(succeed: false, msg: "第${j + 1}次:$result");
+            CommandUtil.getInstance().stopAllExec();
+            _jobRunning = false;
+            return actionResStr;
+          }
+          waitOneSec();
+        }
       }
     }
 
     totalWatch.stop();
-    addNewLogLine("流程结束,检查成果...");
     _jobRunning = false;
-    endAction(actionResStr);
+    endAction(OrderExecuteResult(succeed: true, msg: "流程结束,检查成果..."));
 
-    return "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒";
+    return OrderExecuteResult(
+      succeed: true,
+      msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒",
+    );
   }
 }
