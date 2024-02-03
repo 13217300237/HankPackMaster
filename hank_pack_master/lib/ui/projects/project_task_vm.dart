@@ -185,20 +185,21 @@ class ProjectTaskVm extends ChangeNotifier {
           return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
         }
 
-        try {
-          deleteDirectory(projectPath);
-        } catch (e) {
-          String err = "$e";
-          return OrderExecuteResult(msg: err, succeed: false);
-        }
-
-        return OrderExecuteResult(succeed: true, msg: '打包参数正常');
+        return OrderExecuteResult(succeed: true, msg: '打包参数正常 工作目录为,$projectPath ');
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "工程克隆",
       actionFunc: () async {
+
+        try {
+          deleteDirectory(projectPath);
+        } catch (e) {
+          String err = "删除$projectPath失败,原因是：\n$e\n";
+          return OrderExecuteResult(msg: err, succeed: false);
+        }
+
         ExecuteResult gitCloneRes = await CommandUtil.getInstance().gitClone(
             clonePath: envWorkspaceRoot,
             gitUrl: gitUrl,
@@ -206,7 +207,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
         if (gitCloneRes.exitCode != 0) {
           return OrderExecuteResult(
-              msg: "clone失败，具体问题请看日志... \n${gitCloneRes.res}", succeed: false);
+              msg: "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n", succeed: false);
         }
         return OrderExecuteResult(succeed: true);
       },
@@ -538,14 +539,14 @@ class ProjectTaskVm extends ChangeNotifier {
               addNewLogLine("第${j + 1}次 执行失败: $taskName - $result");
             } else {
               // 失败则打印日志，3秒后开始下一轮
-              addNewLogLine("第${j + 1}次 执行失败: $taskName - $result,3秒后开始下一轮");
+              addNewLogLine("第${j + 1}次 执行失败: $taskName - $result 3秒后开始下一轮");
               addNewEmptyLine();
               waitThreeSec();
             }
           }
         } else {
           // 如果没返回 OrderExecuteResult，那么一定是超时了
-          addNewLogLine("第${j + 1}次 执行超时: $taskName,,3秒后开始下一轮");
+          addNewLogLine("第${j + 1}次 执行超时: $taskName, 3秒后开始下一轮");
           addNewEmptyLine();
 
           // 如果到了最后一次
@@ -563,6 +564,7 @@ class ProjectTaskVm extends ChangeNotifier {
         updateStatue(i, StageStatue.finished);
       } else {
         updateStatue(i, StageStatue.error);
+        _jobRunning = false;
         return actionResStr;
       }
     }
