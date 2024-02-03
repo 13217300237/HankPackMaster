@@ -13,7 +13,7 @@ import '../../core/command_util.dart';
 import '../../comm/text_util.dart';
 import 'package:path/path.dart';
 
-typedef ActionFunc = Future<OrderExecuteResult> Function(int);
+typedef ActionFunc = Future<OrderExecuteResult> Function();
 
 typedef OnStageFinishedFunc = Function(int, String);
 
@@ -85,13 +85,18 @@ class TaskState {
 }
 
 /// 模拟耗时
-waitOneSec() async {
+waitSomeSec() async {
   await Future.delayed(const Duration(milliseconds: 50));
 }
 
 /// 模拟耗时
+waitThreeSec() async {
+  await Future.delayed(const Duration(seconds: 3));
+}
+
+/// 模拟耗时
 waitForever() async {
-  await Future.delayed(const Duration(seconds: 10));
+  await Future.delayed(const Duration(seconds: 2));
 }
 
 class ProjectTaskVm extends ChangeNotifier {
@@ -163,10 +168,8 @@ class ProjectTaskVm extends ChangeNotifier {
 
     taskStateList.add(TaskState(
       "TEST TEST",
-      actionFunc: (i) async {
-        updateStatue(i, StageStatue.executing);
+      actionFunc: () async {
         await waitForever();
-        updateStatue(i, StageStatue.finished);
         return OrderExecuteResult(msg: "测试结束", succeed: true);
       },
       onStateFinished: updateStageCostTime,
@@ -174,118 +177,75 @@ class ProjectTaskVm extends ChangeNotifier {
 
     taskStateList.add(TaskState(
       "参数准备",
-      actionFunc: (i) async {
-        await waitOneSec();
-        updateStatue(i, StageStatue.executing);
-        addNewLogLine("gitUrl-> $gitUrl");
-        addNewLogLine("projectRoot-> $projectPath...");
+      actionFunc: () async {
         if (gitUrl.isEmpty) {
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: "git仓库地址 不能为空", succeed: false);
         }
         if (projectPath.isEmpty) {
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
         }
 
         try {
           deleteDirectory(projectPath);
         } catch (e) {
-          updateStatue(i, StageStatue.error);
           String err = "$e";
-          addNewLogLine(err);
           return OrderExecuteResult(msg: err, succeed: false);
         }
 
-        updateStatue(i, StageStatue.finished);
-        return OrderExecuteResult(succeed: true);
+        return OrderExecuteResult(succeed: true, msg: '打包参数正常');
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "工程克隆",
-      actionFunc: (i) async {
-        await waitOneSec();
-        updateStatue(i, StageStatue.executing);
-        addNewLogLine("clone开始...");
-
+      actionFunc: () async {
         ExecuteResult gitCloneRes = await CommandUtil.getInstance().gitClone(
             clonePath: envWorkspaceRoot,
             gitUrl: gitUrl,
             logOutput: addNewLogLine);
-        addNewLogLine("clone完毕，结果是  $gitCloneRes");
 
         if (gitCloneRes.exitCode != 0) {
-          addNewLogLine("clone失败，具体问题请看日志...");
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(
               msg: "clone失败，具体问题请看日志... \n${gitCloneRes.res}", succeed: false);
         }
-        updateStatue(i, StageStatue.finished);
         return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "分支切换",
-      actionFunc: (i) async {
-        await waitOneSec();
-        updateStatue(i, StageStatue.executing);
-        addNewLogLine("checkout 开始...");
-
-        ExecuteResult gitCheckoutRes =
-            await CommandUtil.getInstance().gitCheckout(
-          projectPath,
-          gitBranch,
-          addNewLogLine,
-        );
-        addNewLogLine("checkout 完毕，结果是  $gitCheckoutRes");
+      actionFunc: () async {
+        ExecuteResult gitCheckoutRes = await CommandUtil.getInstance()
+            .gitCheckout(projectPath, gitBranch, addNewLogLine);
 
         if (gitCheckoutRes.exitCode != 0) {
-          addNewLogLine("checkout  失败，具体问题请看日志...");
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
         }
-        updateStatue(i, StageStatue.finished);
         return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "工程结构检测",
-      actionFunc: (i) async {
-        await waitOneSec();
-        updateStatue(i, StageStatue.executing);
-        addNewLogLine("开始检查工程目录结构...");
+      actionFunc: () async {
         // 阶段2，工程结构检查
         // 检查目录下是否有 gradlew.bat 文件
         File gradlewFile =
             File("$projectPath${Platform.pathSeparator}gradlew.bat");
         if (!gradlewFile.existsSync()) {
           String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
-          addNewLogLine(er);
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: er, succeed: false);
         }
-        addNewLogLine("工程目录检测成功，工程结构正常.");
-        updateStatue(i, StageStatue.finished);
         return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "可用指令查询",
-      actionFunc: (i) async {
-        await waitOneSec();
-        updateStatue(i, StageStatue.executing);
-        ExecuteResult gitAssembleTasksRes =
-            await CommandUtil.getInstance().gradleAssembleTasks(
-          projectPath,
-          addNewLogLine,
-        );
+      actionFunc: () async {
+        ExecuteResult gitAssembleTasksRes = await CommandUtil.getInstance()
+            .gradleAssembleTasks(projectPath, addNewLogLine);
         if (gitAssembleTasksRes.exitCode != 0) {
-          updateStatue(i, StageStatue.error);
-          addNewLogLine("可用指令查询 完毕，结果是  $gitAssembleTasksRes");
           return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
         }
         var ori = gitAssembleTasksRes.res;
@@ -304,16 +264,14 @@ class ProjectTaskVm extends ChangeNotifier {
         }
 
         debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
-        updateStatue(i, StageStatue.finished);
         return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "生成apk",
-      actionFunc: (i) async {
-        await waitOneSec();
-        updateStatue(i, StageStatue.executing);
+      actionFunc: () async {
+        await waitSomeSec();
         // 阶段3，执行打包命令
         ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
             .gradleAssemble(
@@ -322,36 +280,25 @@ class ProjectTaskVm extends ChangeNotifier {
                 versionCode: versionCode,
                 versionName: versionName,
                 logOutput: addNewLogLine);
-        addNewLogLine("打包 完毕，结果是-> $gradleAssembleRes");
 
         if (gradleAssembleRes.exitCode != 0) {
           String er = "打包失败，详情请看日志";
-          addNewLogLine(er);
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: er, succeed: false);
         }
-        updateStatue(i, StageStatue.finished);
         return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "apk检测",
-      actionFunc: (i) async {
+      actionFunc: () async {
         // 去默认的apk产出位置去查找是否存在apk文件  app\build\outputs\apk\debug
         String apkLocation =
             "$projectPath${Platform.pathSeparator}app\\build\\outputs\\apk\\debug\\app-debug.apk";
 
         File apk = File(apkLocation);
         if (await apk.exists()) {
-          addNewLogLine("apk文件已找到,$apkLocation");
-          updateStatue(i, StageStatue.finished);
           this.apkLocation = apkLocation;
-          // return PackageSuccessEntity(
-          //     title: "打包成功，apk输出地址为", apkPath: apkLocation);
-        } else {
-          addNewLogLine("apk文件未找到,$apkLocation");
-          updateStatue(i, StageStatue.error);
         }
         return OrderExecuteResult(succeed: true);
       },
@@ -360,22 +307,14 @@ class ProjectTaskVm extends ChangeNotifier {
 
     taskStateList.add(TaskState(
       "获取pgy token",
-      actionFunc: (i) async {
-        updateStatue(i, StageStatue.executing);
-
+      actionFunc: () async {
         // 先获取当前git的最新提交记录
-        var log = await CommandUtil.getInstance().gitLog(
-          projectPath,
-          addNewLogLine,
-        );
+        var log =
+            await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
 
         if (log.exitCode != 0) {
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
         }
-
-        addNewLogLine("获取git最近提交记录成功 $log");
-        addNewLogLine("获取应用描述成功 $projectAppDesc");
 
         var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
           buildDescription: projectAppDesc,
@@ -383,7 +322,6 @@ class ProjectTaskVm extends ChangeNotifier {
         );
 
         if (pgyToken == null) {
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: "pgy token获取失败...", succeed: false);
         }
 
@@ -394,8 +332,6 @@ class ProjectTaskVm extends ChangeNotifier {
           xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
         );
 
-        addNewLogLine("pgy参数获取成功,$_pgyEntity");
-        updateStatue(i, StageStatue.finished);
         return OrderExecuteResult(succeed: true);
       },
       onStateFinished: updateStageCostTime,
@@ -403,31 +339,21 @@ class ProjectTaskVm extends ChangeNotifier {
 
     taskStateList.add(TaskState(
       "上传pgy",
-      actionFunc: (i) async {
+      actionFunc: () async {
         if (!_pgyEntity!.isOk()) {
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: "上传参数为空，流程终止!", succeed: false);
         }
-        updateStatue(i, StageStatue.executing);
 
-        addNewLogLine("正在上传,$_pgyEntity");
         String oriFileName = basename(File(apkLocation!).path);
-        addNewLogLine("文件名为 $oriFileName");
 
-        var res = await PgyUploadUtil.getInstance().doUpload(
-          _pgyEntity!,
-          filePath: apkLocation!,
-          oriFileName: oriFileName,
-          uploadProgressAction: addNewLogLine,
-        );
+        var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
+            filePath: apkLocation!,
+            oriFileName: oriFileName,
+            uploadProgressAction: addNewLogLine);
 
         if (res != null) {
-          addNewLogLine("上传失败,$res");
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(msg: "上传失败,$res", succeed: false);
         } else {
-          addNewLogLine("上传成功,$oriFileName");
-          updateStatue(i, StageStatue.finished);
           return OrderExecuteResult(succeed: true);
         }
       },
@@ -436,45 +362,21 @@ class ProjectTaskVm extends ChangeNotifier {
 
     taskStateList.add(TaskState(
       "检查pgy发布结果",
-      actionFunc: (i) async {
-        updateStatue(i, StageStatue.executing);
-        var s = await PgyUploadUtil.getInstance().checkUploadRelease(
-          _pgyEntity!,
-          onReleaseCheck: addNewLogLine,
-        );
+      actionFunc: () async {
+        var s = await PgyUploadUtil.getInstance()
+            .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
 
         if (s.code == 1216) {
           // 发布失败，流程终止
-          updateStatue(i, StageStatue.error);
           return OrderExecuteResult(succeed: false, msg: "发布失败，流程终止");
         } else {
           // 发布成功，打印结果
-          debugPrint("发布成功，结果为:${s.message.runtimeType} ${s.data}");
-          addNewLogLine("发布成功，开始解析上传成功的参数");
           // 开始解析发布结果,
           if (s.data is Map<String, dynamic>) {
             MyAppInfo appInfo =
                 MyAppInfo.fromJson(s.data as Map<String, dynamic>);
-
-            addNewLogLine("应用名称: ${appInfo.buildName}");
-            addNewLogLine("大小: ${appInfo.buildFileSize}");
-            addNewLogLine("版本号: ${appInfo.buildVersion}");
-            addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
-            addNewLogLine("应用描述: ${appInfo.buildDescription}");
-            addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
-            addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
-            addNewLogLine(
-                "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
-            addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
-            addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
-            addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
-
-            updateStatue(i, StageStatue.finished);
-
             return OrderExecuteResult(succeed: true, data: appInfo);
           } else {
-            addNewLogLine("发布结果解析失败");
-            updateStatue(i, StageStatue.error);
             return OrderExecuteResult(succeed: false, msg: "发布结果解析失败");
           }
         }
@@ -558,6 +460,10 @@ class ProjectTaskVm extends ChangeNotifier {
     _scrollToBottom();
   }
 
+  void addNewEmptyLine() {
+    addNewLogLine("\n\n\n");
+  }
+
   ///添加一个延时，以确保listView绘制完毕，再来计算最底端的位置
   void _scrollToBottom() {
     Timer(const Duration(milliseconds: 300), () {
@@ -571,17 +477,15 @@ class ProjectTaskVm extends ChangeNotifier {
   int get maxTimes =>
       SpUtil.getValue(SpConst.stageTaskExecuteMaxRetryTimes) ?? 5;
 
-  Future<String> timeOutCounter() async {
+  Future timeOutCounter() async {
     await Future.delayed(Duration(
         seconds: SpUtil.getValue(SpConst.stageTaskExecuteMaxPeriod) ?? 3));
-    return "任务已超时";
   }
 
   ///
   /// 开始流水线工作
   ///
-  Future<OrderExecuteResult> startSchedule(
-      {required Function(OrderExecuteResult s) endAction}) async {
+  Future<OrderExecuteResult?> startSchedule() async {
     if (_jobRunning) {
       return OrderExecuteResult(succeed: false, msg: "任务正在执行中...");
     }
@@ -590,53 +494,85 @@ class ProjectTaskVm extends ChangeNotifier {
 
     addNewLogLine("开始流程...");
 
-    OrderExecuteResult actionResStr;
+    OrderExecuteResult? actionResStr;
 
     Stopwatch totalWatch = Stopwatch();
     totalWatch.start();
 
+    // 开始整体流程
     for (int i = 0; i < taskStateList.length; i++) {
+      bool taskOk = false;
+
+      // 对每个阶段执行 规定最大次数的循环
       for (int j = 0; j < maxTimes; j++) {
+        // 任务变为执行中的状态
+        updateStatue(i, StageStatue.executing);
+
+        // 开始单次执行的计时器
         Stopwatch stageTimeWatch = Stopwatch();
         stageTimeWatch.start();
 
         var taskName = taskStateList[i].stageName;
-        var taskFuture = taskStateList[i].actionFunc(i);
-        var cancelableTask = CancelableOperation.fromFuture(taskFuture);
+        var taskFuture = taskStateList[i].actionFunc();
+        addNewLogLine("第${j + 1}次 执行开始: $taskName");
 
         var result = await Future.any([taskFuture, timeOutCounter()]); // 计算超时
 
         stageTimeWatch.stop(); // 停止计时器
 
-        // 如果任务在规定时间之内完成
-        if (result is OrderExecuteResult && result.succeed == true) {
-          taskStateList[i]
-              .onStateFinished
-              ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} 毫秒");
-          break;
+        // 如果任务在规定时间之内完成，则一定会返回一个OrderExecuteResult
+        if (result is OrderExecuteResult) {
+          // 如果执行成功，则标记此阶段已完成
+          if (result.succeed == true) {
+            taskStateList[i]
+                .onStateFinished
+                ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} 毫秒");
+            taskOk = true;
+            addNewLogLine("第${j + 1}次 执行成功: $taskName - $result");
+            addNewEmptyLine();
+            break;
+          } else {
+            updateStatue(i, StageStatue.error);
+            if (j == maxTimes - 1) {
+              // 失败则打印日志，3秒后开始下一轮
+              addNewLogLine("第${j + 1}次 执行失败: $taskName - $result");
+            } else {
+              // 失败则打印日志，3秒后开始下一轮
+              addNewLogLine("第${j + 1}次 执行失败: $taskName - $result,3秒后开始下一轮");
+              addNewEmptyLine();
+              waitThreeSec();
+            }
+          }
         } else {
-          cancelableTask.cancel(); // 取消任务
-          addNewLogLine("第${j + 1}次: $taskName - $result");
+          // 如果没返回 OrderExecuteResult，那么一定是超时了
+          addNewLogLine("第${j + 1}次 执行超时: $taskName,,3秒后开始下一轮");
+          addNewEmptyLine();
+
           // 如果到了最后一次
           if (j == maxTimes - 1) {
             actionResStr =
                 OrderExecuteResult(succeed: false, msg: "第${j + 1}次:$result");
             CommandUtil.getInstance().stopAllExec();
-            _jobRunning = false;
-            return actionResStr;
+            break;
           }
-          waitOneSec();
+          waitSomeSec();
         }
+      }
+
+      if (taskOk) {
+        updateStatue(i, StageStatue.finished);
+      } else {
+        updateStatue(i, StageStatue.error);
+        return actionResStr;
       }
     }
 
     totalWatch.stop();
     _jobRunning = false;
-    endAction(OrderExecuteResult(succeed: true, msg: "流程结束,检查成果..."));
 
     return OrderExecuteResult(
       succeed: true,
-      msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒",
+      msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒 ",
     );
   }
 }

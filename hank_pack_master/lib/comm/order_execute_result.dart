@@ -8,4 +8,7 @@ class OrderExecuteResult {
   final dynamic data;
 
   OrderExecuteResult({this.msg, required this.succeed, this.data});
+
+  @override
+  String toString() => "$msg";
 }

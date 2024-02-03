@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
@@ -274,18 +275,35 @@ class _ProjectPageState extends State<ProjectPage> {
           _actionButton(
               title: "项目激活测试",
               bgColor: Colors.purple.normal,
-              action: () {
-                DialogUtil.showConfirmDialog(
-                    context: context,
-                    content:
-                        "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
-                    title: '提示',
-                    onConfirm: () => start());
+              action: () async {
+                Future<String?> _myFuture() async {
+                  for (int i in Iterable.generate(15)) {
+                    debugPrint("执行任务中... $i");
+                    await Future.delayed(const Duration(seconds: 1));
+                  }
+
+                  return 'Future completed';
+                }
+
+                var res = await _myFuture().timeout(
+                  const Duration(seconds: 3),
+                  onTimeout: () =>
+                      'The process took too much time to finish. Please try again later',
+                );
+
+                debugPrint(res);
+
+                // DialogUtil.showConfirmDialog(
+                //     context: context,
+                //     content:
+                //         "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
+                //     title: '提示',
+                //     onConfirm: () => start());
               }),
           _actionButton(
               title: "正式开始打包",
               bgColor: Colors.orange.lighter,
-              action: actionButtonDisabled ? null : () => start()),
+              action: actionButtonDisabled ? null : start),
         ],
       ),
     );
@@ -351,7 +369,7 @@ class _ProjectPageState extends State<ProjectPage> {
     return Row(
       children: [
         Expanded(
-            flex: 6,
+            flex: 3,
             child: Column(children: [Expanded(child: leftTop), leftBottom])),
         Expanded(flex: 2, child: Column(children: [Expanded(child: middle)])),
         Expanded(flex: 4, child: Column(children: [Expanded(child: right)])),
@@ -476,7 +494,10 @@ class _ProjectPageState extends State<ProjectPage> {
   Future<void> start() async {
     _projectTaskVm.init();
     _projectTaskVm.cleanLog();
-    _projectTaskVm.startSchedule(endAction: (s) {
+    _projectTaskVm.startSchedule().then((s) {
+      if (s == null) {
+        return;
+      }
       if (s.data is PackageSuccessEntity) {
         dealWithScheduleResultByApkGenerate(s.data);
       } else if (s.data is MyAppInfo) {
