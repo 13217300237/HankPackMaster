@@ -10,5 +10,13 @@ class OrderExecuteResult {
   OrderExecuteResult({this.msg, required this.succeed, this.data});
 
   @override
-  String toString() => "$msg";
+  String toString() {
+    String dataStr = "";
+
+    if (data != null) {
+      dataStr = "$data";
+    }
+
+    return "${msg ?? ""} $dataStr";
+  }
 }

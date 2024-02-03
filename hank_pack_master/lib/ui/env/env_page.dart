@@ -29,8 +29,6 @@ class _EnvPageState extends State<EnvPage> {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      // '${_envParamModel.stageTaskExecuteMaxPeriod}',
-
       _envParamModel.stageTaskExecuteMaxPeriodController.text =
           '${_envParamModel.stageTaskExecuteMaxPeriod}';
       _envParamModel.stageTaskExecuteMaxRetryTimesController.text =
@@ -39,8 +37,24 @@ class _EnvPageState extends State<EnvPage> {
       _envParamModel.pgyApiKeyController.text = _envParamModel.pgyApiKey;
 
       _envParamModel.pgyApiKeyController.addListener(() {
-        if(_envParamModel.pgyApiKeyController.text.isNotEmpty) {
+        if (_envParamModel.pgyApiKeyController.text.isNotEmpty) {
           _envParamModel.pgyApiKey = _envParamModel.pgyApiKeyController.text;
+        }
+      });
+
+      _envParamModel.stageTaskExecuteMaxPeriodController.addListener(() {
+        if (_envParamModel
+            .stageTaskExecuteMaxPeriodController.text.isNotEmpty) {
+          _envParamModel.stageTaskExecuteMaxPeriod = int.tryParse(
+              _envParamModel.stageTaskExecuteMaxPeriodController.text)!;
+        }
+      });
+
+      _envParamModel.stageTaskExecuteMaxRetryTimesController.addListener(() {
+        if (_envParamModel
+            .stageTaskExecuteMaxRetryTimesController.text.isNotEmpty) {
+          _envParamModel.stageTaskExecuteMaxRetryTimes = int.tryParse(
+              _envParamModel.stageTaskExecuteMaxRetryTimesController.text)!;
         }
       });
     });

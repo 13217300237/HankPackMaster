@@ -1,17 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:async/async.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy_upload_util.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:path/path.dart';
 
 import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/sp_util.dart';
-import '../../core/command_util.dart';
 import '../../comm/text_util.dart';
-import 'package:path/path.dart';
+import '../../core/command_util.dart';
 
 typedef ActionFunc = Future<OrderExecuteResult> Function();
 
@@ -165,16 +164,6 @@ class ProjectTaskVm extends ChangeNotifier {
 
   void init() {
     taskStateList.clear();
-
-    taskStateList.add(TaskState(
-      "TEST TEST",
-      actionFunc: () async {
-        await waitForever();
-        return OrderExecuteResult(msg: "测试结束", succeed: true);
-      },
-      onStateFinished: updateStageCostTime,
-    ));
-
     taskStateList.add(TaskState(
       "参数准备",
       actionFunc: () async {
@@ -185,14 +174,14 @@ class ProjectTaskVm extends ChangeNotifier {
           return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
         }
 
-        return OrderExecuteResult(succeed: true, msg: '打包参数正常 工作目录为,$projectPath ');
+        return OrderExecuteResult(
+            succeed: true, msg: '打包参数正常 工作目录为,$projectPath ');
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "工程克隆",
       actionFunc: () async {
-
         try {
           deleteDirectory(projectPath);
         } catch (e) {
@@ -207,7 +196,8 @@ class ProjectTaskVm extends ChangeNotifier {
 
         if (gitCloneRes.exitCode != 0) {
           return OrderExecuteResult(
-              msg: "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n", succeed: false);
+              msg: "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n",
+              succeed: false);
         }
         return OrderExecuteResult(succeed: true);
       },
@@ -376,6 +366,19 @@ class ProjectTaskVm extends ChangeNotifier {
           if (s.data is Map<String, dynamic>) {
             MyAppInfo appInfo =
                 MyAppInfo.fromJson(s.data as Map<String, dynamic>);
+            addNewLogLine("应用名称: ${appInfo.buildName}");
+            addNewLogLine("大小: ${appInfo.buildFileSize}");
+            addNewLogLine("版本号: ${appInfo.buildVersion}");
+            addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
+            addNewLogLine("应用描述: ${appInfo.buildDescription}");
+            addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
+            addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
+            addNewLogLine(
+                "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
+            addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
+            addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
+            addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
+
             return OrderExecuteResult(succeed: true, data: appInfo);
           } else {
             return OrderExecuteResult(succeed: false, msg: "发布结果解析失败");
@@ -531,6 +534,7 @@ class ProjectTaskVm extends ChangeNotifier {
             taskOk = true;
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $result");
             addNewEmptyLine();
+            actionResStr = result;
             break;
           } else {
             updateStatue(i, StageStatue.error);
@@ -573,8 +577,8 @@ class ProjectTaskVm extends ChangeNotifier {
     _jobRunning = false;
 
     return OrderExecuteResult(
-      succeed: true,
-      msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒 ",
-    );
+        succeed: true,
+        msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒 ",
+        data: actionResStr?.data);
   }
 }

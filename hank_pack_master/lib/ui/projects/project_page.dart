@@ -78,7 +78,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
       // TODO 写死数据进行测试
       _projectTaskVm.gitUrlController.text =
-          "git@github.com:18598925736/MyApp20231224.git";
+          "git@github.com:18598925736/MyApplication0016.git";
       _projectTaskVm.assembleTaskNameController.text = "assembleDebug";
     });
   }
@@ -276,29 +276,12 @@ class _ProjectPageState extends State<ProjectPage> {
               title: "项目激活测试",
               bgColor: Colors.purple.normal,
               action: () async {
-                Future<String?> _myFuture() async {
-                  for (int i in Iterable.generate(15)) {
-                    debugPrint("执行任务中... $i");
-                    await Future.delayed(const Duration(seconds: 1));
-                  }
-
-                  return 'Future completed';
-                }
-
-                var res = await _myFuture().timeout(
-                  const Duration(seconds: 3),
-                  onTimeout: () =>
-                      'The process took too much time to finish. Please try again later',
-                );
-
-                debugPrint(res);
-
-                // DialogUtil.showConfirmDialog(
-                //     context: context,
-                //     content:
-                //         "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
-                //     title: '提示',
-                //     onConfirm: () => start());
+                DialogUtil.showConfirmDialog(
+                    context: context,
+                    content:
+                        "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
+                    title: '提示',
+                    onConfirm: () => start());
               }),
           _actionButton(
               title: "正式开始打包",
