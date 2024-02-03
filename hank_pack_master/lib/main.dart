@@ -1,16 +1,19 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:hive_flutter/adapters.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'comm/functions.dart';
-import 'comm/sp_util.dart';
+import 'hive/env_config_entity.dart';
+import 'hive/env_config_operator.dart';
 import 'ui/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SpUtil.init();
+  await Hive.initFlutter();
+  await EnvConfigOperator.openBox();
 
   // if it's not on the web, windows or android, load the accent color
   if (!kIsWeb &&

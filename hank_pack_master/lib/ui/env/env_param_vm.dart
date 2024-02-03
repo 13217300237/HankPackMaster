@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../comm/sp_util.dart';
+import '../../comm/const.dart';
+import '../../hive/env_config_entity.dart';
+import '../../hive/env_config_operator.dart';
 
 class EnvParamVm extends ChangeNotifier {
   /// 环境有问题时的错误提示
@@ -118,51 +120,50 @@ class EnvParamVm extends ChangeNotifier {
     action();
   }
 
-  String get gitRoot => SpUtil.getValue(SpConst.envGitKey) ?? "";
+  String get gitRoot => EnvConfigOperator.searchEnvValue(Const.envGitKey);
 
   set gitRoot(String r) {
-    SpUtil.putValue(SpConst.envGitKey, r);
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envGitKey, r));
     notifyListeners();
   }
 
-  String get flutterRoot => SpUtil.getValue(SpConst.envFlutterKey) ?? "";
+  String get flutterRoot =>
+      EnvConfigOperator.searchEnvValue(Const.envFlutterKey);
 
   set flutterRoot(String r) {
-    SpUtil.putValue(SpConst.envFlutterKey, r);
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envFlutterKey, r));
     notifyListeners();
   }
 
-  String get adbRoot => SpUtil.getValue(SpConst.envAdbKey) ?? "";
+  String get adbRoot => EnvConfigOperator.searchEnvValue(Const.envAdbKey);
 
   set adbRoot(String r) {
-    SpUtil.putValue(SpConst.envAdbKey, r);
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envAdbKey, r));
     notifyListeners();
   }
 
-  String get androidSdkRoot => SpUtil.getValue(SpConst.envAndroidKey) ?? "";
+  String get androidSdkRoot =>
+      EnvConfigOperator.searchEnvValue(Const.envAndroidKey);
 
   set androidSdkRoot(String r) {
-    SpUtil.putValue(SpConst.envAndroidKey, r);
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envAndroidKey, r));
     notifyListeners();
   }
 
-  String get javaRoot => SpUtil.getValue(SpConst.envJavaKey) ?? "";
+  String get javaRoot => EnvConfigOperator.searchEnvValue(Const.envJavaKey);
 
   set javaRoot(String r) {
-    SpUtil.putValue(SpConst.envJavaKey, r);
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envJavaKey, r));
     notifyListeners();
   }
 
   String get workSpaceRoot =>
-      SpUtil.getValue(SpConst.envWorkspaceRootKey) ?? "";
+      EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey);
 
   set workSpaceRoot(String r) {
-    SpUtil.putValue(SpConst.envWorkspaceRootKey, r);
+    EnvConfigOperator.insertOrUpdate(
+        EnvConfigEntity(Const.envWorkspaceRootKey, r));
     notifyListeners();
-  }
-
-  bool isEnvChecked() {
-    return SpUtil.getValue(SpConst.envAndroidKey);
   }
 
   bool isAndroidEnvOk() {
@@ -184,31 +185,33 @@ class EnvParamVm extends ChangeNotifier {
   TextEditingController stageTaskExecuteMaxPeriodController =
       TextEditingController();
 
-  int get stageTaskExecuteMaxPeriod =>
-      SpUtil.getValue(SpConst.stageTaskExecuteMaxPeriod) ?? (5 * 60); // 默认值5分钟
+  String get stageTaskExecuteMaxPeriod =>
+      EnvConfigOperator.searchEnvValue(Const.stageTaskExecuteMaxPeriod);
 
-  set stageTaskExecuteMaxPeriod(int max) {
-    SpUtil.putValue(SpConst.stageTaskExecuteMaxPeriod, max);
+  set stageTaskExecuteMaxPeriod(String max) {
+    EnvConfigOperator.insertOrUpdate(
+        EnvConfigEntity(Const.stageTaskExecuteMaxPeriod, max));
     notifyListeners();
   }
 
   TextEditingController stageTaskExecuteMaxRetryTimesController =
       TextEditingController();
 
-  int get stageTaskExecuteMaxRetryTimes =>
-      SpUtil.getValue(SpConst.stageTaskExecuteMaxRetryTimes) ?? 5; // 默认值5次
+  String get stageTaskExecuteMaxRetryTimes =>
+      EnvConfigOperator.searchEnvValue(Const.stageTaskExecuteMaxRetryTimes);
 
-  set stageTaskExecuteMaxRetryTimes(int max) {
-    SpUtil.putValue(SpConst.stageTaskExecuteMaxRetryTimes, max);
+  set stageTaskExecuteMaxRetryTimes(String max) {
+    EnvConfigOperator.insertOrUpdate(
+        EnvConfigEntity(Const.stageTaskExecuteMaxRetryTimes, max));
     notifyListeners();
   }
 
   TextEditingController pgyApiKeyController = TextEditingController();
 
-  String get pgyApiKey => SpUtil.getValue(SpConst.pgyApiKey) ?? '';
+  String get pgyApiKey => EnvConfigOperator.searchEnvValue(Const.pgyApiKey);
 
   set pgyApiKey(String v) {
-    SpUtil.putValue(SpConst.pgyApiKey, v);
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.pgyApiKey, v));
     notifyListeners();
   }
 }

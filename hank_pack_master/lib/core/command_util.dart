@@ -5,7 +5,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-import '../comm/sp_util.dart';
+import '../comm/const.dart';
+import '../hive/env_config_operator.dart';
 
 bool cmdDebug = true;
 
@@ -419,7 +420,7 @@ class CommandUtil {
   }) async {
     StringBuffer sb = StringBuffer();
 
-    var binRoot = SpUtil.getValue(SpConst.envGitKey);
+    String binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
 
     var process = await execute(
       cmd: '"$binRoot"',
@@ -448,7 +449,7 @@ $sb"""
     Function(String s) logOutput,
   ) async {
     StringBuffer sb = StringBuffer();
-    var binRoot = SpUtil.getValue(SpConst.envGitKey);
+    var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
     var process = await execute(
       cmd: '"$binRoot"',
       params: ["log", "-1", "--pretty=format:\"%s\""],
@@ -472,7 +473,7 @@ $sb"""
   ) async {
     StringBuffer sb = StringBuffer();
 
-    var binRoot = SpUtil.getValue(SpConst.envGitKey);
+    var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
     var process = await execute(
       cmd: '"$binRoot"',
       params: ["checkout", branchName],

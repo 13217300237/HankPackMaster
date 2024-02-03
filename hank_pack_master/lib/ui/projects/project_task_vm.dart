@@ -8,9 +8,10 @@ import 'package:path/path.dart';
 
 import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
-import '../../comm/sp_util.dart';
+import '../../comm/const.dart';
 import '../../comm/text_util.dart';
 import '../../core/command_util.dart';
+import '../../hive/env_config_operator.dart';
 
 typedef ActionFunc = Future<OrderExecuteResult> Function();
 
@@ -143,7 +144,8 @@ class ProjectTaskVm extends ChangeNotifier {
 
   String get packageOrder => assembleTaskNameController.text;
 
-  String get envWorkspaceRoot => SpUtil.getValue(SpConst.envWorkspaceRootKey);
+  String get envWorkspaceRoot =>
+      EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey);
 
   String get versionName => versionNameController.text;
 
@@ -478,12 +480,17 @@ class ProjectTaskVm extends ChangeNotifier {
     });
   }
 
-  int get maxTimes =>
-      SpUtil.getValue(SpConst.stageTaskExecuteMaxRetryTimes) ?? 5;
+  int get maxTimes {
+    return int.tryParse(EnvConfigOperator.searchEnvValue(
+            Const.stageTaskExecuteMaxRetryTimes)) ??
+        5;
+  }
 
   Future timeOutCounter() async {
     await Future.delayed(Duration(
-        seconds: SpUtil.getValue(SpConst.stageTaskExecuteMaxPeriod) ?? 3));
+        seconds: int.tryParse(EnvConfigOperator.searchEnvValue(
+                Const.stageTaskExecuteMaxPeriod)) ??
+            3000));
   }
 
   ///
