@@ -173,6 +173,7 @@ class _EnvPageState extends State<EnvPage> {
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
           child: Container(
+
               padding: const EdgeInsets.all(20),
               margin: const EdgeInsets.all(10),
               decoration: _boxBorder(title),
