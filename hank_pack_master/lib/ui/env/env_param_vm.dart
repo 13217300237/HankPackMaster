@@ -206,6 +206,7 @@ class EnvParamVm extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// PGY apikey
   TextEditingController pgyApiKeyController = TextEditingController();
 
   String get pgyApiKey => EnvConfigOperator.searchEnvValue(Const.pgyApiKey);
@@ -213,5 +214,74 @@ class EnvParamVm extends ChangeNotifier {
   set pgyApiKey(String v) {
     EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.pgyApiKey, v));
     notifyListeners();
+  }
+
+  /// obsEndPoint
+  TextEditingController obsEndPointController = TextEditingController();
+
+  String get obsEndPoint => EnvConfigOperator.searchEnvValue(Const.obsEndPoint);
+
+  set obsEndPoint(String v) {
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.obsEndPoint, v));
+    notifyListeners();
+  }
+
+  /// obsAccessKey
+  TextEditingController obsAccessKeyController = TextEditingController();
+
+  String get obsAccessKey =>
+      EnvConfigOperator.searchEnvValue(Const.obsAccessKey);
+
+  set obsAccessKey(String v) {
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.obsAccessKey, v));
+    notifyListeners();
+  }
+
+  /// obsSecretKey
+  TextEditingController obsSecretKeyController = TextEditingController();
+
+  String get obsSecretKey =>
+      EnvConfigOperator.searchEnvValue(Const.obsSecretKey);
+
+  set obsSecretKey(String v) {
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.obsSecretKey, v));
+    notifyListeners();
+  }
+
+  void initTextController(
+    TextEditingController editTextController,
+    String Function() get,
+    Function(String) set,
+  ) {
+    editTextController.text = get();
+    editTextController.addListener(() {
+      if (editTextController.text.isNotEmpty) {
+        set(editTextController.text);
+      }
+    });
+  }
+
+  void init() {
+    initTextController(
+        stageTaskExecuteMaxPeriodController,
+        () => stageTaskExecuteMaxPeriod,
+        (String s) => stageTaskExecuteMaxPeriod = s);
+
+    initTextController(
+        stageTaskExecuteMaxRetryTimesController,
+        () => stageTaskExecuteMaxRetryTimes,
+        (String s) => stageTaskExecuteMaxRetryTimes = s);
+
+    initTextController(
+        pgyApiKeyController, () => pgyApiKey, (String s) => pgyApiKey = s);
+
+    initTextController(obsEndPointController, () => obsEndPoint,
+        (String s) => obsEndPoint = s);
+
+    initTextController(obsAccessKeyController, () => obsAccessKey,
+        (String s) => obsAccessKey = s);
+
+    initTextController(obsSecretKeyController, () => obsSecretKey,
+        (String s) => obsSecretKey = s);
   }
 }

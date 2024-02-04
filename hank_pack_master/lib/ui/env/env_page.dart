@@ -28,34 +28,10 @@ class _EnvPageState extends State<EnvPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _envParamModel.stageTaskExecuteMaxPeriodController.text =
-          _envParamModel.stageTaskExecuteMaxPeriod;
-      _envParamModel.stageTaskExecuteMaxRetryTimesController.text =
-          _envParamModel.stageTaskExecuteMaxRetryTimes;
 
-      _envParamModel.pgyApiKeyController.text = _envParamModel.pgyApiKey;
+      _envParamModel.init();
 
-      _envParamModel.pgyApiKeyController.addListener(() {
-        if (_envParamModel.pgyApiKeyController.text.isNotEmpty) {
-          _envParamModel.pgyApiKey = _envParamModel.pgyApiKeyController.text;
-        }
-      });
 
-      _envParamModel.stageTaskExecuteMaxPeriodController.addListener(() {
-        if (_envParamModel
-            .stageTaskExecuteMaxPeriodController.text.isNotEmpty) {
-          _envParamModel.stageTaskExecuteMaxPeriod =
-              _envParamModel.stageTaskExecuteMaxPeriodController.text;
-        }
-      });
-
-      _envParamModel.stageTaskExecuteMaxRetryTimesController.addListener(() {
-        if (_envParamModel
-            .stageTaskExecuteMaxRetryTimesController.text.isNotEmpty) {
-          _envParamModel.stageTaskExecuteMaxRetryTimes =
-              _envParamModel.stageTaskExecuteMaxRetryTimesController.text;
-        }
-      });
     });
   }
 
@@ -69,10 +45,14 @@ class _EnvPageState extends State<EnvPage> {
           if (!_envParamModel.isEnvEmpty(title)) ...[
             Padding(
               padding: const EdgeInsets.only(bottom: 0),
-              child: Text(
-                init(),
-                style:
-                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 29),
+              child: Tooltip(
+                message: init(),
+                child: Text(
+                  init(),
+                  maxLines: 1,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 29),
+                ),
               ),
             )
           ],
@@ -109,6 +89,7 @@ class _EnvPageState extends State<EnvPage> {
                   ]),
                   Row(children: [Expanded(child: _stageTaskExecuteSetting())]),
                   Row(children: [Expanded(child: _pgySetting())]),
+                  Row(children: [Expanded(child: _hwobsSetting())]),
                 ]))));
   }
 
@@ -173,7 +154,6 @@ class _EnvPageState extends State<EnvPage> {
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
           child: Container(
-
               padding: const EdgeInsets.all(20),
               margin: const EdgeInsets.all(10),
               decoration: _boxBorder(title),
@@ -183,10 +163,7 @@ class _EnvPageState extends State<EnvPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          title,
-                          style: const TextStyle(fontSize: 30),
-                        ),
+                        Text(title, style: const TextStyle(fontSize: 30)),
                         Row(
                           children: [
                             FilledButton(
@@ -405,23 +382,49 @@ class _EnvPageState extends State<EnvPage> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("蒲公英平台设置", style: _cTextStyle),
           const SizedBox(height: 20),
-          Row(children: [
+          _textInput('_api_key', _envParamModel.pgyApiKeyController),
+        ]))
+      ]),
+    );
+  }
+
+  Widget _textInput(String label, TextEditingController controller) {
+    return Row(children: [
+      Expanded(
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+            SizedBox(width: 150, child: Text(label, style: _cTextStyle)),
+            const Spacer(),
             Expanded(
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  Text("_api_key", style: _cTextStyle),
-                  const SizedBox(width: 200),
-                  Expanded(
-                    child: TextBox(
-                      controller: _envParamModel.pgyApiKeyController,
-                      textAlign: TextAlign.end,
-                      style: const TextStyle(fontSize: 19),
-                    ),
-                  )
-                ])),
-          ]),
+              child: TextBox(
+                controller: controller,
+                textAlign: TextAlign.end,
+                style: const TextStyle(fontSize: 19),
+              ),
+            )
+          ])),
+    ]);
+  }
+
+  _hwobsSetting() {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 9),
+      borderColor: Colors.transparent,
+      backgroundColor: _appTheme.bgColorSucc,
+      borderRadius: BorderRadius.circular(5),
+      child: Row(children: [
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text("华为OBS平台设置", style: _cTextStyle),
+          const SizedBox(height: 20),
+          _textInput('end point ', _envParamModel.obsEndPointController),
+          const SizedBox(height: 10),
+          _textInput('access key', _envParamModel.obsAccessKeyController),
+          const SizedBox(height: 10),
+          _textInput('secret key', _envParamModel.obsSecretKeyController),
         ]))
       ]),
     );
