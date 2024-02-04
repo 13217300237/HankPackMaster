@@ -205,9 +205,20 @@ class _ProjectPageState extends State<ProjectPage> {
           icon: const Icon(FluentIcons.open_enrollment, size: 18),
           onPressed: () async {
             String dir = _projectTaskVm.projectPathController.text;
-            await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
+            try {
+              await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
+            } catch (e) {
+              _showErr();
+            }
           }),
     );
+  }
+
+  _showErr() {
+    DialogUtil.showInfo(
+        context: context,
+        content: "打开资源浏览器失败，目录可能不存在...",
+        severity: InfoBarSeverity.error);
   }
 
   Widget _mainLayout() {
@@ -352,7 +363,7 @@ class _ProjectPageState extends State<ProjectPage> {
     return Row(
       children: [
         Expanded(
-            flex: 3,
+            flex: 4,
             child: Column(children: [Expanded(child: leftTop), leftBottom])),
         Expanded(flex: 2, child: Column(children: [Expanded(child: middle)])),
         Expanded(flex: 4, child: Column(children: [Expanded(child: right)])),
