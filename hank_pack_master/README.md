@@ -17,6 +17,6 @@ Project模块2024年1月14日改进计划：
 上传功能优化：
 1. 增加华为OBS的上传支持，需要阅读解析OBS的API文档  https://support.huaweicloud.com/api-obs/zh-cn_topic_0031051947.html
 
-
+视频指导 https://bbs.huaweicloud.com/videos/101580
 
 
