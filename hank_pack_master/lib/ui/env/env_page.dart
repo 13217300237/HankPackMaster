@@ -102,7 +102,7 @@ class _EnvPageState extends State<EnvPage> {
                   const EnvGroupCard(order: "adb"),
                   const EnvGroupCard(order: "flutter"),
                   const SizedBox(height: 20),
-                  _manullySpecifyEnvTitle(),
+                  _manualSpecifyEnvTitle(),
                   Row(children: [
                     Expanded(child: _workspaceChoose()),
                     Expanded(child: _androidSdkChoose()),
@@ -232,7 +232,7 @@ class _EnvPageState extends State<EnvPage> {
     );
   }
 
-  Widget _manullySpecifyEnvTitle() {
+  Widget _manualSpecifyEnvTitle() {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Row(
