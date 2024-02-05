@@ -4,7 +4,7 @@ import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/comm/const.dart';
 import 'package:hank_pack_master/hive/env_config_operator.dart';
 
-import '../ui/projects/project_task_vm.dart';
+import '../../ui/projects/project_task_vm.dart';
 
 /// 文件上传工具类，仅支持 apk和 ipa
 class PgyUploadUtil {
