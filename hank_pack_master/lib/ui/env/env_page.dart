@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/hwobs/hw_obs_util.dart';
+import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/command_util.dart';
@@ -29,10 +30,7 @@ class _EnvPageState extends State<EnvPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-
       _envParamModel.init();
-
-
     });
   }
 
@@ -249,7 +247,7 @@ class _EnvPageState extends State<EnvPage> {
               FilledButton(
                   child: const Text("测试华为OBS上传"),
                   onPressed: () async {
-                    await HwObsUtil.getInstance().doUpload();
+                    return HwObsUtil.getInstance().doUpload();
                   }),
             ],
           ),

@@ -1,10 +1,9 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:crypto/crypto.dart' as crypto;
+import 'package:intl/intl.dart';
+import 'package:crypto/crypto.dart';
 
 /// 华为OBS对象存储服务核心类
 class HwObsUtil {
@@ -17,108 +16,110 @@ class HwObsUtil {
 
   static late Dio _dio;
 
+  static late String _ak;
+  static late String _sk;
+  static late String _endpoint;
+  static late String _bucketName;
+
   // 公共的静态方法获取实例
   static HwObsUtil getInstance() {
     if (_instance == null) {
       _dio = Dio();
       _ak = "WME9RK9W2EA5J7WMG0ZD";
       _sk = "mW2cNSmvCgDBk2WSeqNSdJowr7KlMTe5FxDl9ovB";
-      _endpoint = "https://obs.ap-southeast-1.myhuaweicloud.com";
+      _endpoint = "obs.ap-southeast-1.myhuaweicloud.com";
       _bucketName = "kbzpay-apppackage";
       _instance = HwObsUtil._();
     }
     return _instance!;
   }
 
-  static late String _ak;
-  static late String _sk;
-  static late String _endpoint;
-  static late String _bucketName;
-
-  String signWithHmacSha1({
-    required String input,
-    required String secureKey,
-  }) {
-    var signingKey = Uint8List.fromList(secureKey.codeUnits);
-    var mac = crypto.Hmac(crypto.sha1, signingKey);
-    var bytes = Uint8List.fromList(input.codeUnits);
-    var digest = mac.convert(bytes);
-    return base64.encode(digest.bytes);
+  String nowDate() {
+    DateTime now = DateTime.now();
+    DateFormat formatter = DateFormat('E, dd MMM yyyy HH:mm:ss', 'en_GB');
+    String formatted = formatter.format(now.toUtc());
+    return "$formatted GMT";
   }
 
-  // 每次发送给OBS服务器的http请求，都必须包含由 SK ,请求时间，请求类型 等信息生成的签名信息。
-  // 签名信息放在header中
-  // 格式为：Authorization: OBS [AccessKeyID]:[Signature]
-  // AccessKeyID 为 AK
-  // Signature 是由 SK和一个StringToSign字符串计算而成
-  String canonicalString({
-    required String sk,
-    required String dateTime,
-    required String bucketName,
-    required String objectName,
-  }) {
-    String httpVerb = "PUT";
-    String contentMD5 = "1";
-    String contentType = "1";
-    String canonicalizedHeaders = "1";
-    String canonicalizedResource = "/$bucketName/$objectName";
+  String getAuthorization(String requestTime) {
+    // 1 构造请求字符串（StringToSign）;
 
-    var stringToSign = """
-$httpVerb
-$contentMD5
-$contentType
-$dateTime
-$canonicalizedHeaders$canonicalizedResource"""
-        .trim();
-    return stringToSign;
+    debugPrint("requestTime: $requestTime");
+
+    String contentMD5 = "";
+    String contentType = "";
+    String canonicalizedHeaders = "";
+    String canonicalizedResource = "/$_bucketName/objecttest1";
+    debugPrint("canonicalizedResource: $canonicalizedResource");
+    String stringToSign =
+        "PUT\n$contentMD5\n$contentType\n$requestTime\n$canonicalizedHeaders$canonicalizedResource";
+    debugPrint("StringToSign: $stringToSign");
+
+    // 2. 使用SK对StringToSign UTF-8编码之后的结果进行HMAC-SHA1签名计算
+    List<int> keyBytes = utf8.encode(_sk);
+    List<int> messageBytes =
+        utf8.encode(stringToSign); // 对 StringToSign 进行 UTF-8 编码
+    Hmac hmacSha1 = Hmac(sha1, keyBytes);
+    Digest hmacDigest = hmacSha1.convert(messageBytes);
+    String hmacSha1Result = hmacDigest.toString();
+    debugPrint("HMAC-SHA1计算的结果是:  $hmacSha1Result");
+
+    // 3. 对第3步的结果进行Base64编码
+    String encodedMessage = base64.encode(utf8.encode(hmacSha1Result));
+    debugPrint("最终签名: OBS $_ak:$encodedMessage"); // 打印编码后的字符串
+
+    return 'OBS $_ak:$encodedMessage';
   }
 
-  final String _obj = "text01.text"; // 上传的对象名 test-object?acl
-  final String _filePath = 'D:\\OBSobject\\text01.txt';
-  final String _area = "ap-southeast-1";
+  testBaidu() async {
+    String url = "https://www.baidu.com";
+    debugPrint("请求地址为：$url");
+    final response = await _dio.get(url);
+    debugPrint('responseCode  =  ${response.statusCode ?? 0}');
 
-  /// 上传到obs
-  Future doUpload() async {
-    String url = "https://$_bucketName.obs.$_area.myhuaweicloud.com/";
-    debugPrint("url->$url");
 
-    String dateTime = '${DateTime.now().millisecondsSinceEpoch}'; // 当前时间的毫秒数
 
-    debugPrint("dateTime-> $dateTime");
+  }
 
-    String canonical = canonicalString(
-      sk: _sk,
-      dateTime: dateTime,
-      bucketName: _bucketName,
-      objectName: _obj,
-    );
-    debugPrint(
-        "\n=======canonical start========\n$canonical\n=======canonical end========\n");
-
-    String sign = signWithHmacSha1(input: canonical, secureKey: _sk);
-
-    debugPrint("sign->$sign");
+  /// 调用 OBS上传，必须关闭XGate，不然网络有问题
+  doUpload() async {
+    String requestTime = nowDate();
+    String authorization = getAuthorization(requestTime);
+    String url = "https://$_bucketName.$_endpoint";
+    debugPrint("请求地址为：$url");
 
     // 构建 FormData
-    FormData formData =
-        FormData.fromMap({"file": await MultipartFile.fromFile(_filePath)});
+    FormData formData = FormData.fromMap(
+        {"file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt')});
 
-    final response = await _dio.put(url,
-        options: Options(headers: {
-          "Authorization": "OBS $_ak:$sign",
-          "Date": dateTime,
-        }),
-        data: formData);
+    var options = Options(
+      headers: {
+        'Date': requestTime,
+        'Authorization': authorization,
+      },
+    );
 
-    if (response.statusCode == 200) {
-      // 请求成功
-      debugPrint("getPgyToken 请求成功===> ${response.data}");
-
-      return null;
-    } else {
-      // 请求失败
-      debugPrint('pgy 请求失败===> 错误码：${response.statusCode}');
-      return null;
+    onSendProgress(int current, int total) {
+      double result = (current / total) * 100;
+      String formattedResult = result.toStringAsFixed(2);
+      debugPrint("请求发送中...$formattedResult%");
     }
+
+    onReceiveProgress(int current, int total) {
+      double result = (current / total) * 100;
+      String formattedResult = result.toStringAsFixed(2);
+      debugPrint("请求接收中...$formattedResult%");
+    }
+
+    final response = await _dio.post(url,
+        data: formData,
+        options: options,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress);
+
+    debugPrint('responseCode  =  ${response.statusCode ?? 0}');
   }
+
+// 官方计算的: OBS WME9RK9W2EA5J7WMG0ZD:Ha1fA/9wR0qIxXhGw7mBAJO46xM=
+// 本人计算的: OBS WME9RK9W2EA5J7WMG0ZD:MWRhZDVmMDNmZjcwNDc0YTg4YzU3ODQ2YzNiOTgxMDA5M2I4ZWIxMw==
 }
