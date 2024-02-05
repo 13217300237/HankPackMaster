@@ -46,13 +46,13 @@ class HwObsUtil {
 
     debugPrint("requestTime: $requestTime");
 
-    String contentMD5 = "";
-    String contentType = "";
+    String contentMD5 = ""; // 提前计算出要上传对象的MD5，在上传完成之后服务端会进行校验，如果不同，会告知客户端，传输过程中遇到风险了
+    String contentType = "multipart/form-data";
     String canonicalizedHeaders = "";
     String canonicalizedResource = "/$_bucketName/objecttest1";
     debugPrint("canonicalizedResource: $canonicalizedResource");
     String stringToSign =
-        "PUT\n$contentMD5\n$contentType\n$requestTime\n$canonicalizedHeaders$canonicalizedResource";
+        "POST\n$contentMD5\n$contentType\n$requestTime\n$canonicalizedHeaders$canonicalizedResource";
     debugPrint("StringToSign: $stringToSign");
 
     // 2. 使用SK对StringToSign UTF-8编码之后的结果进行HMAC-SHA1签名计算
