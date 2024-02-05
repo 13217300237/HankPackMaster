@@ -41,18 +41,19 @@ class HwObsUtil {
     return "$formatted GMT";
   }
 
-  String getAuthorization(String requestTime) {
+  String getAuthorization(String method, String requestTime) {
     // 1 构造请求字符串（StringToSign）;
 
     debugPrint("requestTime: $requestTime");
 
-    String contentMD5 = ""; // 提前计算出要上传对象的MD5，在上传完成之后服务端会进行校验，如果不同，会告知客户端，传输过程中遇到风险了
+    String contentMD5 =
+        ""; // 提前计算出要上传对象的MD5，在上传完成之后服务端会进行校验，如果不同，会告知客户端，传输过程中遇到风险了
     String contentType = "multipart/form-data";
     String canonicalizedHeaders = "";
     String canonicalizedResource = "/$_bucketName/objecttest1";
     debugPrint("canonicalizedResource: $canonicalizedResource");
     String stringToSign =
-        "POST\n$contentMD5\n$contentType\n$requestTime\n$canonicalizedHeaders$canonicalizedResource";
+        "$method\n$contentMD5\n$contentType\n$requestTime\n$canonicalizedHeaders$canonicalizedResource";
     debugPrint("StringToSign: $stringToSign");
 
     // 2. 使用SK对StringToSign UTF-8编码之后的结果进行HMAC-SHA1签名计算
@@ -76,48 +77,60 @@ class HwObsUtil {
     debugPrint("请求地址为：$url");
     final response = await _dio.get(url);
     debugPrint('responseCode  =  ${response.statusCode ?? 0}');
-
-
-
   }
 
   /// 调用 OBS上传，必须关闭XGate，不然网络有问题
   doUpload() async {
-    String requestTime = nowDate();
-    String authorization = getAuthorization(requestTime);
-    String url = "https://$_bucketName.$_endpoint";
-    debugPrint("请求地址为：$url");
+    try {
+      String requestTime = nowDate();
+      String authorization = getAuthorization('post', requestTime);
+      String url = "https://$_bucketName.$_endpoint";
+      debugPrint("请求地址为：$url");
 
-    // 构建 FormData
-    FormData formData = FormData.fromMap(
-        {"file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt')});
+      // 构建 FormData
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt'),
+        "key": "text01.txt",
+      });
 
-    var options = Options(
-      headers: {
-        'Date': requestTime,
-        'Authorization': authorization,
-      },
-    );
+      var options = Options(
+        headers: {
+          'Date': requestTime,
+          'Authorization': authorization,
+        },
+      );
 
-    onSendProgress(int current, int total) {
-      double result = (current / total) * 100;
-      String formattedResult = result.toStringAsFixed(2);
-      debugPrint("请求发送中...$formattedResult%");
+      onSendProgress(int current, int total) {
+        double result = (current / total) * 100;
+        String formattedResult = result.toStringAsFixed(2);
+        debugPrint("请求发送中...$formattedResult%");
+      }
+
+      onReceiveProgress(int current, int total) {
+        double result = (current / total) * 100;
+        String formattedResult = result.toStringAsFixed(2);
+        debugPrint("请求接收中...$formattedResult%");
+      }
+
+      final response = await _dio.post(url,
+          data: formData,
+          options: options,
+          onSendProgress: onSendProgress,
+          onReceiveProgress: onReceiveProgress);
+
+      debugPrint('responseCode  =  ${response.statusCode ?? 0}');
+    } catch (e) {
+      if (e is DioError) {
+        final response = e.response;
+        if (response != null) {
+          print("具体的报错信息: ${response.data}");
+        } else {
+          print("请求出错: ${e.message}");
+        }
+      } else {
+        print("请求出错: $e");
+      }
     }
-
-    onReceiveProgress(int current, int total) {
-      double result = (current / total) * 100;
-      String formattedResult = result.toStringAsFixed(2);
-      debugPrint("请求接收中...$formattedResult%");
-    }
-
-    final response = await _dio.post(url,
-        data: formData,
-        options: options,
-        onSendProgress: onSendProgress,
-        onReceiveProgress: onReceiveProgress);
-
-    debugPrint('responseCode  =  ${response.statusCode ?? 0}');
   }
 
 // 官方计算的: OBS WME9RK9W2EA5J7WMG0ZD:Ha1fA/9wR0qIxXhGw7mBAJO46xM=
