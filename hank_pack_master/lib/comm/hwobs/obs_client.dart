@@ -62,8 +62,10 @@ class OBSClient {
     return obsResponse;
   }
 
-  static Future<OBSResponse?> putFile(String objectName, File file,
-      {String xObsAcl = "public-read"}) async {
+  static Future<OBSResponse?> putFile(
+      {required String objectName,
+      required File file,
+      String xObsAcl = "public-read"}) async {
     var contentMD5 = await getFileMd5Base64(file);
     var stream = file.openRead();
     OBSResponse? obsResponse = await put(
@@ -108,7 +110,7 @@ class OBSClient {
   static Future<OBSResponse?> putFileWithPath(
       String objectName, String filePath,
       {String xObsAcl = "public-read"}) async {
-    return putFile(objectName, File(filePath));
+    return putFile(objectName: objectName, file: File(filePath));
   }
 
   static String _sign(String httpMethod, String contentMd5, String contentType,

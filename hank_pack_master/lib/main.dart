@@ -6,7 +6,7 @@ import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'comm/functions.dart';
-import 'hive/env_config_entity.dart';
+import 'comm/hwobs/obs_client.dart';
 import 'hive/env_config_operator.dart';
 import 'ui/app.dart';
 
@@ -14,6 +14,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await EnvConfigOperator.openBox();
+
+  OBSClient.init(
+      ak: "WME9RK9W2EA5J7WMG0ZD",
+      sk: "mW2cNSmvCgDBk2WSeqNSdJowr7KlMTe5FxDl9ovB",
+      domain:
+      "https://kbzpay-apppackage.obs.ap-southeast-1.myhuaweicloud.com",
+      bucketName: "kbzpay-apppackage");
 
   // if it's not on the web, windows or android, load the accent color
   if (!kIsWeb &&

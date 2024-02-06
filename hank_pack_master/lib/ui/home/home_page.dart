@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 
@@ -75,21 +76,32 @@ class _HomePageState extends State<HomePage> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            FilledButton(
-                child: const Text("测试华为OBS上传"),
-                onPressed: () async {
-                  OBSClient.init(
-                      ak: "WME9RK9W2EA5J7WMG0ZD",
-                      sk: "mW2cNSmvCgDBk2WSeqNSdJowr7KlMTe5FxDl9ovB",
-                      domain:
-                          "https://kbzpay-apppackage.obs.ap-southeast-1.myhuaweicloud.com",
-                      bucketName: "kbzpay-apppackage");
-                  var oBSResponse = await OBSClient.putObject(
-                      objectName: "test/test.txt",
-                      data: utf8.encode("Hello OBS"));
+            Row(
+              children: [
+                FilledButton(
+                    child: const Text("测试华为OBS上传字符串"),
+                    onPressed: () async {
+                      var oBSResponse = await OBSClient.putObject(
+                          objectName: "test/test.txt",
+                          data: utf8.encode("Hello OBS"));
 
-                  debugPrint("${oBSResponse?.url}");
-                }),
+                      debugPrint("${oBSResponse?.url}");
+                    }),
+                const SizedBox(width: 20),
+                FilledButton(
+                    child: const Text("测试华为OBS上传文件"),
+                    onPressed: () async {
+                      File fileToUpload = File(
+                          "C:\\Users\\zwx1245985\\Desktop\\KBZPay_5.6.3_uat2_google.apk");
+
+                      var oBSResponse = await OBSClient.putFile(
+                          objectName: "test/KBZPay_5.6.3_uat2_google.apk",
+                          file: fileToUpload);
+
+                      debugPrint("${oBSResponse?.url}");
+                    }),
+              ],
+            ),
             const SizedBox(height: 30),
             Text(
               text,
