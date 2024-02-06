@@ -41,16 +41,16 @@ class HwObsUtil {
     return "$formatted GMT";
   }
 
-  String getAuthorizationForUpload(String method, String requestTime) {
+  String getAuthorizationForUpload(
+      String method, String requestTime, String objName) {
     // 1 构造请求字符串（StringToSign）;
 
     debugPrint("requestTime: $requestTime");
-
-    String contentMD5 =
-        ""; // 提前计算出要上传对象的MD5，在上传完成之后服务端会进行校验，如果不同，会告知客户端，传输过程中遇到风险了
+    // 提前计算出要上传对象的MD5，在上传完成之后服务端会进行校验，如果不同，会告知客户端，传输过程中遇到风险了
+    String contentMD5 = "";
     String contentType = "";
     String canonicalizedHeaders = "";
-    String canonicalizedResource = "/$_bucketName/objecttest1";
+    String canonicalizedResource = "/$_bucketName/$objName";
     debugPrint("canonicalizedResource: $canonicalizedResource");
     String stringToSign =
         "$method\n$contentMD5\n$contentType\n$requestTime\n$canonicalizedHeaders$canonicalizedResource";
@@ -86,7 +86,7 @@ class HwObsUtil {
     // 2. 使用SK对StringToSign UTF-8编码之后的结果进行HMAC-SHA1签名计算
     List<int> keyBytes = utf8.encode(_sk);
     List<int> messageBytes =
-    utf8.encode(stringToSign); // 对 StringToSign 进行 UTF-8 编码
+        utf8.encode(stringToSign); // 对 StringToSign 进行 UTF-8 编码
     Hmac hmacSha1 = Hmac(sha1, keyBytes);
     Digest hmacDigest = hmacSha1.convert(messageBytes);
     // 3. 对第3步的结果进行Base64编码
@@ -115,6 +115,8 @@ class HwObsUtil {
       final response = await _dio.get(url, options: options);
 
       debugPrint('responseCode  =  ${response.statusCode ?? 0}');
+
+      debugPrint('responseCode  =  ${response.data ?? 'null'}');
     } catch (e) {
       if (e is DioError) {
         final response = e.response;
@@ -133,20 +135,22 @@ class HwObsUtil {
   doUpload() async {
     try {
       String requestTime = nowDate();
-      String url = "https://$_bucketName.$_endpoint";
+
+      String objName = "objtest1"; // 上传之后保存的对象名
+
+      String url = "https://$_bucketName.$_endpoint/$objName";
       debugPrint("请求地址为：$url");
 
       // 构建 FormData 请求体
-      FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt'),
-        // "key": "text01.txt",
-      });
+      FormData formData = FormData.fromMap(
+          {"file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt')});
 
       // 请求头
       var options = Options(
         headers: {
           'Date': requestTime,
-          'Authorization': getAuthorizationForUpload('PUT', requestTime),
+          'Authorization':
+              getAuthorizationForUpload('PUT', requestTime, objName),
         },
       );
 
