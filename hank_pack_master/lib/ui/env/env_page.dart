@@ -244,11 +244,6 @@ class _EnvPageState extends State<EnvPage> {
                     debugPrint("查询到的A的值为： $res  ");
                   }),
               const SizedBox(width: 10),
-              FilledButton(
-                  child: const Text("测试华为OBS上传"),
-                  onPressed: () async {
-                    return HwObsUtil.getInstance().doUpload();
-                  }),
             ],
           ),
         ],

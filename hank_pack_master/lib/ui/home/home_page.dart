@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
+import '../../comm/hwobs/hw_obs_util.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -69,10 +71,27 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(10),
       color: Colors.transparent,
       child: SingleChildScrollView(
-          child: Text(
-        text,
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-      )),
+        child: Column(
+          children: [
+            FilledButton(
+                child: const Text("测试华为OBS上传"),
+                onPressed: () async {
+                  return HwObsUtil.getInstance().doUpload();
+                }),
+            const SizedBox(height: 10),
+            FilledButton(
+                child: const Text("测试华为OBS列举桶"),
+                onPressed: () async {
+                  return HwObsUtil.getInstance().duList();
+                }),
+            const SizedBox(height: 30),
+            Text(
+              text,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
