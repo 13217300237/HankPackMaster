@@ -49,7 +49,7 @@ class HwObsUtil {
     debugPrint("requestTime: $requestTime");
     // 提前计算出要上传对象的MD5，在上传完成之后服务端会进行校验，如果不同，会告知客户端，传输过程中遇到风险了
     String contentMD5 = "";
-    String contentType = "";
+    String contentType = "multipart/form-data; boundary=--dio-boundary-1094773755"; // 猜测可能是由于增加了data之后，签名头域的计算也需要添加新参数
     String canonicalizedHeaders = "";
     String canonicalizedResource = "/$_bucketName/$objName";
     debugPrint("canonicalizedResource: $canonicalizedResource");
