@@ -142,8 +142,9 @@ class HwObsUtil {
       debugPrint("请求地址为：$url");
 
       // 构建 FormData 请求体
-      FormData formData = FormData.fromMap(
-          {"file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt')});
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt')
+      }); // 还真特么是这里设置file的问题啊？
 
       // 请求头
       var options = Options(
@@ -167,7 +168,6 @@ class HwObsUtil {
       }
 
       final response = await _dio.put(url,
-          data: formData,
           options: options,
           onSendProgress: onSendProgress,
           onReceiveProgress: onReceiveProgress);
@@ -177,12 +177,12 @@ class HwObsUtil {
       if (e is DioError) {
         final response = e.response;
         if (response != null) {
-          print("具体的报错信息: ${response.data}");
+          debugPrint("具体的报错信息: ${response.data}");
         } else {
-          print("请求出错: ${e.message}");
+          debugPrint("请求出错: ${e.message}");
         }
       } else {
-        print("请求出错: $e");
+        debugPrint("请求出错: $e");
       }
     }
   }
