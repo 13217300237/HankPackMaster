@@ -116,7 +116,7 @@ class HwObsUtil {
 
       debugPrint('responseCode  =  ${response.statusCode ?? 0}');
 
-      debugPrint('responseCode  =  ${response.data ?? 'null'}');
+      debugPrint('responseCode.data  =  ${response.data ?? 'null'}');
     } catch (e) {
       if (e is DioError) {
         final response = e.response;
@@ -136,15 +136,19 @@ class HwObsUtil {
     try {
       String requestTime = nowDate();
 
-      String objName = "objtest1"; // 上传之后保存的对象名
+      String objName = "test.txt"; // 上传之后保存的对象名,注意这里如果有中文，必须先编码
 
       String url = "https://$_bucketName.$_endpoint/$objName";
       debugPrint("请求地址为：$url");
 
+      var fileToUpload =
+          await MultipartFile.fromFile('D:\\OBSobject\\text01.txt');
+
       // 构建 FormData 请求体
       FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt')
-      }); // 还真特么是这里设置file的问题啊？
+        "file": fileToUpload,
+        "length": fileToUpload.length,
+      }); // 还真特么是这里设置file的问题啊？TODO
 
       // 请求头
       var options = Options(
@@ -172,7 +176,9 @@ class HwObsUtil {
           onSendProgress: onSendProgress,
           onReceiveProgress: onReceiveProgress);
 
-      debugPrint('responseCode  =  ${response.statusCode ?? 0}');
+      debugPrint('responseCode  =  ${response.statusCode}');
+      debugPrint(
+          'response.headers:\n{\n${response.headers.toString().trim()}\n}');
     } catch (e) {
       if (e is DioError) {
         final response = e.response;
