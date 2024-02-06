@@ -55,7 +55,7 @@ class HwObsUtil {
     String stringToSign =
         "$method\n$contentMD5\n$contentType\n$requestTime\n$canonicalizedHeaders$canonicalizedResource";
     debugPrint("加密前的原文:\n$stringToSign");
-    debugPrint("加密用的sk是:\n$_sk");
+    debugPrint("加密用的sk是: $_sk");
     // 2. 使用SK对StringToSign UTF-8编码之后的结果进行HMAC-SHA1签名计算
     List<int> keyBytes = utf8.encode(_sk);
     List<int> messageBytes =
@@ -80,7 +80,7 @@ class HwObsUtil {
   /// 调用 OBS上传，必须关闭XGate，不然网络有问题
   doUpload() async {
     try {
-      String requestTime = 'Tue, 06 Feb 2024 07:40:05 GMT'; // TODO nowDate(); 记得改回来，
+      String requestTime = nowDate();
       String url = "https://$_bucketName.$_endpoint";
       debugPrint("请求地址为：$url");
 
