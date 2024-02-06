@@ -112,7 +112,7 @@ class HwObsUtil {
         debugPrint("请求接收中...$formattedResult%");
       }
 
-      final response = await _dio.post(url,
+      final response = await _dio.put(url,
           data: formData,
           options: options,
           onSendProgress: onSendProgress,
