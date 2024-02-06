@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -64,7 +65,6 @@ class HwObsUtil {
     Digest hmacDigest = hmacSha1.convert(messageBytes);
     // 3. 对第3步的结果进行Base64编码
     String encodedMessage = base64.encode(hmacDigest.bytes);
-
     debugPrint("最终签名: OBS $_ak:$encodedMessage"); // 打印编码后的字符串
 
     return 'OBS $_ak:$encodedMessage';
@@ -133,6 +133,18 @@ class HwObsUtil {
 
   /// 调用 OBS上传，必须关闭XGate，不然网络有问题
   doUpload() async {
+    onSendProgress(int current, int total) {
+      double result = (current / total) * 100;
+      String formattedResult = result.toStringAsFixed(2);
+      debugPrint("请求发送中...$formattedResult%");
+    }
+
+    onReceiveProgress(int current, int total) {
+      double result = (current / total) * 100;
+      String formattedResult = result.toStringAsFixed(2);
+      debugPrint("请求接收中...$formattedResult%");
+    }
+
     try {
       String requestTime = nowDate();
 
@@ -141,14 +153,10 @@ class HwObsUtil {
       String url = "https://$_bucketName.$_endpoint/$objName";
       debugPrint("请求地址为：$url");
 
-      var fileToUpload =
-          await MultipartFile.fromFile('D:\\OBSobject\\text01.txt');
-
       // 构建 FormData 请求体
-      FormData formData = FormData.fromMap({
-        "file": fileToUpload,
-        "length": fileToUpload.length,
-      }); // 还真特么是这里设置file的问题啊？TODO
+      var formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile('D:\\OBSobject\\text01.txt'),
+      });
 
       // 请求头
       var options = Options(
@@ -157,22 +165,12 @@ class HwObsUtil {
           'Authorization':
               getAuthorizationForUpload('PUT', requestTime, objName),
         },
+        contentType: 'multipart/form-data',
       );
-
-      onSendProgress(int current, int total) {
-        double result = (current / total) * 100;
-        String formattedResult = result.toStringAsFixed(2);
-        debugPrint("请求发送中...$formattedResult%");
-      }
-
-      onReceiveProgress(int current, int total) {
-        double result = (current / total) * 100;
-        String formattedResult = result.toStringAsFixed(2);
-        debugPrint("请求接收中...$formattedResult%");
-      }
 
       final response = await _dio.put(url,
           options: options,
+          data: formData, //TODO 去掉这一行就返回200，怀疑，是不是加了data之后，请求头中要增加对应的东西？
           onSendProgress: onSendProgress,
           onReceiveProgress: onReceiveProgress);
 
