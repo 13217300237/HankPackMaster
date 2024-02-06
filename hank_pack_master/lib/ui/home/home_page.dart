@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:fluent_ui/fluent_ui.dart';
 
-import '../../comm/hwobs/hw_obs_util.dart';
+import '../../comm/hwobs/obs_client.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -76,13 +78,17 @@ class _HomePageState extends State<HomePage> {
             FilledButton(
                 child: const Text("测试华为OBS上传"),
                 onPressed: () async {
-                  return HwObsUtil.getInstance().doUpload();
-                }),
-            const SizedBox(height: 10),
-            FilledButton(
-                child: const Text("测试华为OBS列举桶"),
-                onPressed: () async {
-                  return HwObsUtil.getInstance().duList();
+                  OBSClient.init(
+                      ak: "WME9RK9W2EA5J7WMG0ZD",
+                      sk: "mW2cNSmvCgDBk2WSeqNSdJowr7KlMTe5FxDl9ovB",
+                      domain:
+                          "https://kbzpay-apppackage.obs.ap-southeast-1.myhuaweicloud.com",
+                      bucketName: "kbzpay-apppackage");
+                  var oBSResponse = await OBSClient.putObject(
+                      objectName: "test/test.txt",
+                      data: utf8.encode("Hello OBS"));
+
+                  debugPrint("${oBSResponse?.url}");
                 }),
             const SizedBox(height: 30),
             Text(
