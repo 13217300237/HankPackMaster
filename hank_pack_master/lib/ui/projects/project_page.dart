@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:flutter/services.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/ui/projects/app_info_card.dart';
@@ -10,6 +11,7 @@ import 'package:hank_pack_master/ui/projects/project_task_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../comm/ui/pretty_3d_button.dart';
 import '../comm/theme.dart';
 import '../env/env_param_vm.dart';
 
@@ -63,12 +65,9 @@ class _ProjectPageState extends State<ProjectPage> {
                 envParamModel.workSpaceRoot +
                     Platform.pathSeparator +
                     projectName;
-            _projectTaskVm.gitBranchController.text = "dev"; // 测试代码
-            _projectTaskVm.projectAppDescController.text =
-                "测试用的app，你懂的！"; // 测试代码
           } else {
             _projectTaskVm.projectPathController.text = "";
-            _projectTaskVm.gitBranchController.text = ""; // 测试代码
+            _projectTaskVm.gitBranchController.text = "";
           }
           // 直接赋值给 _projectNameController 就行了
         }
@@ -126,10 +125,11 @@ class _ProjectPageState extends State<ProjectPage> {
   /// 输入框
   Widget _input(
       String title, String placeholder, TextEditingController controller,
-      {Widget? suffix, bool alwaysDisable = false}) {
+      {Widget? suffix, bool alwaysDisable = false, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
               width: 80,
@@ -137,10 +137,19 @@ class _ProjectPageState extends State<ProjectPage> {
           const SizedBox(width: 15),
           Expanded(
             child: TextBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                unfocusedColor: Colors.transparent,
+                highlightColor: Colors.transparent,
                 style: const TextStyle(
-                    decoration: TextDecoration.none, fontSize: 18),
+                  decoration: TextDecoration.none,
+                  fontSize: 18,
+                ),
                 placeholder: placeholder,
                 expands: false,
+                maxLines: maxLines,
+                maxLength: 5,
                 enabled: !_projectTaskVm.jobRunning && !alwaysDisable,
                 controller: controller),
           ),
@@ -223,88 +232,106 @@ class _ProjectPageState extends State<ProjectPage> {
 
   Widget _mainLayout() {
     var leftTop = Card(
-        margin: const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 20),
+        margin: const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 10),
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
         borderRadius: BorderRadius.circular(10),
         backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _mainTitleWidget("项目配置"),
             const SizedBox(height: 20),
-            Expanded(
-              child: ScrollConfiguration(
-                behavior:
-                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                child: SingleChildScrollView(
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _input("git地址 ", "输入git地址",
-                            _projectTaskVm.gitUrlController),
-                        _gitErrorText(),
-                        _input("工程位置", "输入工程名",
-                            _projectTaskVm.projectPathController,
-                            alwaysDisable: true, suffix: _toolTip()),
-                        _input("分支名称", "输入分支名称",
-                            _projectTaskVm.gitBranchController),
-                        _input("应用描述", "输入应用描述...",
-                            _projectTaskVm.projectAppDescController),
-                        _input("更新日志", "输入更新日志...",
-                            _projectTaskVm.updateLogController),
-                        _input("打包命令", "输入打包命令...",
-                            _projectTaskVm.assembleTaskNameController),
-                        _chooseConfig(
-                            title: "强制指定打包版本参数(需要工程中动态获取参数才能达成，待定)",
-                            chooseWidget: Row(children: [
-                              _childChoose(
-                                title: "versionCode",
-                                placeholder: "",
-                                controller:
-                                    _projectTaskVm.versionCodeController,
-                              ),
-                              _childChoose(
-                                title: "versionName",
-                                placeholder: "",
-                                controller:
-                                    _projectTaskVm.versionNameController,
-                              ),
-                            ])),
-                      ]),
-                ),
+            ScrollConfiguration(
+              behavior:
+                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _input(
+                        "git地址 ",
+                        "输入git地址",
+                        _projectTaskVm.gitUrlController,
+                      ),
+                      _gitErrorText(),
+                      _input(
+                        "工程位置",
+                        "输入工程名",
+                        _projectTaskVm.projectPathController,
+                        alwaysDisable: true,
+                        suffix: _toolTip(),
+                      ),
+                      _input(
+                        "分支名称",
+                        "输入分支名称",
+                        _projectTaskVm.gitBranchController,
+                      ),
+                      _input(
+                        "应用描述",
+                        "输入应用描述...",
+                        _projectTaskVm.projectAppDescController,
+                        maxLines: 5,
+                      ),
+                      _actionButton(
+                          title: "项目激活测试",
+                          bgColor: Colors.purple.normal,
+                          action: () async {
+                            DialogUtil.showConfirmDialog(
+                                context: context,
+                                content:
+                                    "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
+                                title: '提示',
+                                onConfirm: () => start());
+                          }),
+                    ]),
               ),
             ),
           ],
         ));
 
-    var leftBottom = Container(
-      margin: const EdgeInsets.only(top: 0, left: 10, right: 10, bottom: 0),
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
-      child: Row(
-        children: [
-          _actionButton(
-              title: "项目激活测试",
-              bgColor: Colors.purple.normal,
-              action: () async {
-                DialogUtil.showConfirmDialog(
-                    context: context,
-                    content:
-                        "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
-                    title: '提示',
-                    onConfirm: () => start());
-              }),
-          _actionButton(
-              title: "正式开始打包",
-              bgColor: Colors.orange.lighter,
-              action: actionButtonDisabled ? null : start),
-        ],
-      ),
-    );
+    var leftMiddle = Card(
+        margin: const EdgeInsets.only(top: 0, left: 10, right: 10, bottom: 10),
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
+        borderRadius: BorderRadius.circular(10),
+        backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _mainTitleWidget("打包参数"),
+            const SizedBox(height: 20),
+            ScrollConfiguration(
+              behavior:
+                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _input(
+                        "打包命令",
+                        "输入打包命令...",
+                        _projectTaskVm.assembleTaskNameController,
+                      ),
+                      _input(
+                        "更新日志",
+                        "输入更新日志...",
+                        _projectTaskVm.updateLogController,
+                        maxLines: 5,
+                      ),
+                      _actionButton(
+                          title: "正式开始打包",
+                          bgColor: !actionButtonDisabled
+                              ? Colors.orange.lighter
+                              : Colors.grey.withOpacity(.2),
+                          action: !actionButtonDisabled ? start : null),
+                    ]),
+              ),
+            ),
+          ],
+        ));
 
     var middle = Padding(
         padding:
-            const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 20),
+            const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 20),
         child: Card(
           borderRadius: BorderRadius.circular(10),
           backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
@@ -328,7 +355,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
     var right = Padding(
         padding:
-            const EdgeInsets.only(top: 30, left: 10, right: 20, bottom: 20),
+            const EdgeInsets.only(top: 15, left: 10, right: 20, bottom: 20),
         child: Card(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
             borderRadius: BorderRadius.circular(10),
@@ -362,9 +389,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
     return Row(
       children: [
-        Expanded(
-            flex: 4,
-            child: Column(children: [Expanded(child: leftTop), leftBottom])),
+        Expanded(flex: 5, child: Column(children: [leftTop, leftMiddle])),
         Expanded(flex: 2, child: Column(children: [Expanded(child: middle)])),
         Expanded(flex: 4, child: Column(children: [Expanded(child: right)])),
       ],
@@ -376,24 +401,17 @@ class _ProjectPageState extends State<ProjectPage> {
     required Color bgColor,
     required Function()? action,
   }) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 5),
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        child: FilledButton(
-          style: ButtonStyle(
-              backgroundColor: ButtonState.resolveWith((states) => bgColor)),
-          onPressed: action,
-          child: SizedBox(
-              height: 60,
-              child: Center(
-                child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 30),
-                ),
-              )),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Pretty3DButton(
+          text: title,
+          blurRadius: 0,
+          offset: .5,
+          spreadRadius: .2,
+          onTap: action,
         ),
-      ),
+      ],
     );
   }
 
