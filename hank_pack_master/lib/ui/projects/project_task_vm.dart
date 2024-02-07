@@ -293,7 +293,7 @@ class ProjectTaskVm extends ChangeNotifier {
           String er = "打包失败，详情请看日志";
           return OrderExecuteResult(msg: er, succeed: false);
         }
-        return OrderExecuteResult(succeed: true);
+        return OrderExecuteResult(succeed: true,data: gradleAssembleRes.res);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -308,7 +308,7 @@ class ProjectTaskVm extends ChangeNotifier {
         if (await apk.exists()) {
           this.apkLocation = apkLocation;
         }
-        return OrderExecuteResult(succeed: true);
+        return OrderExecuteResult(succeed: true,data: "打包产物的位置在: $apkLocation");
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -340,7 +340,7 @@ class ProjectTaskVm extends ChangeNotifier {
           xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
         );
 
-        return OrderExecuteResult(succeed: true);
+        return OrderExecuteResult(succeed: true,data: '获取到的Token是 ${pgyToken.toString()}');
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -362,7 +362,7 @@ class ProjectTaskVm extends ChangeNotifier {
         if (res != null) {
           return OrderExecuteResult(msg: "上传失败,$res", succeed: false);
         } else {
-          return OrderExecuteResult(succeed: true);
+          return OrderExecuteResult(succeed: true,data: '上传成功');
         }
       },
       onStateFinished: updateStageCostTime,
