@@ -335,6 +335,8 @@ class _EnvPageState extends State<EnvPage> {
                   SizedBox(
                     width: 100,
                     child: TextBox(
+                      unfocusedColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
                       controller:
                           _envParamModel.stageTaskExecuteMaxPeriodController,
                       suffix: Text("秒", style: _cTextStyle),
@@ -353,6 +355,8 @@ class _EnvPageState extends State<EnvPage> {
                   SizedBox(
                     width: 100,
                     child: TextBox(
+                      unfocusedColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
                       suffix: Text("次", style: _cTextStyle),
                       controller: _envParamModel
                           .stageTaskExecuteMaxRetryTimesController,
@@ -397,6 +401,8 @@ class _EnvPageState extends State<EnvPage> {
             const Spacer(),
             Expanded(
               child: TextBox(
+                unfocusedColor: Colors.transparent,
+                highlightColor: Colors.transparent,
                 controller: controller,
                 textAlign: TextAlign.end,
                 style: const TextStyle(fontSize: 19),

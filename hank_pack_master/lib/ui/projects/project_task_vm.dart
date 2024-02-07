@@ -106,7 +106,6 @@ class ProjectTaskVm extends ChangeNotifier {
   final projectPathController = TextEditingController(); // 工程路径
   final projectAppDescController = TextEditingController(); // 应用描述
   final updateLogController = TextEditingController(); // 更新日志
-  final assembleTaskNameController = TextEditingController(); // 可用打包指令名称
 
   final versionNameController = TextEditingController(); // 强制指定版本名
   final versionCodeController = TextEditingController(); // 强制指定版本号
@@ -143,8 +142,6 @@ class ProjectTaskVm extends ChangeNotifier {
 
   String get updateLog => updateLogController.text;
 
-  String get packageOrder => assembleTaskNameController.text;
-
   String get envWorkspaceRoot =>
       EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey);
 
@@ -158,6 +155,17 @@ class ProjectTaskVm extends ChangeNotifier {
 
   final List<String> _enableAssembleOrders = [];
 
+  Map<String, String> get enableAssembleOrders {
+    Map<String, String> v = {};
+    for (var element in _enableAssembleOrders) {
+      v[element] = element;
+    }
+
+    return v;
+  }
+
+  String? selectedOrder;
+
   void deleteDirectory(String path) {
     Directory directory = Directory(path);
     if (directory.existsSync()) {
@@ -166,6 +174,7 @@ class ProjectTaskVm extends ChangeNotifier {
   }
 
   void initPreCheckTaskList() {
+    selectedOrder = null;
     taskStateList.clear();
     taskStateList.add(TaskState(
       "参数准备",
@@ -259,8 +268,7 @@ class ProjectTaskVm extends ChangeNotifier {
         }
 
         debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
-        return OrderExecuteResult(
-            succeed: true, data: '$_enableAssembleOrders');
+        return OrderExecuteResult(succeed: true, data: _enableAssembleOrders);
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -276,7 +284,7 @@ class ProjectTaskVm extends ChangeNotifier {
         ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
             .gradleAssemble(
                 projectRoot: projectPath + Platform.pathSeparator,
-                packageOrder: packageOrder,
+                packageOrder: selectedOrder!,
                 versionCode: versionCode,
                 versionName: versionName,
                 logOutput: addNewLogLine);
@@ -560,8 +568,8 @@ class ProjectTaskVm extends ChangeNotifier {
             taskOk = true;
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();
-            stage.executeResultData = stageResult;
-            actionResStr = stageResult;
+            stage.executeResultData = stageResult; // 保存当前阶段的执行成功的结果
+            actionResStr = stageResult; // 本次任务的执行结果
             break;
           } else {
             updateStatue(i, StageStatue.error);

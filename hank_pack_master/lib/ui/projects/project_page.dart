@@ -49,7 +49,6 @@ class _ProjectPageState extends State<ProjectPage> {
       _projectTaskVm.projectPathController.addListener(checkInput);
       _projectTaskVm.gitBranchController.addListener(checkInput);
       _projectTaskVm.projectAppDescController.addListener(checkInput);
-      _projectTaskVm.assembleTaskNameController.addListener(checkInput);
       _projectTaskVm.gitUrlController.addListener(() {
         var gitText = _projectTaskVm.gitUrlController.text;
         if (gitText.isNotEmpty) {
@@ -79,7 +78,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
       // TODO 写死数据进行测试
       _projectTaskVm.gitUrlController.text =
-          "git@github.com:18598925736/MyApplication0016.git";
+          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git";
     });
   }
 
@@ -121,6 +120,44 @@ class _ProjectPageState extends State<ProjectPage> {
           child: Text("请先准备好环境参数",
               style: TextStyle(color: Colors.red, fontSize: 45)));
     }
+  }
+
+  Widget _choose(String title, Map<String, String> orderList) {
+    Widget comboBox;
+
+    if (_projectTaskVm.jobRunning) {
+      comboBox = Text(_projectTaskVm.selectedOrder ?? '');
+    } else if (orderList.isEmpty) {
+      comboBox = const SizedBox();
+    } else {
+      comboBox = ComboBox<String>(
+        value: _projectTaskVm.selectedOrder,
+        placeholder: const Text('你必须选择一个打包命令'),
+        items: orderList.entries.map((e) {
+          return ComboBoxItem(
+            value: e.key,
+            child: Text(e.key),
+          );
+        }).toList(),
+        onChanged: (order) =>
+            setState(() => _projectTaskVm.selectedOrder = order),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0),
+      child: Row(children: [
+        SizedBox(
+          width: 100,
+          child: Row(
+            children: [
+              Text(title, style: const TextStyle(fontSize: 18)),
+            ],
+          ),
+        ),
+        comboBox
+      ]),
+    );
   }
 
   /// 输入框
@@ -184,54 +221,6 @@ class _ProjectPageState extends State<ProjectPage> {
     );
   }
 
-  /// 选择的配置
-  Widget _chooseConfig({required String title, required Widget chooseWidget}) {
-    return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Row(children: [
-          Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                Text(title, style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 5),
-                chooseWidget,
-              ]))
-        ]));
-  }
-
-  Widget _childChoose(
-      {required String title,
-      required String placeholder,
-      required TextEditingController controller,
-      double textBoxWidth = 80}) {
-    return Expanded(
-      child: m.Padding(
-        padding: const m.EdgeInsets.only(right: 30),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(title, style: const TextStyle(fontSize: 18)),
-            Row(
-              children: [
-                SizedBox(
-                  width: textBoxWidth,
-                  child: TextBox(
-                      enabled: false,
-                      style: const TextStyle(fontSize: 18),
-                      placeholder: placeholder,
-                      textAlign: TextAlign.center,
-                      controller: controller),
-                ),
-                const SizedBox(width: 10),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
   _toolTip() {
     return Tooltip(
       message: '点击打开目录',
@@ -252,7 +241,12 @@ class _ProjectPageState extends State<ProjectPage> {
     String title,
     String msg,
   ) {
-    DialogUtil.showConfirmDialog(context: context, content: msg, title: title);
+    DialogUtil.showConfirmDialog(
+        context: context,
+        content: msg,
+        title: title,
+        showCancel: false,
+        confirmText: '我知道了...');
   }
 
   _showErr() {
@@ -343,12 +337,7 @@ class _ProjectPageState extends State<ProjectPage> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _input(
-                        "打包命令",
-                        "输入打包命令...",
-                        _projectTaskVm.assembleTaskNameController,
-                        must: true,
-                      ),
+                      _choose('打包命令', _projectTaskVm.enableAssembleOrders),
                       _input(
                         "应用描述",
                         "输入应用描述...",
@@ -512,7 +501,8 @@ class _ProjectPageState extends State<ProjectPage> {
     if (_projectTaskVm.jobRunning) {
       return false;
     }
-    if (_projectTaskVm.assembleTaskNameController.text.isEmpty) {
+    if (_projectTaskVm.selectedOrder == null ||
+        _projectTaskVm.selectedOrder!.isEmpty) {
       return false;
     }
 
