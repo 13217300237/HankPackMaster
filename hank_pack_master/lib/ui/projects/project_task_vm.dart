@@ -194,11 +194,15 @@ class ProjectTaskVm extends ChangeNotifier {
     taskStateList.add(TaskState(
       "工程克隆",
       actionFunc: () async {
+
+        // clone之前不再检查原有文件，而是另外起一个目录，单独存放，这样可以避免文件被占用的问题
+        // 与此同时，必须设定缓存删除机制，避免产生过多无用垃圾文件
+
         try {
           deleteDirectory(projectPath);
         } catch (e) {
           String err = "删除$projectPath失败,原因是：\n$e\n";
-          return OrderExecuteResult(msg: err, succeed: false);
+          return OrderExecuteResult(data: err, succeed: false);
         }
 
         ExecuteResult gitCloneRes = await CommandUtil.getInstance().gitClone(
@@ -206,9 +210,20 @@ class ProjectTaskVm extends ChangeNotifier {
             gitUrl: gitUrl,
             logOutput: addNewLogLine);
 
+        String cloneFailedSolution = '''
+        clone失败：
+        如果是由于文件被占用的原因，请看如下解决方案：
+        
+在 Windows 平台上，你可以使用一些工具来查找使用中的进程并确定哪个进程正在占用文件。以下是两种常用的方法：
+方法一：使用资源监视器（Resource Monitor）
+打开资源监视器。你可以通过按下 Win + R，然后输入 “resmon” 后按回车键来打开命令提示符，输入 “resmon” 并按回车键，或者在任务管理器的 “性能” 标签页中点击 “资源监视器” 按钮来打开资源监视器。
+在资源监视器的 “CPU” 标签页中，找到 “关联的句柄” 部分，并输入文件名或路径以筛选关联的句柄。
+根据结果，你可以看到哪个进程正在使用特定的文件。关闭该进程再次尝试clone即可。
+        ''';
+
         if (gitCloneRes.exitCode != 0) {
           return OrderExecuteResult(
-              msg: "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n",
+              data: "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n $cloneFailedSolution",
               succeed: false);
         }
         return OrderExecuteResult(
@@ -223,7 +238,7 @@ class ProjectTaskVm extends ChangeNotifier {
             .gitCheckout(projectPath, gitBranch, addNewLogLine);
 
         if (gitCheckoutRes.exitCode != 0) {
-          return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
+          return OrderExecuteResult(data: gitCheckoutRes.res, succeed: false);
         }
         return OrderExecuteResult(succeed: true, data: '分支 $gitBranch 切换成功');
       },
@@ -238,7 +253,7 @@ class ProjectTaskVm extends ChangeNotifier {
             File("$projectPath${Platform.pathSeparator}gradlew.bat");
         if (!gradlewFile.existsSync()) {
           String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
-          return OrderExecuteResult(msg: er, succeed: false);
+          return OrderExecuteResult(data: er, succeed: false);
         }
         return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
       },
@@ -250,7 +265,7 @@ class ProjectTaskVm extends ChangeNotifier {
         ExecuteResult gitAssembleTasksRes = await CommandUtil.getInstance()
             .gradleAssembleTasks(projectPath, addNewLogLine);
         if (gitAssembleTasksRes.exitCode != 0) {
-          return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
+          return OrderExecuteResult(data: "可用指令查询 存在问题!!!", succeed: false);
         }
         var ori = gitAssembleTasksRes.res;
         var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
@@ -291,7 +306,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
         if (gradleAssembleRes.exitCode != 0) {
           String er = "打包失败，详情请看日志";
-          return OrderExecuteResult(msg: er, succeed: false);
+          return OrderExecuteResult(data: er, succeed: false);
         }
         return OrderExecuteResult(succeed: true,data: gradleAssembleRes.res);
       },
@@ -307,6 +322,8 @@ class ProjectTaskVm extends ChangeNotifier {
         File apk = File(apkLocation);
         if (await apk.exists()) {
           this.apkLocation = apkLocation;
+        } else {
+          return OrderExecuteResult(succeed: false,data: "查找打包产物 失败: $apkLocation，文件不存在");
         }
         return OrderExecuteResult(succeed: true,data: "打包产物的位置在: $apkLocation");
       },
@@ -321,7 +338,7 @@ class ProjectTaskVm extends ChangeNotifier {
             await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
 
         if (log.exitCode != 0) {
-          return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
+          return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
         }
 
         var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
@@ -330,7 +347,7 @@ class ProjectTaskVm extends ChangeNotifier {
         );
 
         if (pgyToken == null) {
-          return OrderExecuteResult(msg: "pgy token获取失败...", succeed: false);
+          return OrderExecuteResult(data: "pgy token获取失败...", succeed: false);
         }
 
         _pgyEntity = PgyEntity(
@@ -349,7 +366,7 @@ class ProjectTaskVm extends ChangeNotifier {
       "上传pgy",
       actionFunc: () async {
         if (!_pgyEntity!.isOk()) {
-          return OrderExecuteResult(msg: "上传参数为空，流程终止!", succeed: false);
+          return OrderExecuteResult(data: "上传参数为空，流程终止!", succeed: false);
         }
 
         String oriFileName = basename(File(apkLocation!).path);
@@ -360,7 +377,7 @@ class ProjectTaskVm extends ChangeNotifier {
             uploadProgressAction: addNewLogLine);
 
         if (res != null) {
-          return OrderExecuteResult(msg: "上传失败,$res", succeed: false);
+          return OrderExecuteResult(data: "上传失败,$res", succeed: false);
         } else {
           return OrderExecuteResult(succeed: true,data: '上传成功');
         }
@@ -380,7 +397,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
         if (s.code == 1216) {
           // 发布失败，流程终止
-          return OrderExecuteResult(succeed: false, msg: "发布失败，流程终止");
+          return OrderExecuteResult(succeed: false, data: "发布失败，流程终止");
         } else {
           // 发布成功，打印结果
           // 开始解析发布结果,
@@ -402,7 +419,7 @@ class ProjectTaskVm extends ChangeNotifier {
 
             return OrderExecuteResult(succeed: true, data: appInfo);
           } else {
-            return OrderExecuteResult(succeed: false, msg: "发布结果解析失败");
+            return OrderExecuteResult(succeed: false, data: "发布结果解析失败");
           }
         }
       },
@@ -581,7 +598,8 @@ class ProjectTaskVm extends ChangeNotifier {
               addNewLogLine(
                   "第${j + 1}次 执行失败: $taskName - $stageResult 3秒后开始下一轮");
               addNewEmptyLine();
-              waitThreeSec();
+              actionResStr = stageResult;
+              await waitThreeSec();
             }
           }
         } else {

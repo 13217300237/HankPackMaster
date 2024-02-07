@@ -358,7 +358,7 @@ class CommandUtil {
     required Function(String res) action,
   }) async {
     try {
-      debugCmdPrint("cmd：$binRoot$cmd");
+      debugCmdPrint("cmd：$binRoot$cmd params->$params");
       debugCmdPrint("workDir：$workDir");
       debugCmdPrint("binRoot：$binRoot");
       var process = await Process.start("$binRoot$cmd", params,

@@ -77,7 +77,7 @@ class _ProjectPageState extends State<ProjectPage> {
       });
 
       // TODO 写死数据进行测试
-      _projectTaskVm.gitUrlController.text =
+      _projectTaskVm.gitUrlController.text = "git@github.com:18598925736/MyApplication0016.git";
           "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git";
     });
   }
