@@ -47,6 +47,7 @@ class _ProjectPageState extends State<ProjectPage> {
       }
       _projectTaskVm.init();
       _projectTaskVm.projectPathController.addListener(checkInput);
+      _projectTaskVm.gitBranchController.addListener(checkInput);
       _projectTaskVm.projectAppDescController.addListener(checkInput);
       _projectTaskVm.gitUrlController.addListener(() {
         var gitText = _projectTaskVm.gitUrlController.text;
@@ -124,32 +125,56 @@ class _ProjectPageState extends State<ProjectPage> {
 
   /// 输入框
   Widget _input(
-      String title, String placeholder, TextEditingController controller,
-      {Widget? suffix, bool alwaysDisable = false, int maxLines = 1}) {
+    String title,
+    String placeholder,
+    TextEditingController controller, {
+    Widget? suffix,
+    bool alwaysDisable = false,
+    int maxLines = 1,
+    int? maxLength,
+    bool must = false,
+  }) {
+    Widget mustSpace;
+
+    if (must) {
+      mustSpace = SizedBox(
+          width: 20,
+          child: Center(
+              child: Text('*',
+                  style: TextStyle(fontSize: 18, color: Colors.red))));
+    } else {
+      mustSpace = const SizedBox(width: 20);
+    }
+
+    var textStyle =
+        const TextStyle(decoration: TextDecoration.none, fontSize: 16);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-              width: 80,
-              child: Text(title, style: const TextStyle(fontSize: 18))),
-          const SizedBox(width: 15),
+            width: 100,
+            child: Row(
+              children: [
+                Text(title, style: const TextStyle(fontSize: 18)),
+                mustSpace
+              ],
+            ),
+          ),
           Expanded(
             child: TextBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                ),
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(5)),
                 unfocusedColor: Colors.transparent,
                 highlightColor: Colors.transparent,
-                style: const TextStyle(
-                  decoration: TextDecoration.none,
-                  fontSize: 18,
-                ),
+                style: textStyle,
                 placeholder: placeholder,
+                placeholderStyle: textStyle,
                 expands: false,
                 maxLines: maxLines,
-                maxLength: 5,
+                maxLength: maxLength,
                 enabled: !_projectTaskVm.jobRunning && !alwaysDisable,
                 controller: controller),
           ),
@@ -252,6 +277,7 @@ class _ProjectPageState extends State<ProjectPage> {
                         "git地址 ",
                         "输入git地址",
                         _projectTaskVm.gitUrlController,
+                        must: true,
                       ),
                       _gitErrorText(),
                       _input(
@@ -265,17 +291,14 @@ class _ProjectPageState extends State<ProjectPage> {
                         "分支名称",
                         "输入分支名称",
                         _projectTaskVm.gitBranchController,
-                      ),
-                      _input(
-                        "应用描述",
-                        "输入应用描述...",
-                        _projectTaskVm.projectAppDescController,
-                        maxLines: 5,
+                        must: true,
                       ),
                       _actionButton(
                           title: "项目激活测试",
                           bgColor: Colors.purple.normal,
+                          enable: actionButtonEnable,
                           action: () async {
+                            // 点击按钮之前，先检查是否必填项都已经填好
                             DialogUtil.showConfirmDialog(
                                 context: context,
                                 content:
@@ -312,6 +335,12 @@ class _ProjectPageState extends State<ProjectPage> {
                         _projectTaskVm.assembleTaskNameController,
                       ),
                       _input(
+                        "应用描述",
+                        "输入应用描述...",
+                        _projectTaskVm.projectAppDescController,
+                        maxLines: 5,
+                      ),
+                      _input(
                         "更新日志",
                         "输入更新日志...",
                         _projectTaskVm.updateLogController,
@@ -319,10 +348,11 @@ class _ProjectPageState extends State<ProjectPage> {
                       ),
                       _actionButton(
                           title: "正式开始打包",
-                          bgColor: !actionButtonDisabled
+                          enable: actionButtonEnable,
+                          bgColor: actionButtonEnable
                               ? Colors.orange.lighter
                               : Colors.grey.withOpacity(.2),
-                          action: !actionButtonDisabled ? start : null),
+                          action: actionButtonEnable ? start : null),
                     ]),
               ),
             ),
@@ -400,6 +430,7 @@ class _ProjectPageState extends State<ProjectPage> {
     required String title,
     required Color bgColor,
     required Function()? action,
+    required bool enable,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -410,6 +441,7 @@ class _ProjectPageState extends State<ProjectPage> {
           offset: .5,
           spreadRadius: .2,
           onTap: action,
+          enable: enable,
         ),
       ],
     );
@@ -440,33 +472,21 @@ class _ProjectPageState extends State<ProjectPage> {
     );
   }
 
-  bool get actionButtonDisabled {
-    if (_projectTaskVm.jobRunning) {
-      return true;
+  bool get actionButtonEnable {
+    if (!envParamModel.isAndroidEnvOk()) {
+      return false;
     }
-    if (_projectTaskVm.projectPathController.text.isEmpty) {
-      return true;
+    if (_projectTaskVm.jobRunning) {
+      return false;
     }
     if (_projectTaskVm.gitUrlController.text.isEmpty) {
-      return true;
+      return false;
     }
     if (_projectTaskVm.gitBranchController.text.isEmpty) {
-      return true;
+      return false;
     }
 
-    if (_projectTaskVm.projectAppDescController.text.isEmpty) {
-      return true;
-    }
-
-    if (!envParamModel.isAndroidEnvOk()) {
-      return true;
-    }
-
-    if (gitErrVisible) {
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
   void dealWithScheduleResultByApkGenerate(PackageSuccessEntity s) {
@@ -534,8 +554,16 @@ class _ProjectPageState extends State<ProjectPage> {
   Widget _gitErrorText() {
     return Visibility(
         visible: gitErrVisible,
-        child: Text("这不是一个正确的git地址",
-            style: TextStyle(color: Colors.red, fontSize: 20)));
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text("这不是一个正确的git地址",
+                  style: TextStyle(color: Colors.red, fontSize: 16)),
+            ],
+          ),
+        ));
   }
 
   Widget buildStageColumn() {
