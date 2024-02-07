@@ -45,10 +45,11 @@ class _ProjectPageState extends State<ProjectPage> {
       if (!envParamModel.isAndroidEnvOk()) {
         return;
       }
-      _projectTaskVm.init();
+      _projectTaskVm.initPackageTaskList();
       _projectTaskVm.projectPathController.addListener(checkInput);
       _projectTaskVm.gitBranchController.addListener(checkInput);
       _projectTaskVm.projectAppDescController.addListener(checkInput);
+      _projectTaskVm.assembleTaskNameController.addListener(checkInput);
       _projectTaskVm.gitUrlController.addListener(() {
         var gitText = _projectTaskVm.gitUrlController.text;
         if (gitText.isNotEmpty) {
@@ -79,7 +80,6 @@ class _ProjectPageState extends State<ProjectPage> {
       // TODO 写死数据进行测试
       _projectTaskVm.gitUrlController.text =
           "git@github.com:18598925736/MyApplication0016.git";
-      _projectTaskVm.assembleTaskNameController.text = "assembleDebug";
     });
   }
 
@@ -248,6 +248,13 @@ class _ProjectPageState extends State<ProjectPage> {
     );
   }
 
+  _showInfoDialog(
+    String title,
+    String msg,
+  ) {
+    DialogUtil.showConfirmDialog(context: context, content: msg, title: title);
+  }
+
   _showErr() {
     DialogUtil.showInfo(
         context: context,
@@ -296,15 +303,22 @@ class _ProjectPageState extends State<ProjectPage> {
                       _actionButton(
                           title: "项目激活测试",
                           bgColor: Colors.purple.normal,
-                          enable: actionButtonEnable,
+                          enable: preCheckButtonEnable,
                           action: () async {
-                            // 点击按钮之前，先检查是否必填项都已经填好
                             DialogUtil.showConfirmDialog(
                                 context: context,
                                 content:
-                                    "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，是否继续？",
+                                    "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，确定开始吗？",
                                 title: '提示',
-                                onConfirm: () => start());
+                                onConfirm: () {
+                                  _projectTaskVm.initPreCheckTaskList();
+                                  _projectTaskVm.startSchedule().then((value) {
+                                    if (value == null) {
+                                      return;
+                                    }
+                                    _showInfoDialog('激活结果', '${value.data}');
+                                  });
+                                });
                           }),
                     ]),
               ),
@@ -320,7 +334,7 @@ class _ProjectPageState extends State<ProjectPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _mainTitleWidget("打包参数"),
+            _mainTitleWidget("打包参数设置"),
             const SizedBox(height: 20),
             ScrollConfiguration(
               behavior:
@@ -333,6 +347,7 @@ class _ProjectPageState extends State<ProjectPage> {
                         "打包命令",
                         "输入打包命令...",
                         _projectTaskVm.assembleTaskNameController,
+                        must: true,
                       ),
                       _input(
                         "应用描述",
@@ -348,11 +363,12 @@ class _ProjectPageState extends State<ProjectPage> {
                       ),
                       _actionButton(
                           title: "正式开始打包",
-                          enable: actionButtonEnable,
-                          bgColor: actionButtonEnable
+                          enable: startPackageButtonEnable,
+                          bgColor: startPackageButtonEnable
                               ? Colors.orange.lighter
                               : Colors.grey.withOpacity(.2),
-                          action: actionButtonEnable ? start : null),
+                          action:
+                              startPackageButtonEnable ? startPackage : null),
                     ]),
               ),
             ),
@@ -450,9 +466,9 @@ class _ProjectPageState extends State<ProjectPage> {
   Widget _stageBtn({required TaskState stage, required int index}) {
     return FilledButton(
       onPressed: () {
-        if (stage.stageStatue == StageStatue.finished &&
-            index == _projectTaskVm.taskStateList.length - 1) {
-          dealWithScheduleResultByApkUpload(myAppInfo!);
+        if (stage.stageStatue == StageStatue.finished) {
+          // 按下之后，打开当前阶段的执行结果弹窗
+          _showInfoDialog(stage.stageName, '${stage.executeResultData}');
         }
       },
       style: ButtonStyle(
@@ -472,7 +488,7 @@ class _ProjectPageState extends State<ProjectPage> {
     );
   }
 
-  bool get actionButtonEnable {
+  bool get preCheckButtonEnable {
     if (!envParamModel.isAndroidEnvOk()) {
       return false;
     }
@@ -483,6 +499,20 @@ class _ProjectPageState extends State<ProjectPage> {
       return false;
     }
     if (_projectTaskVm.gitBranchController.text.isEmpty) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool get startPackageButtonEnable {
+    if (!envParamModel.isAndroidEnvOk()) {
+      return false;
+    }
+    if (_projectTaskVm.jobRunning) {
+      return false;
+    }
+    if (_projectTaskVm.assembleTaskNameController.text.isEmpty) {
       return false;
     }
 
@@ -519,31 +549,23 @@ class _ProjectPageState extends State<ProjectPage> {
     );
   }
 
-  void dealWithScheduleResultByOthers() {}
-
   MyAppInfo? myAppInfo;
 
-  Future<void> start() async {
-    _projectTaskVm.init();
-    _projectTaskVm.cleanLog();
-    _projectTaskVm.startSchedule().then((s) {
-      if (s == null) {
-        return;
-      }
-      if (s.data is PackageSuccessEntity) {
-        dealWithScheduleResultByApkGenerate(s.data);
-      } else if (s.data is MyAppInfo) {
-        myAppInfo = s.data;
-        dealWithScheduleResultByApkUpload(s.data);
-      } else {
-        DialogUtil.showConfirmDialog(
-          context: context,
-          title: "流程结束",
-          content: s.toString(),
-          confirmText: "知道了...",
-        );
-      }
-    });
+  Future<void> startPackage() async {
+    _projectTaskVm.initPackageTaskList();
+    var scheduleRes = await _projectTaskVm.startSchedule();
+
+    if (scheduleRes == null) {
+      return;
+    }
+    if (scheduleRes.data is PackageSuccessEntity) {
+      dealWithScheduleResultByApkGenerate(scheduleRes.data);
+    } else if (scheduleRes.data is MyAppInfo) {
+      myAppInfo = scheduleRes.data;
+      dealWithScheduleResultByApkUpload(scheduleRes.data);
+    } else {
+      _showInfoDialog('打包结果', scheduleRes.toString());
+    }
   }
 
   bool get gitErrVisible {

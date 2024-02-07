@@ -3,6 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/comm/const.dart';
 import 'package:hank_pack_master/hive/env_config_operator.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../../ui/projects/project_task_vm.dart';
 
@@ -19,6 +20,8 @@ class PgyUploadUtil {
   static PgyUploadUtil getInstance() {
     if (_instance == null) {
       _dio = Dio();
+      _dio.interceptors.add(PrettyDioLogger(
+          requestHeader: true, requestBody: true, responseHeader: true));
       _instance = PgyUploadUtil._();
     }
     return _instance!;
@@ -29,35 +32,40 @@ class PgyUploadUtil {
     required String buildDescription,
     required String buildUpdateDescription,
   }) async {
-    final response = await _dio.post(
-      'https://www.pgyer.com/apiv2/app/getCOSToken',
-      queryParameters: {
-        '_api_key': EnvConfigOperator.searchEnvValue(Const.pgyApiKey),
-        'buildType': 'android',
-        'buildDescription': buildDescription,
-        'buildUpdateDescription': buildUpdateDescription,
-      },
-    );
+    try {
+      final response = await _dio.post(
+        'https://www.pgyer.com/apiv2/app/getCOSToken',
+        queryParameters: {
+          '_api_key': EnvConfigOperator.searchEnvValue(Const.pgyApiKey),
+          'buildType': 'android',
+          'buildDescription': buildDescription,
+          'buildUpdateDescription': buildUpdateDescription,
+        },
+      );
 
-    if (response.statusCode == 200) {
-      // 请求成功
-      debugPrint("getPgyToken 请求成功===> ${response.data}");
-      try {
-        // 使用 jsonDecode 解码 JSON 字符串
-        // 将 jsonData 转化为相应的 Dart 对象
-        PgyTokenEntity tokenEntity = PgyTokenEntity.fromJson(response.data);
+      if (response.statusCode == 200) {
+        // 请求成功
+        debugPrint("getPgyToken 请求成功===> ${response.data}");
+        try {
+          // 使用 jsonDecode 解码 JSON 字符串
+          // 将 jsonData 转化为相应的 Dart 对象
+          PgyTokenEntity tokenEntity = PgyTokenEntity.fromJson(response.data);
 
-        if (0 == tokenEntity.code) {
-          return tokenEntity;
+          if (0 == tokenEntity.code) {
+            return tokenEntity;
+          }
+        } catch (e) {
+          debugPrint("pgy json 转化为实体类失败... $e");
+          return null;
         }
-      } catch (e) {
-        debugPrint("pgy json 转化为实体类失败... $e");
+        return null;
+      } else {
+        // 请求失败
+        debugPrint('pgy 请求失败===> 错误码：${response.statusCode}');
         return null;
       }
-      return null;
-    } else {
-      // 请求失败
-      debugPrint('pgy 请求失败===> 错误码：${response.statusCode}');
+    } catch (e) {
+      debugPrint('dio error: $e');
       return null;
     }
   }
@@ -120,38 +128,43 @@ class PgyUploadUtil {
   }
 
   /// 上传到蒲公英的第三步，检查发布结果
-  Future<ReleaseResultEntity> checkUploadRelease(
+  Future<ReleaseResultEntity?> checkUploadRelease(
     PgyEntity pgyEntity, {
     required void Function(String s) onReleaseCheck,
   }) async {
     ReleaseResultEntity? entity;
 
-    while (!judgeReleaseResultEntityConfirmed(entity,
-        onReleaseCheck: onReleaseCheck)) {
-      // 每次循环之前都检查 发布结果是否确定
-      await Future.delayed(const Duration(milliseconds: 5000));
+    try {
+      while (!judgeReleaseResultEntityConfirmed(entity,
+          onReleaseCheck: onReleaseCheck)) {
+        // 每次循环之前都检查 发布结果是否确定
+        await Future.delayed(const Duration(milliseconds: 5000));
 
-      onReleaseCheck("开始查询发布结果");
+        onReleaseCheck("开始查询发布结果");
 
-      final response = await _dio.post(
-        "https://www.pgyer.com/apiv2/app/buildInfo",
-        queryParameters: {
-          '_api_key': EnvConfigOperator.searchEnvValue(Const.pgyApiKey),
-          'buildKey': pgyEntity.key,
-        },
-      );
+        final response = await _dio.post(
+          "https://www.pgyer.com/apiv2/app/buildInfo",
+          queryParameters: {
+            '_api_key': EnvConfigOperator.searchEnvValue(Const.pgyApiKey),
+            'buildKey': pgyEntity.key,
+          },
+        );
 
-      int code = response.statusCode ?? 0;
+        int code = response.statusCode ?? 0;
 
-      if (code >= 200 && code < 300) {
-        entity = ReleaseResultEntity.fromJson(response.data);
-      } else {
-        // 请求失败
-        entity = ReleaseResultEntity();
-        onReleaseCheck("发布请求执行失败 $code  ${response.statusMessage}");
+        if (code >= 200 && code < 300) {
+          entity = ReleaseResultEntity.fromJson(response.data);
+        } else {
+          // 请求失败
+          entity = ReleaseResultEntity();
+          onReleaseCheck("发布请求执行失败 $code  ${response.statusMessage}");
+        }
       }
+    } catch (e) {
+      debugPrint('dio error: $e');
+      return null;
     }
 
-    return entity!;
+    return entity;
   }
 }

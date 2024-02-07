@@ -76,6 +76,7 @@ class TaskState {
   String stageName;
   String? stageCostTime;
   StageStatue stageStatue = StageStatue.idle;
+  dynamic executeResultData;
   ActionFunc
       actionFunc; // 当前阶段的行为, 返回null说明当前阶段正常，非null的情况分两种，一是有特殊输出的阶段，第二是结束阶段
 
@@ -164,7 +165,7 @@ class ProjectTaskVm extends ChangeNotifier {
     }
   }
 
-  void init() {
+  void initPreCheckTaskList() {
     taskStateList.clear();
     taskStateList.add(TaskState(
       "参数准备",
@@ -177,7 +178,7 @@ class ProjectTaskVm extends ChangeNotifier {
         }
 
         return OrderExecuteResult(
-            succeed: true, msg: '打包参数正常 工作目录为,$projectPath ');
+            succeed: true, data: '打包参数正常 工作目录为,$projectPath ');
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -201,7 +202,8 @@ class ProjectTaskVm extends ChangeNotifier {
               msg: "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n",
               succeed: false);
         }
-        return OrderExecuteResult(succeed: true);
+        return OrderExecuteResult(
+            succeed: true, data: 'clone成功,位置在 $projectPath');
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -214,14 +216,14 @@ class ProjectTaskVm extends ChangeNotifier {
         if (gitCheckoutRes.exitCode != 0) {
           return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
         }
-        return OrderExecuteResult(succeed: true);
+        return OrderExecuteResult(succeed: true, data: '分支 $gitBranch 切换成功');
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "工程结构检测",
       actionFunc: () async {
-        // 阶段2，工程结构检查
+        // 工程结构检查
         // 检查目录下是否有 gradlew.bat 文件
         File gradlewFile =
             File("$projectPath${Platform.pathSeparator}gradlew.bat");
@@ -229,7 +231,7 @@ class ProjectTaskVm extends ChangeNotifier {
           String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
           return OrderExecuteResult(msg: er, succeed: false);
         }
-        return OrderExecuteResult(succeed: true);
+        return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -257,10 +259,15 @@ class ProjectTaskVm extends ChangeNotifier {
         }
 
         debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
-        return OrderExecuteResult(succeed: true);
+        return OrderExecuteResult(
+            succeed: true, data: '$_enableAssembleOrders');
       },
       onStateFinished: updateStageCostTime,
     ));
+  }
+
+  void initPackageTaskList() {
+    taskStateList.clear();
     taskStateList.add(TaskState(
       "生成apk",
       actionFunc: () async {
@@ -358,6 +365,10 @@ class ProjectTaskVm extends ChangeNotifier {
       actionFunc: () async {
         var s = await PgyUploadUtil.getInstance()
             .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
+
+        if (s == null) {
+          return OrderExecuteResult(succeed: false);
+        }
 
         if (s.code == 1216) {
           // 发布失败，流程终止
@@ -460,8 +471,12 @@ class ProjectTaskVm extends ChangeNotifier {
   }
 
   void addNewLogLine(String s) {
-    _cmdExecLog
-        .add("${Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss")}        $s");
+    if (s.isEmpty) {
+      _cmdExecLog.add(s);
+    } else {
+      _cmdExecLog.add(
+          "${Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss")}        $s");
+    }
     notifyListeners();
     _scrollToBottom();
   }
@@ -497,13 +512,15 @@ class ProjectTaskVm extends ChangeNotifier {
   /// 开始流水线工作
   ///
   Future<OrderExecuteResult?> startSchedule() async {
+    cleanLog();
+
     if (_jobRunning) {
       return OrderExecuteResult(succeed: false, msg: "任务正在执行中...");
     }
 
     _jobRunning = true;
 
-    addNewLogLine("开始流程...");
+    addNewLogLine("开始流程...${taskStateList.length}");
 
     OrderExecuteResult? actionResStr;
 
@@ -523,34 +540,38 @@ class ProjectTaskVm extends ChangeNotifier {
         Stopwatch stageTimeWatch = Stopwatch();
         stageTimeWatch.start();
 
-        var taskName = taskStateList[i].stageName;
-        var taskFuture = taskStateList[i].actionFunc();
+        var stage = taskStateList[i];
+        var taskName = stage.stageName;
+        var taskFuture = stage.actionFunc();
         addNewLogLine("第${j + 1}次 执行开始: $taskName");
 
-        var result = await Future.any([taskFuture, timeOutCounter()]); // 计算超时
+        var stageResult =
+            await Future.any([taskFuture, timeOutCounter()]); // 计算超时
 
         stageTimeWatch.stop(); // 停止计时器
 
         // 如果任务在规定时间之内完成，则一定会返回一个OrderExecuteResult
-        if (result is OrderExecuteResult) {
+        if (stageResult is OrderExecuteResult) {
           // 如果执行成功，则标记此阶段已完成
-          if (result.succeed == true) {
+          if (stageResult.succeed == true) {
             taskStateList[i]
                 .onStateFinished
                 ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} 毫秒");
             taskOk = true;
-            addNewLogLine("第${j + 1}次 执行成功: $taskName - $result");
+            addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();
-            actionResStr = result;
+            stage.executeResultData = stageResult;
+            actionResStr = stageResult;
             break;
           } else {
             updateStatue(i, StageStatue.error);
             if (j == maxTimes - 1) {
               // 失败则打印日志，3秒后开始下一轮
-              addNewLogLine("第${j + 1}次 执行失败: $taskName - $result");
+              addNewLogLine("第${j + 1}次 执行失败: $taskName - $stageResult");
             } else {
               // 失败则打印日志，3秒后开始下一轮
-              addNewLogLine("第${j + 1}次 执行失败: $taskName - $result 3秒后开始下一轮");
+              addNewLogLine(
+                  "第${j + 1}次 执行失败: $taskName - $stageResult 3秒后开始下一轮");
               addNewEmptyLine();
               waitThreeSec();
             }
@@ -562,8 +583,8 @@ class ProjectTaskVm extends ChangeNotifier {
 
           // 如果到了最后一次
           if (j == maxTimes - 1) {
-            actionResStr =
-                OrderExecuteResult(succeed: false, msg: "第${j + 1}次:$result");
+            actionResStr = OrderExecuteResult(
+                succeed: false, msg: "第${j + 1}次:$stageResult");
             CommandUtil.getInstance().stopAllExec();
             break;
           }
