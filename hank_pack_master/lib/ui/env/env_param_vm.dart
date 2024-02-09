@@ -248,6 +248,17 @@ class EnvParamVm extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// obsBucketName
+  TextEditingController obsBucketNameController = TextEditingController();
+
+  String get obsBucketName =>
+      EnvConfigOperator.searchEnvValue(Const.obsBucketName);
+
+  set obsBucketName(String v) {
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.obsBucketName, v));
+    notifyListeners();
+  }
+
   void initTextController(
     TextEditingController editTextController,
     String Function() get,

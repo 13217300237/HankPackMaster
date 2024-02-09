@@ -455,10 +455,8 @@ class _ProjectPageState extends State<ProjectPage> {
   Widget _stageBtn({required TaskState stage, required int index}) {
     return FilledButton(
       onPressed: () {
-        if (stage.stageStatue == StageStatue.finished) {
           // 按下之后，打开当前阶段的执行结果弹窗
           _showInfoDialog(stage.stageName, '${stage.executeResultData}');
-        }
       },
       style: ButtonStyle(
           backgroundColor: ButtonState.resolveWith(

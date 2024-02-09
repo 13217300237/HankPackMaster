@@ -598,6 +598,7 @@ class ProjectTaskVm extends ChangeNotifier {
               addNewLogLine(
                   "第${j + 1}次 执行失败: $taskName - $stageResult 3秒后开始下一轮");
               addNewEmptyLine();
+              stage.executeResultData = stageResult;
               actionResStr = stageResult;
               await waitThreeSec();
             }

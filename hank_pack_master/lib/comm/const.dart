@@ -17,5 +17,6 @@ class Const {
   static const String obsEndPoint = "obsEndPoint";
   static const String obsAccessKey = "obsAccessKey";
   static const String obsSecretKey = "obsSecretKey";
+  static const String obsBucketName = "obsBucketName";
 }
 

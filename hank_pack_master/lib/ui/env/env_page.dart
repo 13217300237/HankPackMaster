@@ -429,6 +429,8 @@ class _EnvPageState extends State<EnvPage> {
           _textInput('access key', _envParamModel.obsAccessKeyController),
           const SizedBox(height: 10),
           _textInput('secret key', _envParamModel.obsSecretKeyController),
+          const SizedBox(height: 10),
+          _textInput('bucket name', _envParamModel.obsBucketNameController),
         ]))
       ]),
     );
