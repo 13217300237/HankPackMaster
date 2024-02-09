@@ -6,6 +6,7 @@ import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:path/path.dart';
 
+import '../../comm/file_operation.dart';
 import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/const.dart';
@@ -106,6 +107,7 @@ class ProjectTaskVm extends ChangeNotifier {
   final projectPathController = TextEditingController(); // 工程路径
   final projectAppDescController = TextEditingController(); // 应用描述
   final updateLogController = TextEditingController(); // 更新日志
+  final apkLocationController = TextEditingController(); // 更新日志
 
   final versionNameController = TextEditingController(); // 强制指定版本名
   final versionCodeController = TextEditingController(); // 强制指定版本号
@@ -142,6 +144,13 @@ class ProjectTaskVm extends ChangeNotifier {
 
   String get updateLog => updateLogController.text;
 
+  String get _apkLocation =>
+      "$projectPath${Platform.pathSeparator}${apkLocationController.text}";
+
+  void setApkLocation(String newPath) {
+    apkLocationController.text = newPath;
+  }
+
   String get envWorkspaceRoot =>
       EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey);
 
@@ -165,6 +174,19 @@ class ProjectTaskVm extends ChangeNotifier {
   }
 
   String? selectedOrder;
+
+  void setSelectedOrder(String order) {
+    selectedOrder = order;
+
+    // 同时设置默认的apk路径
+    if (order == 'assembleDebug') {
+      setApkLocation('app\\build\\outputs\\apk\\debug');
+    } else if (order == 'assembleRelease') {
+      setApkLocation('app\\build\\outputs\\apk\\release');
+    }
+
+    notifyListeners();
+  }
 
   void deleteDirectory(String path) {
     Directory directory = Directory(path);
@@ -194,7 +216,6 @@ class ProjectTaskVm extends ChangeNotifier {
     taskStateList.add(TaskState(
       "工程克隆",
       actionFunc: () async {
-
         // clone之前不再检查原有文件，而是另外起一个目录，单独存放，这样可以避免文件被占用的问题
         // 与此同时，必须设定缓存删除机制，避免产生过多无用垃圾文件
 
@@ -223,7 +244,8 @@ class ProjectTaskVm extends ChangeNotifier {
 
         if (gitCloneRes.exitCode != 0) {
           return OrderExecuteResult(
-              data: "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n $cloneFailedSolution",
+              data:
+                  "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n $cloneFailedSolution",
               succeed: false);
         }
         return OrderExecuteResult(
@@ -289,6 +311,8 @@ class ProjectTaskVm extends ChangeNotifier {
     ));
   }
 
+  String? apkToUpload;
+
   void initPackageTaskList() {
     taskStateList.clear();
     taskStateList.add(TaskState(
@@ -308,24 +332,30 @@ class ProjectTaskVm extends ChangeNotifier {
           String er = "打包失败，详情请看日志";
           return OrderExecuteResult(data: er, succeed: false);
         }
-        return OrderExecuteResult(succeed: true,data: gradleAssembleRes.res);
+        return OrderExecuteResult(succeed: true, data: gradleAssembleRes.res);
       },
       onStateFinished: updateStageCostTime,
     ));
     taskStateList.add(TaskState(
       "apk检测",
       actionFunc: () async {
-        // 去默认的apk产出位置去查找是否存在apk文件  app\build\outputs\apk\debug
-        String apkLocation =
-            "$projectPath${Platform.pathSeparator}app\\build\\outputs\\apk\\debug\\app-debug.apk";
+        // 检查此目录下的apk文件，并且校验它的最后修改时间是不是在10分钟以内
+        var list = await findApkFiles(_apkLocation);
 
-        File apk = File(apkLocation);
-        if (await apk.exists()) {
-          this.apkLocation = apkLocation;
-        } else {
-          return OrderExecuteResult(succeed: false,data: "查找打包产物 失败: $apkLocation，文件不存在");
+        if (list.length > 1) {
+          return OrderExecuteResult(
+              succeed: false, data: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
         }
-        return OrderExecuteResult(succeed: true,data: "打包产物的位置在: $apkLocation");
+
+        apkToUpload = list[0];
+
+        if (await File(apkToUpload!).exists()) {
+        } else {
+          return OrderExecuteResult(
+              succeed: false, data: "查找打包产物 失败: $apkToUpload，文件不存在");
+        }
+        return OrderExecuteResult(
+            succeed: true, data: "打包产物的位置在: $apkToUpload");
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -357,7 +387,8 @@ class ProjectTaskVm extends ChangeNotifier {
           xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
         );
 
-        return OrderExecuteResult(succeed: true,data: '获取到的Token是 ${pgyToken.toString()}');
+        return OrderExecuteResult(
+            succeed: true, data: '获取到的Token是 ${pgyToken.toString()}');
       },
       onStateFinished: updateStageCostTime,
     ));
@@ -369,17 +400,17 @@ class ProjectTaskVm extends ChangeNotifier {
           return OrderExecuteResult(data: "上传参数为空，流程终止!", succeed: false);
         }
 
-        String oriFileName = basename(File(apkLocation!).path);
+        String oriFileName = basename(File(apkToUpload!).path);
 
         var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
-            filePath: apkLocation!,
+            filePath: apkToUpload!,
             oriFileName: oriFileName,
             uploadProgressAction: addNewLogLine);
 
         if (res != null) {
           return OrderExecuteResult(data: "上传失败,$res", succeed: false);
         } else {
-          return OrderExecuteResult(succeed: true,data: '上传成功');
+          return OrderExecuteResult(succeed: true, data: '上传成功');
         }
       },
       onStateFinished: updateStageCostTime,
@@ -457,7 +488,6 @@ class ProjectTaskVm extends ChangeNotifier {
   }
 
   PgyEntity? _pgyEntity;
-  String? apkLocation;
 
   Color idleColor = Colors.grey;
 

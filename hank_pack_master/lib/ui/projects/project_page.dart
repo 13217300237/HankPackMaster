@@ -77,8 +77,10 @@ class _ProjectPageState extends State<ProjectPage> {
       });
 
       // TODO 写死数据进行测试
-      _projectTaskVm.gitUrlController.text = "git@github.com:18598925736/MyApplication0016.git";
-          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git";
+      // _projectTaskVm.gitUrlController.text = "git@github.com:18598925736/MyApplication0016.git"; // 测试 Java17环境下的安卓工程
+      _projectTaskVm.gitUrlController.text =
+          "git@github.com:18598925736/MyApp20231224.git"; // 测试 Java17环境下的安卓工程
+      // _projectTaskVm.gitUrlController.text =  "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git"; // 公司电脑，测试内网git
     });
   }
 
@@ -122,8 +124,21 @@ class _ProjectPageState extends State<ProjectPage> {
     }
   }
 
-  Widget _choose(String title, Map<String, String> orderList) {
+  Widget _choose(String title, Map<String, String> orderList,
+      {bool must = true}) {
     Widget comboBox;
+
+    Widget mustSpace;
+
+    if (must) {
+      mustSpace = SizedBox(
+          width: 20,
+          child: Center(
+              child: Text('*',
+                  style: TextStyle(fontSize: 18, color: Colors.red))));
+    } else {
+      mustSpace = const SizedBox(width: 20);
+    }
 
     if (_projectTaskVm.jobRunning) {
       comboBox = Text(_projectTaskVm.selectedOrder ?? '');
@@ -132,15 +147,20 @@ class _ProjectPageState extends State<ProjectPage> {
     } else {
       comboBox = ComboBox<String>(
         value: _projectTaskVm.selectedOrder,
-        placeholder: const Text('你必须选择一个打包命令'),
+        placeholder: const Text(''),
         items: orderList.entries.map((e) {
           return ComboBoxItem(
             value: e.key,
             child: Text(e.key),
           );
         }).toList(),
-        onChanged: (order) =>
-            setState(() => _projectTaskVm.selectedOrder = order),
+        onChanged: (order) {
+          if (order != null) {
+            _projectTaskVm.setSelectedOrder(order);
+          } else {
+            _showInfoDialog(title, "你必须选择一个打包命令");
+          }
+        },
       );
     }
 
@@ -152,6 +172,7 @@ class _ProjectPageState extends State<ProjectPage> {
           child: Row(
             children: [
               Text(title, style: const TextStyle(fontSize: 18)),
+              mustSpace
             ],
           ),
         ),
@@ -258,7 +279,7 @@ class _ProjectPageState extends State<ProjectPage> {
 
   Widget _mainLayout() {
     var leftTop = Card(
-        margin: const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 10),
+        margin: const EdgeInsets.only(top: 15, left: 15, right: 10, bottom: 10),
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
         borderRadius: BorderRadius.circular(10),
         backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
@@ -321,7 +342,7 @@ class _ProjectPageState extends State<ProjectPage> {
         ));
 
     var leftMiddle = Card(
-        margin: const EdgeInsets.only(top: 0, left: 10, right: 10, bottom: 10),
+        margin: const EdgeInsets.only(top: 0, left: 15, right: 10, bottom: 20),
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
         borderRadius: BorderRadius.circular(10),
         backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
@@ -330,37 +351,45 @@ class _ProjectPageState extends State<ProjectPage> {
           children: [
             _mainTitleWidget("打包参数设置"),
             const SizedBox(height: 20),
-            ScrollConfiguration(
-              behavior:
-                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _choose('打包命令', _projectTaskVm.enableAssembleOrders),
-                      _input(
-                        "应用描述",
-                        "输入应用描述...",
-                        _projectTaskVm.projectAppDescController,
-                        maxLines: 5,
-                      ),
-                      _input(
-                        "更新日志",
-                        "输入更新日志...",
-                        _projectTaskVm.updateLogController,
-                        maxLines: 5,
-                      ),
-                      _actionButton(
-                          title: "正式开始打包",
-                          enable: startPackageButtonEnable,
-                          bgColor: startPackageButtonEnable
-                              ? Colors.orange.lighter
-                              : Colors.grey.withOpacity(.2),
-                          action:
-                              startPackageButtonEnable ? startPackage : null),
-                    ]),
+            Expanded(
+              child: ScrollConfiguration(
+                behavior:
+                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _input(
+                          "应用描述",
+                          "输入应用描述...",
+                          _projectTaskVm.projectAppDescController,
+                          maxLines: 5,
+                        ),
+                        _input(
+                          "更新日志",
+                          "输入更新日志...",
+                          _projectTaskVm.updateLogController,
+                          maxLines: 5,
+                        ),
+                        _choose('打包命令', _projectTaskVm.enableAssembleOrders),
+                        const SizedBox(height: 5),
+                        _input(
+                          "apk路径",
+                          "请输入apk预计路径，程序会根据此路径检测apk文件",
+                          _projectTaskVm.apkLocationController,
+                          maxLines: 1,
+                        ),
+                      ]),
+                ),
               ),
             ),
+            _actionButton(
+                title: "正式开始打包",
+                enable: startPackageButtonEnable,
+                bgColor: startPackageButtonEnable
+                    ? Colors.orange.lighter
+                    : Colors.grey.withOpacity(.2),
+                action: startPackageButtonEnable ? startPackage : null),
           ],
         ));
 
@@ -424,7 +453,12 @@ class _ProjectPageState extends State<ProjectPage> {
 
     return Row(
       children: [
-        Expanded(flex: 5, child: Column(children: [leftTop, leftMiddle])),
+        Expanded(
+            flex: 5,
+            child: Column(children: [
+              leftTop,
+              Expanded(child: leftMiddle),
+            ])),
         Expanded(flex: 2, child: Column(children: [Expanded(child: middle)])),
         Expanded(flex: 4, child: Column(children: [Expanded(child: right)])),
       ],
@@ -455,8 +489,8 @@ class _ProjectPageState extends State<ProjectPage> {
   Widget _stageBtn({required TaskState stage, required int index}) {
     return FilledButton(
       onPressed: () {
-          // 按下之后，打开当前阶段的执行结果弹窗
-          _showInfoDialog(stage.stageName, '${stage.executeResultData}');
+        // 按下之后，打开当前阶段的执行结果弹窗
+        _showInfoDialog(stage.stageName, '${stage.executeResultData}');
       },
       style: ButtonStyle(
           backgroundColor: ButtonState.resolveWith(
