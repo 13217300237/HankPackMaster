@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:path/path.dart';
@@ -13,6 +14,7 @@ import '../../comm/const.dart';
 import '../../comm/text_util.dart';
 import '../../core/command_util.dart';
 import '../../hive/env_config_operator.dart';
+import 'package:path/path.dart' as path;
 
 typedef ActionFunc = Future<OrderExecuteResult> Function();
 
@@ -101,6 +103,16 @@ waitForever() async {
   await Future.delayed(const Duration(seconds: 2));
 }
 
+class UploadPlatform {
+  final String name;
+  final int value;
+
+  const UploadPlatform._(this.name, this.value);
+
+  static const UploadPlatform pgy = UploadPlatform._('蒲公英平台', 0);
+  static const UploadPlatform hwobs = UploadPlatform._('华为obs平台', 1);
+}
+
 class ProjectTaskVm extends ChangeNotifier {
   final gitUrlController = TextEditingController(); // git地址
   final gitBranchController = TextEditingController(); // 分支名称
@@ -131,6 +143,18 @@ class ProjectTaskVm extends ChangeNotifier {
   final List<String> _cmdExecLog = [];
 
   final logListViewScrollController = ScrollController();
+
+  UploadPlatform? selectedUploadPlatform; // 选中的上传平台
+
+  List<UploadPlatform> uploadPlatforms = [
+    UploadPlatform.pgy,
+    UploadPlatform.hwobs
+  ];
+
+  void setSelectedUploadPlatform(int index) {
+    selectedUploadPlatform = uploadPlatforms[index];
+    notifyListeners();
+  }
 
   List<String> get cmdExecLog => _cmdExecLog;
 
@@ -311,7 +335,8 @@ class ProjectTaskVm extends ChangeNotifier {
     ));
   }
 
-  String? apkToUpload;
+  String? apkToUpload; // 即将上传的文件地址
+  String? obsDownloadUrl; // obs上传后的下载路径
 
   void initPackageTaskList() {
     taskStateList.clear();
@@ -344,7 +369,8 @@ class ProjectTaskVm extends ChangeNotifier {
 
         if (list.length > 1) {
           return OrderExecuteResult(
-              succeed: false, data: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
+              succeed: false,
+              data: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
         }
 
         apkToUpload = list[0];
@@ -360,102 +386,153 @@ class ProjectTaskVm extends ChangeNotifier {
       onStateFinished: updateStageCostTime,
     ));
 
-    taskStateList.add(TaskState(
-      "获取pgy token",
-      actionFunc: () async {
-        // 先获取当前git的最新提交记录
-        var log =
-            await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
+    if (selectedUploadPlatform?.value == 0) {
+      taskStateList.add(TaskState(
+        "获取pgy token",
+        actionFunc: () async {
+          // 先获取当前git的最新提交记录
+          var log = await CommandUtil.getInstance()
+              .gitLog(projectPath, addNewLogLine);
 
-        if (log.exitCode != 0) {
-          return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
-        }
-
-        var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
-          buildDescription: projectAppDesc,
-          buildUpdateDescription: "$log \n $updateLog",
-        );
-
-        if (pgyToken == null) {
-          return OrderExecuteResult(data: "pgy token获取失败...", succeed: false);
-        }
-
-        _pgyEntity = PgyEntity(
-          endpoint: pgyToken.data?.endpoint,
-          key: pgyToken.data?.params?.key,
-          signature: pgyToken.data?.params?.signature,
-          xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
-        );
-
-        return OrderExecuteResult(
-            succeed: true, data: '获取到的Token是 ${pgyToken.toString()}');
-      },
-      onStateFinished: updateStageCostTime,
-    ));
-
-    taskStateList.add(TaskState(
-      "上传pgy",
-      actionFunc: () async {
-        if (!_pgyEntity!.isOk()) {
-          return OrderExecuteResult(data: "上传参数为空，流程终止!", succeed: false);
-        }
-
-        String oriFileName = basename(File(apkToUpload!).path);
-
-        var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
-            filePath: apkToUpload!,
-            oriFileName: oriFileName,
-            uploadProgressAction: addNewLogLine);
-
-        if (res != null) {
-          return OrderExecuteResult(data: "上传失败,$res", succeed: false);
-        } else {
-          return OrderExecuteResult(succeed: true, data: '上传成功');
-        }
-      },
-      onStateFinished: updateStageCostTime,
-    ));
-
-    taskStateList.add(TaskState(
-      "检查pgy发布结果",
-      actionFunc: () async {
-        var s = await PgyUploadUtil.getInstance()
-            .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
-
-        if (s == null) {
-          return OrderExecuteResult(succeed: false);
-        }
-
-        if (s.code == 1216) {
-          // 发布失败，流程终止
-          return OrderExecuteResult(succeed: false, data: "发布失败，流程终止");
-        } else {
-          // 发布成功，打印结果
-          // 开始解析发布结果,
-          if (s.data is Map<String, dynamic>) {
-            MyAppInfo appInfo =
-                MyAppInfo.fromJson(s.data as Map<String, dynamic>);
-            addNewLogLine("应用名称: ${appInfo.buildName}");
-            addNewLogLine("大小: ${appInfo.buildFileSize}");
-            addNewLogLine("版本号: ${appInfo.buildVersion}");
-            addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
-            addNewLogLine("应用描述: ${appInfo.buildDescription}");
-            addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
-            addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
-            addNewLogLine(
-                "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
-            addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
-            addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
-            addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
-
-            return OrderExecuteResult(succeed: true, data: appInfo);
-          } else {
-            return OrderExecuteResult(succeed: false, data: "发布结果解析失败");
+          if (log.exitCode != 0) {
+            return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
           }
-        }
-      },
-      onStateFinished: updateStageCostTime,
-    ));
+
+          var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
+            buildDescription: projectAppDesc,
+            buildUpdateDescription: "$log \n $updateLog",
+          );
+
+          if (pgyToken == null) {
+            return OrderExecuteResult(data: "pgy token获取失败...", succeed: false);
+          }
+
+          _pgyEntity = PgyEntity(
+            endpoint: pgyToken.data?.endpoint,
+            key: pgyToken.data?.params?.key,
+            signature: pgyToken.data?.params?.signature,
+            xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
+          );
+
+          return OrderExecuteResult(
+              succeed: true, data: '获取到的Token是 ${pgyToken.toString()}');
+        },
+        onStateFinished: updateStageCostTime,
+      ));
+      taskStateList.add(TaskState(
+        "上传pgy",
+        actionFunc: () async {
+          if (!_pgyEntity!.isOk()) {
+            return OrderExecuteResult(data: "上传参数为空，流程终止!", succeed: false);
+          }
+
+          String oriFileName = basename(File(apkToUpload!).path);
+
+          var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
+              filePath: apkToUpload!,
+              oriFileName: oriFileName,
+              uploadProgressAction: addNewLogLine);
+
+          if (res != null) {
+            return OrderExecuteResult(data: "上传失败,$res", succeed: false);
+          } else {
+            return OrderExecuteResult(succeed: true, data: '上传成功');
+          }
+        },
+        onStateFinished: updateStageCostTime,
+      ));
+      taskStateList.add(TaskState(
+        "检查pgy发布结果",
+        actionFunc: () async {
+          var s = await PgyUploadUtil.getInstance()
+              .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
+
+          if (s == null) {
+            return OrderExecuteResult(succeed: false);
+          }
+
+          if (s.code == 1216) {
+            // 发布失败，流程终止
+            return OrderExecuteResult(succeed: false, data: "发布失败，流程终止");
+          } else {
+            // 发布成功，打印结果
+            // 开始解析发布结果,
+            if (s.data is Map<String, dynamic>) {
+              MyAppInfo appInfo =
+                  MyAppInfo.fromJson(s.data as Map<String, dynamic>);
+              addNewLogLine("应用名称: ${appInfo.buildName}");
+              addNewLogLine("大小: ${appInfo.buildFileSize}");
+              addNewLogLine("版本号: ${appInfo.buildVersion}");
+              addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
+              addNewLogLine("应用描述: ${appInfo.buildDescription}");
+              addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
+              addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
+              addNewLogLine(
+                  "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
+              addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
+              addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
+              addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
+
+              return OrderExecuteResult(succeed: true, data: appInfo);
+            } else {
+              return OrderExecuteResult(succeed: false, data: "发布结果解析失败");
+            }
+          }
+        },
+        onStateFinished: updateStageCostTime,
+      ));
+    } else {
+      taskStateList.add(TaskState(
+        "上传到华为obs",
+        actionFunc: () async {
+          // 先获取当前git的最新提交记录
+          var log = await CommandUtil.getInstance()
+              .gitLog(projectPath, addNewLogLine);
+
+          if (log.exitCode != 0) {
+            return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
+          }
+
+          File fileToUpload = File(apkToUpload!);
+
+          var oBSResponse = await OBSClient.putFile(
+              objectName: path.basename(apkToUpload!), file: fileToUpload);
+
+          obsDownloadUrl = oBSResponse?.url;
+          if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
+            return OrderExecuteResult(data: "OBS上传失败 ", succeed: false);
+          } else {
+            return OrderExecuteResult(
+                data: "OBS上传成功,下载地址为 $obsDownloadUrl", succeed: true);
+          }
+        },
+        onStateFinished: updateStageCostTime,
+      ));
+      taskStateList.add(TaskState(
+        "构建打包结果",
+        actionFunc: () async {
+          MyAppInfo appInfo = MyAppInfo();
+
+
+
+          addNewLogLine("应用名称: ${appInfo.buildName}");
+          addNewLogLine("大小: ${appInfo.buildFileSize}");
+          addNewLogLine("版本号: ${appInfo.buildVersion}");
+          addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
+          addNewLogLine("应用描述: ${appInfo.buildDescription}");
+          addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
+          addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
+          addNewLogLine(
+              "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
+          addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
+          addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
+          addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
+
+          return OrderExecuteResult(data: "二维码生成成功 ", succeed: false);
+        },
+        onStateFinished: updateStageCostTime,
+      ));
+    }
 
     notifyListeners();
   }

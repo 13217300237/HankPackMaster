@@ -181,6 +181,53 @@ class _ProjectPageState extends State<ProjectPage> {
     );
   }
 
+  Widget _chooseRadio(String title, {bool must = true}) {
+    Widget mustSpace;
+
+    if (must) {
+      mustSpace = SizedBox(
+          width: 20,
+          child: Center(
+              child: Text('*',
+                  style: TextStyle(fontSize: 18, color: Colors.red))));
+    } else {
+      mustSpace = const SizedBox(width: 20);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0),
+      child: Row(children: [
+        SizedBox(
+          width: 100,
+          child: Row(
+            children: [
+              Text(title, style: const TextStyle(fontSize: 18)),
+              mustSpace,
+            ],
+          ),
+        ),
+        Expanded(
+          child: Row(
+            children:
+                List.generate(_projectTaskVm.uploadPlatforms.length, (index) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 18.0),
+                child: RadioButton(
+                    checked: _projectTaskVm.selectedUploadPlatform?.value == index,
+                    content: Text(_projectTaskVm.uploadPlatforms[index].name),
+                    onChanged: (checked) {
+                      if (checked) {
+                        _projectTaskVm.setSelectedUploadPlatform(index);
+                      }
+                    }),
+              );
+            }),
+          ),
+        )
+      ]),
+    );
+  }
+
   /// 输入框
   Widget _input(
     String title,
@@ -379,6 +426,7 @@ class _ProjectPageState extends State<ProjectPage> {
                           _projectTaskVm.apkLocationController,
                           maxLines: 1,
                         ),
+                        _chooseRadio('上传方式'),
                       ]),
                 ),
               ),
