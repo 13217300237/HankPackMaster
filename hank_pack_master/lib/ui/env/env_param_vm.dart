@@ -294,5 +294,8 @@ class EnvParamVm extends ChangeNotifier {
 
     initTextController(obsSecretKeyController, () => obsSecretKey,
         (String s) => obsSecretKey = s);
+
+    initTextController(obsBucketNameController, () => obsBucketName,
+            (String s) => obsBucketName = s);
   }
 }

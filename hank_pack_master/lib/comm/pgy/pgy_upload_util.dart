@@ -5,7 +5,7 @@ import 'package:hank_pack_master/comm/const.dart';
 import 'package:hank_pack_master/hive/env_config_operator.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-import '../../ui/projects/project_task_vm.dart';
+import '../../ui/work_shop/work_shop_vm.dart';
 
 /// 文件上传工具类，仅支持 apk和 ipa
 class PgyUploadUtil {

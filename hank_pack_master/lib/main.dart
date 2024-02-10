@@ -8,12 +8,14 @@ import 'package:window_manager/window_manager.dart';
 import 'comm/functions.dart';
 import 'comm/hwobs/obs_client.dart';
 import 'hive/env_config_operator.dart';
+import 'hive/project_record/project_record_operator.dart';
 import 'ui/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await EnvConfigOperator.openBox();
+  await ProjectRecordOperator.openBox();
 
   OBSClient.init(
       ak: "WME9RK9W2EA5J7WMG0ZD",

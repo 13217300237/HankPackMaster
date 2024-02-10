@@ -3,31 +3,30 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
-import 'package:flutter/services.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
-import 'package:hank_pack_master/ui/projects/app_info_card.dart';
-import 'package:hank_pack_master/ui/projects/project_task_vm.dart';
+import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../comm/ui/pretty_3d_button.dart';
 import '../comm/theme.dart';
 import '../env/env_param_vm.dart';
+import 'app_info_card.dart';
 
 ///
-/// 此模块用来添加新的安卓工程
+/// 打包工坊
 ///
 /// 表单操作
 ///
-class ProjectPage extends StatefulWidget {
-  const ProjectPage({super.key});
+class WorkShopPage extends StatefulWidget {
+  const WorkShopPage({super.key});
 
   @override
-  State<ProjectPage> createState() => _ProjectPageState();
+  State<WorkShopPage> createState() => _WorkShopPageState();
 }
 
-class _ProjectPageState extends State<ProjectPage> {
+class _WorkShopPageState extends State<WorkShopPage> {
   late EnvParamVm envParamModel;
   late ProjectTaskVm _projectTaskVm;
   late AppTheme _appTheme;
