@@ -146,7 +146,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
     } else {
       comboBox = ComboBox<String>(
         value: _projectTaskVm.selectedOrder,
-        placeholder: const Text(''),
+        placeholder: const Text('你必须选择一个打包命令'),
         items: orderList.entries.map((e) {
           return ComboBoxItem(
             value: e.key,
