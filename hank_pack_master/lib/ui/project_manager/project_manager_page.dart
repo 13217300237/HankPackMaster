@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../hive/project_record/project_record_entity.dart';
@@ -12,7 +13,6 @@ class ProjectManagerPage extends StatefulWidget {
 }
 
 class _ProjectManagerPageState extends State<ProjectManagerPage> {
-
   late GridDataSource _dataSource;
   final int _rowsPerPage = 10;
 
@@ -23,56 +23,20 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   List<ProjectRecordEntity> get _getProjectRecordEntity {
-    return [
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApplication0016.git", "dev"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApp20231224.git", "dev"),
-      ProjectRecordEntity(
-          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
-          "master"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApplication0016.git", "dev"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApp20231224.git", "dev"),
-      ProjectRecordEntity(
-          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
-          "master"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApplication0016.git", "dev"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApp20231224.git", "dev"),
-      ProjectRecordEntity(
-          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
-          "master"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApplication0016.git", "dev"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApp20231224.git", "dev"),
-      ProjectRecordEntity(
-          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
-          "master"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApplication0016.git", "dev"),
-      ProjectRecordEntity(
-          "git@github.com:18598925736/MyApp20231224.git", "dev"),
-      ProjectRecordEntity(
-          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
-          "master"),
-    ];
+    return [...ProjectRecordOperator.findAll()];
   }
 
   /// Define list of CommandBarItem
   get simpleCommandBarItems => <CommandBarItem>[
         CommandBarBuilderItem(
           builder: (context, mode, w) => Tooltip(
-            message: "新建工程",
+            message: "新建一个安卓工程",
             child: w,
           ),
           wrappedItem: CommandBarButton(
             icon: const Icon(FluentIcons.add),
             label: const Text('新建'),
-            onPressed: () {},
+            onPressed: () => createAndroidProjectRecord(),
           ),
         ),
         const CommandBarButton(
@@ -81,6 +45,13 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           onPressed: null,
         ),
       ];
+
+  /// 创建一个新的安卓工程record，并刷新UI
+  void createAndroidProjectRecord() {
+    ProjectRecordOperator.insertOrUpdate(ProjectRecordEntity(
+        "${DateTime.now().millisecondsSinceEpoch}", "testBranch"));
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,11 +70,15 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       ),
     );
 
+    var size = _getProjectRecordEntity.length;
+    if (size == 0) {
+      size = 1;
+    }
+
     var pager = SizedBox(
       width: MediaQuery.of(context).size.width / 2,
       child: SfDataPager(
-        pageCount: ((_getProjectRecordEntity.length / _rowsPerPage).ceil())
-            .toDouble(),
+        pageCount: ((size / _rowsPerPage).ceil()).toDouble(),
         direction: Axis.horizontal,
         delegate: _dataSource,
       ),

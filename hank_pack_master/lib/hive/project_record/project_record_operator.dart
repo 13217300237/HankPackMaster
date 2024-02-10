@@ -1,3 +1,4 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hive/hive.dart';
 
@@ -10,7 +11,7 @@ class ProjectRecordOperator {
     await Hive.openBox(_boxName);
   }
 
-  static Box<ProjectRecordEntity>? _box;
+  static Box? _box;
 
   static _initBox() {
     _box ??= Hive.box(_boxName);
@@ -22,10 +23,17 @@ class ProjectRecordOperator {
         (p) => p.gitUrl == entity.gitUrl && p.branch == entity.branch);
 
     if (index != -1) {
+      debugPrint("执行更新");
       _box!.putAt(index, entity); // 执行更新操作
     } else {
+      debugPrint("执行插入");
       _box!.add(entity); // 执行插入操作
     }
+  }
+
+  static List findAll() {
+    _initBox();
+    return _box!.values.toList();
   }
 
   static void delete(ProjectRecordEntity entity) {
