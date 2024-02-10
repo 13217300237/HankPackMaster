@@ -1,17 +1,19 @@
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
-import 'package:hank_pack_master/hive/project_record/project_record_type_set.dart';
 import 'package:hive/hive.dart';
 
 class ProjectRecordOperator {
+  /// 盒子名称
+  static const String _boxName = "projectRecordBox";
+
   static Future<void> openBox() async {
     Hive.registerAdapter(ProjectRecordEntityAdapter(), override: true);
-    await Hive.openBox(projectRecordBoxName);
+    await Hive.openBox(_boxName);
   }
 
   static Box<ProjectRecordEntity>? _box;
 
   static _initBox() {
-    _box ??= Hive.box(projectRecordBoxName);
+    _box ??= Hive.box(_boxName);
   }
 
   static void insertOrUpdate(ProjectRecordEntity entity) {
@@ -47,6 +49,4 @@ class ProjectRecordOperator {
       return null;
     }
   }
-
-
 }

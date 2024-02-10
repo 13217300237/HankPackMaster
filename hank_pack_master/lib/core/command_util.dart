@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../comm/const.dart';
-import '../hive/env_config_operator.dart';
+import '../hive/env_config/env_config_operator.dart';
 
 bool cmdDebug = true;
 

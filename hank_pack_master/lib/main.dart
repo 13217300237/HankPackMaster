@@ -7,7 +7,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'comm/functions.dart';
 import 'comm/hwobs/obs_client.dart';
-import 'hive/env_config_operator.dart';
+import 'hive/env_config/env_config_operator.dart';
 import 'hive/project_record/project_record_operator.dart';
 import 'ui/app.dart';
 

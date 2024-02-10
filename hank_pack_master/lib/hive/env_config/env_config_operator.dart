@@ -1,18 +1,19 @@
-import 'package:hank_pack_master/hive/env_config_entity.dart';
+import 'package:hank_pack_master/hive/env_config/env_config_entity.dart';
 import 'package:hive/hive.dart';
 
-import 'comm_entity_type_set.dart';
-
 class EnvConfigOperator {
+
+  static const String _boxName = "envConfigBox";
+
   static Future<void> openBox() async {
     Hive.registerAdapter(EnvConfigEntityAdapter(),override: true);
-    await Hive.openBox(envConfigBoxName);
+    await Hive.openBox(_boxName);
   }
 
   static Box? _box;
 
   static _initBox() {
-    _box ??= Hive.box(envConfigBoxName);
+    _box ??= Hive.box(_boxName);
   }
 
   static void insertOrUpdate(EnvConfigEntity entity) {

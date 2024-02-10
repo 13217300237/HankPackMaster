@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../comm/const.dart';
-import '../../hive/env_config_entity.dart';
-import '../../hive/env_config_operator.dart';
+import '../../hive/env_config/env_config_entity.dart';
+import '../../hive/env_config/env_config_operator.dart';
 
 class EnvParamVm extends ChangeNotifier {
   /// 环境有问题时的错误提示

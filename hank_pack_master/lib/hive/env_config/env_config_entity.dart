@@ -1,15 +1,13 @@
 import 'package:hive/hive.dart';
 
-import 'comm_entity_type_set.dart';
-
 part 'env_config_entity.g.dart';
 
-@HiveType(typeId: envConfigClassType)
+@HiveType(typeId: 0x12137)
 class EnvConfigEntity {
-  @HiveField(envConfigEnvNameType)
+  @HiveField(0x01)
   late String envName;
 
-  @HiveField(envConfigEnvValueType)
+  @HiveField(0x02)
   late String envValue;
 
   EnvConfigEntity(this.envName, this.envValue);
