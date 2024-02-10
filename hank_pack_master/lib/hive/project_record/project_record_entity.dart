@@ -14,3 +14,4 @@ class ProjectRecordEntity {
 
   ProjectRecordEntity(this.gitUrl, this.branch);
 }
+

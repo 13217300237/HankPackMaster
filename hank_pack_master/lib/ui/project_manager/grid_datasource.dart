@@ -3,6 +3,8 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../hive/project_record/project_record_entity.dart';
 
+const TextStyle gridTextStyle = TextStyle(color: Color(0xff2C473E));
+
 /// 数据源解析器
 class GridDataSource extends DataGridSource {
   List<DataGridRow> _dataList = [];
@@ -26,7 +28,7 @@ class GridDataSource extends DataGridSource {
       return Container(
         padding: const EdgeInsets.only(left: 10),
         alignment: Alignment.centerLeft,
-        child: Text(dataGridCell.value.toString()),
+        child: Text(dataGridCell.value.toString(), style: gridTextStyle),
       );
     }).toList());
   }
