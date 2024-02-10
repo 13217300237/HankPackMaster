@@ -1,7 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-import 'entity.dart';
+import '../../hive/project_record/project_record_entity.dart';
+import 'grid_datasource.dart';
 
 class ProjectManagerPage extends StatefulWidget {
   const ProjectManagerPage({super.key});
@@ -11,80 +12,109 @@ class ProjectManagerPage extends StatefulWidget {
 }
 
 class _ProjectManagerPageState extends State<ProjectManagerPage> {
-  List<Employee> employees = <Employee>[];
+  List<ProjectRecordEntity> projectRecordEntityList = <ProjectRecordEntity>[];
 
-  late EmployeeDataSource employeeDataSource;
+  late GridDataSource _dataSource;
 
   @override
   void initState() {
     super.initState();
-    employees = getEmployees();
-    employeeDataSource = EmployeeDataSource(employees: employees);
+    projectRecordEntityList = getProjectRecordEntity();
+    _dataSource = GridDataSource(data: projectRecordEntityList);
   }
 
-  List<Employee> getEmployees() {
+  List<ProjectRecordEntity> getProjectRecordEntity() {
     return [
-      Employee(1, 'James', 'Project Lead', 20000),
-      Employee(2, 'Kathryn', 'Manager', 30000),
-      Employee(3, 'Lara', 'Developer', 15000),
-      Employee(4, 'Michael', 'Designer', 15000),
-      Employee(5, 'Martin', 'Developer', 15000),
-      Employee(6, 'Newberry', 'Developer', 15000),
-      Employee(7, 'Balnc', 'Developer', 15000),
-      Employee(8, 'Perry', 'Developer', 15000),
-      Employee(9, 'Gable', 'Developer', 15000),
-      Employee(10, 'Grimes', 'Developer', 15000),
-      Employee(11, 'James', 'Project Lead', 20000),
-      Employee(12, 'Kathryn', 'Manager', 30000),
-      Employee(13, 'Lara', 'Developer', 15000),
-      Employee(14, 'Michael', 'Designer', 15000),
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApplication0016.git", "dev"),
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApp20231224.git", "dev"),
+      ProjectRecordEntity(
+          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
+          "master"),
+
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApplication0016.git", "dev"),
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApp20231224.git", "dev"),
+      ProjectRecordEntity(
+          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
+          "master"),
+
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApplication0016.git", "dev"),
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApp20231224.git", "dev"),
+      ProjectRecordEntity(
+          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
+          "master"),
+
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApplication0016.git", "dev"),
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApp20231224.git", "dev"),
+      ProjectRecordEntity(
+          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
+          "master"),
+
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApplication0016.git", "dev"),
+      ProjectRecordEntity(
+          "git@github.com:18598925736/MyApp20231224.git", "dev"),
+      ProjectRecordEntity(
+          "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git",
+          "master"),
     ];
   }
 
+  final int _rowsPerPage = 5;
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      borderColor: Colors.transparent,
-      backgroundColor: Colors.green.withOpacity(.05),
-      borderRadius: BorderRadius.circular(5),
-      margin: const EdgeInsets.all(15),
-      child: SfDataGrid(
-        columnWidthMode: ColumnWidthMode.lastColumnFill,
-        autoExpandGroups: true,
-        allowExpandCollapseGroup: true,
-        source: employeeDataSource,
-        rowsPerPage: 10,
-        allowSorting: true,
-        columns: <GridColumn>[
-          GridColumn(
-              columnName: 'id',
-              label: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  alignment: Alignment.centerRight,
-                  child: const Text(
-                    'ID',
-                  ))),
-          GridColumn(
-              columnName: 'name',
-              label: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  alignment: Alignment.centerLeft,
-                  child: const Text('Name'))),
-          GridColumn(
-              columnName: 'designation',
-              width: 120,
-              label: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  alignment: Alignment.centerLeft,
-                  child: const Text('Designation'))),
-          GridColumn(
-              columnName: 'salary',
-              label: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  alignment: Alignment.centerRight,
-                  child: const Text('Salary'))),
-        ],
+
+    var grid = Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: SfDataGrid(
+          columnWidthMode: ColumnWidthMode.fill,
+          navigationMode: GridNavigationMode.cell,
+          gridLinesVisibility: GridLinesVisibility.none,
+          headerGridLinesVisibility: GridLinesVisibility.none,
+          source: _dataSource,
+          columns: _getColumn,
+        ),
       ),
     );
+
+    var pager = SizedBox(
+      width: MediaQuery.of(context).size.width / 2,
+      child: SfDataPager(
+        pageCount:
+            ((projectRecordEntityList.length / _rowsPerPage).ceil()).toDouble(),
+        direction: Axis.horizontal,
+        delegate: _dataSource,
+      ),
+    );
+
+
+    return Column(children: [grid, pager]);
+  }
+
+  List<GridColumn> get _getColumn {
+    return <GridColumn>[
+      GridColumn(
+          columnName: 'gitUrl',
+          label: Container(
+              padding: const EdgeInsets.only(left: 8.0),
+              alignment: Alignment.centerLeft,
+              child: const Text('gitUrl'))),
+      GridColumn(
+        columnName: 'branch',
+        label: Container(
+            padding: const EdgeInsets.only(left: 8.0),
+            alignment: Alignment.centerLeft,
+            child: const Text('branch')),
+      ),
+    ];
   }
 }
