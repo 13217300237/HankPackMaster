@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
@@ -14,7 +16,7 @@ class ProjectManagerPage extends StatefulWidget {
 
 class _ProjectManagerPageState extends State<ProjectManagerPage> {
   late GridDataSource _dataSource;
-  final int _rowsPerPage = 10;
+  int _rowsPerPage = 10;
 
   @override
   void initState() {
@@ -23,7 +25,62 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   List<ProjectRecordEntity> get _getProjectRecordEntity {
-    return [...ProjectRecordOperator.findAll()];
+    return [
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+      ProjectRecordEntity(
+          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
+          "testBranch"),
+    ];
   }
 
   /// Define list of CommandBarItem
@@ -53,6 +110,22 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     setState(() {});
   }
 
+  Widget _buildDataPager() {
+    debugPrint(
+        '_getProjectRecordEntity.length = > ${_getProjectRecordEntity.length / _rowsPerPage}');
+
+    return SfDataPager(
+      delegate: _dataSource,
+      availableRowsPerPage: const <int>[10, 15, 20],
+      pageCount: (_getProjectRecordEntity.length / _rowsPerPage).ceilToDouble(),
+      onRowsPerPageChanged: (int? rowsPerPage) {
+        setState(() {
+          _rowsPerPage = rowsPerPage!;
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var grid = Expanded(
@@ -60,7 +133,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         padding: const EdgeInsets.all(15),
         child: SfDataGrid(
           columnWidthMode: ColumnWidthMode.fill,
-          navigationMode: GridNavigationMode.cell,
           gridLinesVisibility: GridLinesVisibility.none,
           headerGridLinesVisibility: GridLinesVisibility.none,
           rowsPerPage: _rowsPerPage,
@@ -75,15 +147,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       size = 1;
     }
 
-    var pager = SizedBox(
-      width: MediaQuery.of(context).size.width / 2,
-      child: SfDataPager(
-        pageCount: ((size / _rowsPerPage).ceil()).toDouble(),
-        direction: Axis.horizontal,
-        delegate: _dataSource,
-      ),
-    );
-
     return Container(
       color: const Color(0xffAFCF84),
       child: Card(
@@ -96,7 +159,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                     overflowBehavior: CommandBarOverflowBehavior.noWrap,
                     primaryItems: [...simpleCommandBarItems])),
             grid,
-            pager
+            _buildDataPager()
           ])),
     );
   }
