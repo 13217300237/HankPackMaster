@@ -312,7 +312,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   void onWindowClose() async {
     bool isPreventClose = await windowManager.isPreventClose();
     if (isPreventClose && mounted) {
-      DialogUtil.showConfirmDialog(
+      DialogUtil.showCustomDialog(
         context: context,
         onConfirm: () => windowManager.destroy(),
         title: "提示",

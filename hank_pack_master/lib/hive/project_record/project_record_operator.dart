@@ -57,4 +57,14 @@ class ProjectRecordOperator {
       return null;
     }
   }
+
+  static Future<int>? clear() {
+    _initBox();
+    try {
+      return _box!.clear();
+    } catch (e) {
+      debugPrint('删除全部时出现问题:$e');
+      return null;
+    }
+  }
 }

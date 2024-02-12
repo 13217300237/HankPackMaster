@@ -7,12 +7,13 @@ class DialogUtil {
   ///
   /// [content] 动态类型，如果传 String，则解析成 Text，如果是Widget，则直接赋值
   ///
-  static void showConfirmDialog({
+  static void showCustomDialog({
     required BuildContext context,
     Function? onConfirm,
     required String title,
     required dynamic content,
     bool showCancel = true,
+    bool showActions = true,
     String confirmText = "是",
     String cancelText = "取消",
     double maxWidth = 500,
@@ -29,22 +30,24 @@ class DialogUtil {
                   content,
                   style: const TextStyle(fontSize: 18),
                 ),
-          actions: [
-            FilledButton(
-              child: Text(confirmText),
-              onPressed: () {
-                Navigator.pop(context);
-                onConfirm?.call();
-              },
-            ),
-            if (showCancel)
-              Button(
-                child: Text(cancelText),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-          ],
+          actions: showActions
+              ? [
+                  FilledButton(
+                    child: Text(confirmText),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onConfirm?.call();
+                    },
+                  ),
+                  if (showCancel)
+                    Button(
+                      child: Text(cancelText),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                ]
+              : [],
         );
       },
     );

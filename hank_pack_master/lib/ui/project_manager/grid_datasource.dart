@@ -10,21 +10,31 @@ const TextStyle gridTextStyle = TextStyle(color: Color(0xff2C473E));
 class ProjectEntityDataSource extends DataGridSource {
   List<DataGridRow> _rows = [];
 
-  final List<ProjectRecordEntity> dataList = Iterable.generate(21)
-      .map((e) => ProjectRecordEntity("$e", "testBranch"))
-      .toList();
+  final List<ProjectRecordEntity> dataList = [];
 
-  void insertOrUpdateProjectRecord() {
-    ProjectRecordOperator.insertOrUpdate(ProjectRecordEntity(
-        "${DateTime.now().millisecondsSinceEpoch}", "testBranch"));
+  bool insertOrUpdateProjectRecord(String gitUrl, String branchName) {
+    if (gitUrl.isEmpty || branchName.isEmpty) {
+      return false;
+    }
 
-    dataList.clear();
-    dataList.addAll(ProjectRecordOperator.findAll());
-    refresh();
+    ProjectRecordOperator.insertOrUpdate(
+        ProjectRecordEntity(gitUrl, branchName));
+
+    _refresh();
+
+    return true;
+  }
+
+  void clearAllProjectRecord() {
+    debugPrint("执行删除全部");
+    ProjectRecordOperator.clear();
+    _refresh();
   }
 
   /// 原来表格的刷新必须强制更新 每行组件（`_buildRows`）
-  refresh() {
+  _refresh() {
+    dataList.clear();
+    dataList.addAll(ProjectRecordOperator.findAll());
     _buildRows();
     notifyListeners();
   }

@@ -656,7 +656,7 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
 
     return IconButton(
       icon: const Icon(FluentIcons.show_results, size: 24.0),
-      onPressed: () => DialogUtil.showConfirmDialog(
+      onPressed: () => DialogUtil.showCustomDialog(
           context: context,
           title: "${widget.title}测试结果",
           content: executeRes,

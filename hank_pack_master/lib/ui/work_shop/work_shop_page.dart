@@ -308,7 +308,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
     String title,
     String msg,
   ) {
-    DialogUtil.showConfirmDialog(
+    DialogUtil.showCustomDialog(
         context: context,
         content: msg,
         title: title,
@@ -366,7 +366,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
                           bgColor: Colors.purple.normal,
                           enable: preCheckButtonEnable,
                           action: () async {
-                            DialogUtil.showConfirmDialog(
+                            DialogUtil.showCustomDialog(
                                 context: context,
                                 content:
                                     "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，确定开始吗？",
@@ -599,7 +599,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
     }
 
     String? confirmText = "打开文件位置";
-    DialogUtil.showConfirmDialog(
+    DialogUtil.showCustomDialog(
       context: context,
       title: "流程结束",
       content: s.toString(),
@@ -611,7 +611,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
   void dealWithScheduleResultByApkUpload(MyAppInfo s) {
     var card = AppInfoCard(appInfo: s);
 
-    DialogUtil.showConfirmDialog(
+    DialogUtil.showCustomDialog(
       context: context,
       content: card,
       title: '流程结束',
