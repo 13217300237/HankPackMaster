@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../comm/ui/pretty_3d_button.dart';
+import '../../comm/url_check_util.dart';
 import '../comm/theme.dart';
 import '../env/env_param_vm.dart';
 import 'app_info_card.dart';
@@ -83,14 +84,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
     });
   }
 
-  bool isValidGitUrl(String url) {
-    RegExp regex = RegExp(
-      r'^((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?$',
-      caseSensitive: false,
-      multiLine: false,
-    );
-    return regex.hasMatch(url);
-  }
+
 
   void checkInput() {
     setState(() {});

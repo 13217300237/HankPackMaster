@@ -25,9 +25,9 @@ class ProjectEntityDataSource extends DataGridSource {
     return true;
   }
 
-  void clearAllProjectRecord() {
+  void clearAllProjectRecord() async{
     debugPrint("执行删除全部");
-    ProjectRecordOperator.clear();
+    await ProjectRecordOperator.clear();
     _refresh();
   }
 
