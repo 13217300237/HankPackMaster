@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -6,10 +8,23 @@ import '../../hive/project_record/project_record_entity.dart';
 const TextStyle gridTextStyle = TextStyle(color: Color(0xff2C473E));
 
 /// 数据源解析器
-class GridDataSource extends DataGridSource {
+class ProjectEntityDataSource extends DataGridSource {
   List<DataGridRow> _dataList = [];
 
-  GridDataSource({required List<ProjectRecordEntity> data}) {
+  final List<ProjectRecordEntity> data = Iterable.generate(21)
+      .map((e) => ProjectRecordEntity("$e", "testBranch"))
+      .toList();
+
+  refresh() {
+    _buildRows();
+    notifyListeners();
+  }
+
+  ProjectEntityDataSource() {
+    _buildRows();
+  }
+
+  _buildRows() {
     _dataList = data
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<String>(columnName: 'gitUrl', value: e.gitUrl),

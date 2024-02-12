@@ -15,72 +15,13 @@ class ProjectManagerPage extends StatefulWidget {
 }
 
 class _ProjectManagerPageState extends State<ProjectManagerPage> {
-  late GridDataSource _dataSource;
+  late ProjectEntityDataSource _dataSource;
   int _rowsPerPage = 10;
 
   @override
   void initState() {
     super.initState();
-    _dataSource = GridDataSource(data: _getProjectRecordEntity);
-  }
-
-  List<ProjectRecordEntity> get _getProjectRecordEntity {
-    return [
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-      ProjectRecordEntity(
-          "${DateTime.now().millisecondsSinceEpoch + Random().nextInt(20000)} ",
-          "testBranch"),
-    ];
+    _dataSource = ProjectEntityDataSource();
   }
 
   /// Define list of CommandBarItem
@@ -105,19 +46,18 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
 
   /// 创建一个新的安卓工程record，并刷新UI
   void createAndroidProjectRecord() {
-    ProjectRecordOperator.insertOrUpdate(ProjectRecordEntity(
-        "${DateTime.now().millisecondsSinceEpoch}", "testBranch"));
-    setState(() {});
+    // ProjectRecordOperator.insertOrUpdate(ProjectRecordEntity(
+    //     "${DateTime.now().millisecondsSinceEpoch}", "testBranch"));
+    _dataSource.data.clear();
+    _dataSource.data.add(ProjectRecordEntity("xxxx", "1111"));
+    _dataSource.refresh();
   }
 
   Widget _buildDataPager() {
-    debugPrint(
-        '_getProjectRecordEntity.length = > ${_getProjectRecordEntity.length / _rowsPerPage}');
-
     return SfDataPager(
       delegate: _dataSource,
       availableRowsPerPage: const <int>[10, 15, 20],
-      pageCount: (_getProjectRecordEntity.length / _rowsPerPage).ceilToDouble(),
+      pageCount: (_dataSource.data.length / _rowsPerPage).ceilToDouble(),
       onRowsPerPageChanged: (int? rowsPerPage) {
         setState(() {
           _rowsPerPage = rowsPerPage!;
@@ -142,7 +82,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       ),
     );
 
-    var size = _getProjectRecordEntity.length;
+    var size = _dataSource.data.length;
     if (size == 0) {
       size = 1;
     }
