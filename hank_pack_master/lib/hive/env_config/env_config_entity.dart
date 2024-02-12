@@ -2,12 +2,12 @@ import 'package:hive/hive.dart';
 
 part 'env_config_entity.g.dart';
 
-@HiveType(typeId: 0x12137)
+@HiveType(typeId: 74)
 class EnvConfigEntity {
-  @HiveField(0x01)
+  @HiveField(1)
   late String envName;
 
-  @HiveField(0x02)
+  @HiveField(2)
   late String envValue;
 
   EnvConfigEntity(this.envName, this.envValue);

@@ -4,17 +4,17 @@ import 'package:hive/hive.dart';
 
 class ProjectRecordOperator {
   /// 盒子名称
-  static const String _boxName = "projectRecordBox";
+  static const String _boxName = "projectRecordDb"; // 每一次更新
 
   static Future<void> openBox() async {
     Hive.registerAdapter(ProjectRecordEntityAdapter(), override: true);
-    await Hive.openBox(_boxName);
+    await Hive.openBox<ProjectRecordEntity>(_boxName);
   }
 
-  static Box? _box;
+  static Box<ProjectRecordEntity>? _box;
 
   static _initBox() {
-    _box ??= Hive.box(_boxName);
+    _box ??= Hive.box<ProjectRecordEntity>(_boxName);
   }
 
   static void insertOrUpdate(ProjectRecordEntity entity) {
@@ -31,7 +31,7 @@ class ProjectRecordOperator {
     }
   }
 
-  static List findAll() {
+  static List<ProjectRecordEntity> findAll() {
     _initBox();
     return _box!.values.toList();
   }

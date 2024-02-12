@@ -8,7 +8,7 @@ part of 'project_record_entity.dart';
 
 class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
   @override
-  final int typeId = 73;
+  final int typeId = 72;
 
   @override
   ProjectRecordEntity read(BinaryReader reader) {

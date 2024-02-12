@@ -46,18 +46,14 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
 
   /// 创建一个新的安卓工程record，并刷新UI
   void createAndroidProjectRecord() {
-    // ProjectRecordOperator.insertOrUpdate(ProjectRecordEntity(
-    //     "${DateTime.now().millisecondsSinceEpoch}", "testBranch"));
-    _dataSource.data.clear();
-    _dataSource.data.add(ProjectRecordEntity("xxxx", "1111"));
-    _dataSource.refresh();
+    _dataSource.insertOrUpdateProjectRecord();
   }
 
   Widget _buildDataPager() {
     return SfDataPager(
       delegate: _dataSource,
       availableRowsPerPage: const <int>[10, 15, 20],
-      pageCount: (_dataSource.data.length / _rowsPerPage).ceilToDouble(),
+      pageCount: (_dataSource.dataList.length / _rowsPerPage).ceilToDouble(),
       onRowsPerPageChanged: (int? rowsPerPage) {
         setState(() {
           _rowsPerPage = rowsPerPage!;
@@ -82,7 +78,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       ),
     );
 
-    var size = _dataSource.data.length;
+    var size = _dataSource.dataList.length;
     if (size == 0) {
       size = 1;
     }
