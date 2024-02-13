@@ -114,7 +114,7 @@ class UploadPlatform {
   static const UploadPlatform hwobs = UploadPlatform._('华为obs平台', 1);
 }
 
-class ProjectTaskVm extends ChangeNotifier {
+class WorkShopVm extends ChangeNotifier {
   final gitUrlController = TextEditingController(); // git地址
   final gitBranchController = TextEditingController(); // 分支名称
   final projectPathController = TextEditingController(); // 工程路径

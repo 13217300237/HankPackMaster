@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
-import 'env/env_param_vm.dart';
+import 'comm/vm/env_param_vm.dart';
 
 ///
 /// 主框架界面

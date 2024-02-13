@@ -12,7 +12,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../comm/ui/pretty_3d_button.dart';
 import '../../comm/url_check_util.dart';
 import '../comm/theme.dart';
-import '../env/env_param_vm.dart';
+import '../comm/vm/env_param_vm.dart';
+import '../comm/vm/task_queue_vm.dart';
 import 'app_info_card.dart';
 
 ///
@@ -28,8 +29,8 @@ class WorkShopPage extends StatefulWidget {
 }
 
 class _WorkShopPageState extends State<WorkShopPage> {
-  late EnvParamVm envParamModel;
-  late ProjectTaskVm _projectTaskVm;
+  late EnvParamVm _envParamModel;
+  late WorkShopVm _projectTaskVm;
   late AppTheme _appTheme;
 
   Widget _mainTitleWidget(String title) {
@@ -41,14 +42,13 @@ class _WorkShopPageState extends State<WorkShopPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
       final route = ModalRoute.of(context);
       if (route?.settings.name == '/work_shop') {
         debugPrint("检查跳转参数: ${route!.settings.arguments.toString()}");
       }
 
       // 在绘制的第一帧之后执行初始化动作
-      if (!envParamModel.isAndroidEnvOk()) {
+      if (!_envParamModel.isAndroidEnvOk()) {
         return;
       }
       _projectTaskVm.initPackageTaskList();
@@ -69,7 +69,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
           if (lastSepIndex > 0) {
             String projectName = gitText.substring(lastSepIndex + 1, endIndex);
             _projectTaskVm.projectPathController.text =
-                envParamModel.workSpaceRoot +
+                _envParamModel.workSpaceRoot +
                     Platform.pathSeparator +
                     projectName;
           } else {
@@ -90,8 +90,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
     });
   }
 
-
-
   void checkInput() {
     setState(() {});
   }
@@ -103,16 +101,19 @@ class _WorkShopPageState extends State<WorkShopPage> {
     _projectTaskVm.gitUrlController.removeListener(checkInput);
   }
 
+  late TaskQueueVm _taskQueueVm;
+
   @override
   Widget build(BuildContext context) {
-    envParamModel = context.watch<EnvParamVm>();
+    _taskQueueVm = context.watch<TaskQueueVm>();
+    _envParamModel = context.watch<EnvParamVm>();
     _appTheme = context.watch<AppTheme>();
 
-    if (envParamModel.isAndroidEnvOk()) {
+    if (_envParamModel.isAndroidEnvOk()) {
       return ChangeNotifierProvider(
-        create: (context) => ProjectTaskVm(),
+        create: (context) => WorkShopVm(),
         builder: (context, child) {
-          _projectTaskVm = context.watch<ProjectTaskVm>();
+          _projectTaskVm = context.watch<WorkShopVm>();
           return Container(color: _appTheme.bgColor, child: _mainLayout());
         },
       );
@@ -212,7 +213,8 @@ class _WorkShopPageState extends State<WorkShopPage> {
               return Padding(
                 padding: const EdgeInsets.only(right: 18.0),
                 child: RadioButton(
-                    checked: _projectTaskVm.selectedUploadPlatform?.value == index,
+                    checked:
+                        _projectTaskVm.selectedUploadPlatform?.value == index,
                     content: Text(_projectTaskVm.uploadPlatforms[index].name),
                     onChanged: (checked) {
                       if (checked) {
@@ -497,12 +499,17 @@ class _WorkShopPageState extends State<WorkShopPage> {
                 ),
               ],
             )));
-
+    var taskQueue = Card(
+      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.only(top: 15),
+      child: Text("等待区任务数:\n ${_taskQueueVm.taskQueueString()}"),
+    );
     return Row(
       children: [
         Expanded(
             flex: 5,
             child: Column(children: [
+              taskQueue,
               leftTop,
               Expanded(child: leftMiddle),
             ])),
@@ -557,7 +564,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
   }
 
   bool get preCheckButtonEnable {
-    if (!envParamModel.isAndroidEnvOk()) {
+    if (!_envParamModel.isAndroidEnvOk()) {
       return false;
     }
     if (_projectTaskVm.jobRunning) {
@@ -574,7 +581,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
   }
 
   bool get startPackageButtonEnable {
-    if (!envParamModel.isAndroidEnvOk()) {
+    if (!_envParamModel.isAndroidEnvOk()) {
       return false;
     }
     if (_projectTaskVm.jobRunning) {

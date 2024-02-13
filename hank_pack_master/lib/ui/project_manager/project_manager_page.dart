@@ -4,6 +4,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
+import 'package:hank_pack_master/ui/comm/vm/task_queue_vm.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/url_check_util.dart';
@@ -26,7 +28,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   void initState() {
     super.initState();
     _dataSource = ProjectEntityDataSource(
-      funcGoToWorkShop: (e) => context.go('/work_shop', extra: e),
+      funcGoToWorkShop: (e) {
+        _taskQueueVm.enqueue(e);
+        context.go('/work_shop', extra: e);
+      },
     );
     _dataSource.init();
   }
@@ -82,11 +87,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         showActions: true,
         confirmText: "确定",
         onConfirm: () {
-          debugPrint(
-              "当前 gitUrl: ${gitUrlTextController.text} ,校验结果 ${isValidGitUrl(gitUrlTextController.text)}");
-
           if (!isValidGitUrl(gitUrlTextController.text)) {
-            DialogUtil.showInfo(context: context, content: "gitUrl 填写格式不正确");
             return false;
           }
           _dataSource.insertOrUpdateProjectRecord(
@@ -95,12 +96,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         judgePop: () {
           if (gitUrlTextController.text.isEmpty ||
               branchNameTextController.text.isEmpty) {
-            DialogUtil.showInfo(
-                context: context, content: "gitUrl 和 branchName 必须都正确填写!");
             return false;
           }
           if (!isValidGitUrl(gitUrlTextController.text)) {
-            DialogUtil.showInfo(context: context, content: "gitUrl 填写格式不正确");
             return false;
           }
           return true;
@@ -127,8 +125,12 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     );
   }
 
+  late TaskQueueVm _taskQueueVm;
+
   @override
   Widget build(BuildContext context) {
+    _taskQueueVm = context.watch<TaskQueueVm>();
+
     var grid = Expanded(
       child: Padding(
         padding: const EdgeInsets.all(15),

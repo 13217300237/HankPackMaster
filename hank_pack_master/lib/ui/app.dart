@@ -3,14 +3,23 @@ import 'package:flutter/material.dart' as m;
 import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:hank_pack_master/ui/env/env_param_vm.dart';
+import 'package:hank_pack_master/ui/comm/vm/env_param_vm.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
-import 'package:hank_pack_master/ui/routes/route.dart';
+import 'package:hank_pack_master/ui/comm/vm/task_queue_vm.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
+import '../routes/route.dart';
+
+
+/// 概念
+/// project：一个gitUrl+一个branchName组合成为一个Project，确定唯一一个工程
+/// task: 一个project可以执行多个task，一个task有两个大阶段（工程预检阶段 | 工程打包阶段）
+/// stage: 每一个task的两个大阶段都可以分为多个小阶段，每一个小阶段有独立的准入和准出
+
 final _appTheme = AppTheme();
 final _envParamModel = EnvParamVm();
+final _taskQueueVm = TaskQueueVm();
 const String appTitle = '安小助';
 
 class App extends StatefulWidget {
@@ -27,6 +36,7 @@ class _AppState extends State<App> {
         providers: [
           ChangeNotifierProvider(create: (context) => _appTheme),
           ChangeNotifierProvider(create: (context) => _envParamModel),
+          ChangeNotifierProvider(create: (context) => _taskQueueVm),
         ],
         builder: (context, child) {
           return FluentApp(

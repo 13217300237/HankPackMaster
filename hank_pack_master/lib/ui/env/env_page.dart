@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/command_util.dart';
 import '../comm/theme.dart';
-import 'env_param_vm.dart';
+import '../comm/vm/env_param_vm.dart';
 
 ///
 /// 环境参数检测页面
