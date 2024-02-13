@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../hive/project_record/project_record_entity.dart';
@@ -15,8 +16,9 @@ enum CellType {
 class CellValue {
   CellType cellType;
   String value;
+  ProjectRecordEntity? entity;
 
-  CellValue({required this.cellType, required this.value});
+  CellValue({required this.cellType, required this.value, this.entity});
 }
 
 /// 数据源解析器
@@ -24,6 +26,8 @@ class ProjectEntityDataSource extends DataGridSource {
   List<DataGridRow> _rows = [];
 
   final List<ProjectRecordEntity> dataList = [];
+
+  Function(ProjectRecordEntity)? funcGoToWorkShop;
 
   bool insertOrUpdateProjectRecord(String gitUrl, String branchName) {
     if (gitUrl.isEmpty || branchName.isEmpty) {
@@ -56,7 +60,8 @@ class ProjectEntityDataSource extends DataGridSource {
     notifyListeners();
   }
 
-  ProjectEntityDataSource() {
+  ProjectEntityDataSource(
+      {required Function(ProjectRecordEntity) this.funcGoToWorkShop}) {
     _buildRows();
   }
 
@@ -71,7 +76,8 @@ class ProjectEntityDataSource extends DataGridSource {
                   value: CellValue(value: e.branch, cellType: CellType.text)),
               DataGridCell<CellValue>(
                   columnName: 'operation',
-                  value: CellValue(value: "跳转", cellType: CellType.button)),
+                  value: CellValue(
+                      value: "跳转", cellType: CellType.button, entity: e)),
             ]))
         .toList();
   }
@@ -90,14 +96,13 @@ class ProjectEntityDataSource extends DataGridSource {
 
       switch (cellValue.cellType) {
         case CellType.text:
-          cellWidget =
-              Text(cellValue.value, style: gridTextStyle);
+          cellWidget = Text(cellValue.value, style: gridTextStyle);
           break;
         case CellType.button:
         case CellType.buttonGroup:
           cellWidget = FilledButton(
             child: Text(cellValue.value),
-            onPressed: () {},
+            onPressed: () => funcGoToWorkShop?.call(cellValue.entity!),
           );
           break;
       }

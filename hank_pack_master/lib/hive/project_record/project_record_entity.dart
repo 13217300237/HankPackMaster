@@ -13,5 +13,10 @@ class ProjectRecordEntity {
   late String branch;
 
   ProjectRecordEntity(this.gitUrl, this.branch);
+
+  @override
+  String toString() {
+    return "$gitUrl ||  $branch";
+  }
 }
 

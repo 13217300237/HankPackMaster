@@ -41,6 +41,12 @@ class _WorkShopPageState extends State<WorkShopPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      final route = ModalRoute.of(context);
+      if (route?.settings.name == '/work_shop') {
+        debugPrint("检查跳转参数: ${route!.settings.arguments.toString()}");
+      }
+
       // 在绘制的第一帧之后执行初始化动作
       if (!envParamModel.isAndroidEnvOk()) {
         return;

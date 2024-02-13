@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
@@ -24,7 +25,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   @override
   void initState() {
     super.initState();
-    _dataSource = ProjectEntityDataSource();
+    _dataSource = ProjectEntityDataSource(
+      funcGoToWorkShop: (e) => context.go('/work_shop', extra: e),
+    );
     _dataSource.init();
   }
 
@@ -195,7 +198,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             decoration: BoxDecoration(
                 color: bg,
                 borderRadius:
-                BorderRadius.only(topRight: Radius.circular(radius))),
+                    BorderRadius.only(topRight: Radius.circular(radius))),
             padding: const EdgeInsets.only(left: 8.0),
             alignment: Alignment.centerLeft,
             child: const Text('操作', style: gridTextStyle)),
