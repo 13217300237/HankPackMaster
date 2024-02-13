@@ -401,7 +401,7 @@ class CommandUtil {
   }
 
   void _stopExec(Process? p) {
-    debugCmdPrint("准备kill $pid");
+    debugCmdPrint("准备kill ${p?.pid}");
     if (p == null) {
       return;
     }
@@ -410,7 +410,7 @@ class CommandUtil {
     _allProcess.removeWhere((element) => element.process.pid == p.pid);
 
     debugCmdPrint(
-        "$pid kill结果为： $killResult, 当前 进程列表中还有 ${_allProcess.length} 个进程");
+        "${p.pid} kill结果为： $killResult, 当前 进程列表中还有 ${_allProcess.length} 个进程");
   }
 
   Future<ExecuteResult> gitClone({
