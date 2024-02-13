@@ -6,6 +6,19 @@ import '../../hive/project_record/project_record_operator.dart';
 
 const TextStyle gridTextStyle = TextStyle(color: Color(0xff2C473E));
 
+enum CellType {
+  text,
+  button,
+  buttonGroup,
+}
+
+class CellValue {
+  CellType cellType;
+  String value;
+
+  CellValue({required this.cellType, required this.value});
+}
+
 /// 数据源解析器
 class ProjectEntityDataSource extends DataGridSource {
   List<DataGridRow> _rows = [];
@@ -25,7 +38,11 @@ class ProjectEntityDataSource extends DataGridSource {
     return true;
   }
 
-  void clearAllProjectRecord() async{
+  void init() {
+    _refresh();
+  }
+
+  void clearAllProjectRecord() async {
     debugPrint("执行删除全部");
     await ProjectRecordOperator.clear();
     _refresh();
@@ -46,8 +63,15 @@ class ProjectEntityDataSource extends DataGridSource {
   _buildRows() {
     _rows = dataList
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<String>(columnName: 'gitUrl', value: e.gitUrl),
-              DataGridCell<String>(columnName: 'branch', value: e.branch),
+              DataGridCell<CellValue>(
+                  columnName: 'gitUrl',
+                  value: CellValue(value: e.gitUrl, cellType: CellType.text)),
+              DataGridCell<CellValue>(
+                  columnName: 'branch',
+                  value: CellValue(value: e.branch, cellType: CellType.text)),
+              DataGridCell<CellValue>(
+                  columnName: 'operation',
+                  value: CellValue(value: "跳转", cellType: CellType.button)),
             ]))
         .toList();
   }
@@ -60,10 +84,28 @@ class ProjectEntityDataSource extends DataGridSource {
   DataGridRowAdapter? buildRow(DataGridRow row) {
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
+      CellValue cellValue = dataGridCell.value;
+
+      Widget cellWidget;
+
+      switch (cellValue.cellType) {
+        case CellType.text:
+          cellWidget =
+              Text(cellValue.value, style: gridTextStyle);
+          break;
+        case CellType.button:
+        case CellType.buttonGroup:
+          cellWidget = FilledButton(
+            child: Text(cellValue.value),
+            onPressed: () {},
+          );
+          break;
+      }
+
       return Container(
         padding: const EdgeInsets.only(left: 10),
         alignment: Alignment.centerLeft,
-        child: Text(dataGridCell.value.toString(), style: gridTextStyle),
+        child: cellWidget,
       );
     }).toList());
   }

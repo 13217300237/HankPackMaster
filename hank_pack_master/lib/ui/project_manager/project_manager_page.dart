@@ -25,6 +25,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   void initState() {
     super.initState();
     _dataSource = ProjectEntityDataSource();
+    _dataSource.init();
   }
 
   /// Define list of CommandBarItem
@@ -78,8 +79,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         showActions: true,
         confirmText: "确定",
         onConfirm: () {
-
-          debugPrint("当前 gitUrl: ${gitUrlTextController.text} ,校验结果 ${isValidGitUrl(gitUrlTextController.text)}");
+          debugPrint(
+              "当前 gitUrl: ${gitUrlTextController.text} ,校验结果 ${isValidGitUrl(gitUrlTextController.text)}");
 
           if (!isValidGitUrl(gitUrlTextController.text)) {
             DialogUtil.showInfo(context: context, content: "gitUrl 填写格式不正确");
@@ -134,12 +135,13 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           headerGridLinesVisibility: GridLinesVisibility.none,
           rowsPerPage: _rowsPerPage,
           source: _dataSource,
-          columns: _getColumn,
+          columns: _getGridHeader,
         ),
       ),
     );
 
     var size = _dataSource.dataList.length;
+    // 矫正size，以计算页数
     if (size == 0) {
       size = 1;
     }
@@ -161,8 +163,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     );
   }
 
-  List<GridColumn> get _getColumn {
+  List<GridColumn> get _getGridHeader {
     var bg = Colors.green.withOpacity(.1);
+    var radius = 5.0;
 
     return <GridColumn>[
       GridColumn(
@@ -171,7 +174,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               decoration: BoxDecoration(
                   color: bg,
                   borderRadius:
-                      const BorderRadius.only(topLeft: Radius.circular(10))),
+                      BorderRadius.only(topLeft: Radius.circular(radius))),
               padding: const EdgeInsets.only(left: 8.0),
               alignment: Alignment.centerLeft,
               child: const Text('gitUrl', style: gridTextStyle))),
@@ -181,10 +184,21 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             decoration: BoxDecoration(
                 color: bg,
                 borderRadius:
-                    const BorderRadius.only(topRight: Radius.circular(10))),
+                    BorderRadius.only(topRight: Radius.circular(radius))),
             padding: const EdgeInsets.only(left: 8.0),
             alignment: Alignment.centerLeft,
             child: const Text('branch', style: gridTextStyle)),
+      ),
+      GridColumn(
+        columnName: 'operation',
+        label: Container(
+            decoration: BoxDecoration(
+                color: bg,
+                borderRadius:
+                BorderRadius.only(topRight: Radius.circular(radius))),
+            padding: const EdgeInsets.only(left: 8.0),
+            alignment: Alignment.centerLeft,
+            child: const Text('操作', style: gridTextStyle)),
       ),
     ];
   }
