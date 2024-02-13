@@ -10,6 +10,7 @@ class DialogUtil {
   static void showCustomDialog({
     required BuildContext context,
     Function? onConfirm,
+    bool Function()? judgePop,
     required String title,
     required dynamic content,
     bool showCancel = true,
@@ -35,7 +36,9 @@ class DialogUtil {
                   FilledButton(
                     child: Text(confirmText),
                     onPressed: () {
-                      Navigator.pop(context);
+                      if (judgePop == null || judgePop()) {
+                        Navigator.pop(context);
+                      }
                       onConfirm?.call();
                     },
                   ),

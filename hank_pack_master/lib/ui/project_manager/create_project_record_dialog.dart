@@ -21,6 +21,8 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
   var isValidGitUrlRes = true;
 
   var textStyle = const TextStyle(fontSize: 18);
+  var textMustStyle = TextStyle(fontSize: 18, color: Colors.red);
+
   var errStyle = TextStyle(fontSize: 16, color: Colors.red);
 
   @override
@@ -40,6 +42,7 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
   Widget build(BuildContext context) {
     var gitUrlLabel =
         SizedBox(width: 100, child: Text('gitUrl', style: textStyle));
+    var mustLabel = SizedBox(width: 20, child: Text("*", style: textMustStyle));
     var isValidGitUrlTip = Visibility(
       visible: !isValidGitUrlRes,
       child: Padding(
@@ -74,12 +77,15 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
           style: textStyle,
           controller: widget.branchNameTextController),
     );
-    var gitUrlRow =
-        Row(children: [gitUrlLabel, const SizedBox(width: 20), gitUrlTextBox]);
+    var gitUrlRow = Row(children: [
+      gitUrlLabel,
+      mustLabel,
+      gitUrlTextBox,
+    ]);
     var branchNameRow = Row(children: [
       branchNameLabel,
-      const SizedBox(width: 20),
-      branchNameTextBox
+      mustLabel,
+      branchNameTextBox,
     ]);
 
     // 弹窗

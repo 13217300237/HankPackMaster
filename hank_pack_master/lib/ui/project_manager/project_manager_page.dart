@@ -78,14 +78,28 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         showActions: true,
         confirmText: "确定",
         onConfirm: () {
+
+          debugPrint("当前 gitUrl: ${gitUrlTextController.text} ,校验结果 ${isValidGitUrl(gitUrlTextController.text)}");
+
+          if (!isValidGitUrl(gitUrlTextController.text)) {
+            DialogUtil.showInfo(context: context, content: "gitUrl 填写格式不正确");
+            return false;
+          }
+          _dataSource.insertOrUpdateProjectRecord(
+              gitUrlTextController.text, branchNameTextController.text);
+        },
+        judgePop: () {
           if (gitUrlTextController.text.isEmpty ||
               branchNameTextController.text.isEmpty) {
             DialogUtil.showInfo(
                 context: context, content: "gitUrl 和 branchName 必须都正确填写!");
-            return;
+            return false;
           }
-          _dataSource.insertOrUpdateProjectRecord(
-              gitUrlTextController.text, branchNameTextController.text);
+          if (!isValidGitUrl(gitUrlTextController.text)) {
+            DialogUtil.showInfo(context: context, content: "gitUrl 填写格式不正确");
+            return false;
+          }
+          return true;
         });
   }
 
