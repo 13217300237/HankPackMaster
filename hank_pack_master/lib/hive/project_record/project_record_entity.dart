@@ -12,11 +12,13 @@ class ProjectRecordEntity {
   @HiveField(0x02)
   late String branch;
 
-  ProjectRecordEntity(this.gitUrl, this.branch);
+  @HiveField(0x03)
+  late bool preCheckOk; // 是否已预检成功
+
+  ProjectRecordEntity(this.gitUrl, this.branch, {this.preCheckOk = false});
 
   @override
   String toString() {
     return "$gitUrl ||  $branch";
   }
 }
-

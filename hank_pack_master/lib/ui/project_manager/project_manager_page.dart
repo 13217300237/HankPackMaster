@@ -30,7 +30,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     _dataSource = ProjectEntityDataSource(
       funcGoToWorkShop: (e) {
         _taskQueueVm.enqueue(e);
-        context.go('/work_shop', extra: e);
+        DialogUtil.showInfo(context: context, content: "任务已入列");
       },
     );
     _dataSource.init();
@@ -171,6 +171,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   List<GridColumn> get _getGridHeader {
     var bg = Colors.green.withOpacity(.1);
     var radius = 5.0;
+    var zeroBorder = const BorderRadius.only(topRight: Radius.circular(0));
 
     return <GridColumn>[
       GridColumn(
@@ -182,17 +183,22 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                       BorderRadius.only(topLeft: Radius.circular(radius))),
               padding: const EdgeInsets.only(left: 8.0),
               alignment: Alignment.centerLeft,
-              child: const Text('gitUrl', style: gridTextStyle))),
+              child: const Text('远程仓库', style: gridTextStyle))),
       GridColumn(
         columnName: 'branch',
         label: Container(
-            decoration: BoxDecoration(
-                color: bg,
-                borderRadius:
-                    BorderRadius.only(topRight: Radius.circular(radius))),
+            decoration: BoxDecoration(color: bg, borderRadius: zeroBorder),
             padding: const EdgeInsets.only(left: 8.0),
             alignment: Alignment.centerLeft,
-            child: const Text('branch', style: gridTextStyle)),
+            child: const Text('分支名', style: gridTextStyle)),
+      ),
+      GridColumn(
+        columnName: 'statue',
+        label: Container(
+            decoration: BoxDecoration(color: bg, borderRadius: zeroBorder),
+            padding: const EdgeInsets.only(left: 8.0),
+            alignment: Alignment.centerLeft,
+            child: const Text('状态', style: gridTextStyle)),
       ),
       GridColumn(
         columnName: 'operation',
