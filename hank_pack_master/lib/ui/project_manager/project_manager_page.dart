@@ -31,7 +31,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     _dataSource = ProjectEntityDataSource(
       funcGoToWorkShop: (e) {
         _taskQueueVm.enqueue(e);
-        DialogUtil.showInfo(context: context, content: "任务已入列");
+        DialogUtil.showInfo(context: context, content: "任务已入列，等待执行...");
       },
     );
     _dataSource.init();

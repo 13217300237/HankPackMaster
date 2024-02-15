@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -31,6 +32,7 @@ class WorkShopPage extends StatefulWidget {
 class _WorkShopPageState extends State<WorkShopPage> {
   late EnvParamVm _envParamModel;
   late WorkShopVm _projectTaskVm;
+  late TaskQueueVm _taskQueueVm;
   late AppTheme _appTheme;
 
   Widget _mainTitleWidget(String title) {
@@ -42,11 +44,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final route = ModalRoute.of(context);
-      if (route?.settings.name == '/work_shop') {
-        debugPrint("检查跳转参数: ${route!.settings.arguments.toString()}");
-      }
-
       // 在绘制的第一帧之后执行初始化动作
       if (!_envParamModel.isAndroidEnvOk()) {
         return;
@@ -80,14 +77,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
 
         checkInput();
       });
-
-      // TODO 写死数据进行测试
-      // _projectTaskVm.gitUrlController.text = "git@github.com:18598925736/MyApplication0016.git"; // 测试 Java17环境下的安卓工程
-      _projectTaskVm.gitUrlController.text =
-          "git@github.com:18598925736/MyApp20231224.git"; // 测试 Java17环境下的安卓工程
-      // _projectTaskVm.gitUrlController.text =  "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git"; // 公司电脑，测试内网git
-
-      _projectTaskVm.initPreCheckTaskList();
     });
   }
 
@@ -101,8 +90,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
     _projectTaskVm.projectPathController.removeListener(checkInput);
     _projectTaskVm.gitUrlController.removeListener(checkInput);
   }
-
-  late TaskQueueVm _taskQueueVm;
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +318,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
   }
 
   Widget _mainLayout() {
-    var leftTop = Card(
+    var projectConfigWidget = Card(
         margin: const EdgeInsets.only(top: 15, left: 15, right: 10, bottom: 10),
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
         borderRadius: BorderRadius.circular(10),
@@ -394,7 +381,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
           ],
         ));
 
-    var leftMiddle = Card(
+    var packageConfigWidget = Card(
         margin: const EdgeInsets.only(top: 0, left: 15, right: 10, bottom: 20),
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
         borderRadius: BorderRadius.circular(10),
@@ -469,69 +456,87 @@ class _WorkShopPageState extends State<WorkShopPage> {
           ),
         ));
 
-    var stageLogWidget = Padding(
-        padding:
-            const EdgeInsets.only(top: 15, left: 10, right: 20, bottom: 20),
-        child: Card(
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            borderRadius: BorderRadius.circular(10),
-            backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _mainTitleWidget("执行日志"),
-                const SizedBox(height: 10),
-                ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context)
-                        .copyWith(scrollbars: false),
-                    child: ListView.builder(
-                      controller: _projectTaskVm.logListViewScrollController,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 1.0, horizontal: 4),
-                          child: Text(
-                            _projectTaskVm.cmdExecLog[index],
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        );
-                      },
-                      itemCount: _projectTaskVm.cmdExecLog.length,
-                    )),
-              ],
-            )));
-
-    var taskCardList = _taskQueueVm.getQueueList().map((e) {
-      return Row(
+    var stageLogWidget = Expanded(
+      child: Row(
         children: [
           Expanded(
             child: Card(
-              borderRadius: BorderRadius.circular(5),
-              padding: const EdgeInsets.all(10),
-              margin: const EdgeInsets.symmetric(vertical: 5),
-              backgroundColor: _appTheme.bgColorSucc.withOpacity(.2),
+              margin: const EdgeInsets.only(bottom: 20, left: 10, right: 10),
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              borderRadius: BorderRadius.circular(10),
+              backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    e.projectName,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 5),
-                  Row(children: [
-                    const Text("状态: "),
-                    Text(e.preCheckOk ? "已激活" : "未激活")
-                  ]),
-                  Row(children: [
-                    const Text("状态: "),
-                    Text(e.preCheckOk ? "已激活" : "未激活")
-                  ]),
+                  _mainTitleWidget("执行日志"),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context)
+                          .copyWith(scrollbars: false),
+                      child: ListView.builder(
+                        controller: _projectTaskVm.logListViewScrollController,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 1.0, horizontal: 4),
+                            child: Text(
+                              _projectTaskVm.cmdExecLog[index],
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          );
+                        },
+                        itemCount: _projectTaskVm.cmdExecLog.length,
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
-          ),
+          )
         ],
+      ),
+    );
+
+    Widget taskCard(ProjectRecordEntity? e, {bool running = false}) {
+      if (e == null) {
+        return const SizedBox();
+      }
+      return Card(
+        borderRadius: BorderRadius.circular(5),
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        backgroundColor:
+            running ? Colors.teal : _appTheme.bgColorSucc.withOpacity(.2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "任务名称：${e.projectName}",
+              style: const TextStyle(fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+            const SizedBox(height: 5),
+            running
+                ? Row(children: [
+                    const Text(
+                      "状态: ",
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(e.preCheckOk ? "已激活" : "未激活")
+                  ])
+                : Row(children: [
+                    const Text("状态: "),
+                    Text(e.preCheckOk ? "打包中" : "激活中")
+                  ]),
+          ],
+        ),
       );
+    }
+
+    var taskCardList = _taskQueueVm.getQueueList().map((e) {
+      return Row(children: [Expanded(child: taskCard(e))]);
     }).toList();
 
     var taskQueue = Card(
@@ -543,6 +548,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
         _mainTitleWidget("任务队列"),
         const SizedBox(height: 15),
         Expanded(
+          flex: 5,
           child: ScrollConfiguration(
             behavior:
                 ScrollConfiguration.of(context).copyWith(scrollbars: false),
@@ -553,86 +559,30 @@ class _WorkShopPageState extends State<WorkShopPage> {
               ),
             ),
           ),
-        )
+        ),
+        _mainTitleWidget("正在执行"),
+        Expanded(
+            flex: 2, child: taskCard(_taskQueueVm.runningTask, running: true)),
+        const SizedBox(height: 15),
       ]),
     );
-    return Expanded(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(flex: 3, child: taskQueue), // TODO 检查布局告警
+          Expanded(
+      flex: 8,
+      child: Column(children: [
+        projectConfigWidget,
+        Expanded(child: packageConfigWidget)
+      ])),
+          Expanded(
+      flex: 6,
+      child: Column(
         children: [
-          Expanded(
-            flex: 1,
-            child: taskQueue,
-          ),
-          Expanded(
-              flex: 4,
-              child: Column(children: [leftTop, Expanded(child: leftMiddle)])),
-
-          Expanded(
-            flex: 3,
-            child: Column(
-              children: [
-                Row(children: [Expanded(child: taskStagesWidget)]),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Card(
-                          margin: const EdgeInsets.only(
-                              bottom: 20, left: 10, right: 10),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 15, horizontal: 10),
-                          borderRadius: BorderRadius.circular(10),
-                          backgroundColor:
-                              _appTheme.bgColorSucc.withOpacity(.1),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _mainTitleWidget("执行日志"),
-                              const SizedBox(height: 10),
-                              Expanded(
-                                child: ScrollConfiguration(
-                                  behavior: ScrollConfiguration.of(context)
-                                      .copyWith(scrollbars: false),
-                                  child: ListView.builder(
-                                    controller: _projectTaskVm
-                                        .logListViewScrollController,
-                                    itemBuilder: (context, index) {
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 1.0, horizontal: 4),
-                                        child: Text(
-                                          _projectTaskVm.cmdExecLog[index],
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                      );
-                                    },
-                                    itemCount: _projectTaskVm.cmdExecLog.length,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-          )
-
-          // _projectTaskVm.taskStateList.isEmpty
-          //     ? Expanded(
-          //       child: Column(children: [
-          //
-          //           stageLogWidget,
-          //         ]),
-          //     )
-          //     : const SizedBox(),
+          Row(children: [Expanded(child: taskStagesWidget)]),
+          stageLogWidget,
         ],
-      ),
-    );
+      ))
+        ]);
   }
 
   Widget _actionButton({
