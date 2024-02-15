@@ -96,41 +96,48 @@ class ProjectEntityDataSource extends DataGridSource {
   /// 每行UI的构建逻辑
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
+    var rowIndex = rows.indexOf(row);
+    Color backgroundColor = Colors.transparent;
+    if ((rowIndex % 2) == 1) {
+      backgroundColor = Colors.green.withOpacity(.1);
+    }
+
     return DataGridRowAdapter(
+        color: backgroundColor,
         cells: row.getCells().map<Widget>((dataGridCell) {
-      CellValue cellValue = dataGridCell.value;
+          CellValue cellValue = dataGridCell.value;
 
-      Widget cellWidget;
+          Widget cellWidget;
 
-      switch (cellValue.cellType) {
-        case CellType.text:
-          cellWidget = Text("${cellValue.value}", style: gridTextStyle);
-          break;
-        case CellType.preChecked:
-          Color color;
-          if (cellValue.value == true) {
-            color = Colors.green;
-          } else {
-            color = Colors.grey.withOpacity(.5);
+          switch (cellValue.cellType) {
+            case CellType.text:
+              cellWidget = Text("${cellValue.value}", style: gridTextStyle);
+              break;
+            case CellType.preChecked:
+              Color color;
+              if (cellValue.value == true) {
+                color = Colors.green;
+              } else {
+                color = Colors.grey.withOpacity(.5);
+              }
+              cellWidget = Icon(FluentIcons.skype_circle_check, color: color);
+              break;
+            case CellType.enqueueAction:
+              cellWidget = Tooltip(
+                message: "${cellValue.value}",
+                child: IconButton(
+                  icon: Icon(FluentIcons.build_queue_new, color: Colors.green.withOpacity(.8)),
+                  onPressed: () => funcGoToWorkShop?.call(cellValue.entity!),
+                ),
+              );
+              break;
           }
-          cellWidget = Icon(FluentIcons.skype_circle_check, color: color);
-          break;
-        case CellType.enqueueAction:
-          cellWidget = Tooltip(
-            message: "${cellValue.value}",
-            child: IconButton(
-              icon: Icon(FluentIcons.build_queue_new, color: Colors.blue),
-              onPressed: () => funcGoToWorkShop?.call(cellValue.entity!),
-            ),
-          );
-          break;
-      }
 
-      return Container(
-        padding: const EdgeInsets.only(left: 5),
-        alignment: Alignment.centerLeft,
-        child: cellWidget,
-      );
-    }).toList());
+          return Container(
+            padding: const EdgeInsets.only(left: 5),
+            alignment: Alignment.centerLeft,
+            child: cellWidget,
+          );
+        }).toList());
   }
 }

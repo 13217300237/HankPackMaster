@@ -169,18 +169,17 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   List<GridColumn> get _getGridHeader {
-    var bg = Colors.green.withOpacity(.1);
+    var bg = Colors.green.withOpacity(.3);
     var radius = 5.0;
     var zeroBorder = const BorderRadius.only(topRight: Radius.circular(0));
+    var topLeftBorder = const BorderRadius.only(topLeft: Radius.circular(2));
+    var topRightBorder = const BorderRadius.only(topRight: Radius.circular(2));
 
     return <GridColumn>[
       GridColumn(
           columnName: 'gitUrl',
           label: Container(
-              decoration: BoxDecoration(
-                  color: bg,
-                  borderRadius:
-                      BorderRadius.only(topLeft: Radius.circular(radius))),
+              decoration: BoxDecoration(color: bg, borderRadius: topLeftBorder),
               padding: const EdgeInsets.only(left: 8.0),
               alignment: Alignment.centerLeft,
               child: const Text('远程仓库', style: gridTextStyle))),
@@ -203,10 +202,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       GridColumn(
         columnName: 'operation',
         label: Container(
-            decoration: BoxDecoration(
-                color: bg,
-                borderRadius:
-                    BorderRadius.only(topRight: Radius.circular(radius))),
+            decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
             padding: const EdgeInsets.only(left: 8.0),
             alignment: Alignment.centerLeft,
             child: const Text('操作', style: gridTextStyle)),
