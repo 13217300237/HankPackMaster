@@ -51,7 +51,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
       if (!_envParamModel.isAndroidEnvOk()) {
         return;
       }
-      _projectTaskVm.initPackageTaskList();
       _projectTaskVm.projectPathController.addListener(checkInput);
       _projectTaskVm.gitBranchController.addListener(checkInput);
       _projectTaskVm.projectAppDescController.addListener(checkInput);
@@ -87,6 +86,8 @@ class _WorkShopPageState extends State<WorkShopPage> {
       _projectTaskVm.gitUrlController.text =
           "git@github.com:18598925736/MyApp20231224.git"; // 测试 Java17环境下的安卓工程
       // _projectTaskVm.gitUrlController.text =  "ssh://git@codehub-dg-g.huawei.com:2222/zWX1245985/test20240204_2.git"; // 公司电脑，测试内网git
+
+      _projectTaskVm.initPreCheckTaskList();
     });
   }
 
@@ -217,6 +218,10 @@ class _WorkShopPageState extends State<WorkShopPage> {
                         _projectTaskVm.selectedUploadPlatform?.value == index,
                     content: Text(_projectTaskVm.uploadPlatforms[index].name),
                     onChanged: (checked) {
+                      if (_projectTaskVm.jobRunning) {
+                        _showInfoDialog("提示", "任务正在执行，请稍后操作");
+                        return;
+                      }
                       if (checked) {
                         _projectTaskVm.setSelectedUploadPlatform(index);
                       }
@@ -442,7 +447,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
           ],
         ));
 
-    var middle = Padding(
+    var taskStagesWidget = Padding(
         padding:
             const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 20),
         child: Card(
@@ -453,20 +458,18 @@ class _WorkShopPageState extends State<WorkShopPage> {
             children: [
               _mainTitleWidget("任务阶段"),
               const SizedBox(height: 10),
-              Expanded(
-                child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context)
-                      .copyWith(scrollbars: false),
-                  child: SingleChildScrollView(
-                      scrollDirection: m.Axis.vertical,
-                      child: buildStageColumn()),
-                ),
+              ScrollConfiguration(
+                behavior:
+                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                    scrollDirection: m.Axis.horizontal,
+                    child: buildStageColumn()),
               ),
             ],
           ),
         ));
 
-    var right = Padding(
+    var stageLogWidget = Padding(
         padding:
             const EdgeInsets.only(top: 15, left: 10, right: 20, bottom: 20),
         child: Card(
@@ -478,44 +481,157 @@ class _WorkShopPageState extends State<WorkShopPage> {
               children: [
                 _mainTitleWidget("执行日志"),
                 const SizedBox(height: 10),
-                Expanded(
-                  child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context)
-                          .copyWith(scrollbars: false),
-                      child: ListView.builder(
-                        controller: _projectTaskVm.logListViewScrollController,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 1.0, horizontal: 4),
-                            child: Text(
-                              _projectTaskVm.cmdExecLog[index],
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          );
-                        },
-                        itemCount: _projectTaskVm.cmdExecLog.length,
-                      )),
-                ),
+                ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context)
+                        .copyWith(scrollbars: false),
+                    child: ListView.builder(
+                      controller: _projectTaskVm.logListViewScrollController,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 1.0, horizontal: 4),
+                          child: Text(
+                            _projectTaskVm.cmdExecLog[index],
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        );
+                      },
+                      itemCount: _projectTaskVm.cmdExecLog.length,
+                    )),
               ],
             )));
+
+    var taskCardList = _taskQueueVm.getQueueList().map((e) {
+      return Row(
+        children: [
+          Expanded(
+            child: Card(
+              borderRadius: BorderRadius.circular(5),
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.symmetric(vertical: 5),
+              backgroundColor: _appTheme.bgColorSucc.withOpacity(.2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    e.projectName,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(children: [
+                    const Text("状态: "),
+                    Text(e.preCheckOk ? "已激活" : "未激活")
+                  ]),
+                  Row(children: [
+                    const Text("状态: "),
+                    Text(e.preCheckOk ? "已激活" : "未激活")
+                  ]),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }).toList();
+
     var taskQueue = Card(
+      borderRadius: BorderRadius.circular(10),
       padding: const EdgeInsets.all(15),
-      margin: const EdgeInsets.only(top: 15),
-      child: Text("等待区任务数:\n ${_taskQueueVm.taskQueueString()}"),
-    );
-    return Row(
-      children: [
+      margin: const EdgeInsets.only(top: 15, bottom: 15, left: 15),
+      backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _mainTitleWidget("任务队列"),
+        const SizedBox(height: 15),
         Expanded(
-            flex: 5,
-            child: Column(children: [
-              taskQueue,
-              leftTop,
-              Expanded(child: leftMiddle),
-            ])),
-        Expanded(flex: 2, child: Column(children: [Expanded(child: middle)])),
-        Expanded(flex: 4, child: Column(children: [Expanded(child: right)])),
-      ],
+          child: ScrollConfiguration(
+            behavior:
+                ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [...taskCardList],
+              ),
+            ),
+          ),
+        )
+      ]),
+    );
+    return Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 1,
+            child: taskQueue,
+          ),
+          Expanded(
+              flex: 4,
+              child: Column(children: [leftTop, Expanded(child: leftMiddle)])),
+
+          Expanded(
+            flex: 3,
+            child: Column(
+              children: [
+                Row(children: [Expanded(child: taskStagesWidget)]),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Card(
+                          margin: const EdgeInsets.only(
+                              bottom: 20, left: 10, right: 10),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 10),
+                          borderRadius: BorderRadius.circular(10),
+                          backgroundColor:
+                              _appTheme.bgColorSucc.withOpacity(.1),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _mainTitleWidget("执行日志"),
+                              const SizedBox(height: 10),
+                              Expanded(
+                                child: ScrollConfiguration(
+                                  behavior: ScrollConfiguration.of(context)
+                                      .copyWith(scrollbars: false),
+                                  child: ListView.builder(
+                                    controller: _projectTaskVm
+                                        .logListViewScrollController,
+                                    itemBuilder: (context, index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 1.0, horizontal: 4),
+                                        child: Text(
+                                          _projectTaskVm.cmdExecLog[index],
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      );
+                                    },
+                                    itemCount: _projectTaskVm.cmdExecLog.length,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          )
+
+          // _projectTaskVm.taskStateList.isEmpty
+          //     ? Expanded(
+          //       child: Column(children: [
+          //
+          //           stageLogWidget,
+          //         ]),
+          //     )
+          //     : const SizedBox(),
+        ],
+      ),
     );
   }
 
@@ -549,17 +665,14 @@ class _WorkShopPageState extends State<WorkShopPage> {
       style: ButtonStyle(
           backgroundColor: ButtonState.resolveWith(
               (states) => _projectTaskVm.getStatueColor(stage))),
-      child: SizedBox(
-          width: double.infinity,
-          child: Center(
-              child: Column(
-            children: [
-              Text(stage.stageName),
-              if (stage.stageCostTime != null &&
-                  stage.stageCostTime!.isNotEmpty)
-                Text(stage.stageCostTime!),
-            ],
-          ))),
+      child: Center(
+          child: Column(
+        children: [
+          Text(stage.stageName),
+          if (stage.stageCostTime != null && stage.stageCostTime!.isNotEmpty)
+            Text(stage.stageCostTime!),
+        ],
+      )),
     );
   }
 
@@ -589,6 +702,10 @@ class _WorkShopPageState extends State<WorkShopPage> {
     }
     if (_projectTaskVm.selectedOrder == null ||
         _projectTaskVm.selectedOrder!.isEmpty) {
+      return false;
+    }
+
+    if (_projectTaskVm.selectedUploadPlatform == null) {
       return false;
     }
 
@@ -677,7 +794,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
 
     return Padding(
       padding: const EdgeInsets.only(top: 15.0, bottom: 5.0),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [...listWidget]),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [...listWidget]),
     );
   }
 

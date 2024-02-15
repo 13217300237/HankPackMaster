@@ -7,6 +7,10 @@ class TaskQueueVm extends ChangeNotifier {
   final ListQueue<ProjectRecordEntity> _taskQueue =
       ListQueue<ProjectRecordEntity>();
 
+  bool hasTask(){
+    return _taskQueue.isNotEmpty;
+  }
+
   List<ProjectRecordEntity> getQueueList() {
     return _taskQueue.toList();
   }
