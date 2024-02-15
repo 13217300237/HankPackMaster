@@ -3,6 +3,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
+import 'column_name_getter.dart';
 
 const TextStyle gridTextStyle = TextStyle(
     color: Color(0xff2C473E),
@@ -10,9 +11,9 @@ const TextStyle gridTextStyle = TextStyle(
     fontWeight: FontWeight.w600);
 
 enum CellType {
-  text,
-  preChecked,
-  enqueueAction,
+  text, // 纯文案显示
+  preChecked, // 预检状态标志
+  enqueueAction, // 操作入列按钮
 }
 
 class CellValue {
@@ -31,13 +32,15 @@ class ProjectEntityDataSource extends DataGridSource {
 
   Function(ProjectRecordEntity)? funcGoToWorkShop;
 
-  bool insertOrUpdateProjectRecord(String gitUrl, String branchName) {
-    if (gitUrl.isEmpty || branchName.isEmpty) {
+  bool insertOrUpdateProjectRecord(
+      String gitUrl, String branchName, String projectName) {
+    if (gitUrl.isEmpty || branchName.isEmpty || projectName.isEmpty) {
       return false;
     }
 
     ProjectRecordOperator.insertOrUpdate(
-        ProjectRecordEntity(gitUrl, branchName));
+      ProjectRecordEntity(gitUrl, branchName, projectName),
+    );
 
     _refresh();
 
@@ -71,21 +74,26 @@ class ProjectEntityDataSource extends DataGridSource {
     _rows = dataList
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<CellValue>(
-                  columnName: 'gitUrl',
+                  columnName: ColumnNameConst.projectName,
+                  value:
+                      CellValue(value: e.projectName, cellType: CellType.text)),
+              DataGridCell<CellValue>(
+                  columnName: ColumnNameConst.gitUrl,
                   value: CellValue(value: e.gitUrl, cellType: CellType.text)),
               DataGridCell<CellValue>(
-                  columnName: 'branch',
+                  columnName: ColumnNameConst.branch,
                   value: CellValue(value: e.branch, cellType: CellType.text)),
               DataGridCell<CellValue>(
-                  columnName: 'statue',
+                  columnName: ColumnNameConst.statue,
                   value: CellValue(
                       value: e.preCheckOk, cellType: CellType.preChecked)),
               DataGridCell<CellValue>(
-                  columnName: 'operation',
+                  columnName: ColumnNameConst.operation,
                   value: CellValue(
-                      value: "任务入列",
-                      cellType: CellType.enqueueAction,
-                      entity: e)),
+                    value: "任务入列",
+                    cellType: CellType.enqueueAction,
+                    entity: e,
+                  )),
             ]))
         .toList();
   }
@@ -111,7 +119,11 @@ class ProjectEntityDataSource extends DataGridSource {
 
           switch (cellValue.cellType) {
             case CellType.text:
-              cellWidget = Text("${cellValue.value}", style: gridTextStyle);
+              cellWidget = Text(
+                "${cellValue.value}",
+                style: gridTextStyle,
+                overflow: TextOverflow.ellipsis,
+              );
               break;
             case CellType.preChecked:
               Color color;
@@ -126,7 +138,8 @@ class ProjectEntityDataSource extends DataGridSource {
               cellWidget = Tooltip(
                 message: "${cellValue.value}",
                 child: IconButton(
-                  icon: Icon(FluentIcons.build_queue_new, color: Colors.green.withOpacity(.8)),
+                  icon: Icon(FluentIcons.build_queue_new,
+                      color: Colors.green.withOpacity(.8)),
                   onPressed: () => funcGoToWorkShop?.call(cellValue.entity!),
                 ),
               );
@@ -135,7 +148,7 @@ class ProjectEntityDataSource extends DataGridSource {
 
           return Container(
             padding: const EdgeInsets.only(left: 5),
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.center,
             child: cellWidget,
           );
         }).toList());

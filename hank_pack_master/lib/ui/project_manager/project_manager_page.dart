@@ -1,15 +1,11 @@
-import 'dart:math';
-
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
-import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:hank_pack_master/ui/comm/vm/task_queue_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/url_check_util.dart';
-import '../../hive/project_record/project_record_entity.dart';
+import 'column_name_getter.dart';
 import 'create_project_record_dialog.dart';
 import 'grid_datasource.dart';
 
@@ -23,6 +19,11 @@ class ProjectManagerPage extends StatefulWidget {
 class _ProjectManagerPageState extends State<ProjectManagerPage> {
   late ProjectEntityDataSource _dataSource;
   int _rowsPerPage = 10;
+
+  double projectNameColumnWidth = 200;
+  double gitUrlColumnWidth = 600;
+  double branchNameColumnWidth = 100;
+  double statueColumnWidth = 100;
 
   @override
   void initState() {
@@ -75,8 +76,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   void createAndroidProjectRecord() {
     TextEditingController gitUrlTextController = TextEditingController();
     TextEditingController branchNameTextController = TextEditingController();
+    TextEditingController projectNameTextController = TextEditingController();
 
     var contentWidget = CreateProjectDialogWidget(
+        projectNameTextController: projectNameTextController,
         gitUrlTextController: gitUrlTextController,
         branchNameTextController: branchNameTextController);
 
@@ -91,7 +94,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             return false;
           }
           _dataSource.insertOrUpdateProjectRecord(
-              gitUrlTextController.text, branchNameTextController.text);
+            gitUrlTextController.text,
+            branchNameTextController.text,
+            projectNameTextController.text,
+          );
         },
         judgePop: () {
           if (gitUrlTextController.text.isEmpty ||
@@ -132,10 +138,28 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     _taskQueueVm = context.watch<TaskQueueVm>();
 
     var grid = Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(15),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.teal, width: .1),
+          borderRadius: const BorderRadius.all(Radius.circular(3)),
+        ),
+        margin: const EdgeInsets.all(15),
         child: SfDataGrid(
-          columnWidthMode: ColumnWidthMode.fill,
+          columnWidthMode: ColumnWidthMode.lastColumnFill,
+          allowColumnsResizing: true,
+          columnResizeMode: ColumnResizeMode.onResize,
+          onColumnResizeUpdate: (ColumnResizeUpdateDetails args) {
+            setState(() {
+              if (args.column.columnName == 'gitUrl') {
+                gitUrlColumnWidth = args.width;
+              } else if (args.column.columnName == 'branch') {
+                branchNameColumnWidth = args.width;
+              } else if (args.column.columnName == 'statue') {
+                statueColumnWidth = args.width;
+              }
+            });
+            return true;
+          },
           gridLinesVisibility: GridLinesVisibility.none,
           headerGridLinesVisibility: GridLinesVisibility.none,
           rowsPerPage: _rowsPerPage,
@@ -170,41 +194,56 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
 
   List<GridColumn> get _getGridHeader {
     var bg = Colors.green.withOpacity(.3);
-    var radius = 5.0;
     var zeroBorder = const BorderRadius.only(topRight: Radius.circular(0));
     var topLeftBorder = const BorderRadius.only(topLeft: Radius.circular(2));
     var topRightBorder = const BorderRadius.only(topRight: Radius.circular(2));
 
     return <GridColumn>[
       GridColumn(
-          columnName: 'gitUrl',
+          columnName: ColumnNameConst.projectName,
+          minimumWidth: 150.0,
+          width: projectNameColumnWidth,
+          columnWidthMode: ColumnWidthMode.fill,
           label: Container(
               decoration: BoxDecoration(color: bg, borderRadius: topLeftBorder),
               padding: const EdgeInsets.only(left: 8.0),
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.center,
+              child: const Text('项目名称', style: gridTextStyle))),
+      GridColumn(
+          columnName: ColumnNameConst.gitUrl,
+          minimumWidth: 150.0,
+          width: gitUrlColumnWidth,
+          columnWidthMode: ColumnWidthMode.fill,
+          label: Container(
+              decoration: BoxDecoration(color: bg, borderRadius: topLeftBorder),
+              padding: const EdgeInsets.only(left: 8.0),
+              alignment: Alignment.center,
               child: const Text('远程仓库', style: gridTextStyle))),
       GridColumn(
-        columnName: 'branch',
+        columnName: ColumnNameConst.branch,
+        width: branchNameColumnWidth,
         label: Container(
             decoration: BoxDecoration(color: bg, borderRadius: zeroBorder),
             padding: const EdgeInsets.only(left: 8.0),
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.center,
             child: const Text('分支名', style: gridTextStyle)),
       ),
       GridColumn(
-        columnName: 'statue',
+        columnName: ColumnNameConst.statue,
+        minimumWidth: 50.0,
+        width: statueColumnWidth,
         label: Container(
             decoration: BoxDecoration(color: bg, borderRadius: zeroBorder),
             padding: const EdgeInsets.only(left: 8.0),
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.center,
             child: const Text('状态', style: gridTextStyle)),
       ),
       GridColumn(
-        columnName: 'operation',
+        columnName: ColumnNameConst.operation,
         label: Container(
             decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
             padding: const EdgeInsets.only(left: 8.0),
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.center,
             child: const Text('操作', style: gridTextStyle)),
       ),
     ];

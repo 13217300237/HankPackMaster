@@ -8,7 +8,7 @@ part of 'project_record_entity.dart';
 
 class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
   @override
-  final int typeId = 72;
+  final int typeId = 2;
 
   @override
   ProjectRecordEntity read(BinaryReader reader) {
@@ -19,17 +19,23 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
     return ProjectRecordEntity(
       fields[1] as String,
       fields[2] as String,
+      fields[4] as String,
+      preCheckOk: fields[3] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, ProjectRecordEntity obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(4)
       ..writeByte(1)
       ..write(obj.gitUrl)
       ..writeByte(2)
-      ..write(obj.branch);
+      ..write(obj.branch)
+      ..writeByte(3)
+      ..write(obj.preCheckOk)
+      ..writeByte(4)
+      ..write(obj.projectName);
   }
 
   @override

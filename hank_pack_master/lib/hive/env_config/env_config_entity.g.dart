@@ -8,7 +8,7 @@ part of 'env_config_entity.dart';
 
 class EnvConfigEntityAdapter extends TypeAdapter<EnvConfigEntity> {
   @override
-  final int typeId = 74;
+  final int typeId = 1;
 
   @override
   EnvConfigEntity read(BinaryReader reader) {

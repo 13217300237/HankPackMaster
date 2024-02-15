@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'env_config_entity.g.dart';
 
-@HiveType(typeId: 74)
+@HiveType(typeId: 1)
 class EnvConfigEntity {
   @HiveField(1)
   late String envName;

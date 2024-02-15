@@ -4,7 +4,7 @@ import 'package:hive/hive.dart';
 
 class ProjectRecordOperator {
   /// 盒子名称
-  static const String _boxName = "projectRecordDb"; // 每一次更新
+  static const String _boxName = "projectRecordDbV2"; // 每一次更新
 
   static Future<void> openBox() async {
     Hive.registerAdapter(ProjectRecordEntityAdapter(), override: true);

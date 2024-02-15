@@ -7,10 +7,14 @@ class CreateProjectDialogWidget extends StatefulWidget {
 
   final TextEditingController branchNameTextController;
 
-  const CreateProjectDialogWidget(
-      {super.key,
-      required this.gitUrlTextController,
-      required this.branchNameTextController});
+  final TextEditingController projectNameTextController;
+
+  const CreateProjectDialogWidget({
+    super.key,
+    required this.gitUrlTextController,
+    required this.branchNameTextController,
+    required this.projectNameTextController,
+  });
 
   @override
   State<CreateProjectDialogWidget> createState() =>
@@ -40,6 +44,8 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var projectNameLabel =
+        SizedBox(width: 100, child: Text('项目名', style: textStyle));
     var gitUrlLabel =
         SizedBox(width: 100, child: Text('gitUrl', style: textStyle));
     var mustLabel = SizedBox(width: 20, child: Text("*", style: textMustStyle));
@@ -52,6 +58,19 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
     );
     var branchNameLabel =
         SizedBox(width: 100, child: Text('branchName', style: textStyle));
+
+    var projectNameTextBox = Expanded(
+      child: TextBox(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: Colors.green.withOpacity(.1)),
+          unfocusedColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          expands: false,
+          maxLines: 1,
+          style: textStyle,
+          controller: widget.projectNameTextController),
+    );
 
     var gitUrlTextBox = Expanded(
       child: TextBox(
@@ -88,9 +107,17 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
       branchNameTextBox,
     ]);
 
+    var projectName = Row(children: [
+      projectNameLabel,
+      mustLabel,
+      projectNameTextBox,
+    ]);
+
     // 弹窗
     var contentWidget = Column(mainAxisSize: MainAxisSize.min, children: [
       const SizedBox(height: 5),
+      projectName,
+      const SizedBox(height: 10),
       gitUrlRow,
       isValidGitUrlTip,
       const SizedBox(height: 10),
