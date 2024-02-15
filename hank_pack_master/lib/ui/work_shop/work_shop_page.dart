@@ -35,6 +35,8 @@ class _WorkShopPageState extends State<WorkShopPage> {
   late TaskQueueVm _taskQueueVm;
   late AppTheme _appTheme;
 
+  bool postFrameFinished = false;
+
   Widget _mainTitleWidget(String title) {
     return Text(title, style: const TextStyle(fontSize: 22));
   }
@@ -44,6 +46,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      postFrameFinished = true;
       // 在绘制的第一帧之后执行初始化动作
       if (!_envParamModel.isAndroidEnvOk()) {
         return;
@@ -151,6 +154,8 @@ class _WorkShopPageState extends State<WorkShopPage> {
         },
       );
     }
+
+    comboBox = Text(_projectTaskVm.selectedOrder ?? '');
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0),
@@ -273,7 +278,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
                 expands: false,
                 maxLines: maxLines,
                 maxLength: maxLength,
-                enabled: !_projectTaskVm.jobRunning && !alwaysDisable,
+                enabled: false,
                 controller: controller),
           ),
           if (suffix != null) ...[suffix]
@@ -317,6 +322,24 @@ class _WorkShopPageState extends State<WorkShopPage> {
         severity: InfoBarSeverity.error);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!postFrameFinished) {
+      return;
+    }
+
+    // 检查第一帧是否绘制完毕,如果完毕了再执行
+    debugPrint('当继承式组件发生变化时会调用');
+    if (_taskQueueVm.runningTask != null) {
+      _projectTaskVm.gitUrlController.text = _taskQueueVm.runningTask!.gitUrl;
+      _projectTaskVm.gitBranchController.text =
+          _taskQueueVm.runningTask!.branch;
+      _startActive();
+    }
+  }
+
   Widget _mainLayout() {
     var projectConfigWidget = Card(
         margin: const EdgeInsets.only(top: 15, left: 15, right: 10, bottom: 10),
@@ -358,7 +381,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
                       _actionButton(
                           title: "项目激活测试",
                           bgColor: Colors.purple.normal,
-                          enable: preCheckButtonEnable,
+                          enable: false,
                           action: () async {
                             DialogUtil.showCustomDialog(
                                 context: context,
@@ -366,13 +389,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
                                     "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，确定开始吗？",
                                 title: '提示',
                                 onConfirm: () {
-                                  _projectTaskVm.initPreCheckTaskList();
-                                  _projectTaskVm.startSchedule().then((value) {
-                                    if (value == null) {
-                                      return;
-                                    }
-                                    _showInfoDialog('激活结果', '${value.data}');
-                                  });
+                                  _startActive();
                                 });
                           }),
                     ]),
@@ -426,7 +443,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
             ),
             _actionButton(
                 title: "正式开始打包",
-                enable: startPackageButtonEnable,
+                enable: false,
                 bgColor: startPackageButtonEnable
                     ? Colors.orange.lighter
                     : Colors.grey.withOpacity(.2),
@@ -502,6 +519,17 @@ class _WorkShopPageState extends State<WorkShopPage> {
       if (e == null) {
         return const SizedBox();
       }
+
+      var statueWidget = !running
+          ? Row(children: [
+              const Text("状态: "),
+              Text(e.preCheckOk ? "已激活" : "未激活")
+            ])
+          : Row(children: [
+              const Text("状态: "),
+              Text(e.preCheckOk ? "打包中" : "激活中")
+            ]);
+
       return Card(
         borderRadius: BorderRadius.circular(5),
         padding: const EdgeInsets.all(10),
@@ -518,18 +546,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
               maxLines: 2,
             ),
             const SizedBox(height: 5),
-            running
-                ? Row(children: [
-                    const Text(
-                      "状态: ",
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(e.preCheckOk ? "已激活" : "未激活")
-                  ])
-                : Row(children: [
-                    const Text("状态: "),
-                    Text(e.preCheckOk ? "打包中" : "激活中")
-                  ]),
+            statueWidget
           ],
         ),
       );
@@ -567,22 +584,22 @@ class _WorkShopPageState extends State<WorkShopPage> {
       ]),
     );
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(flex: 3, child: taskQueue), // TODO 检查布局告警
-          Expanded(
-      flex: 8,
-      child: Column(children: [
-        projectConfigWidget,
-        Expanded(child: packageConfigWidget)
-      ])),
-          Expanded(
-      flex: 6,
-      child: Column(
-        children: [
-          Row(children: [Expanded(child: taskStagesWidget)]),
-          stageLogWidget,
-        ],
-      ))
-        ]);
+      Expanded(flex: 3, child: taskQueue),
+      Expanded(
+          flex: 8,
+          child: Column(children: [
+            projectConfigWidget,
+            Expanded(child: packageConfigWidget)
+          ])),
+      Expanded(
+          flex: 6,
+          child: Column(
+            children: [
+              Row(children: [Expanded(child: taskStagesWidget)]),
+              stageLogWidget,
+            ],
+          ))
+    ]);
   }
 
   Widget _actionButton({
@@ -750,5 +767,19 @@ class _WorkShopPageState extends State<WorkShopPage> {
 
   void showApkNotExistInfo() {
     DialogUtil.showInfo(context: context, content: "出现错误，apk文件不存在");
+  }
+
+  /// 开始项目激活
+  void _startActive() {
+    _projectTaskVm.initPreCheckTaskList();
+    _projectTaskVm.startSchedule().then((value) {
+      if (value == null) {
+        return;
+      }
+      _showInfoDialog('激活结果', '${value.succeed} ${value.msg}');
+      if (value.succeed == true) {
+        _taskQueueVm.onProjectActiveFinished();
+      }
+    });
   }
 }

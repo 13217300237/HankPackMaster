@@ -236,7 +236,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             decoration: BoxDecoration(color: bg, borderRadius: zeroBorder),
             padding: const EdgeInsets.only(left: 8.0),
             alignment: Alignment.center,
-            child: const Text('状态', style: gridTextStyle)),
+            child: const Text('激活状态', style: gridTextStyle)),
       ),
       GridColumn(
         columnName: ColumnNameConst.operation,
