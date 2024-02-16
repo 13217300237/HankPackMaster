@@ -24,7 +24,7 @@ class CreateProjectDialogWidget extends StatefulWidget {
 class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
   var isValidGitUrlRes = true;
 
-  var textStyle = const TextStyle(fontSize: 18);
+  var textStyle = const TextStyle(fontSize: 18,fontWeight: FontWeight.w600);
   var textMustStyle = TextStyle(fontSize: 18, color: Colors.red);
 
   var errStyle = TextStyle(fontSize: 16, color: Colors.red);

@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../hive/project_record/project_record_entity.dart';
@@ -17,6 +17,7 @@ enum CellType {
   preChecked, // 预检状态标志
   goPreCheck, // 操作入列按钮
   goPackageAction, // 进入打包操作
+  recordAction, // 项目操作
 }
 
 class CellValue {
@@ -33,8 +34,19 @@ class ProjectEntityDataSource extends DataGridSource {
 
   final List<ProjectRecordEntity> dataList = [];
 
+  BuildContext buildContext;
+
   Function(ProjectRecordEntity)? funcGoToWorkShop;
   Function(ProjectRecordEntity)? funcGoPackageAction;
+
+  void deleteProjectRecord(ProjectRecordEntity? entity) {
+    if (entity == null) {
+      return;
+    }
+
+    ProjectRecordOperator.delete(entity);
+    _refresh();
+  }
 
   bool insertOrUpdateProjectRecord(
       String gitUrl, String branchName, String projectName) {
@@ -72,6 +84,7 @@ class ProjectEntityDataSource extends DataGridSource {
   ProjectEntityDataSource({
     required this.funcGoToWorkShop,
     required this.funcGoPackageAction,
+    required this.buildContext,
   }) {
     _buildRows();
   }
@@ -100,7 +113,7 @@ class ProjectEntityDataSource extends DataGridSource {
                       cellType: CellType.assembleOrders)),
               if (e.preCheckOk) ...[
                 DataGridCell<CellValue>(
-                    columnName: ColumnNameConst.operation,
+                    columnName: ColumnNameConst.jobOperation,
                     value: CellValue(
                       value: "开始打包",
                       cellType: CellType.goPackageAction,
@@ -108,13 +121,16 @@ class ProjectEntityDataSource extends DataGridSource {
                     )),
               ] else ...[
                 DataGridCell<CellValue>(
-                    columnName: ColumnNameConst.operation,
+                    columnName: ColumnNameConst.jobOperation,
                     value: CellValue(
                       value: "马上激活",
                       cellType: CellType.goPreCheck,
                       entity: e,
                     )),
               ],
+              DataGridCell<CellValue>(
+                  columnName: ColumnNameConst.recordOperation,
+                  value: CellValue(value: e, cellType: CellType.recordAction)),
             ]))
         .toList();
   }
@@ -176,8 +192,53 @@ class ProjectEntityDataSource extends DataGridSource {
               );
               break;
             case CellType.assembleOrders:
-              cellWidget = Wrap(
-                children: [..._assembleOrdersWidget(cellValue.value)],
+              cellWidget = ScrollConfiguration(
+                // 隐藏scrollBar
+                behavior: ScrollConfiguration.of(buildContext)
+                    .copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    children: [..._assembleOrdersWidget(cellValue.value)],
+                  ),
+                ),
+              );
+              break;
+            case CellType.recordAction:
+              cellWidget = Tooltip(
+                message: "删除此记录",
+                child: IconButton(
+                  icon: Icon(FluentIcons.delete,
+                      color: Colors.green.withOpacity(.8)),
+                  onPressed: () {
+                    var e = cellValue.value;
+                    if (e is ProjectRecordEntity) {
+                      DialogUtil.showCustomDialog(
+                          context: buildContext,
+                          title: "确定删除吗?",
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _cText(
+                                label: '工程名',
+                                content: e.projectName,
+                              ),
+                              _cText(
+                                label: '远程仓库',
+                                content: e.gitUrl,
+                              ),
+                              _cText(
+                                label: '分支名',
+                                content: e.branch,
+                              ),
+                            ],
+                          ),
+                          onConfirm: () {
+                            deleteProjectRecord(cellValue.value);
+                          });
+                    }
+                  },
+                ),
               );
               break;
           }
@@ -190,13 +251,32 @@ class ProjectEntityDataSource extends DataGridSource {
         }).toList());
   }
 
+  Widget _cText({
+    required String label,
+    required String content,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Text(
+        "$label:  $content",
+        style: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
   List<Widget> _assembleOrdersWidget(List<String>? orders) {
     if (null == orders) {
       return [const SizedBox()];
     }
-    return orders.map((e) => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0,vertical: 4.0),
-      child: Button(onPressed: () {}, child: Text(e)),
-    )).toList();
+    return orders
+        .map((e) => Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+              child: Button(
+                  onPressed: () {},
+                  child: Text(e,
+                      style: const TextStyle(fontWeight: FontWeight.w600))),
+            ))
+        .toList();
   }
 }

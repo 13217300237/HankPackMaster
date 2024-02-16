@@ -30,66 +30,67 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   final searchKey = GlobalKey(debugLabel: 'Search Bar Key');
   final searchFocusNode = FocusNode();
   final searchController = TextEditingController();
+  var w600TextStyle = const TextStyle(fontWeight: FontWeight.w600);
 
   late final List<NavigationPaneItem> originalItems = [
     PaneItem(
       key: const ValueKey('/'),
       icon: const Icon(FluentIcons.home),
-      title: const Text('主页'),
+      title: Text('主页', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/env'),
       icon: const Icon(FluentIcons.button_control),
-      title: const Text('环境参数'),
+      title: Text('环境参数', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/project_manager'),
       icon: const Icon(FluentIcons.a_a_d_logo),
-      title: const Text('工程管理'),
+      title: Text('工程管理', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/work_shop'),
       icon: const Icon(FluentIcons.a_a_d_logo),
-      title: const Text('打包工坊'),
+      title: Text('打包工坊', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/files'),
       icon: const Icon(FluentIcons.a_t_p_logo),
-      title: const Text('缓存文件迁移'),
+      title: Text('缓存文件迁移', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/trace'),
       icon: const Icon(FluentIcons.app_icon_secure),
-      title: const Text('应用包回溯'),
+      title: Text('应用包回溯', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/device'),
       icon: const Icon(FluentIcons.analytics_query),
-      title: const Text('设备相关'),
+      title: Text('设备相关', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/timer'),
       icon: const Icon(FluentIcons.timer),
-      title: const Text('定时任务'),
+      title: Text('定时任务', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/statistics'),
       icon: const Icon(FluentIcons.archive),
-      title: const Text('工作统计'),
+      title: Text('工作统计', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/information'),
       icon: const Icon(FluentIcons.info),
-      title: const Text('技术资讯'),
+      title:  Text('技术资讯', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
   ].map<NavigationPaneItem>((e) {
@@ -202,7 +203,8 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
             child: Center(
               child: Text(
                 "工作空间: ${envParamModel.workSpaceRoot}",
-                style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+                style:
+                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
               ),
             ),
           ),
@@ -235,11 +237,18 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         );
       },
       pane: NavigationPane(
-        size: const NavigationPaneSize(openMaxWidth: 220,openWidth: 220,compactWidth: 100,openMinWidth: 200),
+        size: const NavigationPaneSize(
+            openMaxWidth: 220,
+            openWidth: 220,
+            compactWidth: 100,
+            openMinWidth: 200),
         selected: _calculateSelectedIndex(context),
         header: const SizedBox(
           height: kOneLineTileHeight,
-          child: Text(appTitle,style: TextStyle(fontSize: 20),),
+          child: Text(
+            appTitle,
+            style: TextStyle(fontSize: 20),
+          ),
         ),
         displayMode: appTheme.displayMode,
         indicator: () {

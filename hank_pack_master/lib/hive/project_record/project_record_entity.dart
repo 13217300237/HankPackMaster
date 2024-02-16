@@ -35,7 +35,7 @@ class ProjectRecordEntity {
 
   @override
   String toString() {
-    return "$gitUrl ||  $branch";
+    return "$projectName \n $gitUrl \n  $branch";
   }
 
   @override

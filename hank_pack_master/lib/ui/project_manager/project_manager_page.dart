@@ -36,6 +36,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   void initState() {
     super.initState();
     _dataSource = ProjectEntityDataSource(
+      buildContext: context,
       funcGoToWorkShop: (e) {
         DialogUtil.showCustomDialog(
             context: context,
@@ -80,7 +81,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           ),
           wrappedItem: CommandBarButton(
             icon: const Icon(FluentIcons.add),
-            label: const Text('新建'),
+            label:
+                const Text('新建', style: TextStyle(fontWeight: FontWeight.w600)),
             onPressed: createAndroidProjectRecord,
           ),
         ),
@@ -91,7 +93,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           ),
           wrappedItem: CommandBarButton(
             icon: const Icon(FluentIcons.clear),
-            label: const Text('清空'),
+            label:
+                const Text('清空', style: TextStyle(fontWeight: FontWeight.w600)),
             onPressed: clearAllProjectRecord,
           ),
         ),
@@ -102,7 +105,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           ),
           wrappedItem: CommandBarButton(
             icon: const Icon(FluentIcons.refresh),
-            label: const Text('刷新'),
+            label:
+                const Text('刷新', style: TextStyle(fontWeight: FontWeight.w600)),
             onPressed: _dataSource.init,
           ),
         ),
@@ -304,11 +308,19 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       ),
       GridColumn(
         minimumWidth: minimumWidth,
-        columnName: ColumnNameConst.operation,
+        columnName: ColumnNameConst.jobOperation,
         label: Container(
             decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
             alignment: Alignment.center,
-            child: const Text('操作', style: gridTextStyle)),
+            child: const Text('作业功能', style: gridTextStyle)),
+      ),
+      GridColumn(
+        minimumWidth: minimumWidth,
+        columnName: ColumnNameConst.recordOperation,
+        label: Container(
+            decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
+            alignment: Alignment.center,
+            child: const Text('项目操作', style: gridTextStyle)),
       ),
     ];
   }
