@@ -28,6 +28,8 @@ typedef ActionFunc = Future<OrderExecuteResult> Function();
 
 typedef OnStageFinishedFunc = Function(int, String);
 
+typedef OnStageStartedFunc = Function(int);
+
 enum StageStatue { idle, executing, finished, error }
 
 class PgyEntity {
@@ -91,9 +93,16 @@ class TaskState {
   ActionFunc
       actionFunc; // 当前阶段的行为, 返回null说明当前阶段正常，非null的情况分两种，一是有特殊输出的阶段，第二是结束阶段
 
-  OnStageFinishedFunc? onStateFinished; // 当前阶段结束之后的行为（无论成功或者失败）
+  OnStageFinishedFunc? onStateFinishedFunc; // 当前阶段结束之后的行为（无论成功或者失败）
 
-  TaskState(this.stageName, {required this.actionFunc, this.onStateFinished});
+  OnStageStartedFunc? onStageStartedFunc;
+
+  TaskState(
+    this.stageName, {
+    required this.actionFunc,
+    this.onStateFinishedFunc,
+    this.onStageStartedFunc,
+  });
 }
 
 /// 模拟耗时
@@ -231,7 +240,8 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(
             succeed: true, data: '打包参数正常 工作目录为,$projectPath ');
       },
-      onStateFinished: updateStageCostTime,
+      onStateFinishedFunc: updateStageCostTime,
+      onStageStartedFunc: updateStateStarted,
     ));
     taskStateList.add(TaskState(
       "工程克隆",
@@ -271,7 +281,8 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(
             succeed: true, data: 'clone成功,位置在 $projectPath');
       },
-      onStateFinished: updateStageCostTime,
+      onStateFinishedFunc: updateStageCostTime,
+      onStageStartedFunc: updateStateStarted,
     ));
     taskStateList.add(TaskState(
       "分支切换",
@@ -284,7 +295,8 @@ class WorkShopVm extends ChangeNotifier {
         }
         return OrderExecuteResult(succeed: true, data: '分支 $gitBranch 切换成功');
       },
-      onStateFinished: updateStageCostTime,
+      onStateFinishedFunc: updateStageCostTime,
+      onStageStartedFunc: updateStateStarted,
     ));
     taskStateList.add(TaskState(
       "工程结构检测",
@@ -299,7 +311,8 @@ class WorkShopVm extends ChangeNotifier {
         }
         return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
       },
-      onStateFinished: updateStageCostTime,
+      onStateFinishedFunc: updateStageCostTime,
+      onStageStartedFunc: updateStateStarted,
     ));
     taskStateList.add(TaskState(
       "可用指令查询",
@@ -327,7 +340,8 @@ class WorkShopVm extends ChangeNotifier {
         debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
         return OrderExecuteResult(succeed: true, data: _enableAssembleOrders);
       },
-      onStateFinished: updateStageCostTime,
+      onStateFinishedFunc: updateStageCostTime,
+      onStageStartedFunc: updateStateStarted,
     ));
   }
 
@@ -354,7 +368,8 @@ class WorkShopVm extends ChangeNotifier {
         }
         return OrderExecuteResult(succeed: true, data: gradleAssembleRes.res);
       },
-      onStateFinished: updateStageCostTime,
+      onStateFinishedFunc: updateStageCostTime,
+      onStageStartedFunc: updateStateStarted,
     ));
     taskStateList.add(TaskState(
       "apk检测",
@@ -378,7 +393,8 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(
             succeed: true, data: "打包产物的位置在: $apkToUpload");
       },
-      onStateFinished: updateStageCostTime,
+      onStateFinishedFunc: updateStageCostTime,
+      onStageStartedFunc: updateStateStarted,
     ));
 
     if (selectedUploadPlatform?.index == 0) {
@@ -412,7 +428,8 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(
               succeed: true, data: '获取到的Token是 ${pgyToken.toString()}');
         },
-        onStateFinished: updateStageCostTime,
+        onStateFinishedFunc: updateStageCostTime,
+        onStageStartedFunc: updateStateStarted,
       ));
       taskStateList.add(TaskState(
         "上传pgy",
@@ -434,7 +451,8 @@ class WorkShopVm extends ChangeNotifier {
             return OrderExecuteResult(succeed: true, data: '上传成功');
           }
         },
-        onStateFinished: updateStageCostTime,
+        onStateFinishedFunc: updateStageCostTime,
+        onStageStartedFunc: updateStateStarted,
       ));
       taskStateList.add(TaskState(
         "检查pgy发布结果",
@@ -474,7 +492,8 @@ class WorkShopVm extends ChangeNotifier {
             }
           }
         },
-        onStateFinished: updateStageCostTime,
+        onStateFinishedFunc: updateStageCostTime,
+        onStageStartedFunc: updateStateStarted,
       ));
     } else {
       taskStateList.add(TaskState(
@@ -501,7 +520,8 @@ class WorkShopVm extends ChangeNotifier {
                 data: "OBS上传成功,下载地址为 $obsDownloadUrl", succeed: true);
           }
         },
-        onStateFinished: updateStageCostTime,
+        onStateFinishedFunc: updateStageCostTime,
+        onStageStartedFunc: updateStateStarted,
       ));
       taskStateList.add(TaskState(
         "构建打包结果",
@@ -522,7 +542,8 @@ class WorkShopVm extends ChangeNotifier {
 
           return OrderExecuteResult(data: appInfo, succeed: false);
         },
-        onStateFinished: updateStageCostTime,
+        onStateFinishedFunc: updateStageCostTime,
+        onStageStartedFunc: updateStateStarted,
       ));
     }
 
@@ -583,10 +604,25 @@ class WorkShopVm extends ChangeNotifier {
     notifyListeners();
   }
 
+  final stageScrollerController = ScrollController();
+
   void updateStageCostTime(int index, String costTime) {
     TaskState c = taskStateList[index];
     c.stageCostTime = costTime;
+
     notifyListeners();
+  }
+
+  void updateStateStarted(int index) {
+    // 每个项目的高度，根据实际情况进行调整
+    double itemWidth = 100.0;
+    // 指定的 item 在 ListView 中的偏移量
+    double offset = index * itemWidth;
+    stageScrollerController.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 500), // 动画持续时间
+      curve: Curves.easeInOut, // 动画曲线
+    );
   }
 
   void cleanLog() {
@@ -669,6 +705,8 @@ class WorkShopVm extends ChangeNotifier {
         var taskFuture = stage.actionFunc();
         addNewLogLine("第${j + 1}次 执行开始: $taskName");
 
+        taskStateList[i].onStageStartedFunc?.call(i);
+
         var stageResult =
             await Future.any([taskFuture, timeOutCounter()]); // 计算超时
 
@@ -679,8 +717,8 @@ class WorkShopVm extends ChangeNotifier {
           // 如果执行成功，则标记此阶段已完成
           if (stageResult.succeed == true) {
             taskStateList[i]
-                .onStateFinished
-                ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} 毫秒");
+                .onStateFinishedFunc
+                ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} ms");
             taskOk = true;
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();
@@ -732,7 +770,7 @@ class WorkShopVm extends ChangeNotifier {
 
     return OrderExecuteResult(
         succeed: true,
-        msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒 ",
+        msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} ms ",
         data: actionResStr?.data);
   }
 
@@ -859,7 +897,11 @@ class WorkShopVm extends ChangeNotifier {
           await startActive();
         }
       } else {
-        debugPrint("当前有任务正在执行，请稍后... ${runningTask?.projectName}");
+        if (runningTask != null) {
+          // debugPrint("当前有任务正在执行，请稍后... ${runningTask?.projectName}");
+        } else if (_taskQueue.isEmpty) {
+          // debugPrint("任务队列为空...");
+        }
       }
     });
   }
