@@ -18,8 +18,11 @@ class ProjectRecordEntity {
   @HiveField(0x04)
   late String projectName;
 
+  @HiveField(0x05)
+  List<String>? assembleOrders;
+
   ProjectRecordEntity(this.gitUrl, this.branch, this.projectName,
-      {this.preCheckOk = false});
+      {this.preCheckOk = false, this.assembleOrders});
 
   @override
   String toString() {

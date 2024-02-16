@@ -756,14 +756,12 @@ class WorkShopVm extends ChangeNotifier {
   String taskQueueString() => _taskQueue.map((e) => "$e\n").toList().toString();
 
   void enqueue(ProjectRecordEntity e) {
-    debugPrint("一个任务入列:${e.projectName}  ${e.preCheckOk}");
     _taskQueue.add(e);
     _loop();
     notifyListeners();
   }
 
   Function? onTaskFinished;
-
 
   /// 开始项目激活
   Future<void> startActive() async {
@@ -787,7 +785,9 @@ class WorkShopVm extends ChangeNotifier {
       return;
     }
     if (value.succeed == true) {
-      onProjectActiveFinished();
+      if (value.data is List<String>) {
+        onProjectActiveFinished(value.data);
+      }
       onTaskFinished?.call();
     }
   }
@@ -800,8 +800,9 @@ class WorkShopVm extends ChangeNotifier {
   ProjectRecordEntity? runningTask;
 
   /// 项目激活成功之后
-  void onProjectActiveFinished() {
+  void onProjectActiveFinished(List<String> assembleOrders) {
     runningTask!.preCheckOk = true;
+    runningTask!.assembleOrders = assembleOrders;
     ProjectRecordOperator.insertOrUpdate(runningTask!);
     runningTask = null;
     notifyListeners();

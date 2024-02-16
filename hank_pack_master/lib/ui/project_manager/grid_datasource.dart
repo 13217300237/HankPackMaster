@@ -1,9 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
-import 'column_name_getter.dart';
+import 'column_name_const.dart';
 
 const TextStyle gridTextStyle = TextStyle(
     color: Color(0xff2C473E),
@@ -13,7 +14,8 @@ const TextStyle gridTextStyle = TextStyle(
 enum CellType {
   text, // 纯文案显示
   preChecked, // 预检状态标志
-  enqueueAction, // 操作入列按钮
+  goPreCheck, // 操作入列按钮
+  goPackageAction, // 进入打包操作
 }
 
 class CellValue {
@@ -31,6 +33,7 @@ class ProjectEntityDataSource extends DataGridSource {
   final List<ProjectRecordEntity> dataList = [];
 
   Function(ProjectRecordEntity)? funcGoToWorkShop;
+  Function(ProjectRecordEntity)? funcGoPackageAction;
 
   bool insertOrUpdateProjectRecord(
       String gitUrl, String branchName, String projectName) {
@@ -65,8 +68,10 @@ class ProjectEntityDataSource extends DataGridSource {
     notifyListeners();
   }
 
-  ProjectEntityDataSource(
-      {required Function(ProjectRecordEntity) this.funcGoToWorkShop}) {
+  ProjectEntityDataSource({
+    required this.funcGoToWorkShop,
+    required this.funcGoPackageAction,
+  }) {
     _buildRows();
   }
 
@@ -88,12 +93,26 @@ class ProjectEntityDataSource extends DataGridSource {
                   value: CellValue(
                       value: e.preCheckOk, cellType: CellType.preChecked)),
               DataGridCell<CellValue>(
-                  columnName: ColumnNameConst.operation,
+                  columnName: ColumnNameConst.assembleOrders,
                   value: CellValue(
-                    value: "任务入列",
-                    cellType: CellType.enqueueAction,
-                    entity: e,
-                  )),
+                      value: e.assembleOrders, cellType: CellType.text)),
+              if (e.preCheckOk) ...[
+                DataGridCell<CellValue>(
+                    columnName: ColumnNameConst.operation,
+                    value: CellValue(
+                      value: "开始打包",
+                      cellType: CellType.goPackageAction,
+                      entity: e,
+                    )),
+              ] else ...[
+                DataGridCell<CellValue>(
+                    columnName: ColumnNameConst.operation,
+                    value: CellValue(
+                      value: "马上激活",
+                      cellType: CellType.goPreCheck,
+                      entity: e,
+                    )),
+              ],
             ]))
         .toList();
   }
@@ -134,13 +153,23 @@ class ProjectEntityDataSource extends DataGridSource {
               }
               cellWidget = Icon(FluentIcons.skype_circle_check, color: color);
               break;
-            case CellType.enqueueAction:
+            case CellType.goPreCheck:
               cellWidget = Tooltip(
                 message: "${cellValue.value}",
                 child: IconButton(
                   icon: Icon(FluentIcons.build_queue_new,
                       color: Colors.green.withOpacity(.8)),
                   onPressed: () => funcGoToWorkShop?.call(cellValue.entity!),
+                ),
+              );
+              break;
+            case CellType.goPackageAction:
+              cellWidget = Tooltip(
+                message: "${cellValue.value}",
+                child: IconButton(
+                  icon: Icon(FluentIcons.packages,
+                      color: Colors.green.withOpacity(.8)),
+                  onPressed: () => funcGoPackageAction?.call(cellValue.entity!),
                 ),
               );
               break;

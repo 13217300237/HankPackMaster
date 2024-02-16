@@ -1,11 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/url_check_util.dart';
-import 'column_name_getter.dart';
+import 'column_name_const.dart';
 import 'create_project_record_dialog.dart';
 import 'grid_datasource.dart';
 
@@ -20,18 +21,47 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   late ProjectEntityDataSource _dataSource;
   int _rowsPerPage = 10;
 
-  double projectNameColumnWidth = 200;
-  double gitUrlColumnWidth = 600;
+  double projectNameColumnWidth = 100;
+  double gitUrlColumnWidth = 300;
   double branchNameColumnWidth = 100;
   double statueColumnWidth = 100;
+  double assembleOrdersWidth = 250;
 
   @override
   void initState() {
     super.initState();
     _dataSource = ProjectEntityDataSource(
       funcGoToWorkShop: (e) {
-        _workShopVm.enqueue(e);
-        DialogUtil.showInfo(context: context, content: "任务已入列，等待执行...");
+        DialogUtil.showCustomDialog(
+            context: context,
+            title: "任务入列提醒",
+            content: "要激活此项目么？ \n ${e.projectName}",
+            confirmText: "确定激活",
+            onConfirm: () {
+              _workShopVm.enqueue(e);
+              context.go('/work_shop');
+            });
+      },
+      funcGoPackageAction: (e) {
+        TextEditingController gitUrlTextController = TextEditingController();
+        TextEditingController branchNameTextController =
+            TextEditingController();
+        TextEditingController projectNameTextController =
+            TextEditingController();
+
+        var contentWidget = CreateProjectDialogWidget(
+            projectNameTextController: projectNameTextController,
+            gitUrlTextController: gitUrlTextController,
+            branchNameTextController: branchNameTextController);
+
+        DialogUtil.showCustomDialog(
+            context: context,
+            title: "项目打包提醒",
+            content: contentWidget,
+            confirmText: "开始打包",
+            onConfirm: () {
+              // 这里必须配置打包的必须参数
+            });
       },
     );
 
@@ -63,6 +93,17 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             icon: const Icon(FluentIcons.clear),
             label: const Text('清空'),
             onPressed: clearAllProjectRecord,
+          ),
+        ),
+        CommandBarBuilderItem(
+          builder: (context, mode, w) => Tooltip(
+            message: "刷新",
+            child: w,
+          ),
+          wrappedItem: CommandBarButton(
+            icon: const Icon(FluentIcons.refresh),
+            label: const Text('刷新'),
+            onPressed: _dataSource.init,
           ),
         ),
       ];
@@ -149,17 +190,23 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         ),
         margin: const EdgeInsets.all(15),
         child: SfDataGrid(
-          columnWidthMode: ColumnWidthMode.lastColumnFill,
+          columnWidthMode: ColumnWidthMode.fill,
           allowColumnsResizing: true,
           columnResizeMode: ColumnResizeMode.onResize,
           onColumnResizeUpdate: (ColumnResizeUpdateDetails args) {
             setState(() {
-              if (args.column.columnName == 'gitUrl') {
+              if (args.column.columnName == ColumnNameConst.gitUrl) {
                 gitUrlColumnWidth = args.width;
-              } else if (args.column.columnName == 'branch') {
+              } else if (args.column.columnName ==
+                  ColumnNameConst.projectName) {
+                projectNameColumnWidth = args.width;
+              } else if (args.column.columnName == ColumnNameConst.branch) {
                 branchNameColumnWidth = args.width;
-              } else if (args.column.columnName == 'statue') {
+              } else if (args.column.columnName == ColumnNameConst.statue) {
                 statueColumnWidth = args.width;
+              } else if (args.column.columnName ==
+                  ColumnNameConst.assembleOrders) {
+                assembleOrdersWidth = args.width;
               }
             });
             return true;
@@ -210,7 +257,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           columnWidthMode: ColumnWidthMode.fill,
           label: Container(
               decoration: BoxDecoration(color: bg, borderRadius: topLeftBorder),
-              padding: const EdgeInsets.only(left: 8.0),
               alignment: Alignment.center,
               child: const Text('项目名称', style: gridTextStyle))),
       GridColumn(
@@ -220,15 +266,14 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           columnWidthMode: ColumnWidthMode.fill,
           label: Container(
               decoration: BoxDecoration(color: bg, borderRadius: topLeftBorder),
-              padding: const EdgeInsets.only(left: 8.0),
               alignment: Alignment.center,
               child: const Text('远程仓库', style: gridTextStyle))),
       GridColumn(
         columnName: ColumnNameConst.branch,
+        minimumWidth: 50.0,
         width: branchNameColumnWidth,
         label: Container(
             decoration: BoxDecoration(color: bg, borderRadius: zeroBorder),
-            padding: const EdgeInsets.only(left: 8.0),
             alignment: Alignment.center,
             child: const Text('分支名', style: gridTextStyle)),
       ),
@@ -238,15 +283,23 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         width: statueColumnWidth,
         label: Container(
             decoration: BoxDecoration(color: bg, borderRadius: zeroBorder),
-            padding: const EdgeInsets.only(left: 8.0),
             alignment: Alignment.center,
             child: const Text('激活状态', style: gridTextStyle)),
       ),
       GridColumn(
+        columnName: ColumnNameConst.assembleOrders,
+        minimumWidth: 100.0,
+        width: assembleOrdersWidth,
+        label: Container(
+            decoration: BoxDecoration(color: bg, borderRadius: zeroBorder),
+            alignment: Alignment.center,
+            child: const Text('打包命令', style: gridTextStyle)),
+      ),
+      GridColumn(
+        minimumWidth: 50.0,
         columnName: ColumnNameConst.operation,
         label: Container(
             decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
-            padding: const EdgeInsets.only(left: 8.0),
             alignment: Alignment.center,
             child: const Text('操作', style: gridTextStyle)),
       ),
