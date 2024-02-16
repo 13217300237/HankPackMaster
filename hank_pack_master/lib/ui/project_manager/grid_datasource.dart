@@ -13,6 +13,7 @@ const TextStyle gridTextStyle = TextStyle(
 
 enum CellType {
   text, // 纯文案显示
+  assembleOrders, // 进入打包操作
   preChecked, // 预检状态标志
   goPreCheck, // 操作入列按钮
   goPackageAction, // 进入打包操作
@@ -95,7 +96,8 @@ class ProjectEntityDataSource extends DataGridSource {
               DataGridCell<CellValue>(
                   columnName: ColumnNameConst.assembleOrders,
                   value: CellValue(
-                      value: e.assembleOrders, cellType: CellType.text)),
+                      value: e.assembleOrders,
+                      cellType: CellType.assembleOrders)),
               if (e.preCheckOk) ...[
                 DataGridCell<CellValue>(
                     columnName: ColumnNameConst.operation,
@@ -173,6 +175,11 @@ class ProjectEntityDataSource extends DataGridSource {
                 ),
               );
               break;
+            case CellType.assembleOrders:
+              cellWidget = Wrap(
+                children: [..._assembleOrdersWidget(cellValue.value)],
+              );
+              break;
           }
 
           return Container(
@@ -181,5 +188,15 @@ class ProjectEntityDataSource extends DataGridSource {
             child: cellWidget,
           );
         }).toList());
+  }
+
+  List<Widget> _assembleOrdersWidget(List<String>? orders) {
+    if (null == orders) {
+      return [const SizedBox()];
+    }
+    return orders.map((e) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0,vertical: 4.0),
+      child: Button(onPressed: () {}, child: Text(e)),
+    )).toList();
   }
 }
