@@ -14,7 +14,6 @@ import '../../comm/ui/pretty_3d_button.dart';
 import '../../comm/url_check_util.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
-import '../comm/vm/task_queue_vm.dart';
 import 'app_info_card.dart';
 
 ///
@@ -31,8 +30,7 @@ class WorkShopPage extends StatefulWidget {
 
 class _WorkShopPageState extends State<WorkShopPage> {
   late EnvParamVm _envParamModel;
-  late WorkShopVm _projectTaskVm;
-  late TaskQueueVm _taskQueueVm;
+  late WorkShopVm _workShopVm;
   late AppTheme _appTheme;
 
   bool postFrameFinished = false;
@@ -51,11 +49,11 @@ class _WorkShopPageState extends State<WorkShopPage> {
       if (!_envParamModel.isAndroidEnvOk()) {
         return;
       }
-      _projectTaskVm.projectPathController.addListener(checkInput);
-      _projectTaskVm.gitBranchController.addListener(checkInput);
-      _projectTaskVm.projectAppDescController.addListener(checkInput);
-      _projectTaskVm.gitUrlController.addListener(() {
-        var gitText = _projectTaskVm.gitUrlController.text;
+      _workShopVm.projectPathController.addListener(checkInput);
+      _workShopVm.gitBranchController.addListener(checkInput);
+      _workShopVm.projectAppDescController.addListener(checkInput);
+      _workShopVm.gitUrlController.addListener(() {
+        var gitText = _workShopVm.gitUrlController.text;
         if (gitText.isNotEmpty) {
           if (!isValidGitUrl(gitText)) {
             // 只要是可用的git源，那就直接解析
@@ -63,18 +61,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
             return;
           }
 
-          var lastSepIndex = gitText.lastIndexOf("/");
-          var endIndex = gitText.length - 4;
-          if (lastSepIndex > 0) {
-            String projectName = gitText.substring(lastSepIndex + 1, endIndex);
-            _projectTaskVm.projectPathController.text =
-                _envParamModel.workSpaceRoot +
-                    Platform.pathSeparator +
-                    projectName;
-          } else {
-            _projectTaskVm.projectPathController.text = "";
-            _projectTaskVm.gitBranchController.text = "";
-          }
+
           // 直接赋值给 _projectNameController 就行了
         }
 
@@ -90,24 +77,18 @@ class _WorkShopPageState extends State<WorkShopPage> {
   @override
   void dispose() {
     super.dispose();
-    _projectTaskVm.projectPathController.removeListener(checkInput);
-    _projectTaskVm.gitUrlController.removeListener(checkInput);
+    _workShopVm.projectPathController.removeListener(checkInput);
+    _workShopVm.gitUrlController.removeListener(checkInput);
   }
 
   @override
   Widget build(BuildContext context) {
-    _taskQueueVm = context.watch<TaskQueueVm>();
     _envParamModel = context.watch<EnvParamVm>();
     _appTheme = context.watch<AppTheme>();
+    _workShopVm = context.watch<WorkShopVm>();
 
     if (_envParamModel.isAndroidEnvOk()) {
-      return ChangeNotifierProvider(
-        create: (context) => WorkShopVm(),
-        builder: (context, child) {
-          _projectTaskVm = context.watch<WorkShopVm>();
-          return Container(color: _appTheme.bgColor, child: _mainLayout());
-        },
-      );
+      return Container(color: _appTheme.bgColor, child: _mainLayout());
     } else {
       return Center(
           child: Text("请先准备好环境参数",
@@ -131,13 +112,13 @@ class _WorkShopPageState extends State<WorkShopPage> {
       mustSpace = const SizedBox(width: 20);
     }
 
-    if (_projectTaskVm.jobRunning) {
-      comboBox = Text(_projectTaskVm.selectedOrder ?? '');
+    if (_workShopVm.jobRunning) {
+      comboBox = Text(_workShopVm.selectedOrder ?? '');
     } else if (orderList.isEmpty) {
       comboBox = const SizedBox();
     } else {
       comboBox = ComboBox<String>(
-        value: _projectTaskVm.selectedOrder,
+        value: _workShopVm.selectedOrder,
         placeholder: const Text('你必须选择一个打包命令'),
         items: orderList.entries.map((e) {
           return ComboBoxItem(
@@ -147,7 +128,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
         }).toList(),
         onChanged: (order) {
           if (order != null) {
-            _projectTaskVm.setSelectedOrder(order);
+            _workShopVm.setSelectedOrder(order);
           } else {
             _showInfoDialog(title, "你必须选择一个打包命令");
           }
@@ -155,7 +136,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
       );
     }
 
-    comboBox = Text(_projectTaskVm.selectedOrder ?? '');
+    comboBox = Text(_workShopVm.selectedOrder ?? '');
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0),
@@ -202,20 +183,19 @@ class _WorkShopPageState extends State<WorkShopPage> {
         Expanded(
           child: Row(
             children:
-                List.generate(_projectTaskVm.uploadPlatforms.length, (index) {
+                List.generate(_workShopVm.uploadPlatforms.length, (index) {
               return Padding(
                 padding: const EdgeInsets.only(right: 18.0),
                 child: RadioButton(
-                    checked:
-                        _projectTaskVm.selectedUploadPlatform?.value == index,
-                    content: Text(_projectTaskVm.uploadPlatforms[index].name),
+                    checked: _workShopVm.selectedUploadPlatform?.value == index,
+                    content: Text(_workShopVm.uploadPlatforms[index].name),
                     onChanged: (checked) {
-                      if (_projectTaskVm.jobRunning) {
+                      if (_workShopVm.jobRunning) {
                         _showInfoDialog("提示", "任务正在执行，请稍后操作");
                         return;
                       }
                       if (checked) {
-                        _projectTaskVm.setSelectedUploadPlatform(index);
+                        _workShopVm.setSelectedUploadPlatform(index);
                       }
                     }),
               );
@@ -293,7 +273,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
       child: IconButton(
           icon: const Icon(FluentIcons.open_enrollment, size: 18),
           onPressed: () async {
-            String dir = _projectTaskVm.projectPathController.text;
+            String dir = _workShopVm.projectPathController.text;
             try {
               await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
             } catch (e) {
@@ -322,24 +302,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
         severity: InfoBarSeverity.error);
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (!postFrameFinished) {
-      return;
-    }
-
-    // 检查第一帧是否绘制完毕,如果完毕了再执行
-    debugPrint('当继承式组件发生变化时会调用');
-    if (_taskQueueVm.runningTask != null) {
-      _projectTaskVm.gitUrlController.text = _taskQueueVm.runningTask!.gitUrl;
-      _projectTaskVm.gitBranchController.text =
-          _taskQueueVm.runningTask!.branch;
-      _startActive();
-    }
-  }
-
   Widget _mainLayout() {
     var projectConfigWidget = Card(
         margin: const EdgeInsets.only(top: 15, left: 15, right: 10, bottom: 10),
@@ -361,37 +323,23 @@ class _WorkShopPageState extends State<WorkShopPage> {
                       _input(
                         "git地址 ",
                         "输入git地址",
-                        _projectTaskVm.gitUrlController,
+                        _workShopVm.gitUrlController,
                         must: true,
                       ),
                       _gitErrorText(),
                       _input(
                         "工程位置",
                         "输入工程名",
-                        _projectTaskVm.projectPathController,
+                        _workShopVm.projectPathController,
                         alwaysDisable: true,
                         suffix: _toolTip(),
                       ),
                       _input(
                         "分支名称",
                         "输入分支名称",
-                        _projectTaskVm.gitBranchController,
+                        _workShopVm.gitBranchController,
                         must: true,
                       ),
-                      _actionButton(
-                          title: "项目激活测试",
-                          bgColor: Colors.purple.normal,
-                          enable: false,
-                          action: () async {
-                            DialogUtil.showCustomDialog(
-                                context: context,
-                                content:
-                                    "项目的首次打包都必须先进行激活测试，以确保该项目可用，主要包括，检测可用分支，检测可用打包指令，确定开始吗？",
-                                title: '提示',
-                                onConfirm: () {
-                                  _startActive();
-                                });
-                          }),
                     ]),
               ),
             ),
@@ -419,21 +367,21 @@ class _WorkShopPageState extends State<WorkShopPage> {
                         _input(
                           "应用描述",
                           "输入应用描述...",
-                          _projectTaskVm.projectAppDescController,
+                          _workShopVm.projectAppDescController,
                           maxLines: 5,
                         ),
                         _input(
                           "更新日志",
                           "输入更新日志...",
-                          _projectTaskVm.updateLogController,
+                          _workShopVm.updateLogController,
                           maxLines: 5,
                         ),
-                        _choose('打包命令', _projectTaskVm.enableAssembleOrders),
+                        _choose('打包命令', _workShopVm.enableAssembleOrders),
                         const SizedBox(height: 5),
                         _input(
                           "apk路径",
                           "请输入apk预计路径，程序会根据此路径检测apk文件",
-                          _projectTaskVm.apkLocationController,
+                          _workShopVm.apkLocationController,
                           maxLines: 1,
                         ),
                         _chooseRadio('上传方式'),
@@ -441,13 +389,13 @@ class _WorkShopPageState extends State<WorkShopPage> {
                 ),
               ),
             ),
-            _actionButton(
-                title: "正式开始打包",
-                enable: false,
-                bgColor: startPackageButtonEnable
-                    ? Colors.orange.lighter
-                    : Colors.grey.withOpacity(.2),
-                action: startPackageButtonEnable ? startPackage : null),
+            // _actionButton(
+            //     title: "正式开始打包",
+            //     enable: false,
+            //     bgColor: startPackageButtonEnable
+            //         ? Colors.orange.lighter
+            //         : Colors.grey.withOpacity(.2),
+            //     action: startPackageButtonEnable ? startPackage : null),
           ],
         ));
 
@@ -492,18 +440,18 @@ class _WorkShopPageState extends State<WorkShopPage> {
                       behavior: ScrollConfiguration.of(context)
                           .copyWith(scrollbars: false),
                       child: ListView.builder(
-                        controller: _projectTaskVm.logListViewScrollController,
+                        controller: _workShopVm.logListViewScrollController,
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 1.0, horizontal: 4),
                             child: Text(
-                              _projectTaskVm.cmdExecLog[index],
+                              _workShopVm.cmdExecLog[index],
                               style: const TextStyle(fontSize: 16),
                             ),
                           );
                         },
-                        itemCount: _projectTaskVm.cmdExecLog.length,
+                        itemCount: _workShopVm.cmdExecLog.length,
                       ),
                     ),
                   )
@@ -552,7 +500,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
       );
     }
 
-    var taskCardList = _taskQueueVm.getQueueList().map((e) {
+    var taskCardList = _workShopVm.getQueueList().map((e) {
       return Row(children: [Expanded(child: taskCard(e))]);
     }).toList();
 
@@ -579,7 +527,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
         ),
         _mainTitleWidget("正在执行"),
         Expanded(
-            flex: 2, child: taskCard(_taskQueueVm.runningTask, running: true)),
+            flex: 2, child: taskCard(_workShopVm.runningTask, running: true)),
         const SizedBox(height: 15),
       ]),
     );
@@ -631,7 +579,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
       },
       style: ButtonStyle(
           backgroundColor: ButtonState.resolveWith(
-              (states) => _projectTaskVm.getStatueColor(stage))),
+              (states) => _workShopVm.getStatueColor(stage))),
       child: Center(
           child: Column(
         children: [
@@ -647,13 +595,13 @@ class _WorkShopPageState extends State<WorkShopPage> {
     if (!_envParamModel.isAndroidEnvOk()) {
       return false;
     }
-    if (_projectTaskVm.jobRunning) {
+    if (_workShopVm.jobRunning) {
       return false;
     }
-    if (_projectTaskVm.gitUrlController.text.isEmpty) {
+    if (_workShopVm.gitUrlController.text.isEmpty) {
       return false;
     }
-    if (_projectTaskVm.gitBranchController.text.isEmpty) {
+    if (_workShopVm.gitBranchController.text.isEmpty) {
       return false;
     }
 
@@ -664,15 +612,15 @@ class _WorkShopPageState extends State<WorkShopPage> {
     if (!_envParamModel.isAndroidEnvOk()) {
       return false;
     }
-    if (_projectTaskVm.jobRunning) {
+    if (_workShopVm.jobRunning) {
       return false;
     }
-    if (_projectTaskVm.selectedOrder == null ||
-        _projectTaskVm.selectedOrder!.isEmpty) {
+    if (_workShopVm.selectedOrder == null ||
+        _workShopVm.selectedOrder!.isEmpty) {
       return false;
     }
 
-    if (_projectTaskVm.selectedUploadPlatform == null) {
+    if (_workShopVm.selectedUploadPlatform == null) {
       return false;
     }
 
@@ -712,8 +660,8 @@ class _WorkShopPageState extends State<WorkShopPage> {
   MyAppInfo? myAppInfo;
 
   Future<void> startPackage() async {
-    _projectTaskVm.initPackageTaskList();
-    var scheduleRes = await _projectTaskVm.startSchedule();
+    _workShopVm.initPackageTaskList();
+    var scheduleRes = await _workShopVm.startSchedule();
 
     if (scheduleRes == null) {
       return;
@@ -729,8 +677,8 @@ class _WorkShopPageState extends State<WorkShopPage> {
   }
 
   bool get gitErrVisible {
-    return !isValidGitUrl(_projectTaskVm.gitUrlController.text) &&
-        _projectTaskVm.gitUrlController.text.isNotEmpty;
+    return !isValidGitUrl(_workShopVm.gitUrlController.text) &&
+        _workShopVm.gitUrlController.text.isNotEmpty;
   }
 
   Widget _gitErrorText() {
@@ -751,8 +699,8 @@ class _WorkShopPageState extends State<WorkShopPage> {
   Widget buildStageColumn() {
     List<Widget> listWidget = [];
 
-    for (int i = 0; i < _projectTaskVm.taskStateList.length; i++) {
-      var e = _projectTaskVm.taskStateList[i];
+    for (int i = 0; i < _workShopVm.taskStateList.length; i++) {
+      var e = _workShopVm.taskStateList[i];
       listWidget.add(Padding(
         padding: const EdgeInsets.all(8.0),
         child: _stageBtn(stage: e, index: i),
@@ -767,19 +715,5 @@ class _WorkShopPageState extends State<WorkShopPage> {
 
   void showApkNotExistInfo() {
     DialogUtil.showInfo(context: context, content: "出现错误，apk文件不存在");
-  }
-
-  /// 开始项目激活
-  void _startActive() {
-    _projectTaskVm.initPreCheckTaskList();
-    _projectTaskVm.startSchedule().then((value) {
-      if (value == null) {
-        return;
-      }
-      _showInfoDialog('激活结果', '${value.succeed} ${value.msg}');
-      if (value.succeed == true) {
-        _taskQueueVm.onProjectActiveFinished();
-      }
-    });
   }
 }

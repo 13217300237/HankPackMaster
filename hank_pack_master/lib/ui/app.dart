@@ -5,7 +5,7 @@ import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/ui/comm/vm/env_param_vm.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
-import 'package:hank_pack_master/ui/comm/vm/task_queue_vm.dart';
+import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +19,7 @@ import '../routes/route.dart';
 
 final _appTheme = AppTheme();
 final _envParamModel = EnvParamVm();
-final _taskQueueVm = TaskQueueVm();
+final _workShopVm = WorkShopVm();
 const String appTitle = '安小助';
 
 class App extends StatefulWidget {
@@ -36,7 +36,7 @@ class _AppState extends State<App> {
         providers: [
           ChangeNotifierProvider(create: (context) => _appTheme),
           ChangeNotifierProvider(create: (context) => _envParamModel),
-          ChangeNotifierProvider(create: (context) => _taskQueueVm),
+          ChangeNotifierProvider(create: (context) => _workShopVm),
         ],
         builder: (context, child) {
           return FluentApp(

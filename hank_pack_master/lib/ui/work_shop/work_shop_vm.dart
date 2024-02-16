@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
@@ -16,6 +17,8 @@ import '../../core/command_util.dart';
 import 'package:path/path.dart' as path;
 
 import '../../hive/env_config/env_config_operator.dart';
+import '../../hive/project_record/project_record_entity.dart';
+import '../../hive/project_record/project_record_operator.dart';
 
 typedef ActionFunc = Future<OrderExecuteResult> Function();
 
@@ -740,5 +743,87 @@ class WorkShopVm extends ChangeNotifier {
         succeed: true,
         msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} 毫秒 ",
         data: actionResStr?.data);
+  }
+
+  // 工程任务队列相关
+  final ListQueue<ProjectRecordEntity> _taskQueue =
+      ListQueue<ProjectRecordEntity>();
+
+  bool hasTask() => _taskQueue.isNotEmpty;
+
+  List<ProjectRecordEntity> getQueueList() => _taskQueue.toList();
+
+  String taskQueueString() => _taskQueue.map((e) => "$e\n").toList().toString();
+
+  void enqueue(ProjectRecordEntity e) {
+    debugPrint("一个任务入列:${e.projectName}  ${e.preCheckOk}");
+    _taskQueue.add(e);
+    _loop();
+    // 检查第一帧是否绘制完毕,如果完毕了再执行
+    debugPrint('当继承式组件发生变化时会调用');
+    notifyListeners();
+  }
+
+  /// 开始项目激活
+  void startActive() {
+    gitUrlController.text = runningTask!.gitUrl;
+    gitBranchController.text = runningTask!.branch;
+
+    var gitText = gitUrlController.text;
+
+    var lastSepIndex = gitText.lastIndexOf("/");
+    var endIndex = gitText.length - 4;
+    if (lastSepIndex > 0) {
+      String projectName = gitText.substring(lastSepIndex + 1, endIndex);
+      projectPathController.text =
+          EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey) +
+              Platform.pathSeparator +
+              projectName;
+    } else {
+      projectPathController.text = "";
+      gitBranchController.text = "";
+    }
+
+    initPreCheckTaskList();
+    startSchedule().then((value) {
+      if (value == null) {
+        return;
+      }
+      if (value.succeed == true) {
+        onProjectActiveFinished();
+      }
+    });
+  }
+
+  void refresh() {
+    _taskQueue.clear();
+    notifyListeners();
+  }
+
+  ProjectRecordEntity? runningTask;
+
+  /// 项目激活成功之后
+  void onProjectActiveFinished() {
+    runningTask!.preCheckOk = true;
+    ProjectRecordOperator.insertOrUpdate(runningTask!);
+    runningTask = null;
+    notifyListeners();
+  }
+
+  Timer? taskTimer;
+
+  void _loop() {
+    if (taskTimer != null) {
+      // 只允许一个定时器
+      return;
+    }
+    // 每隔3秒，查找队列中是否有任务
+    taskTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (runningTask == null && _taskQueue.isNotEmpty) {
+        runningTask = _taskQueue.removeFirst();
+        debugPrint("当前正在执行的任务为空，现在开始此任务： ${runningTask!.projectName}");
+        startActive();
+      }
+    });
   }
 }

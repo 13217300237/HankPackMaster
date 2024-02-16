@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
-import 'package:hank_pack_master/ui/comm/vm/task_queue_vm.dart';
+import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -30,7 +30,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     super.initState();
     _dataSource = ProjectEntityDataSource(
       funcGoToWorkShop: (e) {
-        _taskQueueVm.enqueue(e);
+        _workShopVm.enqueue(e);
         DialogUtil.showInfo(context: context, content: "任务已入列，等待执行...");
       },
     );
@@ -131,11 +131,11 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     );
   }
 
-  late TaskQueueVm _taskQueueVm;
+  late WorkShopVm _workShopVm;
 
   @override
   Widget build(BuildContext context) {
-    _taskQueueVm = context.watch<TaskQueueVm>();
+    _workShopVm = context.watch<WorkShopVm>();
 
     var grid = Expanded(
       child: Container(
