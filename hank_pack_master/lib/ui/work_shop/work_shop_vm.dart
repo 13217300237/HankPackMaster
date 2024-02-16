@@ -759,13 +759,14 @@ class WorkShopVm extends ChangeNotifier {
     debugPrint("一个任务入列:${e.projectName}  ${e.preCheckOk}");
     _taskQueue.add(e);
     _loop();
-    // 检查第一帧是否绘制完毕,如果完毕了再执行
-    debugPrint('当继承式组件发生变化时会调用');
     notifyListeners();
   }
 
+  Function? onTaskFinished;
+
+
   /// 开始项目激活
-  void startActive() {
+  Future<void> startActive() async {
     gitUrlController.text = runningTask!.gitUrl;
     gitBranchController.text = runningTask!.branch;
 
@@ -773,26 +774,22 @@ class WorkShopVm extends ChangeNotifier {
 
     var lastSepIndex = gitText.lastIndexOf("/");
     var endIndex = gitText.length - 4;
-    if (lastSepIndex > 0) {
-      String projectName = gitText.substring(lastSepIndex + 1, endIndex);
-      projectPathController.text =
-          EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey) +
-              Platform.pathSeparator +
-              projectName;
-    } else {
-      projectPathController.text = "";
-      gitBranchController.text = "";
-    }
+    assert(endIndex > 0);
+    String projectName = gitText.substring(lastSepIndex + 1, endIndex);
+    projectPathController.text =
+        EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey) +
+            Platform.pathSeparator +
+            projectName;
 
     initPreCheckTaskList();
-    startSchedule().then((value) {
-      if (value == null) {
-        return;
-      }
-      if (value.succeed == true) {
-        onProjectActiveFinished();
-      }
-    });
+    var value = await startSchedule();
+    if (value == null) {
+      return;
+    }
+    if (value.succeed == true) {
+      onProjectActiveFinished();
+      onTaskFinished?.call();
+    }
   }
 
   void refresh() {
@@ -821,7 +818,6 @@ class WorkShopVm extends ChangeNotifier {
     taskTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (runningTask == null && _taskQueue.isNotEmpty) {
         runningTask = _taskQueue.removeFirst();
-        debugPrint("当前正在执行的任务为空，现在开始此任务： ${runningTask!.projectName}");
         startActive();
       }
     });

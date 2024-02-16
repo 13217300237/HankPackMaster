@@ -34,7 +34,11 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         DialogUtil.showInfo(context: context, content: "任务已入列，等待执行...");
       },
     );
-    _dataSource.init();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _dataSource.init();
+      _workShopVm.onTaskFinished = _dataSource.init;
+    });
   }
 
   /// Define list of CommandBarItem
