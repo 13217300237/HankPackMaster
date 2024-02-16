@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class PgyTokenEntity {
   int? code;
   String? message;
@@ -109,6 +111,7 @@ class MyAppInfo {
     this.buildQRCodeURL,
   });
 
+
   factory MyAppInfo.fromJson(Map<String, dynamic> data) {
     return MyAppInfo(
       buildKey: data['buildKey'],
@@ -132,5 +135,38 @@ class MyAppInfo {
       buildUpdated: data['buildUpdated'],
       buildQRCodeURL: data['buildQRCodeURL'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'buildKey': buildKey,
+      'buildType': buildType,
+      'buildIsFirst': buildIsFirst,
+      'buildIsLastest': buildIsLastest,
+      'buildFileKey': buildFileKey,
+      'buildFileName': buildFileName,
+      'buildFileSize': buildFileSize,
+      'buildName': buildName,
+      'buildVersion': buildVersion,
+      'buildVersionNo': buildVersionNo,
+      'buildBuildVersion': buildBuildVersion,
+      'buildIdentifier': buildIdentifier,
+      'buildIcon': buildIcon,
+      'buildDescription': buildDescription,
+      'buildUpdateDescription': buildUpdateDescription,
+      'buildScreenshots': buildScreenshots,
+      'buildShortcutUrl': buildShortcutUrl,
+      'buildCreated': buildCreated,
+      'buildUpdated': buildUpdated,
+      'buildQRCodeURL': buildQRCodeURL,
+    };
+  }
+
+  String toJsonString() {
+    return jsonEncode(toJson());
+  }
+
+  factory MyAppInfo.fromJsonString(String jsonString) {
+    return MyAppInfo.fromJson(jsonDecode(jsonString));
   }
 }

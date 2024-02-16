@@ -917,14 +917,22 @@ class WorkShopVm extends ChangeNotifier {
     }
     if (scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
-      onProjectPackageFinished();
+      onProjectPackageFinished(myAppInfo!);
     } else {
       ToastUtil.showPrettyToast(scheduleRes.toString());
     }
   }
 
   /// 项目激活成功之后
-  void onProjectPackageFinished() {
+  void onProjectPackageFinished(MyAppInfo myAppInfo) {
+    var his = runningTask!.jobHistory;
+    if (his == null) {
+      runningTask!.jobHistory = [];
+    }
+    runningTask!.jobHistory!.add(myAppInfo.toJsonString());
+
+    ProjectRecordOperator.insertOrUpdate(runningTask!);
+
     runningTask = null;
     notifyListeners();
   }

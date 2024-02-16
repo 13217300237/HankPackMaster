@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import '../../comm/pgy/pgy_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import 'column_name_const.dart';
@@ -115,7 +116,7 @@ class ProjectEntityDataSource extends DataGridSource {
                 DataGridCell<CellValue>(
                     columnName: ColumnNameConst.jobOperation,
                     value: CellValue(
-                      value: "开始打包",
+                      value: e,
                       cellType: CellType.goPackageAction,
                       entity: e,
                     )),
@@ -182,13 +183,47 @@ class ProjectEntityDataSource extends DataGridSource {
               );
               break;
             case CellType.goPackageAction:
-              cellWidget = Tooltip(
-                message: "${cellValue.value}",
-                child: IconButton(
-                  icon: Icon(FluentIcons.packages,
-                      color: Colors.green.withOpacity(.8)),
-                  onPressed: () => funcGoPackageAction?.call(cellValue.entity!),
-                ),
+              cellWidget = Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Tooltip(
+                    message: "开始打包",
+                    child: IconButton(
+                      icon: Icon(FluentIcons.packages,
+                          color: Colors.green.withOpacity(.8)),
+                      onPressed: () =>
+                          funcGoPackageAction?.call(cellValue.entity!),
+                    ),
+                  ),
+                  Tooltip(
+                    message: "查看打包历史",
+                    child: IconButton(
+                      icon: Icon(FluentIcons.full_history,
+                          color: Colors.green.withOpacity(.8)),
+                      onPressed: () {
+                        if (cellValue.value is ProjectRecordEntity) {
+                          var e = cellValue.value as ProjectRecordEntity;
+
+                          var his = e.jobHistory ?? [];
+
+                          DialogUtil.showCustomDialog(
+                              context: buildContext,
+                              title: "查看 ${e.projectName} 打包历史",
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ...his.map((s) {
+                                    var myAppInfo = MyAppInfo.fromJsonString(s);
+                                    return Text('${myAppInfo.buildName}');
+                                  }).toList()
+                                ],
+                              ));
+                        }
+                      },
+                    ),
+                  ),
+                ],
               );
               break;
             case CellType.assembleOrders:

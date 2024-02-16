@@ -95,8 +95,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                     onChanged: (checked) {
                       if (checked == true) {
                         _selectedUploadPlatform = uploadPlatforms[index];
-                        debugPrint(
-                            "uploadPlatforms[index] = ${_selectedUploadPlatform?.index}");
                         setState(() {});
                       }
                     }),
