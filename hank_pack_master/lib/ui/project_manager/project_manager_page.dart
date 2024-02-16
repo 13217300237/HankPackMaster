@@ -6,6 +6,7 @@ import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import '../../comm/toast_util.dart';
 import '../../comm/ui/form_input.dart';
 import '../../comm/url_check_util.dart';
 import 'column_name_const.dart';
@@ -42,8 +43,12 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             content: "要激活此项目么？ \n ${e.projectName}",
             confirmText: "确定激活",
             onConfirm: () {
-              _workShopVm.enqueue(e);
-              context.go('/work_shop');
+              var enqueueSuccess = _workShopVm.enqueue(e);
+              if (enqueueSuccess) {
+                context.go('/work_shop');
+              } else {
+                ToastUtil.showPrettyToast('入列失败,发现重复任务');
+              }
             });
       },
       funcGoPackageAction: (e) {

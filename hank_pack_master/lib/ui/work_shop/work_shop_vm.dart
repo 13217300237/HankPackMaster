@@ -743,10 +743,25 @@ class WorkShopVm extends ChangeNotifier {
 
   String taskQueueString() => _taskQueue.map((e) => "$e\n").toList().toString();
 
-  void enqueue(ProjectRecordEntity e) {
+  bool enqueue(ProjectRecordEntity e) {
+    // 入列的时候，一定要检查是否重复，如果重复，拒绝入列
+    for (var element in getQueueList()) {
+      if (e == element) {
+        return false;
+      }
+    }
+
+    if (runningTask != null) {
+      if (e == runningTask) {
+        return false;
+      }
+    }
+
     _taskQueue.add(e);
     _loop();
     notifyListeners();
+
+    return true;
   }
 
   Function? onTaskFinished;
@@ -827,7 +842,8 @@ class WorkShopVm extends ChangeNotifier {
           selectedOrder = runningTask!.setting!.selectedOrder ?? "";
           selectedOrderController.text = selectedOrder!;
           selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
-          selectedUploadPlatformController.text = selectedUploadPlatform!.name??'';
+          selectedUploadPlatformController.text =
+              selectedUploadPlatform!.name ?? '';
 
           initPackageTaskList();
           // await startSchedule();

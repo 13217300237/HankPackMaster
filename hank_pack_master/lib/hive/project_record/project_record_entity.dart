@@ -37,6 +37,17 @@ class ProjectRecordEntity {
   String toString() {
     return "$gitUrl ||  $branch";
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ProjectRecordEntity &&
+        other.gitUrl == gitUrl &&
+        other.branch == branch;
+  }
+
+  @override
+  int get hashCode => branch.hashCode ^ gitUrl.hashCode;
 }
 
 class PackageSetting {

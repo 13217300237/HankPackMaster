@@ -195,10 +195,13 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             return;
           }
 
-          widget.workShopVm.enqueue(widget.projectRecordEntity);
-
+          var success = widget.workShopVm.enqueue(widget.projectRecordEntity);
           Navigator.pop(context);
-          widget.goToWorkShop?.call();
+          if (success) {
+            widget.goToWorkShop?.call();
+          } else {
+            ToastUtil.showPrettyToast('入列失败,发现重复任务');
+          }
         });
     var cancelActionBtn = OutlinedButton(
         child: const Text("取消"), onPressed: () => Navigator.pop(context));
