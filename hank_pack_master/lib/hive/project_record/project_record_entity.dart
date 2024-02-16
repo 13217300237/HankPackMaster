@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import '../../comm/upload_platforms.dart';
+
 part 'project_record_entity.g.dart';
 
 /// 打包任务实体类
@@ -21,11 +23,44 @@ class ProjectRecordEntity {
   @HiveField(0x05)
   List<String>? assembleOrders;
 
-  ProjectRecordEntity(this.gitUrl, this.branch, this.projectName,
-      {this.preCheckOk = false, this.assembleOrders});
+  PackageSetting? setting;
+
+  ProjectRecordEntity(
+    this.gitUrl,
+    this.branch,
+    this.projectName, {
+    this.preCheckOk = false,
+    this.assembleOrders,
+  });
 
   @override
   String toString() {
     return "$gitUrl ||  $branch";
+  }
+}
+
+class PackageSetting {
+  String? appDescStr;
+  String? appUpdateStr;
+  String? apkLocation;
+  String? selectedOrder;
+  UploadPlatform? selectedUploadPlatform;
+
+  PackageSetting({
+    this.appDescStr,
+    this.appUpdateStr,
+    this.apkLocation,
+    this.selectedOrder,
+    this.selectedUploadPlatform,
+  });
+
+  String ready() {
+    if (selectedOrder == null || selectedOrder!.isEmpty) {
+      return "打包命令必须选择";
+    }
+    if (selectedUploadPlatform == null) {
+      return "上传方式必须选择";
+    }
+    return '';
   }
 }

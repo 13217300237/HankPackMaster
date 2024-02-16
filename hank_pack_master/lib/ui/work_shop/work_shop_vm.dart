@@ -13,6 +13,7 @@ import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/const.dart';
 import '../../comm/text_util.dart';
+import '../../comm/upload_platforms.dart';
 import '../../core/command_util.dart';
 import 'package:path/path.dart' as path;
 
@@ -107,20 +108,13 @@ waitForever() async {
   await Future.delayed(const Duration(seconds: 2));
 }
 
-class UploadPlatform {
-  final String name;
-  final int value;
-
-  const UploadPlatform._(this.name, this.value);
-
-  static const UploadPlatform pgy = UploadPlatform._('蒲公英平台', 0);
-  static const UploadPlatform hwobs = UploadPlatform._('华为obs平台', 1);
-}
-
 class WorkShopVm extends ChangeNotifier {
   final gitUrlController = TextEditingController(); // git地址
   final gitBranchController = TextEditingController(); // 分支名称
   final projectPathController = TextEditingController(); // 工程路径
+  final selectedOrderController = TextEditingController(); // 选中的打包命令
+  final selectedUploadPlatformController = TextEditingController(); // 工程路径
+
   final projectAppDescController = TextEditingController(); // 应用描述
   final updateLogController = TextEditingController(); // 更新日志
   final apkLocationController = TextEditingController(); // 更新日志
@@ -149,11 +143,6 @@ class WorkShopVm extends ChangeNotifier {
   final logListViewScrollController = ScrollController();
 
   UploadPlatform? selectedUploadPlatform; // 选中的上传平台
-
-  List<UploadPlatform> uploadPlatforms = [
-    UploadPlatform.pgy,
-    UploadPlatform.hwobs
-  ];
 
   void setSelectedUploadPlatform(int index) {
     selectedUploadPlatform = uploadPlatforms[index];
@@ -348,7 +337,6 @@ class WorkShopVm extends ChangeNotifier {
       "生成apk",
       actionFunc: () async {
         await waitSomeSec();
-        // 阶段3，执行打包命令
         ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
             .gradleAssemble(
                 projectRoot: projectPath + Platform.pathSeparator,
@@ -390,7 +378,7 @@ class WorkShopVm extends ChangeNotifier {
       onStateFinished: updateStageCostTime,
     ));
 
-    if (selectedUploadPlatform?.value == 0) {
+    if (selectedUploadPlatform?.index == 0) {
       taskStateList.add(TaskState(
         "获取pgy token",
         actionFunc: () async {
@@ -763,11 +751,7 @@ class WorkShopVm extends ChangeNotifier {
 
   Function? onTaskFinished;
 
-  /// 开始项目激活
-  Future<void> startActive() async {
-    gitUrlController.text = runningTask!.gitUrl;
-    gitBranchController.text = runningTask!.branch;
-
+  void setProjectPath() {
     var gitText = gitUrlController.text;
 
     var lastSepIndex = gitText.lastIndexOf("/");
@@ -778,6 +762,13 @@ class WorkShopVm extends ChangeNotifier {
         EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey) +
             Platform.pathSeparator +
             projectName;
+  }
+
+  /// 开始项目激活
+  Future<void> startActive() async {
+    gitUrlController.text = runningTask!.gitUrl;
+    gitBranchController.text = runningTask!.branch;
+    setProjectPath();
 
     initPreCheckTaskList();
     var value = await startSchedule();
@@ -816,10 +807,34 @@ class WorkShopVm extends ChangeNotifier {
       return;
     }
     // 每隔3秒，查找队列中是否有任务
-    taskTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    taskTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (runningTask == null && _taskQueue.isNotEmpty) {
         runningTask = _taskQueue.removeFirst();
-        startActive();
+        assert(runningTask != null);
+
+        // 如果此工程已经激活成功，那么，直接进行打包
+        if (runningTask!.preCheckOk) {
+          assert(runningTask!.setting != null); // 将这些信息填入到 表单中
+
+          gitUrlController.text = runningTask!.gitUrl;
+          gitBranchController.text = runningTask!.branch;
+          setProjectPath();
+
+          projectAppDescController.text =
+              runningTask!.setting!.appDescStr ?? '';
+          updateLogController.text = runningTask!.setting!.appUpdateStr ?? '';
+          apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
+          selectedOrder = runningTask!.setting!.selectedOrder ?? "";
+          selectedOrderController.text = selectedOrder!;
+          selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
+          selectedUploadPlatformController.text = selectedUploadPlatform!.name??'';
+
+          initPackageTaskList();
+          // await startSchedule();
+        } else {
+          // 否则，先进行激活
+          startActive();
+        }
       }
     });
   }

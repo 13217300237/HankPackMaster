@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../comm/ui/pretty_3d_button.dart';
+import '../../comm/ui/form_input.dart';
 import '../../comm/url_check_util.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
@@ -61,7 +62,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
             return;
           }
 
-
           // 直接赋值给 _projectNameController 就行了
         }
 
@@ -94,177 +94,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
           child: Text("请先准备好环境参数",
               style: TextStyle(color: Colors.red, fontSize: 45)));
     }
-  }
-
-  Widget _choose(String title, Map<String, String> orderList,
-      {bool must = true}) {
-    Widget comboBox;
-
-    Widget mustSpace;
-
-    if (must) {
-      mustSpace = SizedBox(
-          width: 20,
-          child: Center(
-              child: Text('*',
-                  style: TextStyle(fontSize: 18, color: Colors.red))));
-    } else {
-      mustSpace = const SizedBox(width: 20);
-    }
-
-    if (_workShopVm.jobRunning) {
-      comboBox = Text(_workShopVm.selectedOrder ?? '');
-    } else if (orderList.isEmpty) {
-      comboBox = const SizedBox();
-    } else {
-      comboBox = ComboBox<String>(
-        value: _workShopVm.selectedOrder,
-        placeholder: const Text('你必须选择一个打包命令'),
-        items: orderList.entries.map((e) {
-          return ComboBoxItem(
-            value: e.key,
-            child: Text(e.key),
-          );
-        }).toList(),
-        onChanged: (order) {
-          if (order != null) {
-            _workShopVm.setSelectedOrder(order);
-          } else {
-            _showInfoDialog(title, "你必须选择一个打包命令");
-          }
-        },
-      );
-    }
-
-    comboBox = Text(_workShopVm.selectedOrder ?? '');
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0),
-      child: Row(children: [
-        SizedBox(
-          width: 100,
-          child: Row(
-            children: [
-              Text(title, style: const TextStyle(fontSize: 18)),
-              mustSpace
-            ],
-          ),
-        ),
-        comboBox
-      ]),
-    );
-  }
-
-  Widget _chooseRadio(String title, {bool must = true}) {
-    Widget mustSpace;
-
-    if (must) {
-      mustSpace = SizedBox(
-          width: 20,
-          child: Center(
-              child: Text('*',
-                  style: TextStyle(fontSize: 18, color: Colors.red))));
-    } else {
-      mustSpace = const SizedBox(width: 20);
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0),
-      child: Row(children: [
-        SizedBox(
-          width: 100,
-          child: Row(
-            children: [
-              Text(title, style: const TextStyle(fontSize: 18)),
-              mustSpace,
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children:
-                List.generate(_workShopVm.uploadPlatforms.length, (index) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 18.0),
-                child: RadioButton(
-                    checked: _workShopVm.selectedUploadPlatform?.value == index,
-                    content: Text(_workShopVm.uploadPlatforms[index].name),
-                    onChanged: (checked) {
-                      if (_workShopVm.jobRunning) {
-                        _showInfoDialog("提示", "任务正在执行，请稍后操作");
-                        return;
-                      }
-                      if (checked) {
-                        _workShopVm.setSelectedUploadPlatform(index);
-                      }
-                    }),
-              );
-            }),
-          ),
-        )
-      ]),
-    );
-  }
-
-  /// 输入框
-  Widget _input(
-    String title,
-    String placeholder,
-    TextEditingController controller, {
-    Widget? suffix,
-    bool alwaysDisable = false,
-    int maxLines = 1,
-    int? maxLength,
-    bool must = false,
-  }) {
-    Widget mustSpace;
-
-    if (must) {
-      mustSpace = SizedBox(
-          width: 20,
-          child: Center(
-              child: Text('*',
-                  style: TextStyle(fontSize: 18, color: Colors.red))));
-    } else {
-      mustSpace = const SizedBox(width: 20);
-    }
-
-    var textStyle =
-        const TextStyle(decoration: TextDecoration.none, fontSize: 16);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Row(
-              children: [
-                Text(title, style: const TextStyle(fontSize: 18)),
-                mustSpace
-              ],
-            ),
-          ),
-          Expanded(
-            child: TextBox(
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(5)),
-                unfocusedColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                style: textStyle,
-                placeholder: placeholder,
-                placeholderStyle: textStyle,
-                expands: false,
-                maxLines: maxLines,
-                maxLength: maxLength,
-                enabled: false,
-                controller: controller),
-          ),
-          if (suffix != null) ...[suffix]
-        ],
-      ),
-    );
   }
 
   _toolTip() {
@@ -320,26 +149,13 @@ class _WorkShopPageState extends State<WorkShopPage> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _input(
-                        "git地址 ",
-                        "输入git地址",
-                        _workShopVm.gitUrlController,
-                        must: true,
-                      ),
+                      input("git地址 ", "输入git地址", _workShopVm.gitUrlController,
+                          must: true, enable: false),
                       _gitErrorText(),
-                      _input(
-                        "工程位置",
-                        "输入工程名",
-                        _workShopVm.projectPathController,
-                        alwaysDisable: true,
-                        suffix: _toolTip(),
-                      ),
-                      _input(
-                        "分支名称",
-                        "输入分支名称",
-                        _workShopVm.gitBranchController,
-                        must: true,
-                      ),
+                      input("工程位置", "输入工程名", _workShopVm.projectPathController,
+                          suffix: _toolTip(), enable: false),
+                      input("分支名称", "输入分支名称", _workShopVm.gitBranchController,
+                          must: true, enable: false),
                     ]),
               ),
             ),
@@ -364,27 +180,30 @@ class _WorkShopPageState extends State<WorkShopPage> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _input(
+                        input(
                           "应用描述",
                           "输入应用描述...",
                           _workShopVm.projectAppDescController,
                           maxLines: 5,
+                          enable: false,
                         ),
-                        _input(
-                          "更新日志",
-                          "输入更新日志...",
-                          _workShopVm.updateLogController,
-                          maxLines: 5,
-                        ),
-                        _choose('打包命令', _workShopVm.enableAssembleOrders),
+                        input("更新日志", "输入更新日志...",
+                            _workShopVm.updateLogController,
+                            maxLines: 5, enable: false),
+                        input('打包命令', "必须选择一个打包命令",
+                            _workShopVm.selectedOrderController,
+                            enable: false),
                         const SizedBox(height: 5),
-                        _input(
+                        input(
                           "apk路径",
                           "请输入apk预计路径，程序会根据此路径检测apk文件",
                           _workShopVm.apkLocationController,
                           maxLines: 1,
+                          enable: false,
                         ),
-                        _chooseRadio('上传方式'),
+                        input('上传方式', "必须选择一个上传平台",
+                            _workShopVm.selectedUploadPlatformController,
+                            enable: false),
                       ]),
                 ),
               ),
@@ -627,55 +446,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
     return true;
   }
 
-  void dealWithScheduleResultByApkGenerate(PackageSuccessEntity s) {
-    onConfirm() async {
-      var apkFile = File(s.apkPath);
-      if (await apkFile.exists()) {
-        await launchUrl(Uri.parse(apkFile.parent.path));
-      } else {
-        showApkNotExistInfo();
-      }
-    }
-
-    String? confirmText = "打开文件位置";
-    DialogUtil.showCustomDialog(
-      context: context,
-      title: "流程结束",
-      content: s.toString(),
-      onConfirm: onConfirm,
-      confirmText: confirmText,
-    );
-  }
-
-  void dealWithScheduleResultByApkUpload(MyAppInfo s) {
-    var card = AppInfoCard(appInfo: s);
-
-    DialogUtil.showCustomDialog(
-      context: context,
-      content: card,
-      title: '流程结束',
-    );
-  }
-
-  MyAppInfo? myAppInfo;
-
-  Future<void> startPackage() async {
-    _workShopVm.initPackageTaskList();
-    var scheduleRes = await _workShopVm.startSchedule();
-
-    if (scheduleRes == null) {
-      return;
-    }
-    if (scheduleRes.data is PackageSuccessEntity) {
-      dealWithScheduleResultByApkGenerate(scheduleRes.data);
-    } else if (scheduleRes.data is MyAppInfo) {
-      myAppInfo = scheduleRes.data;
-      dealWithScheduleResultByApkUpload(scheduleRes.data);
-    } else {
-      _showInfoDialog('打包结果', scheduleRes.toString());
-    }
-  }
-
   bool get gitErrVisible {
     return !isValidGitUrl(_workShopVm.gitUrlController.text) &&
         _workShopVm.gitUrlController.text.isNotEmpty;
@@ -711,9 +481,5 @@ class _WorkShopPageState extends State<WorkShopPage> {
       padding: const EdgeInsets.only(top: 15.0, bottom: 5.0),
       child: Row(mainAxisSize: MainAxisSize.min, children: [...listWidget]),
     );
-  }
-
-  void showApkNotExistInfo() {
-    DialogUtil.showInfo(context: context, content: "出现错误，apk文件不存在");
   }
 }

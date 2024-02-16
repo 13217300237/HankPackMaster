@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
-import '../../comm/url_check_util.dart';
+import '../../../comm/url_check_util.dart';
 
 class CreateProjectDialogWidget extends StatefulWidget {
   final TextEditingController gitUrlTextController;
