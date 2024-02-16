@@ -8,11 +8,13 @@ import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:path/path.dart';
 
+import '../../comm/dialog_util.dart';
 import '../../comm/file_operation.dart';
 import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/const.dart';
 import '../../comm/text_util.dart';
+import '../../comm/toast_util.dart';
 import '../../comm/upload_platforms.dart';
 import '../../core/command_util.dart';
 import 'package:path/path.dart' as path;
@@ -20,6 +22,7 @@ import 'package:path/path.dart' as path;
 import '../../hive/env_config/env_config_operator.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
+import 'app_info_card.dart';
 
 typedef ActionFunc = Future<OrderExecuteResult> Function();
 
@@ -795,6 +798,8 @@ class WorkShopVm extends ChangeNotifier {
         onProjectActiveFinished(value.data);
       }
       onTaskFinished?.call();
+    } else {
+      onProjectActiveFinished([]);
     }
   }
 
@@ -807,9 +812,12 @@ class WorkShopVm extends ChangeNotifier {
 
   /// 项目激活成功之后
   void onProjectActiveFinished(List<String> assembleOrders) {
-    runningTask!.preCheckOk = true;
-    runningTask!.assembleOrders = assembleOrders;
-    ProjectRecordOperator.insertOrUpdate(runningTask!);
+    if (assembleOrders.isNotEmpty) {
+      runningTask!.preCheckOk = true;
+      runningTask!.assembleOrders = assembleOrders;
+      ProjectRecordOperator.insertOrUpdate(runningTask!);
+    } else {}
+
     runningTask = null;
     notifyListeners();
   }
@@ -826,7 +834,7 @@ class WorkShopVm extends ChangeNotifier {
       if (runningTask == null && _taskQueue.isNotEmpty) {
         runningTask = _taskQueue.removeFirst();
         assert(runningTask != null);
-
+        debugPrint("准备切入新任务，请稍后... ${runningTask!.projectName}");
         // 如果此工程已经激活成功，那么，直接进行打包
         if (runningTask!.preCheckOk) {
           assert(runningTask!.setting != null); // 将这些信息填入到 表单中
@@ -845,13 +853,37 @@ class WorkShopVm extends ChangeNotifier {
           selectedUploadPlatformController.text =
               selectedUploadPlatform!.name ?? '';
 
-          initPackageTaskList();
-          // await startSchedule();
+          await startPackage();
         } else {
           // 否则，先进行激活
-          startActive();
+          await startActive();
         }
+      } else {
+        debugPrint("当前有任务正在执行，请稍后... ${runningTask?.projectName}");
       }
     });
+  }
+
+  MyAppInfo? myAppInfo;
+
+  Future<void> startPackage() async {
+    initPackageTaskList();
+    var scheduleRes = await startSchedule();
+
+    if (scheduleRes == null) {
+      return;
+    }
+    if (scheduleRes.data is MyAppInfo) {
+      myAppInfo = scheduleRes.data;
+      onProjectPackageFinished();
+    } else {
+      ToastUtil.showPrettyToast(scheduleRes.toString());
+    }
+  }
+
+  /// 项目激活成功之后
+  void onProjectPackageFinished() {
+    runningTask = null;
+    notifyListeners();
   }
 }

@@ -28,9 +28,11 @@ class DialogUtil {
           constraints: BoxConstraints(maxWidth: maxWidth),
           content: content is Widget
               ? content
-              : Text(
-                  content,
-                  style: const TextStyle(fontSize: 18),
+              : SingleChildScrollView(
+                  child: Text(
+                    content,
+                    style: const TextStyle(fontSize: 18),
+                  ),
                 ),
           actions: showActions
               ? [

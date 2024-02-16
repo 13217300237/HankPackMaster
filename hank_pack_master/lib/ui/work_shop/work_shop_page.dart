@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/order_execute_result.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
@@ -122,6 +123,16 @@ class _WorkShopPageState extends State<WorkShopPage> {
         title: title,
         showCancel: false,
         confirmText: '我知道了...');
+  }
+
+  void showMyAppInfo(MyAppInfo s) {
+    var card = AppInfoCard(appInfo: s);
+
+    DialogUtil.showCustomDialog(
+      context: context,
+      content: card,
+      title: '流程结束',
+    );
   }
 
   _showErr() {
@@ -394,7 +405,16 @@ class _WorkShopPageState extends State<WorkShopPage> {
     return FilledButton(
       onPressed: () {
         // 按下之后，打开当前阶段的执行结果弹窗
-        _showInfoDialog(stage.stageName, '${stage.executeResultData}');
+
+        var result = stage.executeResultData;
+        if (result is OrderExecuteResult) {
+          var data = result.data;
+          if (data is MyAppInfo) {
+            showMyAppInfo(data);
+          } else {
+            _showInfoDialog(stage.stageName, '${stage.executeResultData}');
+          }
+        }
       },
       style: ButtonStyle(
           backgroundColor: ButtonState.resolveWith(

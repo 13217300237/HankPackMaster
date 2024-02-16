@@ -108,58 +108,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
     );
   }
 
-  MyAppInfo? myAppInfo;
-
-  Future<void> startPackage() async {
-    widget.workShopVm.initPackageTaskList();
-    var scheduleRes = await widget.workShopVm.startSchedule();
-
-    if (scheduleRes == null) {
-      return;
-    }
-    if (scheduleRes.data is PackageSuccessEntity) {
-      dealWithScheduleResultByApkGenerate(scheduleRes.data);
-    } else if (scheduleRes.data is MyAppInfo) {
-      myAppInfo = scheduleRes.data;
-      dealWithScheduleResultByApkUpload(scheduleRes.data);
-    } else {
-      ToastUtil.showPrettyToast(scheduleRes.toString());
-    }
-  }
-
-  void dealWithScheduleResultByApkUpload(MyAppInfo s) {
-    var card = AppInfoCard(appInfo: s);
-
-    DialogUtil.showCustomDialog(
-      context: context,
-      content: card,
-      title: '流程结束',
-    );
-  }
-
-  void showApkNotExistInfo() {
-    DialogUtil.showInfo(context: context, content: "出现错误，apk文件不存在");
-  }
-
-  void dealWithScheduleResultByApkGenerate(PackageSuccessEntity s) {
-    onConfirm() async {
-      var apkFile = File(s.apkPath);
-      if (await apkFile.exists()) {
-        await launchUrl(Uri.parse(apkFile.parent.path));
-      } else {
-        showApkNotExistInfo();
-      }
-    }
-
-    String? confirmText = "打开文件位置";
-    DialogUtil.showCustomDialog(
-      context: context,
-      title: "流程结束",
-      content: s.toString(),
-      onConfirm: onConfirm,
-      confirmText: confirmText,
-    );
-  }
 
   String _errMsg = "";
 

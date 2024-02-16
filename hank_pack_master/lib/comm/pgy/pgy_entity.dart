@@ -10,6 +10,16 @@ class PgyTokenEntity {
     message = json['message'];
     data = Details.fromJson(json['data']);
   }
+
+  @override
+  String toString() {
+    return """
+message = $message 
+endpoint = ${data?.endpoint} 
+xCosSecurityToken = ${data?.params?.xCosSecurityToken} 
+signature = ${data?.params?.signature} 
+key = ${data?.params?.key}""";
+  }
 }
 
 class Details {
@@ -43,9 +53,9 @@ class Params {
 class ReleaseResultEntity {
   int? code;
   String? message;
-  Map<String,dynamic>? data;
+  Map<String, dynamic>? data;
 
-  ReleaseResultEntity({this.code, this.message,this.data});
+  ReleaseResultEntity({this.code, this.message, this.data});
 
   ReleaseResultEntity.fromJson(Map<String, dynamic> json) {
     code = json['code'];
@@ -53,8 +63,6 @@ class ReleaseResultEntity {
     data = json['data'];
   }
 }
-
-
 
 class MyAppInfo {
   final String? buildKey;
@@ -101,8 +109,7 @@ class MyAppInfo {
     this.buildQRCodeURL,
   });
 
-  factory MyAppInfo.fromJson(Map<String,dynamic> data) {
-
+  factory MyAppInfo.fromJson(Map<String, dynamic> data) {
     return MyAppInfo(
       buildKey: data['buildKey'],
       buildType: data['buildType'],
