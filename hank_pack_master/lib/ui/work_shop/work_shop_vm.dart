@@ -6,23 +6,20 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:path/path.dart' as path;
 import 'package:path/path.dart';
 
-import '../../comm/dialog_util.dart';
+import '../../comm/const.dart';
 import '../../comm/file_operation.dart';
 import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
-import '../../comm/const.dart';
 import '../../comm/text_util.dart';
 import '../../comm/toast_util.dart';
 import '../../comm/upload_platforms.dart';
 import '../../core/command_util.dart';
-import 'package:path/path.dart' as path;
-
 import '../../hive/env_config/env_config_operator.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
-import 'app_info_card.dart';
 
 typedef ActionFunc = Future<OrderExecuteResult> Function();
 
@@ -473,6 +470,9 @@ class WorkShopVm extends ChangeNotifier {
             if (s.data is Map<String, dynamic>) {
               MyAppInfo appInfo =
                   MyAppInfo.fromJson(s.data as Map<String, dynamic>);
+              appInfo.buildDescription =
+                  projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
+
               addNewLogLine("应用名称: ${appInfo.buildName}");
               addNewLogLine("大小: ${appInfo.buildFileSize}");
               addNewLogLine("版本号: ${appInfo.buildVersion}");
@@ -506,18 +506,29 @@ class WorkShopVm extends ChangeNotifier {
           if (log.exitCode != 0) {
             return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
           }
-
+          // 上传到OBS的时候，必须重命名,不然无法区分多版本
           File fileToUpload = File(apkToUpload!);
 
+          String childFolderName = path.basename(projectPath); // 用项目名称作为分隔
+          String buildUpdated = Jiffy.now().format(pattern: "yyyyMMdd_HHmmss_");
+
           var oBSResponse = await OBSClient.putFile(
-              objectName: path.basename(apkToUpload!), file: fileToUpload);
+            objectName:
+                "${childFolderName}_$buildUpdated${path.basename(apkToUpload!)}",
+            file: fileToUpload,
+          );
 
           obsDownloadUrl = oBSResponse?.url;
           if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
-            return OrderExecuteResult(data: "OBS上传失败 ", succeed: false);
+            return OrderExecuteResult(
+              data: "OBS上传失败 ",
+              succeed: false,
+            );
           } else {
             return OrderExecuteResult(
-                data: "OBS上传成功,下载地址为 $obsDownloadUrl", succeed: true);
+              data: "OBS上传成功,下载地址为 $obsDownloadUrl",
+              succeed: true,
+            );
           }
         },
         onStateFinishedFunc: updateStageCostTime,
@@ -527,20 +538,36 @@ class WorkShopVm extends ChangeNotifier {
         "构建打包结果",
         actionFunc: () async {
           MyAppInfo appInfo = MyAppInfo();
-          // TODO           addNewLogLine("应用名称: ${appInfo.buildName}"); // 解析apk
-          addNewLogLine("大小: ${appInfo.buildFileSize}"); // 解析apk
-          addNewLogLine("版本号: ${appInfo.buildVersion}"); // 解析apk
-          addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}"); // 解析apk
-          addNewLogLine("应用包名: ${appInfo.buildIdentifier}"); // 解析apk
-          addNewLogLine(
-              "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}"); // 解析apk
-          addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
-          addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
-          addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
-          addNewLogLine("应用描述: ${appInfo.buildDescription}");
-          addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
+          File apkFile = File(apkToUpload!);
+          if (await apkFile.exists()) {
+            String fileSize = "${await apkFile.length()}"; // 文件大小
+            appInfo.buildFileSize = fileSize;
+            // 如何通过一个APK文件，找出它的 versionName, versionCode,包名
 
-          return OrderExecuteResult(data: appInfo, succeed: false);
+            // 用aapt解析出manifest内容，然后 解析出其中的
+
+
+            appInfo.buildQRCodeURL = obsDownloadUrl;
+            appInfo.buildUpdated =
+                Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
+            // 更新日志
+            appInfo.buildUpdateDescription = updateLog;
+            // 应用描述
+            appInfo.buildDescription = projectAppDesc;
+
+            addNewLogLine("大小: ${appInfo.buildFileSize}");
+            addNewLogLine("版本号: ${appInfo.buildVersion}");
+            addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
+            addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
+            addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
+            addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
+            addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
+            addNewLogLine("应用描述: ${appInfo.buildDescription}");
+            addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
+            return OrderExecuteResult(data: appInfo, succeed: true);
+          } else {
+            return OrderExecuteResult(data: null, succeed: false);
+          }
         },
         onStateFinishedFunc: updateStageCostTime,
         onStageStartedFunc: updateStateStarted,
@@ -549,6 +576,8 @@ class WorkShopVm extends ChangeNotifier {
 
     notifyListeners();
   }
+
+
 
   List<String> findLinesWithKeyword(
       {required String ori, required String keyword}) {
@@ -915,7 +944,7 @@ class WorkShopVm extends ChangeNotifier {
     if (scheduleRes == null) {
       return;
     }
-    if (scheduleRes.data is MyAppInfo) {
+    if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
       onProjectPackageFinished(myAppInfo!);
     } else {

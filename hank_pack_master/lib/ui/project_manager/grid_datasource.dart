@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/ui/project_manager/package_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/pgy/pgy_entity.dart';
@@ -209,13 +210,13 @@ class ProjectEntityDataSource extends DataGridSource {
 
                           DialogUtil.showCustomDialog(
                               context: buildContext,
-                              title: "查看 ${e.projectName} 打包历史",
+                              title: "${e.projectName} 打包历史",
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   ...his.map((s) {
                                     var myAppInfo = MyAppInfo.fromJsonString(s);
-                                    return Text('${myAppInfo.buildName}');
+                                    return PackageHistoryCard(myAppInfo: myAppInfo);
                                   }).toList()
                                 ],
                               ));

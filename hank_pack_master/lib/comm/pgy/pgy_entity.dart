@@ -67,26 +67,26 @@ class ReleaseResultEntity {
 }
 
 class MyAppInfo {
-  final String? buildKey;
-  final String? buildType;
-  final String? buildIsFirst;
-  final String? buildIsLastest;
-  final String? buildFileKey;
-  final String? buildFileName;
-  final String? buildFileSize;
-  final String? buildName;
-  final String? buildVersion;
-  final String? buildVersionNo;
-  final String? buildBuildVersion;
-  final String? buildIdentifier;
-  final String? buildIcon;
-  final String? buildDescription;
-  final String? buildUpdateDescription;
-  final String? buildScreenshots;
-  final String? buildShortcutUrl;
-  final String? buildCreated;
-  final String? buildUpdated;
-  final String? buildQRCodeURL;
+   String? buildKey;
+   String? buildType;
+   String? buildIsFirst;
+   String? buildIsLastest;
+   String? buildFileKey;
+   String? buildFileName;
+   String? buildFileSize;
+   String? buildName;
+   String? buildVersion;
+   String? buildVersionNo;
+   String? buildBuildVersion;
+   String? buildIdentifier;
+   String? buildIcon;
+   String? buildDescription;
+   String? buildUpdateDescription;
+   String? buildScreenshots;
+   String? buildShortcutUrl;
+   String? buildCreated;
+   String? buildUpdated;
+   String? buildQRCodeURL;
 
   MyAppInfo({
     this.buildKey,

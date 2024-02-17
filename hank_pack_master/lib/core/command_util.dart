@@ -383,7 +383,7 @@ class CommandUtil {
 
       return process;
     } catch (e, r) {
-      debugCmdPrint("$e $r");
+      debugCmdPrint("命令执行时报错：$e $r");
     }
 
     return null;
@@ -464,6 +464,78 @@ $sb"""
     String res = "$sb".trim();
 
     return ExecuteResult(res, exitCode!);
+  }
+
+  Future<ExecuteResult> aapt(
+      String apkPath, {Function(String s)? logOutput}) async {
+    StringBuffer sb = StringBuffer();
+    // 执行 aapt2 命令获取 APK 中的应用信息
+    ProcessResult result = await Process.run(
+        'D:/env/Android/Sdk/build-tools/32.0.0-rc1/aapt2.exe',
+        ['dump', 'badging', apkPath],
+        stdoutEncoding: utf8);
+
+    /// 方法内部还可以定义方法，这是dart的特色
+    Map<String, dynamic> parseAapt2Output(String output) {
+      Map<String, dynamic> appInfo = {};
+
+      List<String> split = output.split("\n");
+      var targetStr = "package:";
+      var packageInfo =
+          split.firstWhere((element) => element.contains(targetStr));
+      var sub = packageInfo
+          .substring(packageInfo.indexOf(targetStr) + targetStr.length)
+          .trim()
+          .split(" ");
+
+      Map<String, String> packageMap = {};
+
+      for (String item in sub) {
+        List<String> parts = item.split("=");
+        String key = parts[0].replaceAll("'", "").trim();
+        String value = parts[1].replaceAll("'", "").trim();
+        packageMap[key] = value;
+      }
+
+      appInfo.addAll(packageMap);
+
+      var targetStr2 = "application-label:";
+      var applicationLabel =
+          split.firstWhere((element) => element.contains(targetStr2));
+      var appName = applicationLabel
+          .substring(applicationLabel.indexOf(targetStr2) + targetStr2.length)
+          .trim()
+          .replaceAll('\'', '');
+
+      appInfo['appName'] = appName;
+
+      return appInfo;
+    }
+
+    if (result.exitCode == 0) {
+      String output = result.stdout as String;
+
+      // debugPrint("打印结果：${result.stdout.runtimeType} \n$output");
+
+      // 解析应用信息
+      Map<String, dynamic> appInfo = parseAapt2Output(output);
+
+      // 获取包名、版本号和版本名
+      String? appName = appInfo['appName'];
+      String? packageName = appInfo['name'];
+      String? versionCode = appInfo['versionCode'];
+      String? versionName = appInfo['versionName'];
+
+      // 打印包名、版本号和版本名
+      print('app Name: $appName');
+      print('Package Name: $packageName');
+      print('Version Code: $versionCode');
+      print('Version Name: $versionName');
+    } else {
+      print('Failed to get APK information using aapt2.');
+    }
+
+    return ExecuteResult("res", exitCode);
   }
 
   Future<ExecuteResult> gitCheckout(
