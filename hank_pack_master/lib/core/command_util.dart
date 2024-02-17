@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
@@ -19,8 +19,9 @@ debugCmdPrint(String msg) {
 class ExecuteResult {
   String res;
   int exitCode;
+  dynamic data;
 
-  ExecuteResult(this.res, this.exitCode);
+  ExecuteResult(this.res, this.exitCode, {this.data});
 
   @override
   String toString() {
@@ -466,51 +467,92 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
+  /// 方法内部还可以定义方法，这是dart的特色
+  Map<String, dynamic> _parseAapt2Output(String output) {
+    Map<String, dynamic> appInfo = {};
+
+    List<String> split = output.split("\n");
+    var targetStr = "package:";
+    var packageInfo =
+        split.firstWhere((element) => element.contains(targetStr));
+    var sub = packageInfo
+        .substring(packageInfo.indexOf(targetStr) + targetStr.length)
+        .trim()
+        .split(" ");
+
+    Map<String, String> packageMap = {};
+
+    for (String item in sub) {
+      List<String> parts = item.split("=");
+      String key = parts[0].replaceAll("'", "").trim();
+      String value = parts[1].replaceAll("'", "").trim();
+      packageMap[key] = value;
+    }
+
+    appInfo.addAll(packageMap);
+
+    var targetStr2 = "application-label:";
+    var applicationLabel =
+        split.firstWhere((element) => element.contains(targetStr2));
+    var appName = applicationLabel
+        .substring(applicationLabel.indexOf(targetStr2) + targetStr2.length)
+        .trim()
+        .replaceAll('\'', '');
+
+    appInfo['appName'] = appName;
+
+    return appInfo;
+  }
+
+  int _parseVersionPart(String part) {
+    if (part.contains(RegExp(r'[^0-9]'))) {
+      // 如果part包含非数字字符，则只取第一个数字字串
+      int? number = int.tryParse(part.replaceAll(RegExp(r'[^0-9].*'), ''));
+      return number ?? 0;
+    } else {
+      return int.tryParse(part) ?? 0;
+    }
+  }
+
   Future<ExecuteResult> aapt(
-      String apkPath, {Function(String s)? logOutput}) async {
-    StringBuffer sb = StringBuffer();
+    String apkPath, {
+    Function(String s)? logOutput,
+  }) async {
     // 执行 aapt2 命令获取 APK 中的应用信息
-    ProcessResult result = await Process.run(
-        'D:/env/Android/Sdk/build-tools/32.0.0-rc1/aapt2.exe',
-        ['dump', 'badging', apkPath],
-        stdoutEncoding: utf8);
+    var androidSdkPath = EnvConfigOperator.searchEnvValue(Const.envAndroidKey);
+    debugPrint("androidSdkPath->$androidSdkPath");
 
-    /// 方法内部还可以定义方法，这是dart的特色
-    Map<String, dynamic> parseAapt2Output(String output) {
-      Map<String, dynamic> appInfo = {};
+    // 找出最新版的buildTool
+    Directory directory = Directory('$androidSdkPath/build-tools');
 
-      List<String> split = output.split("\n");
-      var targetStr = "package:";
-      var packageInfo =
-          split.firstWhere((element) => element.contains(targetStr));
-      var sub = packageInfo
-          .substring(packageInfo.indexOf(targetStr) + targetStr.length)
-          .trim()
-          .split(" ");
+    var oriList = directory.listSync();
+    // 自定义比较函数对版本号进行排序
+    oriList.sort((a, b) {
+      List<String> partsA = path.basename(a.path).split('.');
+      List<String> partsB = path.basename(b.path).split('.');
 
-      Map<String, String> packageMap = {};
+      for (int i = 0; i < partsA.length; i++) {
+        if (i >= partsB.length) {
+          return 1; // 如果a比b长，则a大
+        }
 
-      for (String item in sub) {
-        List<String> parts = item.split("=");
-        String key = parts[0].replaceAll("'", "").trim();
-        String value = parts[1].replaceAll("'", "").trim();
-        packageMap[key] = value;
+        int numberA = _parseVersionPart(partsA[i]);
+        int numberB = _parseVersionPart(partsB[i]);
+
+        if (numberA != numberB) {
+          return numberA.compareTo(numberB);
+        }
       }
 
-      appInfo.addAll(packageMap);
+      return partsA.length.compareTo(partsB.length); // 版本号长度相同则通过长度比较
+    });
+    var last = oriList.last;
+    debugPrint("last.path->${last.path}");
 
-      var targetStr2 = "application-label:";
-      var applicationLabel =
-          split.firstWhere((element) => element.contains(targetStr2));
-      var appName = applicationLabel
-          .substring(applicationLabel.indexOf(targetStr2) + targetStr2.length)
-          .trim()
-          .replaceAll('\'', '');
-
-      appInfo['appName'] = appName;
-
-      return appInfo;
-    }
+    ProcessResult result = await Process.run(
+        '$androidSdkPath/build-tools/32.0.0-rc1/aapt2.exe',
+        ['dump', 'badging', apkPath],
+        stdoutEncoding: utf8);
 
     if (result.exitCode == 0) {
       String output = result.stdout as String;
@@ -518,7 +560,7 @@ $sb"""
       // debugPrint("打印结果：${result.stdout.runtimeType} \n$output");
 
       // 解析应用信息
-      Map<String, dynamic> appInfo = parseAapt2Output(output);
+      Map<String, dynamic> appInfo = _parseAapt2Output(output);
 
       // 获取包名、版本号和版本名
       String? appName = appInfo['appName'];
@@ -527,15 +569,15 @@ $sb"""
       String? versionName = appInfo['versionName'];
 
       // 打印包名、版本号和版本名
-      print('app Name: $appName');
-      print('Package Name: $packageName');
-      print('Version Code: $versionCode');
-      print('Version Name: $versionName');
+      debugPrint('app Name: $appName');
+      debugPrint('Package Name: $packageName');
+      debugPrint('Version Code: $versionCode');
+      debugPrint('Version Name: $versionName');
+      return ExecuteResult("", exitCode, data: appInfo);
     } else {
-      print('Failed to get APK information using aapt2.');
+      debugPrint('Failed to get APK information using aapt2.');
+      return ExecuteResult("", -1);
     }
-
-    return ExecuteResult("res", exitCode);
   }
 
   Future<ExecuteResult> gitCheckout(
