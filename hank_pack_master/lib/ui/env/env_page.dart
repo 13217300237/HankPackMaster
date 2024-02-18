@@ -497,61 +497,72 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
   /// 可执行文件单选按钮组件
   Widget _buildEnvRadioBtn(String title, Set<String> content) {
     List<Widget> muEnv = [];
+
+    double cardWidth = 400;
+
     for (var binRoot in content) {
-      muEnv.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Card(
-                  borderColor: Colors.transparent,
-                  backgroundColor: Colors.green.withOpacity(.15),
-                  borderRadius: BorderRadius.circular(5),
-                  child: RadioButton(
-                      checked: _envParamModel.judgeEnv(title, binRoot),
-                      onChanged: (v) => _envParamModel.setEnv(title, binRoot,
-                          needToOverride: true),
-                      content: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _titleWidget(binRoot),
-                            EnvCheckWidget(cmdStr: binRoot, title: title),
-                          ],
-                        ),
-                      )),
+      muEnv.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Card(
+          borderColor: Colors.transparent,
+          backgroundColor: Colors.blue.withOpacity(.15),
+          borderRadius: BorderRadius.circular(5),
+          child: RadioButton(
+              checked: _envParamModel.judgeEnv(title, binRoot),
+              onChanged: (v) =>
+                  _envParamModel.setEnv(title, binRoot, needToOverride: true),
+              content: Padding(
+                padding: const EdgeInsets.only(left: 28.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _titleWidget(binRoot, cardWidth),
+                    const SizedBox(width: 20),
+                    EnvCheckWidget(
+                        cmdStr: binRoot, title: title, cardWidth: cardWidth),
+                  ],
                 ),
-              )
-            ],
-          ),
+              )),
         ),
-      );
+      ));
     }
 
     return _card(title, muEnv);
   }
 
-  Widget _titleWidget(String binRoot) {
-    return Padding(
+  Widget _titleWidget(String binRoot, double cardWidth) {
+    return Container(
+      width: cardWidth,
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(binRoot, style: const TextStyle(fontSize: 22)),
+      child: Tooltip(
+        message: binRoot,
+        style: const TooltipThemeData(
+            textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        triggerMode: TooltipTriggerMode.manual,
+        child: Text(
+          binRoot,
+          style: const TextStyle(fontSize: 22),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 
   Widget _card(String title, List<Widget> muEnv) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(title, style: const TextStyle(fontSize: 30)),
-      const SizedBox(height: 15),
-      if (_isEnvGroupLoading) ...[
-        ...muEnv,
-        envErrWidget(title),
-      ] else ...[
-        const ProgressBar(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 30)),
+        const SizedBox(height: 15),
+        if (_isEnvGroupLoading) ...[
+          Wrap(children: [...muEnv]),
+          envErrWidget(title),
+        ] else ...[
+          const ProgressBar(),
+        ],
       ],
-    ]);
+    );
   }
 
   bool hasExecutableExtension(String path) {
@@ -627,8 +638,13 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
 class EnvCheckWidget extends StatefulWidget {
   final String cmdStr;
   final String title;
+  final double cardWidth;
 
-  const EnvCheckWidget({super.key, required this.cmdStr, required this.title});
+  const EnvCheckWidget(
+      {super.key,
+      required this.cmdStr,
+      required this.title,
+      required this.cardWidth});
 
   @override
   State<EnvCheckWidget> createState() => _EnvCheckWidgetState();
@@ -650,14 +666,22 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
       return const ProgressRing();
     }
 
-    return IconButton(
-      icon: const Icon(FluentIcons.show_results, size: 24.0),
-      onPressed: () => DialogUtil.showCustomDialog(
-          context: context,
-          title: "${widget.title}测试结果",
-          content: executeRes,
-          showCancel: false),
+    return SizedBox(
+      width: widget.cardWidth,
+      child: Text(
+        executeRes,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+      ),
     );
+
+    // return IconButton(
+    //   icon: const Icon(FluentIcons.show_results, size: 24.0),
+    //   onPressed: () => DialogUtil.showCustomDialog(
+    //       context: context,
+    //       title: "${widget.title}测试结果",
+    //       content: executeRes,
+    //       showCancel: false),
+    // );
   }
 
   @override
