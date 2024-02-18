@@ -127,7 +127,7 @@ class OBSClient {
 
 extension StringMd5Ext on String {
   List<int> toMD5Bytes() {
-    var content = Utf8Encoder().convert(this);
+    var content = const Utf8Encoder().convert(this);
     var digest = md5.convert(content);
     return digest.bytes;
   }

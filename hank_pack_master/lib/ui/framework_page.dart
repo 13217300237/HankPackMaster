@@ -122,10 +122,8 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         }).toList(),
       );
     }
-    if (e is PaneItem) {
-      return buildPaneItem(e);
-    }
-
+    return buildPaneItem(e);
+  
     return e;
   }).toList();
 

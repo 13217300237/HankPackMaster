@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import '../upload_platforms.dart';
 
 class PgyTokenEntity {
   int? code;

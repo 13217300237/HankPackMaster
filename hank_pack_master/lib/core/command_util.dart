@@ -649,7 +649,7 @@ $sb"""
     params.add(packageOrder);
     params.add("--stacktrace");
 
-    debugPrint("${params}");
+    debugPrint("$params");
 
     var process = await execute(
       cmd: "gradlew.bat",

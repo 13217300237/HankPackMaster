@@ -1,17 +1,12 @@
-import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/comm/upload_platforms.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../../comm/dialog_util.dart';
-import '../../../comm/pgy/pgy_entity.dart';
 import '../../../comm/ui/form_input.dart';
 import '../../../comm/url_check_util.dart';
-import '../../work_shop/app_info_card.dart';
 
 class StartPackageDialogWidget extends StatefulWidget {
   final WorkShopVm workShopVm;
