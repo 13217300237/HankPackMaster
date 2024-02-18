@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/apk_parser_result.dart';
 import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:jiffy/jiffy.dart';
@@ -476,7 +477,7 @@ class WorkShopVm extends ChangeNotifier {
               addNewLogLine("应用名称: ${appInfo.buildName}");
               addNewLogLine("大小: ${appInfo.buildFileSize}");
               addNewLogLine("版本号: ${appInfo.buildVersion}");
-              addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
+              addNewLogLine("上传批次: ${appInfo.buildBuildVersion}");
               addNewLogLine("应用描述: ${appInfo.buildDescription}");
               addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
               addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
@@ -545,30 +546,36 @@ class WorkShopVm extends ChangeNotifier {
           File apkFile = File(apkToUpload!);
           if (await apkFile.exists()) {
             String fileSize = "${await apkFile.length()}"; // 文件大小
-            appInfo.buildFileSize = fileSize;
-            // 如何通过一个APK文件，找出它的 versionName, versionCode,包名
+            var executeResult =
+                await CommandUtil.getInstance().aapt(apkToUpload!);
+            var data = executeResult.data;
+            if (data is ApkParserResult) {
+              appInfo.buildName = data.appName;
+              appInfo.buildVersion = data.versionName;
+              appInfo.buildVersionNo = data.versioncode;
+              appInfo.buildIdentifier = data.packageName;
+              appInfo.buildFileSize = fileSize;
+              appInfo.buildQRCodeURL = obsDownloadUrl;
+              appInfo.buildUpdated =
+                  Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
+              // 更新日志
+              appInfo.buildUpdateDescription = updateLog;
+              // 应用描述
+              appInfo.buildDescription = projectAppDesc;
 
-            // 用aapt解析出manifest内容，然后 解析出其中的
-            CommandUtil.getInstance().aapt(apkToUpload!);
-
-            appInfo.buildQRCodeURL = obsDownloadUrl;
-            appInfo.buildUpdated =
-                Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
-            // 更新日志
-            appInfo.buildUpdateDescription = updateLog;
-            // 应用描述
-            appInfo.buildDescription = projectAppDesc;
-
-            addNewLogLine("大小: ${appInfo.buildFileSize}");
-            addNewLogLine("版本号: ${appInfo.buildVersion}");
-            addNewLogLine("编译版本号: ${appInfo.buildBuildVersion}");
-            addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
-            addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
-            addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
-            addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
-            addNewLogLine("应用描述: ${appInfo.buildDescription}");
-            addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
-            return OrderExecuteResult(data: appInfo, succeed: true);
+              debugPrint("大小: ${appInfo.buildFileSize}");
+              debugPrint("版本号: ${appInfo.buildVersion}");
+              debugPrint("编译版本号: ${appInfo.buildVersionNo}");
+              debugPrint("应用包名: ${appInfo.buildIdentifier}");
+              debugPrint("下载短链接: ${appInfo.buildShortcutUrl}");
+              debugPrint("二维码地址: ${appInfo.buildQRCodeURL}");
+              debugPrint("应用更新时间: ${appInfo.buildUpdated}");
+              debugPrint("应用描述: ${appInfo.buildDescription}");
+              debugPrint("更新日志: ${appInfo.buildUpdateDescription}");
+              return OrderExecuteResult(data: appInfo, succeed: true);
+            } else {
+              return OrderExecuteResult(data: null, succeed: false);
+            }
           } else {
             return OrderExecuteResult(data: null, succeed: false);
           }

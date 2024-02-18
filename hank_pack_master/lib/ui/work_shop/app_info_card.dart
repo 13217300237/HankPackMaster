@@ -44,6 +44,10 @@ class AppInfoCard extends StatelessWidget {
   }
 
   Widget _line(String title, String value) {
+    if (value.isEmpty || "null" == value.trim()) {
+      return const SizedBox();
+    }
+
     var fontSize = 15.0;
 
     return Padding(

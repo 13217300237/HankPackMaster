@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import '../comm/apk_parser_result.dart';
 import '../comm/const.dart';
 import '../hive/env_config/env_config_operator.dart';
 
@@ -550,8 +551,7 @@ $sb"""
     debugPrint("last.path->${lastPath.path}");
 
     ProcessResult result = await Process.run(
-        '${lastPath.path}/aapt2.exe',
-        ['dump', 'badging', apkPath],
+        '${lastPath.path}/aapt2.exe', ['dump', 'badging', apkPath],
         stdoutEncoding: utf8);
 
     if (result.exitCode == 0) {
@@ -571,7 +571,13 @@ $sb"""
       debugPrint('Package Name: $packageName');
       debugPrint('Version Code: $versionCode');
       debugPrint('Version Name: $versionName');
-      return ExecuteResult("", exitCode, data: appInfo);
+      return ExecuteResult("", exitCode,
+          data: ApkParserResult(
+            appName: appName,
+            packageName: packageName,
+            versioncode: versionCode,
+            versionName: versionName,
+          ));
     } else {
       debugPrint('Failed to get APK information using aapt2.');
       return ExecuteResult("", -1);

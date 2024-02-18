@@ -217,7 +217,9 @@ class _WorkShopPageState extends State<WorkShopPage> {
                                       vertical: 1.0, horizontal: 4),
                                   child: Text(
                                     _workShopVm.cmdExecLog[index],
-                                    style: const TextStyle(fontSize: 16),
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                 );
                               },
@@ -332,10 +334,16 @@ class _WorkShopPageState extends State<WorkShopPage> {
           child: Center(
             child: Column(
               children: [
-                Text(stage.stageName),
+                Text(
+                  stage.stageName,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 if (stage.stageCostTime != null &&
                     stage.stageCostTime!.isNotEmpty)
-                  Text(stage.stageCostTime!),
+                  Text(
+                    stage.stageCostTime!,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
               ],
             ),
           ),
