@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:hank_pack_master/comm/order_execute_result.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
@@ -105,22 +106,18 @@ class _WorkShopPageState extends State<WorkShopPage> {
           children: [
             _mainTitleWidget("项目配置"),
             const SizedBox(height: 20),
-            ScrollConfiguration(
-              behavior:
-                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      input("git地址 ", "输入git地址", _workShopVm.gitUrlController,
-                          must: true, enable: false),
-                      input("工程位置", "输入工程名", _workShopVm.projectPathController,
-                          suffix: _toolTip(), enable: false),
-                      input("分支名称", "输入分支名称", _workShopVm.gitBranchController,
-                          must: true, enable: false),
-                    ]),
-              ),
-            ),
+            SingleChildScrollView(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    input("git地址 ", "输入git地址", _workShopVm.gitUrlController,
+                        must: true, enable: false),
+                    input("工程位置", "输入工程名", _workShopVm.projectPathController,
+                        suffix: _toolTip(), enable: false),
+                    input("分支名称", "输入分支名称", _workShopVm.gitBranchController,
+                        must: true, enable: false),
+                  ]),
+            ).hideScrollbar(context),
           ],
         ));
 
@@ -133,38 +130,33 @@ class _WorkShopPageState extends State<WorkShopPage> {
           _mainTitleWidget("打包参数设置"),
           const SizedBox(height: 20),
           Expanded(
-              child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context)
-                      .copyWith(scrollbars: false),
-                  child: SingleChildScrollView(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                        input(
-                          "应用描述",
-                          "输入应用描述...",
-                          _workShopVm.projectAppDescController,
-                          maxLines: 5,
-                          enable: false,
-                        ),
-                        input("更新日志", "输入更新日志...",
-                            _workShopVm.updateLogController,
-                            maxLines: 5, enable: false),
-                        input('打包命令', "必须选择一个打包命令",
-                            _workShopVm.selectedOrderController,
-                            enable: false),
-                        const SizedBox(height: 5),
-                        input(
-                          "apk路径",
-                          "请输入apk预计路径，程序会根据此路径检测apk文件",
-                          _workShopVm.apkLocationController,
-                          maxLines: 1,
-                          enable: false,
-                        ),
-                        input('上传方式', "必须选择一个上传平台",
-                            _workShopVm.selectedUploadPlatformController,
-                            enable: false),
-                      ]))))
+              child: SingleChildScrollView(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                input(
+                  "应用描述",
+                  "输入应用描述...",
+                  _workShopVm.projectAppDescController,
+                  maxLines: 5,
+                  enable: false,
+                ),
+                input("更新日志", "输入更新日志...", _workShopVm.updateLogController,
+                    maxLines: 5, enable: false),
+                input('打包命令', "必须选择一个打包命令", _workShopVm.selectedOrderController,
+                    enable: false),
+                const SizedBox(height: 5),
+                input(
+                  "apk路径",
+                  "请输入apk预计路径，程序会根据此路径检测apk文件",
+                  _workShopVm.apkLocationController,
+                  maxLines: 1,
+                  enable: false,
+                ),
+                input('上传方式', "必须选择一个上传平台",
+                    _workShopVm.selectedUploadPlatformController,
+                    enable: false),
+              ])).hideScrollbar(context))
         ]));
 
     var taskStagesWidget = Padding(
@@ -206,26 +198,21 @@ class _WorkShopPageState extends State<WorkShopPage> {
                     _mainTitleWidget("执行日志"),
                     const SizedBox(height: 10),
                     Expanded(
-                        child: ScrollConfiguration(
-                            behavior: ScrollConfiguration.of(context)
-                                .copyWith(scrollbars: false),
-                            child: ListView.builder(
-                              controller:
-                                  _workShopVm.logListViewScrollController,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 1.0, horizontal: 4),
-                                  child: Text(
-                                    _workShopVm.cmdExecLog[index],
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                );
-                              },
-                              itemCount: _workShopVm.cmdExecLog.length,
-                            )))
+                        child: ListView.builder(
+                      controller: _workShopVm.logListViewScrollController,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 1.0, horizontal: 4),
+                          child: Text(
+                            _workShopVm.cmdExecLog[index],
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w600),
+                          ),
+                        );
+                      },
+                      itemCount: _workShopVm.cmdExecLog.length,
+                    ).hideScrollbar(context))
                   ])))
     ]));
 
@@ -280,14 +267,11 @@ class _WorkShopPageState extends State<WorkShopPage> {
         const SizedBox(height: 15),
         Expanded(
             flex: 5,
-            child: ScrollConfiguration(
-                behavior:
-                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                child: SingleChildScrollView(
-                    child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [...taskCardList],
-                )))),
+            child: SingleChildScrollView(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [...taskCardList],
+            )).hideScrollbar(context)),
         _mainTitleWidget("正在执行"),
         Expanded(
             flex: 2, child: taskCard(_workShopVm.runningTask, running: true)),

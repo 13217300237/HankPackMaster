@@ -297,6 +297,14 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             child: const Text('激活状态', style: gridTextStyle)),
       ),
       GridColumn(
+        minimumWidth: minimumWidth,
+        columnName: ColumnNameConst.jobOperation,
+        label: Container(
+            decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
+            alignment: Alignment.center,
+            child: const Text('作业功能', style: gridTextStyle)),
+      ),
+      GridColumn(
         columnName: ColumnNameConst.assembleOrders,
         minimumWidth: minimumWidth,
         width: assembleOrdersWidth,
@@ -305,14 +313,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                 color: bg, borderRadius: zeroBorder, border: borderRight),
             alignment: Alignment.center,
             child: const Text('打包命令', style: gridTextStyle)),
-      ),
-      GridColumn(
-        minimumWidth: minimumWidth,
-        columnName: ColumnNameConst.jobOperation,
-        label: Container(
-            decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
-            alignment: Alignment.center,
-            child: const Text('作业功能', style: gridTextStyle)),
       ),
       GridColumn(
         minimumWidth: minimumWidth,

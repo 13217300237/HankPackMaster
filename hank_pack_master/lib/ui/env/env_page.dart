@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/command_util.dart';
@@ -65,29 +66,24 @@ class _EnvPageState extends State<EnvPage> {
     return Container(
         color: _appTheme.bgColor,
         padding: const EdgeInsets.all(20),
-        child: ScrollConfiguration(
-            // 隐藏scrollBar
-            behavior:
-                ScrollConfiguration.of(context).copyWith(scrollbars: false),
-            child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  const Text("自动环境检测", style: TextStyle(fontSize: 30)),
-                  const EnvGroupCard(order: "java"),
-                  const EnvGroupCard(order: "git"),
-                  const EnvGroupCard(order: "adb"),
-                  const EnvGroupCard(order: "flutter"),
-                  const SizedBox(height: 20),
-                  _manualSpecifyEnvTitle(),
-                  Row(children: [
-                    Expanded(child: _workspaceChoose()),
-                    Expanded(child: _androidSdkChoose()),
-                  ]),
-                  Row(children: [Expanded(child: _stageTaskExecuteSetting())]),
-                  Row(children: [Expanded(child: _pgySetting())]),
-                  Row(children: [Expanded(child: _hwobsSetting())]),
-                ]))));
+        child: SingleChildScrollView(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text("自动环境检测", style: TextStyle(fontSize: 30)),
+          const EnvGroupCard(order: "java"),
+          const EnvGroupCard(order: "git"),
+          const EnvGroupCard(order: "adb"),
+          const EnvGroupCard(order: "flutter"),
+          const SizedBox(height: 20),
+          _manualSpecifyEnvTitle(),
+          Row(children: [
+            Expanded(child: _workspaceChoose()),
+            Expanded(child: _androidSdkChoose()),
+          ]),
+          Row(children: [Expanded(child: _stageTaskExecuteSetting())]),
+          Row(children: [Expanded(child: _pgySetting())]),
+          Row(children: [Expanded(child: _hwobsSetting())]),
+        ])).hideScrollbar(context));
   }
 
   /// 这是为了解决 context可变的问题

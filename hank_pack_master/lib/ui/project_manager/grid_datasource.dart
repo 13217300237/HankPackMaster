@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:hank_pack_master/ui/project_manager/package_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -108,11 +109,6 @@ class ProjectEntityDataSource extends DataGridSource {
                   columnName: ColumnNameConst.statue,
                   value: CellValue(
                       value: e.preCheckOk, cellType: CellType.preChecked)),
-              DataGridCell<CellValue>(
-                  columnName: ColumnNameConst.assembleOrders,
-                  value: CellValue(
-                      value: e.assembleOrders,
-                      cellType: CellType.assembleOrders)),
               if (e.preCheckOk) ...[
                 DataGridCell<CellValue>(
                     columnName: ColumnNameConst.jobOperation,
@@ -130,6 +126,11 @@ class ProjectEntityDataSource extends DataGridSource {
                       entity: e,
                     )),
               ],
+              DataGridCell<CellValue>(
+                  columnName: ColumnNameConst.assembleOrders,
+                  value: CellValue(
+                      value: e.assembleOrders,
+                      cellType: CellType.assembleOrders)),
               DataGridCell<CellValue>(
                   columnName: ColumnNameConst.recordOperation,
                   value: CellValue(value: e, cellType: CellType.recordAction)),
@@ -229,7 +230,7 @@ class ProjectEntityDataSource extends DataGridSource {
                                     }).toList()
                                   ],
                                 ),
-                              ));
+                              ).hideScrollbar(buildContext));
                         }
                       },
                     ),
@@ -238,16 +239,11 @@ class ProjectEntityDataSource extends DataGridSource {
               );
               break;
             case CellType.assembleOrders:
-              cellWidget = ScrollConfiguration(
-                // 隐藏scrollBar
-                behavior: ScrollConfiguration.of(buildContext)
-                    .copyWith(scrollbars: false),
-                child: SingleChildScrollView(
-                  child: Wrap(
-                    children: [..._assembleOrdersWidget(cellValue.value)],
-                  ),
+              cellWidget = SingleChildScrollView(
+                child: Wrap(
+                  children: [..._assembleOrdersWidget(cellValue.value)],
                 ),
-              );
+              ).hideScrollbar(buildContext);
               break;
             case CellType.recordAction:
               cellWidget = Tooltip(
