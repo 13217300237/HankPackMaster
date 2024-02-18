@@ -19,13 +19,14 @@ class DialogUtil {
     String confirmText = "是",
     String cancelText = "取消",
     double maxWidth = 500,
+    double maxHeight = 700,
   }) {
     showDialog(
       context: context,
       builder: (context) {
         return ContentDialog(
           title: Text(title),
-          constraints: BoxConstraints(maxWidth: maxWidth),
+          constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
           content: content is Widget
               ? content
               : SingleChildScrollView(

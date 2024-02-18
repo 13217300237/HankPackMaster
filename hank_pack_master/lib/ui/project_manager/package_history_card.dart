@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 
 import '../../comm/dialog_util.dart';
+import '../../comm/upload_platforms.dart';
 import '../work_shop/app_info_card.dart';
 
 class PackageHistoryCard extends StatelessWidget {
@@ -14,13 +15,23 @@ class PackageHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(4),
-      borderColor: Colors.green,
-      borderRadius: BorderRadius.circular(2),
-      child: GestureDetector(
-          child: Text("打包时间: ${myAppInfo.buildUpdated}"),
-          onTap: () => showMyAppInfo(myAppInfo, context)),
+    return GestureDetector(
+      onTap: () => showMyAppInfo(myAppInfo, context),
+      child: Card(
+        margin: const EdgeInsets.all(4),
+        backgroundColor: Colors.green.withOpacity(.2),
+        borderColor: Colors.green.withOpacity(.4),
+        borderRadius: BorderRadius.circular(4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+                "上传方式: ${UploadPlatform.findNameByIndex('${myAppInfo.uploadPlatform}')}"),
+            const SizedBox(height: 10),
+            Text("打包时间: ${myAppInfo.buildUpdated}"),
+          ],
+        ),
+      ),
     );
   }
 
@@ -30,7 +41,7 @@ class PackageHistoryCard extends StatelessWidget {
     DialogUtil.showCustomDialog(
         context: context,
         content: card,
-        title: '流程结束',
+        title: '历史查看',
         showCancel: false,
         confirmText: "关闭");
   }

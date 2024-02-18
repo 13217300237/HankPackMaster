@@ -209,16 +209,26 @@ class ProjectEntityDataSource extends DataGridSource {
                           var his = e.jobHistory ?? [];
 
                           DialogUtil.showCustomDialog(
+                              maxHeight: 400,
                               context: buildContext,
                               title: "${e.projectName} 打包历史",
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ...his.map((s) {
-                                    var myAppInfo = MyAppInfo.fromJsonString(s);
-                                    return PackageHistoryCard(myAppInfo: myAppInfo);
-                                  }).toList()
-                                ],
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ...his.reversed.map((s) {
+                                      var myAppInfo =
+                                          MyAppInfo.fromJsonString(s);
+                                      return Row(
+                                        children: [
+                                          Expanded(
+                                              child: PackageHistoryCard(
+                                                  myAppInfo: myAppInfo)),
+                                        ],
+                                      );
+                                    }).toList()
+                                  ],
+                                ),
                               ));
                         }
                       },
