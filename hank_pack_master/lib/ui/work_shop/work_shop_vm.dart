@@ -537,6 +537,10 @@ class WorkShopVm extends ChangeNotifier {
       taskStateList.add(TaskState(
         "构建打包结果",
         actionFunc: () async {
+          if (apkToUpload == null) {
+            return OrderExecuteResult(
+                data: "error : apkToUpload is null!", succeed: false);
+          }
           MyAppInfo appInfo = MyAppInfo();
           File apkFile = File(apkToUpload!);
           if (await apkFile.exists()) {
@@ -545,7 +549,7 @@ class WorkShopVm extends ChangeNotifier {
             // 如何通过一个APK文件，找出它的 versionName, versionCode,包名
 
             // 用aapt解析出manifest内容，然后 解析出其中的
-
+            CommandUtil.getInstance().aapt(apkToUpload!);
 
             appInfo.buildQRCodeURL = obsDownloadUrl;
             appInfo.buildUpdated =
@@ -576,8 +580,6 @@ class WorkShopVm extends ChangeNotifier {
 
     notifyListeners();
   }
-
-
 
   List<String> findLinesWithKeyword(
       {required String ori, required String keyword}) {

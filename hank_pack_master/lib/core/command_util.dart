@@ -546,18 +546,16 @@ $sb"""
 
       return partsA.length.compareTo(partsB.length); // 版本号长度相同则通过长度比较
     });
-    var last = oriList.last;
-    debugPrint("last.path->${last.path}");
+    var lastPath = oriList.last;
+    debugPrint("last.path->${lastPath.path}");
 
     ProcessResult result = await Process.run(
-        '$androidSdkPath/build-tools/32.0.0-rc1/aapt2.exe',
+        '${lastPath.path}/aapt2.exe',
         ['dump', 'badging', apkPath],
         stdoutEncoding: utf8);
 
     if (result.exitCode == 0) {
       String output = result.stdout as String;
-
-      // debugPrint("打印结果：${result.stdout.runtimeType} \n$output");
 
       // 解析应用信息
       Map<String, dynamic> appInfo = _parseAapt2Output(output);
