@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../upload_platforms.dart';
+
 class PgyTokenEntity {
   int? code;
   String? message;
@@ -67,26 +69,28 @@ class ReleaseResultEntity {
 }
 
 class MyAppInfo {
-   String? buildKey;
-   String? buildType;
-   String? buildIsFirst;
-   String? buildIsLastest;
-   String? buildFileKey;
-   String? buildFileName;
-   String? buildFileSize;
-   String? buildName;
-   String? buildVersion;
-   String? buildVersionNo;
-   String? buildBuildVersion;
-   String? buildIdentifier;
-   String? buildIcon;
-   String? buildDescription;
-   String? buildUpdateDescription;
-   String? buildScreenshots;
-   String? buildShortcutUrl;
-   String? buildCreated;
-   String? buildUpdated;
-   String? buildQRCodeURL;
+  String? uploadPlatform;
+
+  String? buildKey;
+  String? buildType;
+  String? buildIsFirst;
+  String? buildIsLastest;
+  String? buildFileKey;
+  String? buildFileName;
+  String? buildFileSize;
+  String? buildName;
+  String? buildVersion;
+  String? buildVersionNo;
+  String? buildBuildVersion;
+  String? buildIdentifier;
+  String? buildIcon;
+  String? buildDescription;
+  String? buildUpdateDescription;
+  String? buildScreenshots;
+  String? buildShortcutUrl;
+  String? buildCreated;
+  String? buildUpdated;
+  String? buildQRCodeURL;
 
   MyAppInfo({
     this.buildKey,
@@ -109,8 +113,8 @@ class MyAppInfo {
     this.buildCreated,
     this.buildUpdated,
     this.buildQRCodeURL,
+    this.uploadPlatform,
   });
-
 
   factory MyAppInfo.fromJson(Map<String, dynamic> data) {
     return MyAppInfo(
@@ -134,6 +138,7 @@ class MyAppInfo {
       buildCreated: data['buildCreated'],
       buildUpdated: data['buildUpdated'],
       buildQRCodeURL: data['buildQRCodeURL'],
+      uploadPlatform: data['uploadPlatform'],
     );
   }
 
@@ -159,6 +164,7 @@ class MyAppInfo {
       'buildCreated': buildCreated,
       'buildUpdated': buildUpdated,
       'buildQRCodeURL': buildQRCodeURL,
+      'uploadPlatform': uploadPlatform,
     };
   }
 

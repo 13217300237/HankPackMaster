@@ -473,6 +473,7 @@ class WorkShopVm extends ChangeNotifier {
                   MyAppInfo.fromJson(s.data as Map<String, dynamic>);
               appInfo.buildDescription =
                   projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
+              appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
 
               addNewLogLine("应用名称: ${appInfo.buildName}");
               addNewLogLine("大小: ${appInfo.buildFileSize}");
@@ -550,6 +551,7 @@ class WorkShopVm extends ChangeNotifier {
                 await CommandUtil.getInstance().aapt(apkToUpload!);
             var data = executeResult.data;
             if (data is ApkParserResult) {
+              appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
               appInfo.buildName = data.appName;
               appInfo.buildVersion = data.versionName;
               appInfo.buildVersionNo = data.versioncode;
@@ -567,7 +569,6 @@ class WorkShopVm extends ChangeNotifier {
               debugPrint("版本号: ${appInfo.buildVersion}");
               debugPrint("编译版本号: ${appInfo.buildVersionNo}");
               debugPrint("应用包名: ${appInfo.buildIdentifier}");
-              debugPrint("下载短链接: ${appInfo.buildShortcutUrl}");
               debugPrint("二维码地址: ${appInfo.buildQRCodeURL}");
               debugPrint("应用更新时间: ${appInfo.buildUpdated}");
               debugPrint("应用描述: ${appInfo.buildDescription}");

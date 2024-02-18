@@ -171,25 +171,26 @@ class _WorkShopPageState extends State<WorkShopPage> {
         padding:
             const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 20),
         child: Card(
-            borderRadius: BorderRadius.circular(10),
-            backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              _mainTitleWidget("任务阶段"),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 150,
-                child: ListView.builder(
-                  controller: _workShopVm.stageScrollerController,
-                  itemBuilder: (context, index) {
-                    var e = _workShopVm.taskStateList[index];
-                    return _stageBtn(stage: e, index: index);
-                  },
-                  itemCount: _workShopVm.taskStateList.length,
-                  scrollDirection: m.Axis.horizontal,
-                ),
-              )
-            ])));
+          borderRadius: BorderRadius.circular(10),
+          backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            _mainTitleWidget("任务阶段"),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 120,
+              child: ListView.builder(
+                controller: _workShopVm.stageScrollerController,
+                itemBuilder: (context, index) {
+                  var e = _workShopVm.taskStateList[index];
+                  return _stageBtn(stage: e, index: index);
+                },
+                itemCount: _workShopVm.taskStateList.length,
+                scrollDirection: m.Axis.horizontal,
+              ),
+            )
+          ]),
+        ));
 
     var stageLogWidget = Expanded(
         child: Row(children: [
@@ -302,7 +303,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
             Expanded(child: packageConfigWidget)
           ])),
       Expanded(
-          flex: 6,
+          flex: 7,
           child: Column(children: [
             Row(children: [Expanded(child: taskStagesWidget)]),
             stageLogWidget
@@ -333,6 +334,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
                   (states) => _workShopVm.getStatueColor(stage))),
           child: Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   stage.stageName,

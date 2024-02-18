@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:hank_pack_master/comm/upload_platforms.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../comm/pgy/pgy_entity.dart';
 
@@ -25,19 +27,32 @@ class AppInfoCard extends StatelessWidget {
           _line('应用描述', "${appInfo.buildDescription}"),
           _line('更新日志', "${appInfo.buildUpdateDescription}"),
           _line('更新时间', "${appInfo.buildUpdated}"),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: CachedNetworkImage(
-                width: 260,
-                height: 260,
-                imageUrl: "${appInfo.buildQRCodeURL}",
-                placeholder: (context, url) =>
-                    const Center(child: m.CircularProgressIndicator()),
-                errorWidget: (context, url, error) => const Icon(m.Icons.error),
+          if (appInfo.uploadPlatform == '${UploadPlatform.pgy.index}') ...[
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: CachedNetworkImage(
+                  width: 260,
+                  height: 260,
+                  imageUrl: "${appInfo.buildQRCodeURL}",
+                  placeholder: (context, url) => const Center(
+                      child: m.CircularProgressIndicator(
+                    strokeWidth: 2,
+                  )),
+                  errorWidget: (context, url, error) =>
+                      const Icon(m.Icons.error_outline),
+                ),
               ),
             ),
-          ),
+          ] else ...[
+            Center(
+              child: QrImageView(
+                data: '${appInfo.buildQRCodeURL}',
+                size: 260,
+                version: QrVersions.auto,
+              ),
+            ),
+          ],
         ],
       ),
     );
