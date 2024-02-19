@@ -397,7 +397,7 @@ class WorkShopVm extends ChangeNotifier {
 
     if (selectedUploadPlatform?.index == 0) {
       taskStateList.add(TaskState(
-        "获取pgy token",
+        "获取pgyToken",
         actionFunc: () async {
           // 先获取当前git的最新提交记录
           var log = await CommandUtil.getInstance()
@@ -813,6 +813,23 @@ class WorkShopVm extends ChangeNotifier {
         data: actionResStr?.data);
   }
 
+  void _reset() {
+    taskStateList.clear();
+    _cmdExecLog.clear();
+    gitUrlController.text = '';
+    gitBranchController.text = "";
+    projectPathController.text = "";
+    projectAppDescController.text = "";
+    updateLogController.text = "";
+    apkLocationController.text = "";
+    selectedOrder = "";
+    selectedOrderController.text = "";
+    selectedUploadPlatform = null;
+    selectedUploadPlatformController.text = "";
+    runningTask = null;
+    notifyListeners();
+  }
+
   // 工程任务队列相关
   final ListQueue<ProjectRecordEntity> _taskQueue =
       ListQueue<ProjectRecordEntity>();
@@ -870,14 +887,15 @@ class WorkShopVm extends ChangeNotifier {
     if (value == null) {
       return;
     }
-    if (value.succeed == true) {
-      if (value.data is List<String>) {
-        onProjectActiveFinished(value.data);
-      }
-      onTaskFinished?.call();
-    } else {
-      onProjectActiveFinished([]);
+
+    if (value.succeed != true || value.data is! List<String>) {
+      _reset();
+      return;
     }
+
+    onProjectActiveFinished(value.data);
+    _reset();
+    onTaskFinished?.call();
   }
 
   void refresh() {
@@ -893,9 +911,7 @@ class WorkShopVm extends ChangeNotifier {
       runningTask!.preCheckOk = true;
       runningTask!.assembleOrders = assembleOrders;
       ProjectRecordOperator.insertOrUpdate(runningTask!);
-    } else {}
-
-    runningTask = null;
+    }
     notifyListeners();
   }
 
@@ -913,9 +929,9 @@ class WorkShopVm extends ChangeNotifier {
         assert(runningTask != null);
         debugPrint("准备切入新任务，请稍后... ${runningTask!.projectName}");
         // 如果此工程已经激活成功，那么，直接进行打包
-        if (runningTask!.preCheckOk) {
-          assert(runningTask!.setting != null); // 将这些信息填入到 表单中
-
+        if (runningTask!.preCheckOk == true) {
+          assert(runningTask!.setting != null);
+          // 将这些信息填入到 表单中
           gitUrlController.text = runningTask!.gitUrl;
           gitBranchController.text = runningTask!.branch;
           setProjectPath();
@@ -952,26 +968,26 @@ class WorkShopVm extends ChangeNotifier {
     var scheduleRes = await startSchedule();
 
     if (scheduleRes == null) {
+      _reset();
       return;
     }
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
       onProjectPackageFinished(myAppInfo!);
     } else {
+      _reset();
       ToastUtil.showPrettyToast(scheduleRes.toString());
     }
   }
 
-  /// 项目激活成功之后
+  /// 项目打包成功之后
   void onProjectPackageFinished(MyAppInfo myAppInfo) {
     var his = runningTask!.jobHistory;
     if (his == null) {
       runningTask!.jobHistory = [];
     }
     runningTask!.jobHistory!.add(myAppInfo.toJsonString());
-
     ProjectRecordOperator.insertOrUpdate(runningTask!);
-
     runningTask = null;
     notifyListeners();
   }

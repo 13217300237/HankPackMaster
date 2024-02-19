@@ -2,14 +2,14 @@ import 'package:fluent_ui/fluent_ui.dart';
 
 import '../../../comm/url_check_util.dart';
 
-class CreateProjectDialogWidget extends StatefulWidget {
+class EditProjectDialogWidget extends StatefulWidget {
   final TextEditingController gitUrlTextController;
 
   final TextEditingController branchNameTextController;
 
   final TextEditingController projectNameTextController;
 
-  const CreateProjectDialogWidget({
+  const EditProjectDialogWidget({
     super.key,
     required this.gitUrlTextController,
     required this.branchNameTextController,
@@ -17,14 +17,14 @@ class CreateProjectDialogWidget extends StatefulWidget {
   });
 
   @override
-  State<CreateProjectDialogWidget> createState() =>
-      _CreateProjectDialogWidgetState();
+  State<EditProjectDialogWidget> createState() =>
+      _EditProjectDialogWidgetState();
 }
 
-class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
+class _EditProjectDialogWidgetState extends State<EditProjectDialogWidget> {
   var isValidGitUrlRes = true;
 
-  var textStyle = const TextStyle(fontSize: 18,fontWeight: FontWeight.w600);
+  var textStyle = const TextStyle(fontSize: 18, fontWeight: FontWeight.w600);
   var textMustStyle = TextStyle(fontSize: 18, color: Colors.red);
 
   var errStyle = TextStyle(fontSize: 16, color: Colors.red);
@@ -82,10 +82,12 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
           expands: false,
           maxLines: 4,
           style: textStyle,
+          enabled: false,
           controller: widget.gitUrlTextController),
     );
     var branchNameTextBox = Expanded(
       child: TextBox(
+          enabled: false,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
               color: Colors.green.withOpacity(.1)),
@@ -98,18 +100,15 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
     );
     var gitUrlRow = Row(children: [
       gitUrlLabel,
-      mustLabel,
       gitUrlTextBox,
     ]);
     var branchNameRow = Row(children: [
       branchNameLabel,
-      mustLabel,
       branchNameTextBox,
     ]);
 
     var projectName = Row(children: [
       projectNameLabel,
-      mustLabel,
       projectNameTextBox,
     ]);
 
