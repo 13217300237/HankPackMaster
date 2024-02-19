@@ -5,9 +5,12 @@ import 'package:hank_pack_master/ui/project_manager/package_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/pgy/pgy_entity.dart';
+import '../../comm/url_check_util.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import 'column_name_const.dart';
+import 'dialog/create_project_record_dialog.dart';
+import 'dialog/edit_project_record_dialog.dart';
 
 const TextStyle gridTextStyle = TextStyle(
     color: Color(0xff2C473E),
@@ -246,41 +249,58 @@ class ProjectEntityDataSource extends DataGridSource {
               ).hideScrollbar(buildContext);
               break;
             case CellType.recordAction:
-              cellWidget = Tooltip(
-                message: "删除此记录",
-                child: IconButton(
-                  icon: Icon(FluentIcons.delete,
-                      color: Colors.green.withOpacity(.8)),
-                  onPressed: () {
-                    var e = cellValue.value;
-                    if (e is ProjectRecordEntity) {
-                      DialogUtil.showCustomDialog(
-                          context: buildContext,
-                          title: "确定删除吗?",
-                          content: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _cText(
-                                label: '工程名',
-                                content: e.projectName,
+              cellWidget = Wrap(
+                children: [
+                  Tooltip(
+                    message: "重新编辑",
+                    child: IconButton(
+                      icon: Icon(FluentIcons.edit,
+                          color: Colors.green.withOpacity(.8)),
+                      onPressed: () {
+                        var e = cellValue.value;
+                        if (e is ProjectRecordEntity) {
+                          editAndroidProjectRecord(e);
+                        }
+                      },
+                    ),
+                  ),
+                  Tooltip(
+                    message: "删除此记录",
+                    child: IconButton(
+                      icon: Icon(FluentIcons.delete,
+                          color: Colors.green.withOpacity(.8)),
+                      onPressed: () {
+                        var e = cellValue.value;
+                        if (e is ProjectRecordEntity) {
+                          DialogUtil.showCustomDialog(
+                              context: buildContext,
+                              title: "确定删除吗?",
+                              content: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _cText(
+                                    label: '工程名',
+                                    content: e.projectName,
+                                  ),
+                                  _cText(
+                                    label: '远程仓库',
+                                    content: e.gitUrl,
+                                  ),
+                                  _cText(
+                                    label: '分支名',
+                                    content: e.branch,
+                                  ),
+                                ],
                               ),
-                              _cText(
-                                label: '远程仓库',
-                                content: e.gitUrl,
-                              ),
-                              _cText(
-                                label: '分支名',
-                                content: e.branch,
-                              ),
-                            ],
-                          ),
-                          onConfirm: () {
-                            deleteProjectRecord(cellValue.value);
-                          });
-                    }
-                  },
-                ),
+                              onConfirm: () {
+                                deleteProjectRecord(cellValue.value);
+                              });
+                        }
+                      },
+                    ),
+                  ),
+                ],
               );
               break;
           }
@@ -291,6 +311,49 @@ class ProjectEntityDataSource extends DataGridSource {
             child: cellWidget,
           );
         }).toList());
+  }
+
+  /// 创建一个新的安卓工程record，并刷新UI
+  void editAndroidProjectRecord(ProjectRecordEntity e) {
+    TextEditingController gitUrlTextController = TextEditingController();
+    TextEditingController branchNameTextController = TextEditingController();
+    TextEditingController projectNameTextController = TextEditingController();
+
+    var contentWidget = EditProjectDialogWidget(
+        projectNameTextController: projectNameTextController,
+        gitUrlTextController: gitUrlTextController,
+        branchNameTextController: branchNameTextController);
+
+    gitUrlTextController.text = e.gitUrl;
+    branchNameTextController.text = e.branch;
+    projectNameTextController.text = e.projectName;
+
+    DialogUtil.showCustomDialog(
+        context: buildContext,
+        title: '编辑工程',
+        content: contentWidget,
+        showActions: true,
+        confirmText: "确定",
+        onConfirm: () {
+          if (!isValidGitUrl(gitUrlTextController.text)) {
+            return false;
+          }
+          insertOrUpdateProjectRecord(
+            gitUrlTextController.text,
+            branchNameTextController.text,
+            projectNameTextController.text,
+          );
+        },
+        judgePop: () {
+          if (gitUrlTextController.text.isEmpty ||
+              branchNameTextController.text.isEmpty) {
+            return false;
+          }
+          if (!isValidGitUrl(gitUrlTextController.text)) {
+            return false;
+          }
+          return true;
+        });
   }
 
   Widget _cText({
