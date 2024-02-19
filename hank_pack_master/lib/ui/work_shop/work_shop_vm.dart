@@ -807,10 +807,28 @@ class WorkShopVm extends ChangeNotifier {
     totalWatch.stop();
     _jobRunning = false;
 
+   _reset();
+
     return OrderExecuteResult(
         succeed: true,
         msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} ms ",
         data: actionResStr?.data);
+  }
+
+  void _reset(){
+    taskStateList.clear();
+    _cmdExecLog.clear();
+    gitUrlController.text = '';
+    gitBranchController.text = "";
+    projectPathController.text = "";
+    projectAppDescController.text = "";
+    updateLogController.text =  "";
+    apkLocationController.text = "";
+    selectedOrder = "";
+    selectedOrderController.text = "";
+    selectedUploadPlatform = null;
+    selectedUploadPlatformController.text = "";
+    notifyListeners();
   }
 
   // 工程任务队列相关
@@ -913,9 +931,9 @@ class WorkShopVm extends ChangeNotifier {
         assert(runningTask != null);
         debugPrint("准备切入新任务，请稍后... ${runningTask!.projectName}");
         // 如果此工程已经激活成功，那么，直接进行打包
-        if (runningTask!.preCheckOk) {
-          assert(runningTask!.setting != null); // 将这些信息填入到 表单中
-
+        if (runningTask!.preCheckOk == true) {
+          assert(runningTask!.setting != null);
+          // 将这些信息填入到 表单中
           gitUrlController.text = runningTask!.gitUrl;
           gitBranchController.text = runningTask!.branch;
           setProjectPath();
