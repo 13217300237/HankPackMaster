@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/command_util.dart';
@@ -477,12 +478,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
             margin: const EdgeInsets.all(8),
             borderRadius: BorderRadius.circular(5),
             borderColor: Colors.transparent,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  _buildEnvRadioBtn(widget.order, whereRes.toSet()),
-                ])),
+            child: _buildEnvRadioBtn(widget.order, whereRes.toSet())),
       )
     ]);
   }
@@ -499,10 +495,11 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     List<Widget> muEnv = [];
 
     double cardWidth = 400;
+    double cardHeight = 100;
 
     for (var binRoot in content) {
       muEnv.add(Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         child: Card(
           borderColor: Colors.transparent,
           backgroundColor: Colors.blue.withOpacity(.15),
@@ -520,7 +517,10 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                     _titleWidget(binRoot, cardWidth),
                     const SizedBox(width: 20),
                     EnvCheckWidget(
-                        cmdStr: binRoot, title: title, cardWidth: cardWidth),
+                        cmdStr: binRoot,
+                        title: title,
+                        cardWidth: cardWidth,
+                        cardHeight: cardHeight),
                   ],
                 ),
               )),
@@ -542,7 +542,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
         triggerMode: TooltipTriggerMode.manual,
         child: Text(
           binRoot,
-          style: const TextStyle(fontSize: 22),
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
           overflow: TextOverflow.ellipsis,
         ),
       ),
@@ -553,7 +553,41 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 30)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
+            Button(
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['exe', 'bat'],
+                );
+
+                if (result != null) {
+                  String? path = result.files.single.path;
+                  debugPrint('选择了 $path');
+                  if (path != null &&
+                      path.isNotEmpty &&
+                      path.contains(title)) {
+                    whereRes.add(path);
+                    setState(() {});
+                  } else {
+                    ToastUtil.showPrettyToast("路径选择不正确");
+                  }
+                } else {
+                  ToastUtil.showPrettyToast("路径选择不正确");
+                }
+              },
+              child: const Text(
+                "手动改添加环境",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 15),
         if (_isEnvGroupLoading) ...[
           Wrap(children: [...muEnv]),
@@ -639,12 +673,14 @@ class EnvCheckWidget extends StatefulWidget {
   final String cmdStr;
   final String title;
   final double cardWidth;
+  final double cardHeight;
 
   const EnvCheckWidget(
       {super.key,
       required this.cmdStr,
       required this.title,
-      required this.cardWidth});
+      required this.cardWidth,
+      required this.cardHeight});
 
   @override
   State<EnvCheckWidget> createState() => _EnvCheckWidgetState();
@@ -668,9 +704,18 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
 
     return SizedBox(
       width: widget.cardWidth,
-      child: Text(
-        executeRes,
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+      height: widget.cardHeight,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              executeRes,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+            ),
+          ],
+        ),
       ),
     );
 

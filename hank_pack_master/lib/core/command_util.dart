@@ -386,6 +386,7 @@ class CommandUtil {
       return process;
     } catch (e, r) {
       debugCmdPrint("命令执行时报错：$e $r");
+      return null;
     }
 
     return null;
