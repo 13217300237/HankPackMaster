@@ -193,6 +193,23 @@ class ProjectEntityDataSource extends DataGridSource {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Tooltip(
+                    message: "重置激活状态",
+                    child: IconButton(
+                      icon: Icon(FluentIcons.reset,
+                          color: Colors.green.withOpacity(.8)),
+                      onPressed: () {
+                        DialogUtil.showCustomDialog(
+                            context: buildContext,
+                            title: "警告",
+                            content: "此项目会变为非激活状态，所有打包记录将会清除，继续吗？",
+                            onConfirm: () {
+                              var e = cellValue.entity!;
+                              _resetProjectRecord(e);
+                            });
+                      },
+                    ),
+                  ),
+                  Tooltip(
                     message: "开始打包",
                     child: IconButton(
                       icon: Icon(FluentIcons.packages,
@@ -383,5 +400,13 @@ class ProjectEntityDataSource extends DataGridSource {
                       style: const TextStyle(fontWeight: FontWeight.w600))),
             ))
         .toList();
+  }
+
+  void _resetProjectRecord(ProjectRecordEntity e) {
+    e.preCheckOk = false;
+    e.assembleOrders = [];
+    e.jobHistory = [];
+    ProjectRecordOperator.insertOrUpdate(e);
+    _refresh();
   }
 }
