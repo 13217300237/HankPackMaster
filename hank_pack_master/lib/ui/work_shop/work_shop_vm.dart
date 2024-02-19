@@ -397,7 +397,7 @@ class WorkShopVm extends ChangeNotifier {
 
     if (selectedUploadPlatform?.index == 0) {
       taskStateList.add(TaskState(
-        "获取pgy token",
+        "获取pgyToken",
         actionFunc: () async {
           // 先获取当前git的最新提交记录
           var log = await CommandUtil.getInstance()
@@ -807,27 +807,26 @@ class WorkShopVm extends ChangeNotifier {
     totalWatch.stop();
     _jobRunning = false;
 
-   _reset();
-
     return OrderExecuteResult(
         succeed: true,
         msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} ms ",
         data: actionResStr?.data);
   }
 
-  void _reset(){
+  void _reset() {
     taskStateList.clear();
     _cmdExecLog.clear();
     gitUrlController.text = '';
     gitBranchController.text = "";
     projectPathController.text = "";
     projectAppDescController.text = "";
-    updateLogController.text =  "";
+    updateLogController.text = "";
     apkLocationController.text = "";
     selectedOrder = "";
     selectedOrderController.text = "";
     selectedUploadPlatform = null;
     selectedUploadPlatformController.text = "";
+    runningTask = null;
     notifyListeners();
   }
 
@@ -888,14 +887,15 @@ class WorkShopVm extends ChangeNotifier {
     if (value == null) {
       return;
     }
-    if (value.succeed == true) {
-      if (value.data is List<String>) {
-        onProjectActiveFinished(value.data);
-      }
-      onTaskFinished?.call();
-    } else {
-      onProjectActiveFinished([]);
+
+    if (value.succeed != true || value.data is! List<String>) {
+      _reset();
+      return;
     }
+
+    onProjectActiveFinished(value.data);
+    _reset();
+    onTaskFinished?.call();
   }
 
   void refresh() {
@@ -911,9 +911,7 @@ class WorkShopVm extends ChangeNotifier {
       runningTask!.preCheckOk = true;
       runningTask!.assembleOrders = assembleOrders;
       ProjectRecordOperator.insertOrUpdate(runningTask!);
-    } else {}
-
-    runningTask = null;
+    }
     notifyListeners();
   }
 
@@ -970,26 +968,26 @@ class WorkShopVm extends ChangeNotifier {
     var scheduleRes = await startSchedule();
 
     if (scheduleRes == null) {
+      _reset();
       return;
     }
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
       onProjectPackageFinished(myAppInfo!);
     } else {
+      _reset();
       ToastUtil.showPrettyToast(scheduleRes.toString());
     }
   }
 
-  /// 项目激活成功之后
+  /// 项目打包成功之后
   void onProjectPackageFinished(MyAppInfo myAppInfo) {
     var his = runningTask!.jobHistory;
     if (his == null) {
       runningTask!.jobHistory = [];
     }
     runningTask!.jobHistory!.add(myAppInfo.toJsonString());
-
     ProjectRecordOperator.insertOrUpdate(runningTask!);
-
     runningTask = null;
     notifyListeners();
   }

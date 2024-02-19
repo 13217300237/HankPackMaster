@@ -23,7 +23,8 @@ class ProjectRecordOperator {
         (p) => p.gitUrl == entity.gitUrl && p.branch == entity.branch);
 
     if (index != -1) {
-      debugPrint("执行更新");
+      debugPrint(
+          "执行更新 ${entity.gitUrl}  ${entity.branch} ${entity.preCheckOk}");
       _box!.putAt(index, entity); // 执行更新操作
     } else {
       debugPrint("执行插入");

@@ -48,7 +48,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               if (enqueueSuccess) {
                 context.go('/work_shop');
               } else {
-                ToastUtil.showPrettyToast('入列失败,发现重复任务');
+                ToastUtil.showPrettyToast('项目激活 入列失败,发现重复任务');
               }
             });
       },
