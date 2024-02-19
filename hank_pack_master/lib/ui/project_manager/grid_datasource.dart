@@ -376,10 +376,10 @@ class ProjectEntityDataSource extends DataGridSource {
     return orders
         .map((e) => Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                  const EdgeInsets.symmetric(horizontal: 2.0, vertical: 4.0),
               child: Button(
                   onPressed: () {},
-                  child: Text(e,
+                  child: Text(e.replaceAll("assemble", ''),
                       style: const TextStyle(fontWeight: FontWeight.w600))),
             ))
         .toList();

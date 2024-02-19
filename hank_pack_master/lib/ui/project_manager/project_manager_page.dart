@@ -19,7 +19,7 @@ class ProjectManagerPage extends StatefulWidget {
   State<ProjectManagerPage> createState() => _ProjectManagerPageState();
 }
 
-const minimumWidth = 150.0;
+const minimumWidth = 100.0;
 
 class _ProjectManagerPageState extends State<ProjectManagerPage> {
   late ProjectEntityDataSource _dataSource;
@@ -27,9 +27,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
 
   double projectNameColumnWidth = 150;
   double gitUrlColumnWidth = 300;
-  double branchNameColumnWidth = minimumWidth;
+  double branchColumnWidth = minimumWidth;
   double statueColumnWidth = minimumWidth;
   double assembleOrdersWidth = 250;
+  double jobOperationWidth = minimumWidth;
 
   @override
   void initState() {
@@ -198,18 +199,26 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           columnResizeMode: ColumnResizeMode.onResize,
           onColumnResizeUpdate: (ColumnResizeUpdateDetails args) {
             setState(() {
-              if (args.column.columnName == ColumnNameConst.gitUrl) {
-                gitUrlColumnWidth = args.width;
-              } else if (args.column.columnName ==
-                  ColumnNameConst.projectName) {
-                projectNameColumnWidth = args.width;
-              } else if (args.column.columnName == ColumnNameConst.branch) {
-                branchNameColumnWidth = args.width;
-              } else if (args.column.columnName == ColumnNameConst.statue) {
-                statueColumnWidth = args.width;
-              } else if (args.column.columnName ==
-                  ColumnNameConst.assembleOrders) {
-                assembleOrdersWidth = args.width;
+
+              switch(args.column.columnName){
+                case ColumnNameConst.gitUrl:
+                  gitUrlColumnWidth = args.width;
+                  break;
+                case ColumnNameConst.projectName:
+                  projectNameColumnWidth = args.width;
+                  break;
+                case ColumnNameConst.branch:
+                  branchColumnWidth = args.width;
+                  break;
+                case ColumnNameConst.statue:
+                  statueColumnWidth = args.width;
+                  break;
+                case ColumnNameConst.assembleOrders:
+                  assembleOrdersWidth = args.width;
+                  break;
+                case ColumnNameConst.jobOperation:
+                  jobOperationWidth = args.width;
+                  break;
               }
             });
             return true;
@@ -278,7 +287,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       GridColumn(
         columnName: ColumnNameConst.branch,
         minimumWidth: minimumWidth,
-        width: branchNameColumnWidth,
+        width: branchColumnWidth,
         label: Container(
             decoration: BoxDecoration(
                 color: bg, borderRadius: zeroBorder, border: borderRight),
@@ -297,6 +306,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       ),
       GridColumn(
         minimumWidth: minimumWidth,
+        width: jobOperationWidth,
         columnName: ColumnNameConst.jobOperation,
         label: Container(
             decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
@@ -311,7 +321,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             decoration: BoxDecoration(
                 color: bg, borderRadius: zeroBorder, border: borderRight),
             alignment: Alignment.center,
-            child: const Text('打包命令', style: gridTextStyle)),
+            child: const Text('可用变体', style: gridTextStyle)),
       ),
       GridColumn(
         minimumWidth: minimumWidth,
