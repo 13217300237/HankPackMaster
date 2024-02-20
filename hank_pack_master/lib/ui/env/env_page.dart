@@ -574,10 +574,8 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                     whereRes.add(path);
                     setState(() {});
                   } else {
-                    ToastUtil.showPrettyToast("路径选择不正确");
+                    ToastUtil.showPrettyToast("只能选择 $title.exe 或者 $title.bat");
                   }
-                } else {
-                  ToastUtil.showPrettyToast("路径选择不正确");
                 }
               },
               child: const Text(
