@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
-import 'package:hank_pack_master/comm/const.dart';
+import 'package:hank_pack_master/comm/str_const.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../../hive/env_config/env_config_operator.dart';

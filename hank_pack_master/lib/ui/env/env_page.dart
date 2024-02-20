@@ -214,7 +214,7 @@ class _EnvPageState extends State<EnvPage> {
           Row(
             children: [
               FilledButton(
-                  child: const Text("设置环境变量A为随机值"),
+                  child: Text("设置环境变量A为随机值", style: _cTextStyle),
                   onPressed: () async {
                     var random = Random.secure().nextInt(100);
                     ExecuteResult res = await CommandUtil.getInstance()
@@ -233,7 +233,7 @@ class _EnvPageState extends State<EnvPage> {
                   }),
               const SizedBox(width: 10),
               Button(
-                  child: const Text("打开环境变量设置"),
+                  child: Text("打开环境变量设置", style: _cTextStyle),
                   onPressed: () async {
                     var res = await CommandUtil.getInstance().openEnvSetting();
                     debugPrint("查询到的A的值为： $res  ");
@@ -338,7 +338,7 @@ class _EnvPageState extends State<EnvPage> {
                           _envParamModel.stageTaskExecuteMaxPeriodController,
                       suffix: Text("秒", style: _cTextStyle),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 19),
+                      style: _cTextStyle,
                     ),
                   )
                 ])),
@@ -402,7 +402,7 @@ class _EnvPageState extends State<EnvPage> {
                 highlightColor: Colors.transparent,
                 controller: controller,
                 textAlign: TextAlign.end,
-                style: const TextStyle(fontSize: 19),
+                style: _cTextStyle,
               ),
             )
           ])),
@@ -433,7 +433,8 @@ class _EnvPageState extends State<EnvPage> {
     );
   }
 
-  final _cTextStyle = const TextStyle(fontSize: 19);
+  final _cTextStyle =
+      const TextStyle(fontSize: 19, fontWeight: FontWeight.w600);
 }
 
 ///
@@ -569,9 +570,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                 if (result != null) {
                   String? path = result.files.single.path;
                   debugPrint('选择了 $path');
-                  if (path != null &&
-                      path.isNotEmpty &&
-                      path.contains(title)) {
+                  if (path != null && path.isNotEmpty && path.contains(title)) {
                     whereRes.add(path);
                     setState(() {});
                   } else {

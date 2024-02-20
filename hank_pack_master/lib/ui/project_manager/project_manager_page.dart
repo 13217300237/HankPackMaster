@@ -46,7 +46,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             onConfirm: () {
               var enqueueSuccess = _workShopVm.enqueue(e);
               if (enqueueSuccess) {
-                context.go('/work_shop');
+                _confirmGoToWorkShop();
               } else {
                 ToastUtil.showPrettyToast('项目激活 入列失败,发现重复任务');
               }
@@ -60,7 +60,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               projectRecordEntity: e,
               workShopVm: _workShopVm,
               enableAssembleOrders: e.assembleOrders ?? [],
-              goToWorkShop: () => context.go('/work_shop'),
+              goToWorkShop: _confirmGoToWorkShop,
             ),
             showActions: false);
       },
@@ -199,8 +199,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           columnResizeMode: ColumnResizeMode.onResize,
           onColumnResizeUpdate: (ColumnResizeUpdateDetails args) {
             setState(() {
-
-              switch(args.column.columnName){
+              switch (args.column.columnName) {
                 case ColumnNameConst.gitUrl:
                   gitUrlColumnWidth = args.width;
                   break;
@@ -332,5 +331,13 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             child: const Text('项目操作', style: gridTextStyle)),
       ),
     ];
+  }
+
+  void _confirmGoToWorkShop() {
+    DialogUtil.showCustomDialog(
+        context: context,
+        title: '提示',
+        content: '入列成功，是否进入工坊查看',
+        onConfirm: () => context.go('/work_shop'));
   }
 }

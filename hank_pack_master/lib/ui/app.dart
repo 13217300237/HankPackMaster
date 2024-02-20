@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
-import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/ui/comm/vm/env_param_vm.dart';
@@ -10,7 +9,6 @@ import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
 import '../routes/route.dart';
-
 
 /// 概念
 /// project：一个gitUrl+一个branchName组合成为一个Project，确定唯一一个工程
@@ -50,6 +48,9 @@ class _AppState extends State<App> {
         });
   }
 
+  var tooltipTheme = const TooltipThemeData(
+      textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w600));
+
   Widget fluentUi(BuildContext context) {
     var appTheme = context.watch<AppTheme>();
     return FluentApp.router(
@@ -61,6 +62,7 @@ class _AppState extends State<App> {
       color: appTheme.accentColor,
       // 黑暗模式主题
       darkTheme: FluentThemeData(
+          tooltipTheme: tooltipTheme,
           brightness: Brightness.dark,
           accentColor: appTheme.accentColor,
           visualDensity: VisualDensity.standard,
@@ -70,6 +72,8 @@ class _AppState extends State<App> {
           fontFamily: 'STKAITI'),
       // 白天模式主题
       theme: FluentThemeData(
+          tooltipTheme: tooltipTheme,
+          scrollbarTheme: const ScrollbarThemeData(),
           accentColor: appTheme.accentColor,
           visualDensity: VisualDensity.standard,
           focusTheme: FocusThemeData(

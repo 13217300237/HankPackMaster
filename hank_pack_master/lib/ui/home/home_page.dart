@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/core/command_util.dart';
 
+import '../../comm/hwobs/obs_client.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -77,13 +80,35 @@ class _HomePageState extends State<HomePage> {
             Row(
               children: [
                 FilledButton(
+                    child: const Text("测试华为OBS上传字符串"),
+                    onPressed: () async {
+                      var oBSResponse = await OBSClient.putObject(
+                          objectName: "test/test.txt",
+                          data: utf8.encode("Hello OBS"));
+
+                      debugPrint("${oBSResponse?.url}");
+                    }),
+                const SizedBox(width: 20),
+                FilledButton(
+                    child: const Text("测试华为OBS上传文件"),
+                    onPressed: () async {
+                      File fileToUpload = File(
+                          "C:\\Users\\zwx1245985\\Desktop\\KBZPay_5.6.3_uat2_google.apk");
+
+                      var oBSResponse = await OBSClient.putFile(
+                          objectName: "test/KBZPay_5.6.3_uat2_google.apk",
+                          file: fileToUpload);
+
+                      debugPrint("${oBSResponse?.url}");
+                    }),
+                const SizedBox(width: 20),
+                FilledButton(
                     child: const Text("测试解析apk文件"),
                     onPressed: () async {
-                      String apkPath = 'E:/packTest/MyApp20231224/app/build/outputs/apk/debug/app-debug.apk'; // 替换为你的 APK 文件路径
+                      String apkPath =
+                          'E:/packTest/MyApp20231224/app/build/outputs/apk/debug/app-debug.apk'; // 替换为你的 APK 文件路径
 
                       CommandUtil.getInstance().aapt(apkPath);
-
-
                     }),
               ],
             ),
@@ -97,5 +122,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
 }

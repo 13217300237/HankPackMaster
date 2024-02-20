@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../comm/const.dart';
+import '../../../comm/str_const.dart';
 import '../../../hive/env_config/env_config_entity.dart';
 import '../../../hive/env_config/env_config_operator.dart';
 
