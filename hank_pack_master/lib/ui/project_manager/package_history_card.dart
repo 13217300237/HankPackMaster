@@ -26,9 +26,14 @@ class PackageHistoryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-                "上传方式: ${UploadPlatform.findNameByIndex('${myAppInfo.uploadPlatform}')}"),
+              "上传方式: ${UploadPlatform.findNameByIndex('${myAppInfo.uploadPlatform}')}",
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
             const SizedBox(height: 10),
-            Text("打包时间: ${myAppInfo.buildUpdated}"),
+            Text(
+              "打包时间: ${myAppInfo.buildUpdated}",
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
           ],
         ),
       ),

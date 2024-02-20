@@ -174,7 +174,11 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(_errMsg, style: TextStyle(color: Colors.red)),
+              Text(_errMsg,
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16)),
               const SizedBox(width: 10),
               confirmActionBtn,
               const SizedBox(width: 10),

@@ -95,7 +95,10 @@ Widget choose(String title, Map<String, String> orderList,
       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
     ),
     items: orderList.entries
-        .map((e) => ComboBoxItem(value: e.key, child: Text(e.key)))
+        .map((e) => ComboBoxItem(
+            value: e.key,
+            child: Text(e.key,
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16))))
         .toList(),
     onChanged: (order) {
       if (order != null) {
