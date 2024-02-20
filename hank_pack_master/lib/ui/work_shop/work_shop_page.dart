@@ -32,7 +32,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
   late AppTheme _appTheme;
 
   Widget _mainTitleWidget(String title) {
-    return Text(title, style: const TextStyle(fontSize: 22));
+    return Text(title, style: const TextStyle(fontSize: 22,fontWeight: FontWeight.w600));
   }
 
   @override
