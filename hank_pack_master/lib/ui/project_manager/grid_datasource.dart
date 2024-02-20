@@ -11,12 +11,12 @@ import '../../comm/url_check_util.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import 'column_name_const.dart';
-import 'dialog/create_project_record_dialog.dart';
 import 'dialog/edit_project_record_dialog.dart';
 
 const TextStyle gridTextStyle = TextStyle(
     color: Color(0xff2C473E),
     fontFamily: 'STKAITI',
+    fontSize: 16,
     fontWeight: FontWeight.w600);
 
 enum CellType {
@@ -44,8 +44,9 @@ class ProjectEntityDataSource extends DataGridSource {
 
   BuildContext buildContext;
 
-  Function(ProjectRecordEntity)? funcGoToWorkShop;
+  Function(ProjectRecordEntity)? funConfirmToActive;
   Function(ProjectRecordEntity)? funcGoPackageAction;
+  Function()? funJumpToWorkShop;
 
   void deleteProjectRecord(ProjectRecordEntity? entity) {
     if (entity == null) {
@@ -90,8 +91,9 @@ class ProjectEntityDataSource extends DataGridSource {
   }
 
   ProjectEntityDataSource({
-    required this.funcGoToWorkShop,
+    required this.funConfirmToActive,
     required this.funcGoPackageAction,
+    required this.funJumpToWorkShop,
     required this.buildContext,
   }) {
     _buildRows();
@@ -177,7 +179,10 @@ class ProjectEntityDataSource extends DataGridSource {
               String toolTip;
               if (entity.jobRunning == true) {
                 toolTip = "执行中";
-                statueWidget = ProgressRing(activeColor: Colors.blue);
+                statueWidget = GestureDetector(
+                  onTap: funJumpToWorkShop,
+                  child: ProgressRing(activeColor: Colors.blue),
+                );
               } else if (entity.preCheckOk == true) {
                 toolTip = "已激活";
                 statueWidget = Icon(
@@ -193,9 +198,7 @@ class ProjectEntityDataSource extends DataGridSource {
                   size: iconSize,
                 );
               }
-              cellWidget = Tooltip(
-                  message: toolTip,
-                  child: statueWidget);
+              cellWidget = Tooltip(message: toolTip, child: statueWidget);
               break;
             case CellType.goPreCheck:
               cellWidget = Tooltip(
@@ -203,7 +206,7 @@ class ProjectEntityDataSource extends DataGridSource {
                 child: IconButton(
                   icon: Icon(FluentIcons.build_queue_new,
                       size: iconSize, color: Colors.green.withOpacity(.8)),
-                  onPressed: () => funcGoToWorkShop?.call(cellValue.entity!),
+                  onPressed: () => funConfirmToActive?.call(cellValue.entity!),
                 ),
               );
               break;

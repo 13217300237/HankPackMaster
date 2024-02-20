@@ -28,7 +28,8 @@ class CustomToast extends StatelessWidget {
           const SizedBox(width: 10.0),
           Text(
             message,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.w600),
             overflow: TextOverflow.ellipsis,
           ),
         ],

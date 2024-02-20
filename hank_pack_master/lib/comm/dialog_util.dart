@@ -24,14 +24,17 @@ class DialogUtil {
       context: context,
       builder: (context) {
         return ContentDialog(
-          title: Text(title),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
           constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
           content: content is Widget
               ? content
               : SingleChildScrollView(
                   child: Text(
                     content,
-                    style: const TextStyle(fontSize: 18),
+                    style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w600),
                   ),
                 ),
           actions: showActions

@@ -26,8 +26,10 @@ Widget input(
     mustSpace = const SizedBox(width: 20);
   }
 
-  var textStyle =
-      const TextStyle(decoration: TextDecoration.none, fontSize: 16);
+  var textStyle = const TextStyle(
+      decoration: TextDecoration.none,
+      fontSize: 16,
+      fontWeight: FontWeight.w600);
 
   return Padding(
     padding: const EdgeInsets.only(bottom: 10),
@@ -38,7 +40,9 @@ Widget input(
           width: 100,
           child: Row(
             children: [
-              Text(title, style: const TextStyle(fontSize: 18)),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w600)),
               mustSpace
             ],
           ),
@@ -75,15 +79,21 @@ Widget choose(String title, Map<String, String> orderList,
     mustSpace = SizedBox(
         width: 20,
         child: Center(
-            child:
-                Text('*', style: TextStyle(fontSize: 18, color: Colors.red))));
+            child: Text('*',
+                style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600))));
   } else {
     mustSpace = const SizedBox(width: 20);
   }
 
   comboBox = ComboBox<String>(
     value: selected,
-    placeholder: const Text('你必须选择一个打包命令'),
+    placeholder: const Text(
+      '你必须选择一个打包命令',
+      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    ),
     items: orderList.entries
         .map((e) => ComboBoxItem(value: e.key, child: Text(e.key)))
         .toList(),
@@ -103,7 +113,9 @@ Widget choose(String title, Map<String, String> orderList,
         width: 100,
         child: Row(
           children: [
-            Text(title, style: const TextStyle(fontSize: 18)),
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             mustSpace
           ],
         ),

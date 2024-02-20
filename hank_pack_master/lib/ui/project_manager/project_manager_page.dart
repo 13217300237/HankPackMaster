@@ -38,17 +38,19 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     super.initState();
     _dataSource = ProjectEntityDataSource(
       buildContext: context,
-      funcGoToWorkShop: (e) {
+      funConfirmToActive: (e) {
         DialogUtil.showCustomDialog(
             context: context,
             title: "项目激活提醒",
-            content: "要激活此项目么？ \n ${e.projectName}",
+            content: Text(
+              "要激活项目  ${e.projectName} 么？ \n ",
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
             confirmText: "确定激活",
             onConfirm: () {
               var enqueueSuccess = _workShopVm.enqueue(e);
               if (enqueueSuccess) {
-                _confirmGoToWorkShop();
-
+                confirmGoToWorkShop();
               } else {
                 ToastUtil.showPrettyToast('项目激活 入列失败,发现重复任务');
               }
@@ -62,10 +64,11 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               projectRecordEntity: e,
               workShopVm: _workShopVm,
               enableAssembleOrders: e.assembleOrders ?? [],
-              goToWorkShop: _confirmGoToWorkShop,
+              goToWorkShop: confirmGoToWorkShop,
             ),
             showActions: false);
       },
+      funJumpToWorkShop: confirmGoToWorkShop,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -331,11 +334,11 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     ];
   }
 
-  void _confirmGoToWorkShop() {
+  void confirmGoToWorkShop() {
     DialogUtil.showCustomDialog(
         context: context,
         title: '提示',
-        content: '入列成功，是否进入工坊查看',
+        content: '正在执行任务，是否进入工坊查看',
         onConfirm: () => context.go('/work_shop'));
   }
 }

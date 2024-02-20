@@ -1,4 +1,3 @@
-
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/comm/upload_platforms.dart';
@@ -76,7 +75,9 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         SizedBox(
             width: 100,
             child: Row(children: [
-              Text(title, style: const TextStyle(fontSize: 18)),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w600)),
               mustSpace
             ])),
         Expanded(
@@ -86,7 +87,10 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                 padding: const EdgeInsets.only(right: 18.0),
                 child: RadioButton(
                     checked: index == _selectedUploadPlatform?.index,
-                    content: Text(uploadPlatforms[index].name),
+                    content: Text(
+                      uploadPlatforms[index].name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     onChanged: (checked) {
                       if (checked == true) {
                         _selectedUploadPlatform = uploadPlatforms[index];
@@ -100,7 +104,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
       ]),
     );
   }
-
 
   String _errMsg = "";
 
