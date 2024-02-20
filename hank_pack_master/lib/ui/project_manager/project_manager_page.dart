@@ -8,6 +8,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/toast_util.dart';
 import '../../comm/url_check_util.dart';
+import '../comm/theme.dart';
 import 'column_name_const.dart';
 import 'dialog/create_project_record_dialog.dart';
 import 'grid_datasource.dart';
@@ -100,7 +101,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         ),
         CommandBarBuilderItem(
           builder: (context, mode, w) => Tooltip(
-            message: "刷新",
+            message: "刷新表格数据",
             child: w,
           ),
           wrappedItem: CommandBarButton(
@@ -181,14 +182,17 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   late WorkShopVm _workShopVm;
+  late AppTheme _appTheme;
 
   @override
   Widget build(BuildContext context) {
     _workShopVm = context.watch<WorkShopVm>();
+    _appTheme = context.watch<AppTheme>();
 
     var grid = Expanded(
       child: Container(
         decoration: BoxDecoration(
+          color: Colors.white.withOpacity(.6),
           border: Border.all(color: Colors.teal, width: .1),
           borderRadius: const BorderRadius.all(Radius.circular(3)),
         ),
@@ -238,9 +242,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     }
 
     return Container(
-      color: const Color(0xffAFCF84),
+      color: _appTheme.bgColor,
       child: Card(
-          backgroundColor: const Color(0xfff2f2e8),
+          backgroundColor: Colors.blue.withOpacity(.2),
           margin: const EdgeInsets.all(15),
           child: Column(children: [
             Padding(
@@ -262,73 +266,66 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     var borderRight =
         const Border(right: BorderSide(color: Colors.white, width: .7));
 
+    Widget leftContainer(String title) {
+      return Container(
+          decoration: BoxDecoration(
+              color: bg, borderRadius: topLeftBorder, border: borderRight),
+          alignment: Alignment.center,
+          child: Text(title, style: gridTextStyle));
+    }
+
+    Widget centerContainer(String title) {
+      return Container(
+          decoration: BoxDecoration(
+              color: bg, borderRadius: zeroBorder, border: borderRight),
+          alignment: Alignment.center,
+          child: Text(title, style: gridTextStyle));
+    }
+
+    Widget rightContainer(String title) {
+      return Container(
+          decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
+          alignment: Alignment.center,
+          child: Text(title, style: gridTextStyle));
+    }
+
     return <GridColumn>[
       GridColumn(
           columnName: ColumnNameConst.projectName,
           minimumWidth: minimumWidth,
           width: projectNameColumnWidth,
           columnWidthMode: ColumnWidthMode.fill,
-          label: Container(
-              decoration: BoxDecoration(
-                  color: bg, borderRadius: topLeftBorder, border: borderRight),
-              alignment: Alignment.center,
-              child: const Text('项目名称', style: gridTextStyle))),
+          label: leftContainer("项目名称")),
       GridColumn(
           columnName: ColumnNameConst.gitUrl,
           minimumWidth: minimumWidth,
           width: gitUrlColumnWidth,
           columnWidthMode: ColumnWidthMode.fill,
-          label: Container(
-              decoration: BoxDecoration(
-                  color: bg, borderRadius: zeroBorder, border: borderRight),
-              alignment: Alignment.center,
-              child: const Text('远程仓库', style: gridTextStyle))),
+          label: centerContainer("远程仓库")),
       GridColumn(
-        columnName: ColumnNameConst.branch,
-        minimumWidth: minimumWidth,
-        width: branchColumnWidth,
-        label: Container(
-            decoration: BoxDecoration(
-                color: bg, borderRadius: zeroBorder, border: borderRight),
-            alignment: Alignment.center,
-            child: const Text('分支名', style: gridTextStyle)),
-      ),
+          columnName: ColumnNameConst.branch,
+          minimumWidth: minimumWidth,
+          width: branchColumnWidth,
+          label: centerContainer("分支名称")),
       GridColumn(
-        columnName: ColumnNameConst.statue,
-        minimumWidth: minimumWidth,
-        width: statueColumnWidth,
-        label: Container(
-            decoration: BoxDecoration(
-                color: bg, borderRadius: zeroBorder, border: borderRight),
-            alignment: Alignment.center,
-            child: const Text('激活状态', style: gridTextStyle)),
-      ),
+          columnName: ColumnNameConst.statue,
+          minimumWidth: minimumWidth,
+          width: statueColumnWidth,
+          label: centerContainer("状态")),
       GridColumn(
-        minimumWidth: minimumWidth,
-        width: jobOperationWidth,
-        columnName: ColumnNameConst.jobOperation,
-        label: Container(
-            decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
-            alignment: Alignment.center,
-            child: const Text('作业功能', style: gridTextStyle)),
-      ),
+          minimumWidth: minimumWidth,
+          width: jobOperationWidth,
+          columnName: ColumnNameConst.jobOperation,
+          label: centerContainer("作业功能")),
       GridColumn(
-        columnName: ColumnNameConst.assembleOrders,
-        minimumWidth: minimumWidth,
-        width: assembleOrdersWidth,
-        label: Container(
-            decoration: BoxDecoration(
-                color: bg, borderRadius: zeroBorder, border: borderRight),
-            alignment: Alignment.center,
-            child: const Text('可用变体', style: gridTextStyle)),
-      ),
+          columnName: ColumnNameConst.assembleOrders,
+          minimumWidth: minimumWidth,
+          width: assembleOrdersWidth,
+          label: centerContainer("可用变体")),
       GridColumn(
         minimumWidth: minimumWidth,
         columnName: ColumnNameConst.recordOperation,
-        label: Container(
-            decoration: BoxDecoration(color: bg, borderRadius: topRightBorder),
-            alignment: Alignment.center,
-            child: const Text('项目操作', style: gridTextStyle)),
+        label: rightContainer("项目操作"),
       ),
     ];
   }

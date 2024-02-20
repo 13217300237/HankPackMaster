@@ -800,7 +800,7 @@ class WorkShopVm extends ChangeNotifier {
       } else {
         updateStatue(i, StageStatue.error);
         _jobRunning = false;
-        return actionResStr;
+        break;
       }
     }
 
@@ -912,6 +912,7 @@ class WorkShopVm extends ChangeNotifier {
       runningTask!.assembleOrders = assembleOrders;
       ProjectRecordOperator.insertOrUpdate(runningTask!);
     }
+    _reset();
     notifyListeners();
   }
 
@@ -988,7 +989,6 @@ class WorkShopVm extends ChangeNotifier {
     }
     runningTask!.jobHistory!.add(myAppInfo.toJsonString());
     ProjectRecordOperator.insertOrUpdate(runningTask!);
-    runningTask = null;
-    notifyListeners();
+    _reset();
   }
 }

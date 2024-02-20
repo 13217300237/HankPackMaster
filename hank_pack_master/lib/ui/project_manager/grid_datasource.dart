@@ -170,12 +170,19 @@ class ProjectEntityDataSource extends DataGridSource {
               break;
             case CellType.preChecked:
               Color color;
+              IconData iconData;
+              String toolTip;
               if (cellValue.value == true) {
                 color = Colors.green;
+                iconData = FluentIcons.skype_circle_check;
+                toolTip = "已激活";
               } else {
                 color = Colors.grey.withOpacity(.5);
+                iconData = FluentIcons.unknown;
+                toolTip = "未激活";
               }
-              cellWidget = Icon(FluentIcons.skype_circle_check, color: color);
+              cellWidget = Tooltip(
+                  message: toolTip, child: Icon(iconData, color: color));
               break;
             case CellType.goPreCheck:
               cellWidget = Tooltip(

@@ -93,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                     child: const Text("测试华为OBS上传文件"),
                     onPressed: () async {
                       File fileToUpload = File(
-                          "C:\\Users\\zwx1245985\\Desktop\\KBZPay_5.6.3_uat2_google.apk");
+                          "D:\\packTest\\MyApplication0016\\app\\build\\outputs\\apk\\debug\\app-debug.apk");
 
                       var oBSResponse = await OBSClient.putFile(
                           objectName: "test/KBZPay_5.6.3_uat2_google.apk",

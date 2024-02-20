@@ -27,13 +27,18 @@ class ProjectRecordEntity {
   List<String>? jobHistory;
 
   /// 临时字段，不用存数据库
+  /// 传递给工坊的对象，包含了打包所需的所有参数
   PackageSetting? setting;
+
+  /// 是否处在工作中...
+  bool jobRunning;
 
   ProjectRecordEntity(
     this.gitUrl,
     this.branch,
     this.projectName, {
     this.preCheckOk = false,
+    this.jobRunning = false,
     this.assembleOrders,
     this.jobHistory,
   });
