@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
@@ -20,7 +22,7 @@ const TextStyle gridTextStyle = TextStyle(
 enum CellType {
   text, // 纯文案显示
   assembleOrders, // 进入打包操作
-  preChecked, // 预检状态标志
+  statue, // 预检状态标志
   goPreCheck, // 操作入列按钮
   goPackageAction, // 进入打包操作
   recordAction, // 项目操作
@@ -110,8 +112,7 @@ class ProjectEntityDataSource extends DataGridSource {
                   value: CellValue(value: e.branch, cellType: CellType.text)),
               DataGridCell<CellValue>(
                   columnName: ColumnNameConst.statue,
-                  value: CellValue(
-                      value: e.preCheckOk, cellType: CellType.preChecked)),
+                  value: CellValue(value: e, cellType: CellType.statue)),
               if (e.preCheckOk) ...[
                 DataGridCell<CellValue>(
                     columnName: ColumnNameConst.jobOperation,
@@ -144,6 +145,8 @@ class ProjectEntityDataSource extends DataGridSource {
   @override
   List<DataGridRow> get rows => _rows;
 
+  double iconSize = 20;
+
   /// 每行UI的构建逻辑
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
@@ -168,28 +171,38 @@ class ProjectEntityDataSource extends DataGridSource {
                 overflow: TextOverflow.ellipsis,
               );
               break;
-            case CellType.preChecked:
-              Color color;
-              IconData iconData;
+            case CellType.statue:
+              ProjectRecordEntity entity = cellValue.value;
+              Widget statueWidget;
               String toolTip;
-              if (cellValue.value == true) {
-                color = Colors.green;
-                iconData = FluentIcons.skype_circle_check;
+              if (entity.jobRunning == true) {
+                toolTip = "执行中";
+                statueWidget = ProgressRing(activeColor: Colors.blue);
+              } else if (entity.preCheckOk == true) {
                 toolTip = "已激活";
+                statueWidget = Icon(
+                  FluentIcons.skype_circle_check,
+                  color: Colors.green,
+                  size: iconSize,
+                );
               } else {
-                color = Colors.grey.withOpacity(.5);
-                iconData = FluentIcons.unknown;
                 toolTip = "未激活";
+                statueWidget = Icon(
+                  FluentIcons.unknown,
+                  color: Colors.grey.withOpacity(.5),
+                  size: iconSize,
+                );
               }
               cellWidget = Tooltip(
-                  message: toolTip, child: Icon(iconData, color: color));
+                  message: toolTip,
+                  child: statueWidget);
               break;
             case CellType.goPreCheck:
               cellWidget = Tooltip(
                 message: "${cellValue.value}",
                 child: IconButton(
                   icon: Icon(FluentIcons.build_queue_new,
-                      color: Colors.green.withOpacity(.8)),
+                      size: iconSize, color: Colors.green.withOpacity(.8)),
                   onPressed: () => funcGoToWorkShop?.call(cellValue.entity!),
                 ),
               );
@@ -203,7 +216,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     message: "重置激活状态",
                     child: IconButton(
                       icon: Icon(FluentIcons.reset,
-                          color: Colors.green.withOpacity(.8)),
+                          size: iconSize, color: Colors.green.withOpacity(.8)),
                       onPressed: () {
                         DialogUtil.showCustomDialog(
                             context: buildContext,
@@ -220,7 +233,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     message: "开始打包",
                     child: IconButton(
                       icon: Icon(FluentIcons.packages,
-                          color: Colors.green.withOpacity(.8)),
+                          size: iconSize, color: Colors.green.withOpacity(.8)),
                       onPressed: () =>
                           funcGoPackageAction?.call(cellValue.entity!),
                     ),
@@ -229,7 +242,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     message: "查看打包历史",
                     child: IconButton(
                       icon: Icon(FluentIcons.full_history,
-                          color: Colors.green.withOpacity(.8)),
+                          size: iconSize, color: Colors.green.withOpacity(.8)),
                       onPressed: () {
                         if (cellValue.value is ProjectRecordEntity) {
                           var e = cellValue.value as ProjectRecordEntity;
@@ -279,7 +292,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     message: "重新编辑",
                     child: IconButton(
                       icon: Icon(FluentIcons.edit,
-                          color: Colors.green.withOpacity(.8)),
+                          size: iconSize, color: Colors.green.withOpacity(.8)),
                       onPressed: () {
                         var e = cellValue.value;
                         if (e is ProjectRecordEntity) {
@@ -292,7 +305,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     message: "删除此记录",
                     child: IconButton(
                       icon: Icon(FluentIcons.delete,
-                          color: Colors.green.withOpacity(.8)),
+                          size: iconSize, color: Colors.green.withOpacity(.8)),
                       onPressed: () {
                         var e = cellValue.value;
                         if (e is ProjectRecordEntity) {

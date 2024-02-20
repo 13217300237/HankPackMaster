@@ -20,7 +20,7 @@ class ProjectManagerPage extends StatefulWidget {
   State<ProjectManagerPage> createState() => _ProjectManagerPageState();
 }
 
-const minimumWidth = 100.0;
+const minimumWidth = 200.0;
 
 class _ProjectManagerPageState extends State<ProjectManagerPage> {
   late ProjectEntityDataSource _dataSource;
@@ -48,6 +48,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               var enqueueSuccess = _workShopVm.enqueue(e);
               if (enqueueSuccess) {
                 _confirmGoToWorkShop();
+
               } else {
                 ToastUtil.showPrettyToast('项目激活 入列失败,发现重复任务');
               }
@@ -309,11 +310,11 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           label: centerContainer("分支名称")),
       GridColumn(
           columnName: ColumnNameConst.statue,
-          minimumWidth: minimumWidth,
+          minimumWidth: 200,
           width: statueColumnWidth,
           label: centerContainer("状态")),
       GridColumn(
-          minimumWidth: minimumWidth,
+          minimumWidth: 200,
           width: jobOperationWidth,
           columnName: ColumnNameConst.jobOperation,
           label: centerContainer("作业功能")),

@@ -185,9 +185,9 @@ class WorkShopVm extends ChangeNotifier {
 
   String get versionCode => versionCodeController.text;
 
-  bool get jobRunning => _jobRunning;
+  bool get workThreadRunning => _workThreadRunning;
 
-  bool _jobRunning = false;
+  bool _workThreadRunning = false;
 
   final List<String> _enableAssembleOrders = [];
 
@@ -687,6 +687,10 @@ class WorkShopVm extends ChangeNotifier {
   ///添加一个延时，以确保listView绘制完毕，再来计算最底端的位置
   void _scrollToBottom() {
     Timer(const Duration(milliseconds: 300), () {
+      if (logListViewScrollController.hasClients != true) {
+        return;
+      }
+
       logListViewScrollController.animateTo(
           logListViewScrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 500),
@@ -713,11 +717,11 @@ class WorkShopVm extends ChangeNotifier {
   Future<OrderExecuteResult?> startSchedule() async {
     cleanLog();
 
-    if (_jobRunning) {
+    if (_workThreadRunning) {
       return OrderExecuteResult(succeed: false, msg: "任务正在执行中...");
     }
 
-    _jobRunning = true;
+    _workThreadRunning = true;
 
     addNewLogLine("开始流程...${taskStateList.length}");
 
@@ -799,13 +803,13 @@ class WorkShopVm extends ChangeNotifier {
         updateStatue(i, StageStatue.finished);
       } else {
         updateStatue(i, StageStatue.error);
-        _jobRunning = false;
+        _workThreadRunning = false;
         break;
       }
     }
 
     totalWatch.stop();
-    _jobRunning = false;
+    _workThreadRunning = false;
 
     return OrderExecuteResult(
         succeed: true,
@@ -856,7 +860,6 @@ class WorkShopVm extends ChangeNotifier {
 
     _taskQueue.add(e);
     _loop();
-    notifyListeners();
 
     return true;
   }
@@ -885,10 +888,13 @@ class WorkShopVm extends ChangeNotifier {
     initPreCheckTaskList();
     var value = await startSchedule();
     if (value == null) {
+      setProjectRecordJobRunning(false);
+      _reset();
       return;
     }
 
     if (value.succeed != true || value.data is! List<String>) {
+      setProjectRecordJobRunning(false);
       _reset();
       return;
     }
@@ -910,7 +916,7 @@ class WorkShopVm extends ChangeNotifier {
     if (assembleOrders.isNotEmpty) {
       runningTask!.preCheckOk = true;
       runningTask!.assembleOrders = assembleOrders;
-      ProjectRecordOperator.insertOrUpdate(runningTask!);
+      setProjectRecordJobRunning(false);
     }
     _reset();
     notifyListeners();
@@ -927,6 +933,7 @@ class WorkShopVm extends ChangeNotifier {
     taskTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (runningTask == null && _taskQueue.isNotEmpty) {
         runningTask = _taskQueue.removeFirst();
+        setProjectRecordJobRunning(true);
         assert(runningTask != null);
         debugPrint("准备切入新任务，请稍后... ${runningTask!.projectName}");
         // 如果此工程已经激活成功，那么，直接进行打包
@@ -969,6 +976,7 @@ class WorkShopVm extends ChangeNotifier {
     var scheduleRes = await startSchedule();
 
     if (scheduleRes == null) {
+      setProjectRecordJobRunning(false);
       _reset();
       return;
     }
@@ -976,6 +984,7 @@ class WorkShopVm extends ChangeNotifier {
       myAppInfo = scheduleRes.data;
       onProjectPackageFinished(myAppInfo!);
     } else {
+      setProjectRecordJobRunning(false);
       _reset();
       ToastUtil.showPrettyToast(scheduleRes.toString());
     }
@@ -988,7 +997,13 @@ class WorkShopVm extends ChangeNotifier {
       runningTask!.jobHistory = [];
     }
     runningTask!.jobHistory!.add(myAppInfo.toJsonString());
-    ProjectRecordOperator.insertOrUpdate(runningTask!);
+    setProjectRecordJobRunning(false);
     _reset();
+  }
+
+  void setProjectRecordJobRunning(bool running) {
+    runningTask!.jobRunning = running;
+    ProjectRecordOperator.insertOrUpdate(runningTask!);
+    notifyListeners();
   }
 }

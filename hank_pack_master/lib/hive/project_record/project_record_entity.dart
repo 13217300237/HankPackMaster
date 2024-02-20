@@ -26,12 +26,14 @@ class ProjectRecordEntity {
   @HiveField(0x06)
   List<String>? jobHistory;
 
+  /// 是否处在工作中...
+  @HiveField(0x07)
+  bool? jobRunning;
+
   /// 临时字段，不用存数据库
   /// 传递给工坊的对象，包含了打包所需的所有参数
   PackageSetting? setting;
 
-  /// 是否处在工作中...
-  bool jobRunning;
 
   ProjectRecordEntity(
     this.gitUrl,

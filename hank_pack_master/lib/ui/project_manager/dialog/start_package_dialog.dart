@@ -141,7 +141,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
           if (success) {
             widget.goToWorkShop?.call();
           } else {
-            ToastUtil.showPrettyToast('入列失败,发现重复任务');
+            ToastUtil.showPrettyToast('打包任务入列失败,发现重复任务');
           }
         });
     var cancelActionBtn = OutlinedButton(
