@@ -30,15 +30,18 @@ class ProjectRecordEntity {
   @HiveField(0x07)
   bool? jobRunning;
 
+  @HiveField(0x08)
+  String? projectDesc;
+
   /// 临时字段，不用存数据库
   /// 传递给工坊的对象，包含了打包所需的所有参数
   PackageSetting? setting;
 
-
   ProjectRecordEntity(
     this.gitUrl,
     this.branch,
-    this.projectName, {
+    this.projectName,
+    this.projectDesc, {
     this.preCheckOk = false,
     this.jobRunning = false,
     this.assembleOrders,

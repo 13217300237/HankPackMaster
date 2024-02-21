@@ -9,11 +9,14 @@ class EditProjectDialogWidget extends StatefulWidget {
 
   final TextEditingController projectNameTextController;
 
+  final TextEditingController projectDescTextController;
+
   const EditProjectDialogWidget({
     super.key,
     required this.gitUrlTextController,
     required this.branchNameTextController,
     required this.projectNameTextController,
+    required this.projectDescTextController,
   });
 
   @override
@@ -46,6 +49,8 @@ class _EditProjectDialogWidgetState extends State<EditProjectDialogWidget> {
   Widget build(BuildContext context) {
     var projectNameLabel =
         SizedBox(width: 100, child: Text('项目名', style: textStyle));
+    var projectDescLabel =
+        SizedBox(width: 100, child: Text('项目描述', style: textStyle));
     var gitUrlLabel =
         SizedBox(width: 100, child: Text('gitUrl', style: textStyle));
     var mustLabel = SizedBox(width: 20, child: Text("*", style: textMustStyle));
@@ -72,7 +77,7 @@ class _EditProjectDialogWidgetState extends State<EditProjectDialogWidget> {
           controller: widget.projectNameTextController),
     );
 
-    var gitUrlTextBox = Expanded(
+    var projectDescTextBox = Expanded(
       child: TextBox(
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
@@ -81,6 +86,19 @@ class _EditProjectDialogWidgetState extends State<EditProjectDialogWidget> {
           highlightColor: Colors.transparent,
           expands: false,
           maxLines: 4,
+          style: textStyle,
+          controller: widget.projectDescTextController),
+    );
+
+    var gitUrlTextBox = Expanded(
+      child: TextBox(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: Colors.green.withOpacity(.1)),
+          unfocusedColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          expands: false,
+          maxLines: 2,
           style: textStyle,
           enabled: false,
           controller: widget.gitUrlTextController),
@@ -112,10 +130,17 @@ class _EditProjectDialogWidgetState extends State<EditProjectDialogWidget> {
       projectNameTextBox,
     ]);
 
+    var projectDesc = Row(children: [
+      projectDescLabel,
+      projectDescTextBox,
+    ]);
+
     // 弹窗
     var contentWidget = Column(mainAxisSize: MainAxisSize.min, children: [
       const SizedBox(height: 5),
       projectName,
+      const SizedBox(height: 10),
+      projectDesc,
       const SizedBox(height: 10),
       gitUrlRow,
       isValidGitUrlTip,

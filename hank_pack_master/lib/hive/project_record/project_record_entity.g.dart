@@ -20,6 +20,7 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       fields[1] as String,
       fields[2] as String,
       fields[4] as String,
+      fields[8] as String?,
       preCheckOk: fields[3] as bool,
       jobRunning: fields[7] as bool?,
       assembleOrders: (fields[5] as List?)?.cast<String>(),
@@ -30,7 +31,7 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
   @override
   void write(BinaryWriter writer, ProjectRecordEntity obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(4)
       ..write(obj.projectName)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       ..writeByte(6)
       ..write(obj.jobHistory)
       ..writeByte(7)
-      ..write(obj.jobRunning);
+      ..write(obj.jobRunning)
+      ..writeByte(8)
+      ..write(obj.projectDesc);
   }
 
   @override

@@ -57,14 +57,17 @@ class ProjectEntityDataSource extends DataGridSource {
     _refresh();
   }
 
-  bool insertOrUpdateProjectRecord(
-      String gitUrl, String branchName, String projectName) {
-    if (gitUrl.isEmpty || branchName.isEmpty || projectName.isEmpty) {
+  bool insertOrUpdateProjectRecord(String gitUrl, String branchName,
+      String projectName, String projectDesc) {
+    if (gitUrl.isEmpty ||
+        branchName.isEmpty ||
+        projectName.isEmpty ||
+        projectDesc.isEmpty) {
       return false;
     }
 
     ProjectRecordOperator.insertOrUpdate(
-      ProjectRecordEntity(gitUrl, branchName, projectName),
+      ProjectRecordEntity(gitUrl, branchName, projectName, projectDesc),
     );
 
     _refresh();
@@ -353,20 +356,24 @@ class ProjectEntityDataSource extends DataGridSource {
         }).toList());
   }
 
-  /// 创建一个新的安卓工程record，并刷新UI
+  /// 编辑工程
   void editAndroidProjectRecord(ProjectRecordEntity e) {
     TextEditingController gitUrlTextController = TextEditingController();
     TextEditingController branchNameTextController = TextEditingController();
     TextEditingController projectNameTextController = TextEditingController();
+    TextEditingController projectDescTextController = TextEditingController();
 
     var contentWidget = EditProjectDialogWidget(
-        projectNameTextController: projectNameTextController,
-        gitUrlTextController: gitUrlTextController,
-        branchNameTextController: branchNameTextController);
+      projectNameTextController: projectNameTextController,
+      gitUrlTextController: gitUrlTextController,
+      branchNameTextController: branchNameTextController,
+      projectDescTextController: projectDescTextController,
+    );
 
     gitUrlTextController.text = e.gitUrl;
     branchNameTextController.text = e.branch;
     projectNameTextController.text = e.projectName;
+    projectDescTextController.text = e.projectDesc ?? '';
 
     DialogUtil.showCustomDialog(
         context: buildContext,
@@ -382,11 +389,14 @@ class ProjectEntityDataSource extends DataGridSource {
             gitUrlTextController.text,
             branchNameTextController.text,
             projectNameTextController.text,
+            projectDescTextController.text,
           );
         },
         judgePop: () {
           if (gitUrlTextController.text.isEmpty ||
-              branchNameTextController.text.isEmpty) {
+              branchNameTextController.text.isEmpty ||
+              projectNameTextController.text.isEmpty ||
+              projectDescTextController.text.isEmpty) {
             return false;
           }
           if (!isValidGitUrl(gitUrlTextController.text)) {

@@ -131,15 +131,18 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     TextEditingController gitUrlTextController = TextEditingController();
     TextEditingController branchNameTextController = TextEditingController();
     TextEditingController projectNameTextController = TextEditingController();
+    TextEditingController projectDescTextController = TextEditingController();
 
     var contentWidget = CreateProjectDialogWidget(
-        projectNameTextController: projectNameTextController,
-        gitUrlTextController: gitUrlTextController,
-        branchNameTextController: branchNameTextController);
+      projectNameTextController: projectNameTextController,
+      gitUrlTextController: gitUrlTextController,
+      branchNameTextController: branchNameTextController,
+      projectDescTextController: projectDescTextController,
+    );
 
     DialogUtil.showCustomDialog(
         context: context,
-        title: '新增工程',
+        title: '新建工程',
         content: contentWidget,
         showActions: true,
         confirmText: "确定",
@@ -151,11 +154,14 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             gitUrlTextController.text,
             branchNameTextController.text,
             projectNameTextController.text,
+            projectDescTextController.text,
           );
         },
         judgePop: () {
           if (gitUrlTextController.text.isEmpty ||
-              branchNameTextController.text.isEmpty) {
+              branchNameTextController.text.isEmpty ||
+              projectNameTextController.text.isEmpty ||
+              projectDescTextController.text.isEmpty) {
             return false;
           }
           if (!isValidGitUrl(gitUrlTextController.text)) {
