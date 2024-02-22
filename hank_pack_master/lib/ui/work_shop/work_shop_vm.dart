@@ -15,7 +15,6 @@ import '../../comm/file_operation.dart';
 import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/text_util.dart';
-import '../../comm/toast_util.dart';
 import '../../comm/upload_platforms.dart';
 import '../../core/command_util.dart';
 import '../../hive/env_config/env_config_operator.dart';
@@ -252,7 +251,7 @@ class WorkShopVm extends ChangeNotifier {
           deleteDirectory(projectPath);
         } catch (e) {
           String err = "删除$projectPath失败,原因是：\n$e\n";
-          return OrderExecuteResult(data: err, succeed: false);
+          return OrderExecuteResult(msg: err, succeed: false);
         }
 
         ExecuteResult gitCloneRes = await CommandUtil.getInstance().gitClone(
@@ -262,10 +261,14 @@ class WorkShopVm extends ChangeNotifier {
 
         String cloneFailedSolution = '''
         clone失败：
-        如果是由于文件被占用的原因，请看如下解决方案：
-        
-在 Windows 平台上，你可以使用一些工具来查找使用中的进程并确定哪个进程正在占用文件。以下是两种常用的方法：
-方法一：使用资源监视器（Resource Monitor）
+        如果是由于文件被占用的原因，在 Windows 平台上，
+      
+方法1：
+打开任务管理器，找到JDK相关进程，杀死，然后重新执行任务。
+
+方法2：        
+
+使用资源监视器（Resource Monitor）
 打开资源监视器。你可以通过按下 Win + R，然后输入 “resmon” 后按回车键来打开命令提示符，输入 “resmon” 并按回车键，或者在任务管理器的 “性能” 标签页中点击 “资源监视器” 按钮来打开资源监视器。
 在资源监视器的 “CPU” 标签页中，找到 “关联的句柄” 部分，并输入文件名或路径以筛选关联的句柄。
 根据结果，你可以看到哪个进程正在使用特定的文件。关闭该进程再次尝试clone即可。
@@ -273,7 +276,7 @@ class WorkShopVm extends ChangeNotifier {
 
         if (gitCloneRes.exitCode != 0) {
           return OrderExecuteResult(
-              data:
+              msg:
                   "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n $cloneFailedSolution",
               succeed: false);
         }
@@ -290,7 +293,7 @@ class WorkShopVm extends ChangeNotifier {
             .gitCheckout(projectPath, gitBranch, addNewLogLine);
 
         if (gitCheckoutRes.exitCode != 0) {
-          return OrderExecuteResult(data: gitCheckoutRes.res, succeed: false);
+          return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
         }
         return OrderExecuteResult(succeed: true, data: '分支 $gitBranch 切换成功');
       },
@@ -306,7 +309,7 @@ class WorkShopVm extends ChangeNotifier {
             File("$projectPath${Platform.pathSeparator}gradlew.bat");
         if (!gradlewFile.existsSync()) {
           String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
-          return OrderExecuteResult(data: er, succeed: false);
+          return OrderExecuteResult(msg: er, succeed: false);
         }
         return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
       },
@@ -319,7 +322,7 @@ class WorkShopVm extends ChangeNotifier {
         ExecuteResult gitAssembleTasksRes = await CommandUtil.getInstance()
             .gradleAssembleTasks(projectPath, addNewLogLine);
         if (gitAssembleTasksRes.exitCode != 0) {
-          return OrderExecuteResult(data: "可用指令查询 存在问题!!!", succeed: false);
+          return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
         }
         var ori = gitAssembleTasksRes.res;
         var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
@@ -363,7 +366,7 @@ class WorkShopVm extends ChangeNotifier {
 
         if (gradleAssembleRes.exitCode != 0) {
           String er = "打包失败，详情请看日志";
-          return OrderExecuteResult(data: er, succeed: false);
+          return OrderExecuteResult(msg: er, succeed: false);
         }
         return OrderExecuteResult(succeed: true, data: gradleAssembleRes.res);
       },
@@ -379,7 +382,7 @@ class WorkShopVm extends ChangeNotifier {
         if (list.length > 1) {
           return OrderExecuteResult(
               succeed: false,
-              data: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
+              msg: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
         }
 
         apkToUpload = list[0];
@@ -387,7 +390,7 @@ class WorkShopVm extends ChangeNotifier {
         if (await File(apkToUpload!).exists()) {
         } else {
           return OrderExecuteResult(
-              succeed: false, data: "查找打包产物 失败: $apkToUpload，文件不存在");
+              succeed: false, msg: "查找打包产物 失败: $apkToUpload，文件不存在");
         }
         return OrderExecuteResult(
             succeed: true, data: "打包产物的位置在: $apkToUpload");
@@ -405,7 +408,7 @@ class WorkShopVm extends ChangeNotifier {
               .gitLog(projectPath, addNewLogLine);
 
           if (log.exitCode != 0) {
-            return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
+            return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
           }
 
           var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
@@ -414,7 +417,7 @@ class WorkShopVm extends ChangeNotifier {
           );
 
           if (pgyToken == null) {
-            return OrderExecuteResult(data: "pgy token获取失败...", succeed: false);
+            return OrderExecuteResult(msg: "pgy token获取失败...", succeed: false);
           }
 
           _pgyEntity = PgyEntity(
@@ -425,7 +428,7 @@ class WorkShopVm extends ChangeNotifier {
           );
 
           return OrderExecuteResult(
-              succeed: true, data: '获取到的Token是 ${pgyToken.toString()}');
+              succeed: true, msg: '获取到的Token是 ${pgyToken.toString()}');
         },
         onStateFinishedFunc: updateStageCostTime,
         onStageStartedFunc: updateStateStarted,
@@ -434,7 +437,7 @@ class WorkShopVm extends ChangeNotifier {
         "上传pgy",
         actionFunc: () async {
           if (!_pgyEntity!.isOk()) {
-            return OrderExecuteResult(data: "上传参数为空，流程终止!", succeed: false);
+            return OrderExecuteResult(msg: "上传参数为空，流程终止!", succeed: false);
           }
 
           String oriFileName = basename(File(apkToUpload!).path);
@@ -445,7 +448,7 @@ class WorkShopVm extends ChangeNotifier {
               uploadProgressAction: addNewLogLine);
 
           if (res != null) {
-            return OrderExecuteResult(data: "上传失败,$res", succeed: false);
+            return OrderExecuteResult(msg: "上传失败,$res", succeed: false);
           } else {
             return OrderExecuteResult(succeed: true, data: '上传成功');
           }
@@ -460,12 +463,12 @@ class WorkShopVm extends ChangeNotifier {
               .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
 
           if (s == null) {
-            return OrderExecuteResult(succeed: false);
+            return OrderExecuteResult(succeed: false, msg: "");
           }
 
           if (s.code == 1216) {
             // 发布失败，流程终止
-            return OrderExecuteResult(succeed: false, data: "发布失败，流程终止");
+            return OrderExecuteResult(succeed: false, msg: "发布失败，流程终止");
           } else {
             // 发布成功，打印结果
             // 开始解析发布结果,
@@ -524,9 +527,7 @@ class WorkShopVm extends ChangeNotifier {
           obsDownloadUrl = oBSResponse?.url;
           if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
             return OrderExecuteResult(
-              data: "OBS上传失败 ",
-              succeed: false,
-            );
+                data: "OBS上传失败 ", succeed: false, msg: "OBS上传失败 ");
           } else {
             return OrderExecuteResult(
               data: "OBS上传成功,下载地址为 $obsDownloadUrl",
@@ -779,6 +780,7 @@ class WorkShopVm extends ChangeNotifier {
               addNewLogLine(
                   "第${j + 1}次 执行失败: $taskName - $stageResult 3秒后开始下一轮");
               addNewEmptyLine();
+
               stage.executeResultData = stageResult;
               actionResStr = stageResult;
               await waitThreeSec();
@@ -814,7 +816,8 @@ class WorkShopVm extends ChangeNotifier {
 
     return OrderExecuteResult(
         succeed: true,
-        msg: "任务总共花费时间${totalWatch.elapsed.inMilliseconds} ms ",
+        msg:
+            "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionResStr?.msg}，任务总共花费时间${totalWatch.elapsed.inMilliseconds} ms ",
         data: actionResStr?.data);
   }
 
@@ -939,15 +942,14 @@ class WorkShopVm extends ChangeNotifier {
         assert(runningTask != null);
         debugPrint("准备切入新任务，请稍后... ${runningTask!.projectName}");
         // 如果此工程已经激活成功，那么，直接进行打包
+        assert(runningTask!.setting != null);
+        // 将这些信息填入到 表单中
+        gitUrlController.text = runningTask!.gitUrl;
+        gitBranchController.text = runningTask!.branch;
+        setProjectPath();
+        projectNameController.text = runningTask!.projectName ?? '';
+        projectAppDescController.text = runningTask!.projectDesc ?? '';
         if (runningTask!.preCheckOk == true) {
-          assert(runningTask!.setting != null);
-          // 将这些信息填入到 表单中
-          gitUrlController.text = runningTask!.gitUrl;
-          gitBranchController.text = runningTask!.branch;
-          setProjectPath();
-
-          projectNameController.text = runningTask!.projectName ?? '';
-          projectAppDescController.text = runningTask!.projectDesc ?? '';
           updateLogController.text = runningTask!.setting!.appUpdateStr ?? '';
           apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
           selectedOrder = runningTask!.setting!.selectedOrder ?? "";
@@ -955,7 +957,6 @@ class WorkShopVm extends ChangeNotifier {
           selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
           selectedUploadPlatformController.text =
               selectedUploadPlatform!.name ?? '';
-
           await startPackage();
         } else {
           // 否则，先进行激活
@@ -984,15 +985,14 @@ class WorkShopVm extends ChangeNotifier {
     }
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
-      onProjectPackageFinished(myAppInfo!);
     } else {
-      setProjectRecordJobRunning(false);
-      _reset();
-      ToastUtil.showPrettyToast(scheduleRes.toString());
+      myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
     }
+
+    onProjectPackageFinished(myAppInfo!);
   }
 
-  /// 项目打包成功之后
+  /// 流程结束时，无论成功或者失败
   void onProjectPackageFinished(MyAppInfo myAppInfo) {
     var his = runningTask!.jobHistory;
     if (his == null) {
@@ -1003,9 +1003,11 @@ class WorkShopVm extends ChangeNotifier {
     _reset();
   }
 
+  void _updateToDb() => ProjectRecordOperator.insertOrUpdate(runningTask!);
+
   void setProjectRecordJobRunning(bool running) {
     runningTask!.jobRunning = running;
-    ProjectRecordOperator.insertOrUpdate(runningTask!);
+    _updateToDb();
     notifyListeners();
   }
 }

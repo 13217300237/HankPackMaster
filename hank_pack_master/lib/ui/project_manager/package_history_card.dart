@@ -13,31 +13,57 @@ class PackageHistoryCard extends StatelessWidget {
     required this.myAppInfo,
   });
 
+  Color _bgColor() {
+    String? errMsg = myAppInfo.errMessage;
+    if (errMsg != null && errMsg.isNotEmpty) {
+      return Colors.red.withOpacity(.2);
+    } else {
+      return Colors.green.withOpacity(.2);
+    }
+  }
+
+  Widget errWidget() {
+    String? errMsg = myAppInfo.errMessage;
+    if (errMsg != null && errMsg.isNotEmpty) {
+      return Text(
+        errMsg,
+        style: _style,
+      );
+    } else {
+      return const SizedBox();
+    }
+  }
+
+  final _style = const TextStyle(fontWeight: FontWeight.w600, fontSize: 16);
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => showMyAppInfo(myAppInfo, context),
-      child: Card(
-        margin: const EdgeInsets.all(4),
-        backgroundColor: Colors.green.withOpacity(.2),
-        borderColor: Colors.green.withOpacity(.4),
-        borderRadius: BorderRadius.circular(4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "上传方式: ${UploadPlatform.findNameByIndex('${myAppInfo.uploadPlatform}')}",
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "打包时间: ${myAppInfo.buildUpdated}",
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
-          ],
-        ),
-      ),
-    );
+        onTap: () => showMyAppInfo(myAppInfo, context),
+        child: Card(
+            margin: const EdgeInsets.all(4),
+            backgroundColor: _bgColor(),
+            borderColor: _bgColor(),
+            borderRadius: BorderRadius.circular(4),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                "上传方式: ${UploadPlatform.findNameByIndex('${myAppInfo.uploadPlatform}')}",
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+              const SizedBox(height: 10),
+              _timeWidget(),
+              const SizedBox(height: 10),
+              errWidget(),
+            ])));
+  }
+
+  Widget _timeWidget() {
+    if (myAppInfo.buildUpdated == null || myAppInfo.buildUpdated!.isEmpty) {
+      return const SizedBox();
+    }
+    return Text("打包时间: ${myAppInfo.buildUpdated}", style: _style);
   }
 
   void showMyAppInfo(MyAppInfo s, BuildContext context) {

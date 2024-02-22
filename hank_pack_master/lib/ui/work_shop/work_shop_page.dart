@@ -274,9 +274,9 @@ class _WorkShopPageState extends State<WorkShopPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [...taskCardList],
             )).hideScrollbar(context)),
-        _mainTitleWidget("正在执行"),
-        Expanded(
-            flex: 2, child: taskCard(_workShopVm.runningTask, running: true)),
+        // _mainTitleWidget("正在执行"), // 感觉这个没必要了
+        // Expanded(
+        //     flex: 2, child: taskCard(_workShopVm.runningTask, running: true)),
         const SizedBox(height: 15)
       ]),
     );

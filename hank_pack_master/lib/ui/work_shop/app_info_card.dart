@@ -27,35 +27,54 @@ class AppInfoCard extends StatelessWidget {
           _line('应用描述', "${appInfo.buildDescription}"),
           _line('更新日志', "${appInfo.buildUpdateDescription}"),
           _line('更新时间', "${appInfo.buildUpdated}"),
-          if (appInfo.uploadPlatform == '${UploadPlatform.pgy.index}') ...[
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: CachedNetworkImage(
-                  width: 260,
-                  height: 260,
-                  imageUrl: "${appInfo.buildQRCodeURL}",
-                  placeholder: (context, url) => const Center(
-                      child: m.CircularProgressIndicator(
-                    strokeWidth: 2,
-                  )),
-                  errorWidget: (context, url, error) =>
-                      const Icon(m.Icons.error_outline),
-                ),
-              ),
-            ),
-          ] else ...[
-            Center(
-              child: QrImageView(
-                data: '${appInfo.buildQRCodeURL}',
-                size: 260,
-                version: QrVersions.auto,
-              ),
-            ),
-          ],
+          qrCode(),
+          msgWidget(),
         ],
       ),
     );
+  }
+
+  Widget msgWidget() {
+    if (appInfo.errMessage != null && appInfo.errMessage!.isNotEmpty) {
+      return Text(
+        "${appInfo.errMessage}",
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+      );
+    }
+    return const SizedBox();
+  }
+
+  Widget qrCode() {
+    if (appInfo.errMessage != null && appInfo.errMessage!.isNotEmpty) {
+      return const SizedBox();
+    } else {
+      if (appInfo.uploadPlatform == '${UploadPlatform.pgy.index}') {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: CachedNetworkImage(
+              width: 260,
+              height: 260,
+              imageUrl: "${appInfo.buildQRCodeURL}",
+              placeholder: (context, url) => const Center(
+                  child: m.CircularProgressIndicator(
+                strokeWidth: 2,
+              )),
+              errorWidget: (context, url, error) =>
+                  const Icon(m.Icons.error_outline),
+            ),
+          ),
+        );
+      } else {
+        return Center(
+          child: QrImageView(
+            data: '${appInfo.buildQRCodeURL}',
+            size: 260,
+            version: QrVersions.auto,
+          ),
+        );
+      }
+    }
   }
 
   Widget _line(String title, String value) {

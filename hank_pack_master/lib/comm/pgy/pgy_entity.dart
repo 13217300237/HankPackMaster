@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-
 class PgyTokenEntity {
   int? code;
   String? message;
@@ -67,6 +66,7 @@ class ReleaseResultEntity {
   }
 }
 
+/// 打包成功，则返回appInfo
 class MyAppInfo {
   String? uploadPlatform;
 
@@ -91,29 +91,33 @@ class MyAppInfo {
   String? buildUpdated;
   String? buildQRCodeURL;
 
-  MyAppInfo({
-    this.buildKey,
-    this.buildType,
-    this.buildIsFirst,
-    this.buildIsLastest,
-    this.buildFileKey,
-    this.buildFileName,
-    this.buildFileSize,
-    this.buildName,
-    this.buildVersion,
-    this.buildVersionNo,
-    this.buildBuildVersion,
-    this.buildIdentifier,
-    this.buildIcon,
-    this.buildDescription,
-    this.buildUpdateDescription,
-    this.buildScreenshots,
-    this.buildShortcutUrl,
-    this.buildCreated,
-    this.buildUpdated,
-    this.buildQRCodeURL,
-    this.uploadPlatform,
-  });
+  String? errMessage;
+  String? errCode;
+
+  MyAppInfo(
+      {this.buildKey,
+      this.buildType,
+      this.buildIsFirst,
+      this.buildIsLastest,
+      this.buildFileKey,
+      this.buildFileName,
+      this.buildFileSize,
+      this.buildName,
+      this.buildVersion,
+      this.buildVersionNo,
+      this.buildBuildVersion,
+      this.buildIdentifier,
+      this.buildIcon,
+      this.buildDescription,
+      this.buildUpdateDescription,
+      this.buildScreenshots,
+      this.buildShortcutUrl,
+      this.buildCreated,
+      this.buildUpdated,
+      this.buildQRCodeURL,
+      this.uploadPlatform,
+      this.errCode,
+      this.errMessage});
 
   factory MyAppInfo.fromJson(Map<String, dynamic> data) {
     return MyAppInfo(
@@ -138,6 +142,8 @@ class MyAppInfo {
       buildUpdated: data['buildUpdated'],
       buildQRCodeURL: data['buildQRCodeURL'],
       uploadPlatform: data['uploadPlatform'],
+      errCode: data['errCode'],
+      errMessage: data['errMessage'],
     );
   }
 
@@ -164,6 +170,8 @@ class MyAppInfo {
       'buildUpdated': buildUpdated,
       'buildQRCodeURL': buildQRCodeURL,
       'uploadPlatform': uploadPlatform,
+      'errCode': errCode,
+      'errMessage': errMessage,
     };
   }
 
