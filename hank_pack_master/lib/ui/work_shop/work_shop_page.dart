@@ -40,7 +40,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
     _envParamModel = context.watch<EnvParamVm>();
     _appTheme = context.watch<AppTheme>();
     _workShopVm = context.watch<WorkShopVm>();
-
     if (_envParamModel.isAndroidEnvOk()) {
       return Container(color: _appTheme.bgColor, child: _mainLayout());
     } else {
@@ -54,7 +53,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
     return Tooltip(
       message: '点击打开目录',
       child: IconButton(
-          icon: const Icon(FluentIcons.open_enrollment, size: 18),
+          icon: const Icon(FluentIcons.folder_open, size: 18),
           onPressed: () async {
             String dir = _workShopVm.projectPathController.text;
             try {

@@ -74,6 +74,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _dataSource.init();
       _workShopVm.onTaskFinished = _dataSource.init;
+      _workShopVm.onProcessChanged = (double v) {
+        _dataSource.runningProcessValue = v;
+        _dataSource.notifyListeners();
+      };
     });
   }
 

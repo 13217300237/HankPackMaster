@@ -48,6 +48,8 @@ class ProjectEntityDataSource extends DataGridSource {
   Function(ProjectRecordEntity)? funcGoPackageAction;
   Function()? funJumpToWorkShop;
 
+  double runningProcessValue = 0;
+
   void deleteProjectRecord(ProjectRecordEntity? entity) {
     if (entity == null) {
       return;
@@ -150,7 +152,7 @@ class ProjectEntityDataSource extends DataGridSource {
   @override
   List<DataGridRow> get rows => _rows;
 
-  double iconSize = 20;
+  double iconSize = 26;
 
   /// 每行UI的构建逻辑
   @override
@@ -181,10 +183,14 @@ class ProjectEntityDataSource extends DataGridSource {
               Widget statueWidget;
               String toolTip;
               if (entity.jobRunning == true) {
-                toolTip = "执行中";
+                toolTip = "执行中 $runningProcessValue %";
                 statueWidget = GestureDetector(
                   onTap: funJumpToWorkShop,
-                  child: ProgressRing(activeColor: Colors.blue),
+                  child: ProgressRing(
+                    activeColor: Colors.blue,
+                    value: runningProcessValue,
+                    strokeWidth: 4,
+                  ),
                 );
               } else if (entity.preCheckOk == true) {
                 toolTip = "已激活";
@@ -414,7 +420,7 @@ class ProjectEntityDataSource extends DataGridSource {
       padding: const EdgeInsets.all(4.0),
       child: Text(
         "$label:  $content",
-        style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
       ),
     );
   }

@@ -47,14 +47,8 @@ class PackageHistoryCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                "上传方式: ${UploadPlatform.findNameByIndex('${myAppInfo.uploadPlatform}')}",
-                style:
-                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              ),
-              const SizedBox(height: 10),
+              _uploadPlatformWidget(),
               _timeWidget(),
-              const SizedBox(height: 10),
               errWidget(),
             ])));
   }
@@ -63,7 +57,10 @@ class PackageHistoryCard extends StatelessWidget {
     if (myAppInfo.buildUpdated == null || myAppInfo.buildUpdated!.isEmpty) {
       return const SizedBox();
     }
-    return Text("打包时间: ${myAppInfo.buildUpdated}", style: _style);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Text("打包时间: ${myAppInfo.buildUpdated}", style: _style),
+    );
   }
 
   void showMyAppInfo(MyAppInfo s, BuildContext context) {
@@ -75,5 +72,18 @@ class PackageHistoryCard extends StatelessWidget {
         title: '历史查看',
         showCancel: false,
         confirmText: "关闭");
+  }
+
+  _uploadPlatformWidget() {
+    if (myAppInfo.buildUpdated == null || myAppInfo.buildUpdated!.isEmpty) {
+      return const SizedBox();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: Text(
+        "上传方式: ${UploadPlatform.findNameByIndex('${myAppInfo.uploadPlatform}')}",
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+      ),
+    );
   }
 }

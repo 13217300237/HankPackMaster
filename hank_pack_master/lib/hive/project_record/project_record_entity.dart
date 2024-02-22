@@ -37,6 +37,8 @@ class ProjectRecordEntity {
   /// 传递给工坊的对象，包含了打包所需的所有参数
   PackageSetting? setting;
 
+  double processValue = 0;
+
   ProjectRecordEntity(
     this.gitUrl,
     this.branch,

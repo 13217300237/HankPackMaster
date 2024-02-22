@@ -152,6 +152,10 @@ class WorkShopVm extends ChangeNotifier {
 
   final logListViewScrollController = ScrollController();
 
+  Function(double)? onProcessChanged;
+
+
+
   UploadPlatform? selectedUploadPlatform; // 选中的上传平台
 
   void setSelectedUploadPlatform(int index) {
@@ -713,6 +717,12 @@ class WorkShopVm extends ChangeNotifier {
             3000));
   }
 
+  double calTaskProcessValue(int taskCount, int current) {
+    return ((current / taskCount) * 100).roundToDouble();
+  }
+
+
+
   ///
   /// 开始流水线工作
   ///
@@ -732,9 +742,12 @@ class WorkShopVm extends ChangeNotifier {
     Stopwatch totalWatch = Stopwatch();
     totalWatch.start();
 
+    onProcessChanged?.call(10);
+
     // 开始整体流程
     for (int i = 0; i < taskStateList.length; i++) {
       bool taskOk = false;
+      onProcessChanged?.call(calTaskProcessValue(taskStateList.length, i));
 
       // 对每个阶段执行 规定最大次数的循环
       for (int j = 0; j < maxTimes; j++) {
