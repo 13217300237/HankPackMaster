@@ -414,7 +414,7 @@ class ProjectEntityDataSource extends DataGridSource {
       padding: const EdgeInsets.all(4.0),
       child: Text(
         "$label:  $content",
-        style: const TextStyle(fontWeight: FontWeight.w600),
+        style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
       ),
     );
   }

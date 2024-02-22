@@ -305,7 +305,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           minimumWidth: minimumWidth,
           width: projectNameColumnWidth,
           columnWidthMode: ColumnWidthMode.fill,
-          label: leftContainer("项目名称")),
+          label: leftContainer("工程名称")),
       GridColumn(
           columnName: ColumnNameConst.gitUrl,
           minimumWidth: minimumWidth,
