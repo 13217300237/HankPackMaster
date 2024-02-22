@@ -53,7 +53,7 @@ Widget input(
               unfocusedColor: Colors.transparent,
               highlightColor: Colors.transparent,
               style: textStyle,
-              placeholder: placeholder,
+              placeholder: " ", // 强制把placeHolder设置为-
               placeholderStyle: textStyle,
               expands: false,
               maxLines: maxLines,

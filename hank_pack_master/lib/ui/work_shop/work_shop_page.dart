@@ -110,12 +110,21 @@ class _WorkShopPageState extends State<WorkShopPage> {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    input("工程名称 ", "输入工程名称", _workShopVm.projectNameController,
+                        must: true, enable: false),
                     input("git地址 ", "输入git地址", _workShopVm.gitUrlController,
                         must: true, enable: false),
                     input("工程位置", "输入工程名", _workShopVm.projectPathController,
                         suffix: _toolTip(), enable: false),
                     input("分支名称", "输入分支名称", _workShopVm.gitBranchController,
                         must: true, enable: false),
+                    input(
+                      "应用描述",
+                      "输入应用描述...",
+                      _workShopVm.projectAppDescController,
+                      maxLines: 5,
+                      enable: false,
+                    ),
                   ]),
             ).hideScrollbar(context),
           ],
@@ -134,13 +143,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                input(
-                  "应用描述",
-                  "输入应用描述...",
-                  _workShopVm.projectAppDescController,
-                  maxLines: 5,
-                  enable: false,
-                ),
                 input("更新日志", "输入更新日志...", _workShopVm.updateLogController,
                     maxLines: 5, enable: false),
                 input('打包命令', "必须选择一个打包命令", _workShopVm.selectedOrderController,

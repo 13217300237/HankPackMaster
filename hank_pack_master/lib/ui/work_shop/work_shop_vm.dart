@@ -119,6 +119,7 @@ waitForever() async {
 }
 
 class WorkShopVm extends ChangeNotifier {
+  final projectNameController = TextEditingController();
   final gitUrlController = TextEditingController(); // git地址
   final gitBranchController = TextEditingController(); // 分支名称
   final projectPathController = TextEditingController(); // 工程路径
@@ -821,6 +822,7 @@ class WorkShopVm extends ChangeNotifier {
     taskStateList.clear();
     _cmdExecLog.clear();
     gitUrlController.text = '';
+    projectNameController.text = '';
     gitBranchController.text = "";
     projectPathController.text = "";
     projectAppDescController.text = "";
@@ -944,8 +946,8 @@ class WorkShopVm extends ChangeNotifier {
           gitBranchController.text = runningTask!.branch;
           setProjectPath();
 
-          projectAppDescController.text =
-              runningTask!.setting!.appDescStr ?? '';
+          projectNameController.text = runningTask!.projectName ?? '';
+          projectAppDescController.text = runningTask!.projectDesc ?? '';
           updateLogController.text = runningTask!.setting!.appUpdateStr ?? '';
           apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
           selectedOrder = runningTask!.setting!.selectedOrder ?? "";
