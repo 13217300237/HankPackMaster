@@ -955,7 +955,6 @@ class WorkShopVm extends ChangeNotifier {
         assert(runningTask != null);
         debugPrint("准备切入新任务，请稍后... ${runningTask!.projectName}");
         // 如果此工程已经激活成功，那么，直接进行打包
-        assert(runningTask!.setting != null);
         // 将这些信息填入到 表单中
         gitUrlController.text = runningTask!.gitUrl;
         gitBranchController.text = runningTask!.branch;
