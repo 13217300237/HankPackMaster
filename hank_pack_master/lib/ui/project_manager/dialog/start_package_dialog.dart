@@ -36,9 +36,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   var errStyle = TextStyle(fontSize: 16, color: Colors.red);
 
-  final TextEditingController _projectAppDescController =
-      TextEditingController();
-
   final TextEditingController _updateLogController = TextEditingController();
 
   final TextEditingController _apkLocationController = TextEditingController();
@@ -50,14 +47,14 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
   @override
   void initState() {
     super.initState();
-    _projectAppDescController.addListener(() {
-      if (_projectAppDescController.text.isEmpty) {
-        isValidGitUrlRes = true;
-      } else {
-        isValidGitUrlRes = isValidGitUrl(_projectAppDescController.text);
-      }
-      setState(() {});
-    });
+    // _projectAppDescController.addListener(() {
+    //   if (_projectAppDescController.text.isEmpty) {
+    //     isValidGitUrlRes = true;
+    //   } else {
+    //     isValidGitUrlRes = isValidGitUrl(_projectAppDescController.text);
+    //   }
+    //   setState(() {});
+    // });
   }
 
   Widget chooseRadio(String title) {
@@ -118,7 +115,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         child: const Text("确定"),
         onPressed: () {
           // 收集信息,并返回出去
-          String appDescStr = _projectAppDescController.text;
           String appUpdateStr = _updateLogController.text;
           String apkLocation = _apkLocationController.text;
           String? selectedOrder = _selectedOrder;
@@ -126,7 +122,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
           // 将此任务添加到队列中去
           widget.projectRecordEntity.setting = PackageSetting(
-            appDescStr: appDescStr,
             appUpdateStr: appUpdateStr,
             apkLocation: apkLocation,
             selectedOrder: selectedOrder,
@@ -155,7 +150,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          input("应用描述", "输入应用描述...", _projectAppDescController, maxLines: 5),
           input("更新日志", "输入更新日志...", _updateLogController, maxLines: 5),
           choose('打包命令', enableAssembleMap, setSelectedOrder: (order) {
             // 同时设置默认的apk路径

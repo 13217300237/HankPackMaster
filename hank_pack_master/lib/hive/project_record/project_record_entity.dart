@@ -66,14 +66,12 @@ class ProjectRecordEntity {
 }
 
 class PackageSetting {
-  String? appDescStr;
   String? appUpdateStr;
   String? apkLocation;
   String? selectedOrder;
   UploadPlatform? selectedUploadPlatform;
 
   PackageSetting({
-    this.appDescStr,
     this.appUpdateStr,
     this.apkLocation,
     this.selectedOrder,
