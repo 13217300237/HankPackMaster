@@ -51,5 +51,5 @@ void main() async {
     });
   }
 
-  runApp(const App());
+  runApp(const App()); // TEST
 }
