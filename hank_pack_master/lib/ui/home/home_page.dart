@@ -5,6 +5,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/core/command_util.dart';
 
 import '../../comm/hwobs/obs_client.dart';
+import '../../comm/ui/animation_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -113,9 +114,14 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             const SizedBox(height: 30),
-            Text(
-              text,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            AnimatedShapeWidget(
+              width: 200,
+              height: 200,
+              animationDuration: const Duration(milliseconds: 500),
+              startBorderRadius: 20,
+              endBorderRadius: 100,
+              startColor: Colors.green,
+              endColor: Colors.blue,
             ),
           ],
         ),
