@@ -325,42 +325,44 @@ class _EnvPageState extends State<EnvPage> {
           Row(children: [
             Expanded(
                 child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                   Text("每次最大可执行时间", style: _cTextStyle),
-                  SizedBox(
-                    width: 100,
-                    child: TextBox(
-                      unfocusedColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      controller:
-                          _envParamModel.stageTaskExecuteMaxPeriodController,
-                      suffix: Text("秒", style: _cTextStyle),
-                      textAlign: TextAlign.center,
-                      style: _cTextStyle,
-                    ),
-                  )
+                  const Spacer(),
+                  ComboBox<String>(
+                    value: _envParamModel.stageTaskExecuteMaxPeriod,
+                    items: _envParamModel.executePeriodList
+                        .map<ComboBoxItem<String>>((e) {
+                      return ComboBoxItem<String>(
+                          value: e, child: Text(e, style: _cTextStyle));
+                    }).toList(),
+                    onChanged: (c) => setState(
+                        () => _envParamModel.stageTaskExecuteMaxPeriod = c!),
+                  ),
+                  const SizedBox(width: 20),
+                  Text("分钟", style: _cTextStyle),
                 ])),
             const SizedBox(width: 100),
             Expanded(
                 child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                   Text("最大可执行次数", style: _cTextStyle),
-                  SizedBox(
-                    width: 100,
-                    child: TextBox(
-                      unfocusedColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      suffix: Text("次", style: _cTextStyle),
-                      controller: _envParamModel
-                          .stageTaskExecuteMaxRetryTimesController,
-                      textAlign: TextAlign.center,
-                      style: _cTextStyle,
-                    ),
+                  const Spacer(),
+                  ComboBox<String>(
+                    value: _envParamModel.stageTaskExecuteMaxRetryTimes,
+                    items: _envParamModel.executeTimes
+                        .map<ComboBoxItem<String>>((e) {
+                      return ComboBoxItem<String>(
+                          value: e, child: Text(e, style: _cTextStyle));
+                    }).toList(),
+                    onChanged: (c) => setState(() =>
+                        _envParamModel.stageTaskExecuteMaxRetryTimes = c!),
                   ),
+                  const SizedBox(width: 20),
+                  Text("次", style: _cTextStyle),
                 ]))
           ])
         ]))

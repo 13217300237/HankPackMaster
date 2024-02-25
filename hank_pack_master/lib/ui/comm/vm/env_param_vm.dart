@@ -272,17 +272,20 @@ class EnvParamVm extends ChangeNotifier {
     });
   }
 
+  void initComboBox(
+      TextEditingController editTextController,
+      String Function() get,
+      Function(String) set,
+      ) {
+    editTextController.text = get();
+    editTextController.addListener(() {
+      if (editTextController.text.isNotEmpty) {
+        set(editTextController.text);
+      }
+    });
+  }
+
   void init() {
-    initTextController(
-        stageTaskExecuteMaxPeriodController,
-        () => stageTaskExecuteMaxPeriod,
-        (String s) => stageTaskExecuteMaxPeriod = s);
-
-    initTextController(
-        stageTaskExecuteMaxRetryTimesController,
-        () => stageTaskExecuteMaxRetryTimes,
-        (String s) => stageTaskExecuteMaxRetryTimes = s);
-
     initTextController(
         pgyApiKeyController, () => pgyApiKey, (String s) => pgyApiKey = s);
 
@@ -298,4 +301,11 @@ class EnvParamVm extends ChangeNotifier {
     initTextController(obsBucketNameController, () => obsBucketName,
             (String s) => obsBucketName = s);
   }
+
+
+
+  // 用combox替换输入框
+  List<String> executePeriodList = ["10", "20", "30", "40"]; // 每次最大可执行时间
+  List<String> executeTimes = ["2", "3", "4", "5", "6", "7"]; // 每次最大可执行时间
+
 }

@@ -117,7 +117,7 @@ class _HomePageState extends State<HomePage> {
             AnimatedShapeWidget(
               width: 200,
               height: 200,
-              animationDuration: const Duration(milliseconds: 500),
+              animationDuration: const Duration(milliseconds: 200),
               startBorderRadius: 20,
               endBorderRadius: 100,
               startColor: Colors.green,
