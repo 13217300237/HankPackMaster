@@ -661,18 +661,29 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     CommandUtil.getInstance().whereCmd(
         order: widget.order,
         action: (s) {
+          _isEnvGroupLoading = true;
           var split = s.trim().split("\n");
           for (var e in split) {
             if (!judgeFlutterGit(s)) {
               appendRes(e);
             }
           }
-          _isEnvGroupLoading = true;
-          _envParamModel.setEnv(
-            widget.order,
-            getFirstFromWhereRes(),
-            needToOverride: false,
-          );
+
+          var savedEnv = _envParamModel.getEnv(widget.order);
+          debugPrint(
+              '================================================== savedEnv -> $savedEnv');
+          if (savedEnv.isNotEmpty) {
+            if (!whereRes.contains(savedEnv)) {
+              whereRes.add(savedEnv); // 別忘了上次设置好的环境，因为出现过where命令抽风导致没打印出任何结果的情况
+            }
+          } else {
+            _envParamModel.setEnv(
+              widget.order,
+              getFirstFromWhereRes(),
+              needToOverride: false,
+            );
+          }
+
           setState(() {});
         });
   }

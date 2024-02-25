@@ -121,6 +121,24 @@ class EnvParamVm extends ChangeNotifier {
     action();
   }
 
+  String getEnv(String title) {
+    switch (title) {
+      case "git":
+        return gitRoot;
+      case "flutter":
+        return flutterRoot;
+      case "adb":
+        return adbRoot;
+      case "android":
+        return androidSdkRoot;
+      case "java":
+        return javaRoot;
+      case "workSpaceRoot":
+        return workSpaceRoot;
+    }
+    return "";
+  }
+
   String get gitRoot => EnvConfigOperator.searchEnvValue(Const.envGitKey);
 
   set gitRoot(String r) {
