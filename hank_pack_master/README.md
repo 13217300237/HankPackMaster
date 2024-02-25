@@ -34,3 +34,10 @@ pgy: '_api_key': '3e3bb841269ccb9e3fb9b3feffa4273c'
 
 1. 打包成功之后，给一个未读数给打包历史上
 
+
+  OBSClient.init(
+      ak: "WME9RK9W2EA5J7WMG0ZD",
+      sk: "mW2cNSmvCgDBk2WSeqNSdJowr7KlMTe5FxDl9ovB",
+      domain:
+      "https://kbzpay-apppackage.obs.ap-southeast-1.myhuaweicloud.com",
+      bucketName: "kbzpay-apppackage");

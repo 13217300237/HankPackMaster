@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'comm/functions.dart';
 import 'comm/hwobs/obs_client.dart';
+import 'comm/str_const.dart';
 import 'hive/env_config/env_config_operator.dart';
 import 'hive/project_record/project_record_operator.dart';
 import 'ui/app.dart';
@@ -18,11 +19,11 @@ void main() async {
   await ProjectRecordOperator.openBox();
 
   OBSClient.init(
-      ak: "WME9RK9W2EA5J7WMG0ZD",
-      sk: "mW2cNSmvCgDBk2WSeqNSdJowr7KlMTe5FxDl9ovB",
-      domain:
-      "https://kbzpay-apppackage.obs.ap-southeast-1.myhuaweicloud.com",
-      bucketName: "kbzpay-apppackage");
+    ak: EnvConfigOperator.searchEnvValue(Const.obsAccessKey),
+    sk: EnvConfigOperator.searchEnvValue(Const.obsSecretKey),
+    domain: EnvConfigOperator.searchEnvValue(Const.obsEndPoint),
+    bucketName: EnvConfigOperator.searchEnvValue(Const.obsBucketName),
+  );
 
   // if it's not on the web, windows or android, load the accent color
   if (!kIsWeb &&

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../../comm/hwobs/obs_client.dart';
 import '../../../comm/str_const.dart';
 import '../../../hive/env_config/env_config_entity.dart';
 import '../../../hive/env_config/env_config_operator.dart';
@@ -223,6 +224,7 @@ class EnvParamVm extends ChangeNotifier {
 
   set obsEndPoint(String v) {
     EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.obsEndPoint, v));
+    obsInit();
     notifyListeners();
   }
 
@@ -234,6 +236,7 @@ class EnvParamVm extends ChangeNotifier {
 
   set obsAccessKey(String v) {
     EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.obsAccessKey, v));
+    obsInit();
     notifyListeners();
   }
 
@@ -245,6 +248,7 @@ class EnvParamVm extends ChangeNotifier {
 
   set obsSecretKey(String v) {
     EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.obsSecretKey, v));
+    obsInit();
     notifyListeners();
   }
 
@@ -256,6 +260,7 @@ class EnvParamVm extends ChangeNotifier {
 
   set obsBucketName(String v) {
     EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.obsBucketName, v));
+    obsInit();
     notifyListeners();
   }
 
@@ -273,16 +278,25 @@ class EnvParamVm extends ChangeNotifier {
   }
 
   void initComboBox(
-      TextEditingController editTextController,
-      String Function() get,
-      Function(String) set,
-      ) {
+    TextEditingController editTextController,
+    String Function() get,
+    Function(String) set,
+  ) {
     editTextController.text = get();
     editTextController.addListener(() {
       if (editTextController.text.isNotEmpty) {
         set(editTextController.text);
       }
     });
+  }
+
+  void obsInit() {
+    OBSClient.init(
+      ak: EnvConfigOperator.searchEnvValue(Const.obsAccessKey),
+      sk: EnvConfigOperator.searchEnvValue(Const.obsSecretKey),
+      domain: EnvConfigOperator.searchEnvValue(Const.obsEndPoint),
+      bucketName: EnvConfigOperator.searchEnvValue(Const.obsBucketName),
+    );
   }
 
   void init() {
@@ -299,13 +313,10 @@ class EnvParamVm extends ChangeNotifier {
         (String s) => obsSecretKey = s);
 
     initTextController(obsBucketNameController, () => obsBucketName,
-            (String s) => obsBucketName = s);
+        (String s) => obsBucketName = s);
   }
-
-
 
   // 用combox替换输入框
   List<String> executePeriodList = ["10", "20", "30", "40"]; // 每次最大可执行时间
   List<String> executeTimes = ["2", "3", "4", "5", "6", "7"]; // 每次最大可执行时间
-
 }
