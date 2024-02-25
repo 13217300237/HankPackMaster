@@ -7,6 +7,7 @@ import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/command_util.dart';
 import '../comm/theme.dart';
@@ -72,7 +73,10 @@ class _EnvPageState extends State<EnvPage> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Text("自动环境检测", style: TextStyle(fontSize: 30)),
           const EnvGroupCard(order: "java"),
-          const EnvGroupCard(order: "git"),
+          const EnvGroupCard(
+            order: "git",
+            downloadUrl: "https://git-scm.com/download/win",
+          ),
           const EnvGroupCard(order: "adb"),
           const EnvGroupCard(order: "flutter"),
           const SizedBox(height: 20),
@@ -449,8 +453,9 @@ class _EnvPageState extends State<EnvPage> {
 ///
 class EnvGroupCard extends StatefulWidget {
   final String order;
+  final String? downloadUrl;
 
-  const EnvGroupCard({super.key, required this.order});
+  const EnvGroupCard({super.key, required this.order, this.downloadUrl});
 
   @override
   State<EnvGroupCard> createState() => _EnvGroupCardState();
@@ -481,7 +486,8 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
             margin: const EdgeInsets.all(8),
             borderRadius: BorderRadius.circular(5),
             borderColor: Colors.transparent,
-            child: _buildEnvRadioBtn(widget.order, whereRes.toSet())),
+            child: _buildEnvRadioBtn(
+                widget.order, widget.downloadUrl, whereRes.toSet())),
       )
     ]);
   }
@@ -494,7 +500,8 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
   }
 
   /// 可执行文件单选按钮组件
-  Widget _buildEnvRadioBtn(String title, Set<String> content) {
+  Widget _buildEnvRadioBtn(
+      String order, String? downloadUrl, Set<String> content) {
     List<Widget> muEnv = [];
 
     double cardWidth = 400;
@@ -508,9 +515,9 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
           backgroundColor: Colors.blue.withOpacity(.15),
           borderRadius: BorderRadius.circular(5),
           child: RadioButton(
-              checked: _envParamModel.judgeEnv(title, binRoot),
+              checked: _envParamModel.judgeEnv(order, binRoot),
               onChanged: (v) =>
-                  _envParamModel.setEnv(title, binRoot, needToOverride: true),
+                  _envParamModel.setEnv(order, binRoot, needToOverride: true),
               content: Padding(
                 padding: const EdgeInsets.only(left: 28.0),
                 child: Column(
@@ -521,7 +528,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                     const SizedBox(width: 20),
                     EnvCheckWidget(
                         cmdStr: binRoot,
-                        title: title,
+                        title: order,
                         cardWidth: cardWidth,
                         cardHeight: cardHeight),
                   ],
@@ -531,7 +538,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
       ));
     }
 
-    return _card(title, muEnv);
+    return _card(order, muEnv);
   }
 
   Widget _titleWidget(String binRoot, double cardWidth) {
@@ -559,9 +566,30 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
+            Row(
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 30, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 20),
+                if (widget.downloadUrl != null &&
+                    widget.downloadUrl!.isNotEmpty)
+                  Tooltip(
+                    message: "点击进入下载地址",
+                    child: IconButton(
+                      onPressed: () async {
+                        await launchUrl(
+                            Uri.parse(widget.downloadUrl!)); // 通过资源管理器打开该目录
+                      },
+                      icon: Icon(
+                        FluentIcons.cloud_link,
+                        size: 30,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             Button(
               onPressed: () async {
                 FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -621,7 +649,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     }
   }
 
-  String getFirstFromResSet() {
+  String getFirstFromWhereRes() {
     if (whereRes.isNotEmpty) {
       return whereRes[0];
     }
@@ -633,20 +661,30 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     CommandUtil.getInstance().whereCmd(
         order: widget.order,
         action: (s) {
-          var sTrim = s.trim();
-          if (sTrim.contains("\n")) {
-            var split = sTrim.split("\n");
-            for (var e in split) {
+          var split = s.trim().split("\n");
+          for (var e in split) {
+            if (!judgeFlutterGit(s)) {
               appendRes(e);
             }
-          } else {
-            appendRes(s);
           }
           _isEnvGroupLoading = true;
-          _envParamModel.setEnv(widget.order, getFirstFromResSet(),
-              needToOverride: false);
+          _envParamModel.setEnv(
+            widget.order,
+            getFirstFromWhereRes(),
+            needToOverride: false,
+          );
           setState(() {});
         });
+  }
+
+  /// 有个奇怪情况，flutterSDK自带git工具，但是并不是我手动安装的git，最好不要选，要将他排除在外
+  bool judgeFlutterGit(String path) {
+    if (path.contains("git.exe") &&
+        path.contains("flutter${Platform.pathSeparator}bin")) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void showCmdResultDialog(String res) {
@@ -717,15 +755,6 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
         ),
       ),
     );
-
-    // return IconButton(
-    //   icon: const Icon(FluentIcons.show_results, size: 24.0),
-    //   onPressed: () => DialogUtil.showCustomDialog(
-    //       context: context,
-    //       title: "${widget.title}测试结果",
-    //       content: executeRes,
-    //       showCancel: false),
-    // );
   }
 
   @override
