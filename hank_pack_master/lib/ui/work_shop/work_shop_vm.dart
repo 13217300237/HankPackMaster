@@ -154,8 +154,6 @@ class WorkShopVm extends ChangeNotifier {
 
   Function(double)? onProcessChanged;
 
-
-
   UploadPlatform? selectedUploadPlatform; // 选中的上传平台
 
   void setSelectedUploadPlatform(int index) {
@@ -663,11 +661,13 @@ class WorkShopVm extends ChangeNotifier {
     double itemWidth = 100.0;
     // 指定的 item 在 ListView 中的偏移量
     double offset = index * itemWidth;
-    stageScrollerController.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 500), // 动画持续时间
-      curve: Curves.easeInOut, // 动画曲线
-    );
+    if (stageScrollerController.hasClients) {
+      stageScrollerController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 500), // 动画持续时间
+        curve: Curves.easeInOut, // 动画曲线
+      );
+    }
   }
 
   void cleanLog() {
@@ -711,17 +711,16 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   Future timeOutCounter() async {
-    await Future.delayed(Duration(
-        seconds: int.tryParse(EnvConfigOperator.searchEnvValue(
-                Const.stageTaskExecuteMaxPeriod)) ??
-            3000));
+    var t = int.tryParse(EnvConfigOperator.searchEnvValue(
+            Const.stageTaskExecuteMaxPeriod)) ??
+        5;
+
+    await Future.delayed(Duration(minutes: t));
   }
 
   double calTaskProcessValue(int taskCount, int current) {
     return ((current / taskCount) * 100).roundToDouble();
   }
-
-
 
   ///
   /// 开始流水线工作

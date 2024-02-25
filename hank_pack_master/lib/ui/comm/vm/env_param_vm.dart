@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 
 import '../../../comm/hwobs/obs_client.dart';
 import '../../../comm/str_const.dart';
+import '../../../core/command_util.dart';
 import '../../../hive/env_config/env_config_entity.dart';
 import '../../../hive/env_config/env_config_operator.dart';
 
@@ -171,9 +175,16 @@ class EnvParamVm extends ChangeNotifier {
 
   String get javaRoot => EnvConfigOperator.searchEnvValue(Const.envJavaKey);
 
-  set javaRoot(String r) {
-    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envJavaKey, r));
-    notifyListeners();
+  set javaRoot(String javaPath) {
+    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envJavaKey, javaPath));
+    // 设置java环境时，必须同时设置 JAVA_HOME 到 用户环境变量
+
+    String path = File(javaPath).parent.parent.path;
+
+    CommandUtil.getInstance().setSystemEnvVar("JAVA_HOME",path).then((value) {
+      ToastUtil.showPrettyToast("JAVA_HOME -> $path  设置成功, 重启系统之后生效");
+      notifyListeners();
+    });
   }
 
   String get workSpaceRoot =>
@@ -207,9 +218,10 @@ class EnvParamVm extends ChangeNotifier {
   String get stageTaskExecuteMaxPeriod =>
       EnvConfigOperator.searchEnvValue(Const.stageTaskExecuteMaxPeriod);
 
-  set stageTaskExecuteMaxPeriod(String max) {
+  /// [maxPeriod] 单位为分钟
+  set stageTaskExecuteMaxPeriod(String maxPeriod) {
     EnvConfigOperator.insertOrUpdate(
-        EnvConfigEntity(Const.stageTaskExecuteMaxPeriod, max));
+        EnvConfigEntity(Const.stageTaskExecuteMaxPeriod, maxPeriod));
     notifyListeners();
   }
 
