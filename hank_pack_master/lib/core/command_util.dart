@@ -585,6 +585,34 @@ $sb"""
     }
   }
 
+  Future<ExecuteResult> gitPull(
+      String gitProjectDir,
+      Function(String s) logOutput,
+      ) async {
+    StringBuffer sb = StringBuffer();
+
+    var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
+    var process = await execute(
+      cmd: '"$binRoot"',
+      params: ["pull"],
+      workDir: gitProjectDir,
+      action: (res) {
+        logOutput(res);
+        sb.writeln(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """
+cmd: git pull
+exitCode : $exitCode
+$sb"""
+        .trim();
+
+    return ExecuteResult(res, exitCode!);
+  }
+
   Future<ExecuteResult> gitCheckout(
     String gitProjectDir,
     String branchName,

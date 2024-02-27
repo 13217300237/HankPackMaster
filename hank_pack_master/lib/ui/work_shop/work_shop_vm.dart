@@ -247,6 +247,16 @@ class WorkShopVm extends ChangeNotifier {
   void initPackageTaskList() {
     taskStateList.clear();
 
+    var gitPullTask = TaskState("工程同步", actionFunc: () async {
+
+      var gitCheckoutRes = await CommandUtil.getInstance().gitPull(projectPath, addNewLogLine);
+      if (gitCheckoutRes.exitCode != 0) {
+        return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
+      }
+
+      return OrderExecuteResult(data: "git pull 成功", succeed: true);
+    });
+
     var generateApkTask = TaskState("生成apk", actionFunc: () async {
       ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
           .gradleAssemble(
@@ -442,6 +452,7 @@ class WorkShopVm extends ChangeNotifier {
       }
     });
 
+    taskStateList.add(gitPullTask);
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);
 
