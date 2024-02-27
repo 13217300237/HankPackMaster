@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:hank_pack_master/comm/text_util.dart';
+
 class PgyTokenEntity {
   int? code;
   String? message;
@@ -91,8 +93,8 @@ class MyAppInfo {
   String? buildUpdated;
   String? buildQRCodeURL;
 
-  String? errMessage;
-  String? errCode;
+  String? errMessage; // 现在用错误message表示整个错误
+  String? errCode; // 错误码，暂未用到
 
   MyAppInfo(
       {this.buildKey,
@@ -181,5 +183,47 @@ class MyAppInfo {
 
   factory MyAppInfo.fromJsonString(String jsonString) {
     return MyAppInfo.fromJson(jsonDecode(jsonString));
+  }
+}
+
+
+class PgyEntity {
+  String? endpoint;
+  String? key;
+  String? signature;
+  String? xCosSecurityToken;
+
+  PgyEntity({
+    required this.endpoint,
+    required this.key,
+    required this.signature,
+    required this.xCosSecurityToken,
+  });
+
+  @override
+  String toString() {
+    return '''
+    endpoint-> $endpoint
+    key-> $key
+    signature-> $signature
+    xCosSecurityToken-> $xCosSecurityToken
+    ''';
+  }
+
+  bool isOk() {
+    if (endpoint.empty()) {
+      return false;
+    }
+    if (key.empty()) {
+      return false;
+    }
+    if (signature.empty()) {
+      return false;
+    }
+    if (xCosSecurityToken.empty()) {
+      return false;
+    }
+
+    return true;
   }
 }
