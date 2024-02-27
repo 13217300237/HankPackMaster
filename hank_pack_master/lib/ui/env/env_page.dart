@@ -72,7 +72,10 @@ class _EnvPageState extends State<EnvPage> {
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Text("自动环境检测", style: TextStyle(fontSize: 30)),
-          const EnvGroupCard(order: "java"),
+          const EnvGroupCard(
+            order: "java",
+            downloadUrl: "https://www.oracle.com/java/technologies/downloads",
+          ),
           const EnvGroupCard(
             order: "git",
             downloadUrl: "https://git-scm.com/download/win",
