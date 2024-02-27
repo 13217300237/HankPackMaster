@@ -129,41 +129,34 @@ class WorkShopVm extends ChangeNotifier {
     }
   }
 
-  void initPreCheckTaskList() {
-    selectedOrder = null;
-    taskStateList.clear();
+  get prepareParamTask => TaskState("参数准备", actionFunc: () async {
+        if (gitUrl.isEmpty) {
+          return OrderExecuteResult(msg: "git仓库地址 不能为空", succeed: false);
+        }
+        if (projectPath.isEmpty) {
+          return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
+        }
+        return OrderExecuteResult(
+            succeed: true, data: '打包参数正常 工作目录为,$projectPath ');
+      });
 
-    TaskState.onStateFinishedFunc = updateStageCostTime;
-    TaskState.onStageStartedFunc = updateStateStarted;
+  get gitCloneTask => TaskState("工程克隆", actionFunc: () async {
+        // clone之前不再检查原有文件，而是另外起一个目录，单独存放，这样可以避免文件被占用的问题
+        // 与此同时，必须设定缓存删除机制，避免产生过多无用垃圾文件
 
-    var prepareParamTask = TaskState("参数准备", actionFunc: () async {
-      if (gitUrl.isEmpty) {
-        return OrderExecuteResult(msg: "git仓库地址 不能为空", succeed: false);
-      }
-      if (projectPath.isEmpty) {
-        return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
-      }
-      return OrderExecuteResult(
-          succeed: true, data: '打包参数正常 工作目录为,$projectPath ');
-    });
+        try {
+          deleteDirectory(projectPath);
+        } catch (e) {
+          String err = "删除$projectPath失败,原因是：\n$e\n";
+          return OrderExecuteResult(msg: err, succeed: false);
+        }
 
-    var gitCloneTask = TaskState("工程克隆", actionFunc: () async {
-      // clone之前不再检查原有文件，而是另外起一个目录，单独存放，这样可以避免文件被占用的问题
-      // 与此同时，必须设定缓存删除机制，避免产生过多无用垃圾文件
+        ExecuteResult gitCloneRes = await CommandUtil.getInstance().gitClone(
+            clonePath: envWorkspaceRoot,
+            gitUrl: gitUrl,
+            logOutput: addNewLogLine);
 
-      try {
-        deleteDirectory(projectPath);
-      } catch (e) {
-        String err = "删除$projectPath失败,原因是：\n$e\n";
-        return OrderExecuteResult(msg: err, succeed: false);
-      }
-
-      ExecuteResult gitCloneRes = await CommandUtil.getInstance().gitClone(
-          clonePath: envWorkspaceRoot,
-          gitUrl: gitUrl,
-          logOutput: addNewLogLine);
-
-      String cloneFailedSolution = '''
+        String cloneFailedSolution = '''
         clone失败：
         如果是由于文件被占用的原因，在 Windows 平台上，
       
@@ -178,61 +171,287 @@ class WorkShopVm extends ChangeNotifier {
 根据结果，你可以看到哪个进程正在使用特定的文件。关闭该进程再次尝试clone即可。
         ''';
 
-      if (gitCloneRes.exitCode != 0) {
-        return OrderExecuteResult(
-            msg:
-                "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n $cloneFailedSolution",
-            succeed: false);
-      }
-      return OrderExecuteResult(
-          succeed: true, data: 'clone成功,位置在 $projectPath');
-    });
-
-    var branchCheckoutTask = TaskState("分支切换", actionFunc: () async {
-      ExecuteResult gitCheckoutRes = await CommandUtil.getInstance()
-          .gitCheckout(projectPath, gitBranch, addNewLogLine);
-
-      if (gitCheckoutRes.exitCode != 0) {
-        return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
-      }
-      return OrderExecuteResult(succeed: true, data: '分支 $gitBranch 切换成功');
-    });
-
-    var projectStructCheckTask = TaskState("工程结构检测", actionFunc: () async {
-      // 工程结构检查
-      // 检查目录下是否有 gradlew.bat 文件
-      File gradlewFile =
-          File("$projectPath${Platform.pathSeparator}gradlew.bat");
-      if (!gradlewFile.existsSync()) {
-        String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
-        return OrderExecuteResult(msg: er, succeed: false);
-      }
-      return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
-    });
-
-    var assembleOrdersTask = TaskState("可用指令查询", actionFunc: () async {
-      ExecuteResult gitAssembleTasksRes = await CommandUtil.getInstance()
-          .gradleAssembleTasks(projectPath, addNewLogLine);
-      if (gitAssembleTasksRes.exitCode != 0) {
-        return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
-      }
-      var ori = gitAssembleTasksRes.res;
-      var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
-      // 排除所有带test的，无论大小写
-      orders = findLinesExceptKeyword(lines: orders, keyword: "test");
-      orders = findLinesExceptKeyword(lines: orders, keyword: "bundle");
-      orders = findLinesExceptKeyword(lines: orders, keyword: "app:assemble -");
-
-      _enableAssembleOrders.clear();
-      for (var e in orders) {
-        if (e.lastIndexOf(" - ") != -1) {
-          _enableAssembleOrders.add(e.substring(4, e.lastIndexOf(" - ")));
+        if (gitCloneRes.exitCode != 0) {
+          return OrderExecuteResult(
+              msg:
+                  "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n $cloneFailedSolution",
+              succeed: false);
         }
-      }
+        return OrderExecuteResult(
+            succeed: true, data: 'clone成功,位置在 $projectPath');
+      });
 
-      debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
-      return OrderExecuteResult(succeed: true, data: _enableAssembleOrders);
-    });
+  get branchCheckoutTask => TaskState("分支切换", actionFunc: () async {
+        ExecuteResult gitCheckoutRes = await CommandUtil.getInstance()
+            .gitCheckout(projectPath, gitBranch, addNewLogLine);
+
+        if (gitCheckoutRes.exitCode != 0) {
+          return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
+        }
+        return OrderExecuteResult(succeed: true, data: '分支 $gitBranch 切换成功');
+      });
+
+  get projectStructCheckTask => TaskState("工程结构检测", actionFunc: () async {
+        // 工程结构检查
+        // 检查目录下是否有 gradlew.bat 文件
+        File gradlewFile =
+            File("$projectPath${Platform.pathSeparator}gradlew.bat");
+        if (!gradlewFile.existsSync()) {
+          String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
+          return OrderExecuteResult(msg: er, succeed: false);
+        }
+        return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
+      });
+
+  get assembleOrdersTask => TaskState("可用指令查询", actionFunc: () async {
+        ExecuteResult gitAssembleTasksRes = await CommandUtil.getInstance()
+            .gradleAssembleTasks(projectPath, addNewLogLine);
+        if (gitAssembleTasksRes.exitCode != 0) {
+          return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
+        }
+        var ori = gitAssembleTasksRes.res;
+        var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
+        // 排除所有带test的，无论大小写
+        orders = findLinesExceptKeyword(lines: orders, keyword: "test");
+        orders = findLinesExceptKeyword(lines: orders, keyword: "bundle");
+        orders =
+            findLinesExceptKeyword(lines: orders, keyword: "app:assemble -");
+
+        _enableAssembleOrders.clear();
+        for (var e in orders) {
+          if (e.lastIndexOf(" - ") != -1) {
+            _enableAssembleOrders.add(e.substring(4, e.lastIndexOf(" - ")));
+          }
+        }
+
+        debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
+        return OrderExecuteResult(succeed: true, data: _enableAssembleOrders);
+      });
+
+  get gitPullTask => TaskState("工程同步", actionFunc: () async {
+        var gitCheckoutRes =
+            await CommandUtil.getInstance().gitPull(projectPath, addNewLogLine);
+        if (gitCheckoutRes.exitCode != 0) {
+          return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
+        }
+
+        return OrderExecuteResult(data: "git pull 成功", succeed: true);
+      });
+
+  get generateApkTask => TaskState("生成apk", actionFunc: () async {
+        ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
+            .gradleAssemble(
+                projectRoot: projectPath + Platform.pathSeparator,
+                packageOrder: selectedOrder!,
+                versionCode: versionCode,
+                versionName: versionName,
+                logOutput: addNewLogLine);
+
+        if (gradleAssembleRes.exitCode != 0) {
+          String er = "打包失败，详情请看日志";
+          return OrderExecuteResult(msg: er, succeed: false);
+        }
+        return OrderExecuteResult(succeed: true, data: gradleAssembleRes.res);
+      });
+
+  get apkCheckTask => TaskState("apk检测", actionFunc: () async {
+        // 检查此目录下的apk文件，并且校验它的最后修改时间是不是在10分钟以内
+        var list = await findApkFiles(_apkLocation);
+
+        if (list.length > 1) {
+          return OrderExecuteResult(
+              succeed: false,
+              msg: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
+        }
+
+        apkToUpload = list[0];
+
+        if (await File(apkToUpload!).exists()) {
+        } else {
+          return OrderExecuteResult(
+              succeed: false, msg: "查找打包产物 失败: $apkToUpload，文件不存在");
+        }
+        return OrderExecuteResult(
+            succeed: true, data: "打包产物的位置在: $apkToUpload");
+      });
+
+  get pgyTokenFetchTask => TaskState("获取pgyToken", actionFunc: () async {
+        // 先获取当前git的最新提交记录
+        var log =
+            await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
+
+        if (log.exitCode != 0) {
+          return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
+        }
+
+        var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
+          buildDescription: projectAppDesc,
+          buildUpdateDescription: "$log \n $updateLog",
+        );
+
+        if (pgyToken == null) {
+          return OrderExecuteResult(
+              msg: "pgy token获取失败... [$apkToUpload]", succeed: false);
+        }
+
+        _pgyEntity = PgyEntity(
+          endpoint: pgyToken.data?.endpoint,
+          key: pgyToken.data?.params?.key,
+          signature: pgyToken.data?.params?.signature,
+          xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
+        );
+
+        return OrderExecuteResult(
+            succeed: true, msg: '获取到的Token是 ${pgyToken.toString()}');
+      });
+
+  get uploadToPgyTask => TaskState("上传pgy", actionFunc: () async {
+        if (!_pgyEntity!.isOk()) {
+          return OrderExecuteResult(
+              msg: "上传参数为空，流程终止!  [$apkToUpload]", succeed: false);
+        }
+
+        String oriFileName = path.basename(File(apkToUpload!).path);
+
+        var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
+            filePath: apkToUpload!,
+            oriFileName: oriFileName,
+            uploadProgressAction: addNewLogLine);
+
+        if (res != null) {
+          return OrderExecuteResult(
+              msg: "上传失败,$res \n [$apkToUpload] \n", succeed: false);
+        } else {
+          return OrderExecuteResult(succeed: true, data: '上传成功');
+        }
+      });
+
+  get pgyResultSearchTask => TaskState("检查pgy发布结果", actionFunc: () async {
+        var s = await PgyUploadUtil.getInstance()
+            .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
+
+        if (s == null) {
+          return OrderExecuteResult(
+              succeed: false, msg: " \n [$apkToUpload] \n");
+        }
+
+        if (s.code == 1216) {
+          // 发布失败，流程终止
+          return OrderExecuteResult(
+              succeed: false, msg: "发布失败，流程终止, \n [$apkToUpload] \n");
+        } else {
+          // 发布成功，打印结果
+          // 开始解析发布结果,
+          if (s.data is Map<String, dynamic>) {
+            MyAppInfo appInfo =
+                MyAppInfo.fromJson(s.data as Map<String, dynamic>);
+            appInfo.buildDescription = projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
+            appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
+
+            addNewLogLine("应用名称: ${appInfo.buildName}");
+            addNewLogLine("大小: ${appInfo.buildFileSize}");
+            addNewLogLine("版本号: ${appInfo.buildVersion}");
+            addNewLogLine("上传批次: ${appInfo.buildBuildVersion}");
+            addNewLogLine("应用描述: ${appInfo.buildDescription}");
+            addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
+            addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
+            addNewLogLine(
+                "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
+            addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
+            addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
+            addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
+
+            return OrderExecuteResult(succeed: true, data: appInfo);
+          } else {
+            return OrderExecuteResult(
+                succeed: false, data: "发布结果解析失败,  \n [$apkToUpload] \n ");
+          }
+        }
+      });
+
+  get uploadToObsTask => TaskState("上传到华为obs", actionFunc: () async {
+        // 先获取当前git的最新提交记录
+        var log =
+            await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
+
+        if (log.exitCode != 0) {
+          return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
+        }
+        // 上传到OBS的时候，必须重命名,不然无法区分多版本
+        File fileToUpload = File(apkToUpload!);
+
+        String childFolderName = path.basename(projectPath); // 用项目名称作为分隔
+        String buildUpdated = Jiffy.now().format(pattern: "yyyyMMdd_HHmmss_");
+
+        var oBSResponse = await OBSClient.putFile(
+          objectName:
+              "${childFolderName}_$buildUpdated${path.basename(apkToUpload!)}",
+          file: fileToUpload,
+        );
+
+        obsDownloadUrl = oBSResponse?.url;
+        if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
+          return OrderExecuteResult(
+              succeed: false, msg: "OBS上传失败, \n [$apkToUpload]  \n ");
+        } else {
+          return OrderExecuteResult(
+            data: "OBS上传成功,下载地址为 $obsDownloadUrl",
+            succeed: true,
+          );
+        }
+      });
+
+  get generateObsUploadResTask => TaskState("构建打包结果", actionFunc: () async {
+        if (apkToUpload == null) {
+          return OrderExecuteResult(
+              data: "error : apkToUpload is null!", succeed: false);
+        }
+        MyAppInfo appInfo = MyAppInfo();
+        File apkFile = File(apkToUpload!);
+        if (await apkFile.exists()) {
+          String fileSize = "${await apkFile.length()}"; // 文件大小
+          var executeResult =
+              await CommandUtil.getInstance().aapt(apkToUpload!);
+          var data = executeResult.data;
+          if (data is ApkParserResult) {
+            appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
+            appInfo.buildName = data.appName;
+            appInfo.buildVersion = data.versionName;
+            appInfo.buildVersionNo = data.versioncode;
+            appInfo.buildIdentifier = data.packageName;
+            appInfo.buildFileSize = fileSize;
+            appInfo.buildQRCodeURL = obsDownloadUrl;
+            appInfo.buildUpdated =
+                Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
+            // 更新日志
+            appInfo.buildUpdateDescription = updateLog;
+            // 应用描述
+            appInfo.buildDescription = projectAppDesc;
+
+            debugPrint("大小: ${appInfo.buildFileSize}");
+            debugPrint("版本号: ${appInfo.buildVersion}");
+            debugPrint("编译版本号: ${appInfo.buildVersionNo}");
+            debugPrint("应用包名: ${appInfo.buildIdentifier}");
+            debugPrint("二维码地址: ${appInfo.buildQRCodeURL}");
+            debugPrint("应用更新时间: ${appInfo.buildUpdated}");
+            debugPrint("应用描述: ${appInfo.buildDescription}");
+            debugPrint("更新日志: ${appInfo.buildUpdateDescription}");
+            return OrderExecuteResult(data: appInfo, succeed: true);
+          } else {
+            return OrderExecuteResult(data: null, succeed: false);
+          }
+        } else {
+          return OrderExecuteResult(data: null, succeed: false);
+        }
+      });
+
+  /// 初始化一个激活任务队列
+  void initPreCheckTaskList() {
+    selectedOrder = null;
+    taskStateList.clear();
+
+    TaskState.onStateFinishedFunc = updateStageCostTime;
+    TaskState.onStageStartedFunc = updateStateStarted;
 
     taskStateList.add(prepareParamTask);
     taskStateList.add(gitCloneTask);
@@ -244,217 +463,15 @@ class WorkShopVm extends ChangeNotifier {
   String? apkToUpload; // 即将上传的文件地址
   String? obsDownloadUrl; // obs上传后的下载路径
 
+  /// 初始化一个打包任务队列
   void initPackageTaskList() {
     taskStateList.clear();
-
-    var gitPullTask = TaskState("工程同步", actionFunc: () async {
-
-      var gitCheckoutRes = await CommandUtil.getInstance().gitPull(projectPath, addNewLogLine);
-      if (gitCheckoutRes.exitCode != 0) {
-        return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
-      }
-
-      return OrderExecuteResult(data: "git pull 成功", succeed: true);
-    });
-
-    var generateApkTask = TaskState("生成apk", actionFunc: () async {
-      ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
-          .gradleAssemble(
-              projectRoot: projectPath + Platform.pathSeparator,
-              packageOrder: selectedOrder!,
-              versionCode: versionCode,
-              versionName: versionName,
-              logOutput: addNewLogLine);
-
-      if (gradleAssembleRes.exitCode != 0) {
-        String er = "打包失败，详情请看日志";
-        return OrderExecuteResult(msg: er, succeed: false);
-      }
-      return OrderExecuteResult(succeed: true, data: gradleAssembleRes.res);
-    });
-    var apkCheckTask = TaskState("apk检测", actionFunc: () async {
-      // 检查此目录下的apk文件，并且校验它的最后修改时间是不是在10分钟以内
-      var list = await findApkFiles(_apkLocation);
-
-      if (list.length > 1) {
-        return OrderExecuteResult(
-            succeed: false,
-            msg: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
-      }
-
-      apkToUpload = list[0];
-
-      if (await File(apkToUpload!).exists()) {
-      } else {
-        return OrderExecuteResult(
-            succeed: false, msg: "查找打包产物 失败: $apkToUpload，文件不存在");
-      }
-      return OrderExecuteResult(succeed: true, data: "打包产物的位置在: $apkToUpload");
-    });
-
-    var pgyTokenFetchTask = TaskState("获取pgyToken", actionFunc: () async {
-      // 先获取当前git的最新提交记录
-      var log =
-          await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
-
-      if (log.exitCode != 0) {
-        return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
-      }
-
-      var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
-        buildDescription: projectAppDesc,
-        buildUpdateDescription: "$log \n $updateLog",
-      );
-
-      if (pgyToken == null) {
-        return OrderExecuteResult(msg: "pgy token获取失败...", succeed: false);
-      }
-
-      _pgyEntity = PgyEntity(
-        endpoint: pgyToken.data?.endpoint,
-        key: pgyToken.data?.params?.key,
-        signature: pgyToken.data?.params?.signature,
-        xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
-      );
-
-      return OrderExecuteResult(
-          succeed: true, msg: '获取到的Token是 ${pgyToken.toString()}');
-    });
-    var uploadToPgyTask = TaskState("上传pgy", actionFunc: () async {
-      if (!_pgyEntity!.isOk()) {
-        return OrderExecuteResult(msg: "上传参数为空，流程终止!", succeed: false);
-      }
-
-      String oriFileName = path.basename(File(apkToUpload!).path);
-
-      var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
-          filePath: apkToUpload!,
-          oriFileName: oriFileName,
-          uploadProgressAction: addNewLogLine);
-
-      if (res != null) {
-        return OrderExecuteResult(msg: "上传失败,$res", succeed: false);
-      } else {
-        return OrderExecuteResult(succeed: true, data: '上传成功');
-      }
-    });
-    var pgyResultSearchTask = TaskState("检查pgy发布结果", actionFunc: () async {
-      var s = await PgyUploadUtil.getInstance()
-          .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
-
-      if (s == null) {
-        return OrderExecuteResult(succeed: false, msg: "");
-      }
-
-      if (s.code == 1216) {
-        // 发布失败，流程终止
-        return OrderExecuteResult(succeed: false, msg: "发布失败，流程终止");
-      } else {
-        // 发布成功，打印结果
-        // 开始解析发布结果,
-        if (s.data is Map<String, dynamic>) {
-          MyAppInfo appInfo =
-              MyAppInfo.fromJson(s.data as Map<String, dynamic>);
-          appInfo.buildDescription = projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
-          appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
-
-          addNewLogLine("应用名称: ${appInfo.buildName}");
-          addNewLogLine("大小: ${appInfo.buildFileSize}");
-          addNewLogLine("版本号: ${appInfo.buildVersion}");
-          addNewLogLine("上传批次: ${appInfo.buildBuildVersion}");
-          addNewLogLine("应用描述: ${appInfo.buildDescription}");
-          addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
-          addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
-          addNewLogLine(
-              "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
-          addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
-          addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
-          addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
-
-          return OrderExecuteResult(succeed: true, data: appInfo);
-        } else {
-          return OrderExecuteResult(succeed: false, data: "发布结果解析失败");
-        }
-      }
-    });
-
-    var uploadToObsTask = TaskState("上传到华为obs", actionFunc: () async {
-      // 先获取当前git的最新提交记录
-      var log =
-          await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
-
-      if (log.exitCode != 0) {
-        return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
-      }
-      // 上传到OBS的时候，必须重命名,不然无法区分多版本
-      File fileToUpload = File(apkToUpload!);
-
-      String childFolderName = path.basename(projectPath); // 用项目名称作为分隔
-      String buildUpdated = Jiffy.now().format(pattern: "yyyyMMdd_HHmmss_");
-
-      var oBSResponse = await OBSClient.putFile(
-        objectName:
-            "${childFolderName}_$buildUpdated${path.basename(apkToUpload!)}",
-        file: fileToUpload,
-      );
-
-      obsDownloadUrl = oBSResponse?.url;
-      if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
-        return OrderExecuteResult(
-            data: "OBS上传失败 ", succeed: false, msg: "OBS上传失败 ");
-      } else {
-        return OrderExecuteResult(
-          data: "OBS上传成功,下载地址为 $obsDownloadUrl",
-          succeed: true,
-        );
-      }
-    });
-    var generateObsUploadResTask = TaskState("构建打包结果", actionFunc: () async {
-      if (apkToUpload == null) {
-        return OrderExecuteResult(
-            data: "error : apkToUpload is null!", succeed: false);
-      }
-      MyAppInfo appInfo = MyAppInfo();
-      File apkFile = File(apkToUpload!);
-      if (await apkFile.exists()) {
-        String fileSize = "${await apkFile.length()}"; // 文件大小
-        var executeResult = await CommandUtil.getInstance().aapt(apkToUpload!);
-        var data = executeResult.data;
-        if (data is ApkParserResult) {
-          appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
-          appInfo.buildName = data.appName;
-          appInfo.buildVersion = data.versionName;
-          appInfo.buildVersionNo = data.versioncode;
-          appInfo.buildIdentifier = data.packageName;
-          appInfo.buildFileSize = fileSize;
-          appInfo.buildQRCodeURL = obsDownloadUrl;
-          appInfo.buildUpdated =
-              Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
-          // 更新日志
-          appInfo.buildUpdateDescription = updateLog;
-          // 应用描述
-          appInfo.buildDescription = projectAppDesc;
-
-          debugPrint("大小: ${appInfo.buildFileSize}");
-          debugPrint("版本号: ${appInfo.buildVersion}");
-          debugPrint("编译版本号: ${appInfo.buildVersionNo}");
-          debugPrint("应用包名: ${appInfo.buildIdentifier}");
-          debugPrint("二维码地址: ${appInfo.buildQRCodeURL}");
-          debugPrint("应用更新时间: ${appInfo.buildUpdated}");
-          debugPrint("应用描述: ${appInfo.buildDescription}");
-          debugPrint("更新日志: ${appInfo.buildUpdateDescription}");
-          return OrderExecuteResult(data: appInfo, succeed: true);
-        } else {
-          return OrderExecuteResult(data: null, succeed: false);
-        }
-      } else {
-        return OrderExecuteResult(data: null, succeed: false);
-      }
-    });
 
     taskStateList.add(gitPullTask);
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);
+
+    // 如果是已有的apk文件进行上传的话，那就直接执行以下步骤就行了
 
     if (selectedUploadPlatform?.index == 0) {
       taskStateList.add(pgyTokenFetchTask);
@@ -466,6 +483,21 @@ class WorkShopVm extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  /// 初始化一个快速上传的任务队列
+  void initFastUploadTaskList(String apkPath) {
+    apkToUpload = apkPath;
+    if (selectedUploadPlatform!.index == 0) {
+      // 0 pgy
+      taskStateList.add(pgyTokenFetchTask);
+      taskStateList.add(uploadToPgyTask);
+      taskStateList.add(pgyResultSearchTask);
+    } else {
+      // 1 obs
+      taskStateList.add(uploadToObsTask);
+      taskStateList.add(generateObsUploadResTask);
+    }
   }
 
   List<String> findLinesWithKeyword(
@@ -833,7 +865,16 @@ class WorkShopVm extends ChangeNotifier {
         setProjectPath();
         projectNameController.text = runningTask!.projectName ?? '';
         projectAppDescController.text = runningTask!.projectDesc ?? '';
-        if (runningTask!.preCheckOk == true) {
+
+        if (runningTask!.apkPath != null && runningTask!.apkPath!.isNotEmpty) {
+          selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
+          selectedUploadPlatformController.text =
+              selectedUploadPlatform!.name ?? '';
+          apkLocationController.text = runningTask!.apkPath!;
+
+          await startFastUpload(runningTask!.apkPath!);
+
+        } else if (runningTask!.preCheckOk == true) {
           updateLogController.text = runningTask!.setting!.appUpdateStr ?? '';
           apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
           selectedOrder = runningTask!.setting!.selectedOrder ?? "";
@@ -860,6 +901,24 @@ class WorkShopVm extends ChangeNotifier {
 
   Future<void> startPackage() async {
     initPackageTaskList();
+    var scheduleRes = await startSchedule();
+
+    if (scheduleRes == null) {
+      setProjectRecordJobRunning(false);
+      _reset();
+      return;
+    }
+    if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
+      myAppInfo = scheduleRes.data;
+    } else {
+      myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
+    }
+
+    onProjectPackageFinished(myAppInfo!);
+  }
+
+  Future<void> startFastUpload(String apkPath) async {
+    initFastUploadTaskList(apkPath);
     var scheduleRes = await startSchedule();
 
     if (scheduleRes == null) {

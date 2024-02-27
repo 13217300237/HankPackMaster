@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
+import 'package:hank_pack_master/ui/project_manager/dialog/fast_upload_dialog.dart';
 import 'package:hank_pack_master/ui/project_manager/package_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -47,6 +48,8 @@ class ProjectEntityDataSource extends DataGridSource {
   Function(ProjectRecordEntity)? funConfirmToActive;
   Function(ProjectRecordEntity)? funcGoPackageAction;
   Function()? funJumpToWorkShop;
+
+  Function(ProjectRecordEntity, String)? openFastUploadDialogFunc;
 
   double runningProcessValue = 0;
 
@@ -100,6 +103,7 @@ class ProjectEntityDataSource extends DataGridSource {
     required this.funcGoPackageAction,
     required this.funJumpToWorkShop,
     required this.buildContext,
+    required this.openFastUploadDialogFunc,
   }) {
     _buildRows();
   }
@@ -221,74 +225,78 @@ class ProjectEntityDataSource extends DataGridSource {
               break;
             case CellType.goPackageAction:
               cellWidget = Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Tooltip(
-                    message: "重置激活状态",
-                    child: IconButton(
-                      icon: Icon(FluentIcons.reset,
-                          size: iconSize, color: Colors.green.withOpacity(.8)),
-                      onPressed: () {
-                        DialogUtil.showCustomDialog(
-                            context: buildContext,
-                            title: "警告",
-                            content: "此项目会变为非激活状态，所有打包记录将会清除，继续吗？",
-                            onConfirm: () {
-                              var e = cellValue.entity!;
-                              _resetProjectRecord(e);
-                            });
-                      },
-                    ),
-                  ),
-                  Tooltip(
-                    message: "开始打包",
-                    child: IconButton(
-                      icon: Icon(FluentIcons.packages,
-                          size: iconSize, color: Colors.green.withOpacity(.8)),
-                      onPressed: () =>
-                          funcGoPackageAction?.call(cellValue.entity!),
-                    ),
-                  ),
-                  Tooltip(
-                    message: "查看打包历史",
-                    child: IconButton(
-                      icon: Icon(FluentIcons.full_history,
-                          size: iconSize, color: Colors.green.withOpacity(.8)),
-                      onPressed: () {
-                        if (cellValue.value is ProjectRecordEntity) {
-                          var e = cellValue.value as ProjectRecordEntity;
-
-                          var his = e.jobHistory ?? [];
-
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Tooltip(
+                      message: "重置激活状态",
+                      child: IconButton(
+                        icon: Icon(FluentIcons.reset,
+                            size: iconSize,
+                            color: Colors.green.withOpacity(.8)),
+                        onPressed: () {
                           DialogUtil.showCustomDialog(
-                              maxHeight: 400,
                               context: buildContext,
-                              title: "${e.projectName} 打包历史",
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    ...his.reversed.map((s) {
-                                      var myAppInfo =
-                                          MyAppInfo.fromJsonString(s);
-                                      return Row(
-                                        children: [
-                                          Expanded(
-                                              child: PackageHistoryCard(
-                                                  myAppInfo: myAppInfo)),
-                                        ],
-                                      );
-                                    }).toList()
-                                  ],
-                                ),
-                              ).hideScrollbar(buildContext));
-                        }
-                      },
+                              title: "警告",
+                              content: "此项目会变为非激活状态，所有打包记录将会清除，继续吗？",
+                              onConfirm: () {
+                                var e = cellValue.entity!;
+                                _resetProjectRecord(e);
+                              });
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              );
+                    Tooltip(
+                      message: "开始打包",
+                      child: IconButton(
+                        icon: Icon(FluentIcons.packages,
+                            size: iconSize,
+                            color: Colors.green.withOpacity(.8)),
+                        onPressed: () =>
+                            funcGoPackageAction?.call(cellValue.entity!),
+                      ),
+                    ),
+                    Tooltip(
+                        message: "查看打包历史",
+                        child: IconButton(
+                            icon: Icon(FluentIcons.full_history,
+                                size: iconSize,
+                                color: Colors.green.withOpacity(.8)),
+                            onPressed: () {
+                              if (cellValue.value is ProjectRecordEntity) {
+                                var e = cellValue.value as ProjectRecordEntity;
+
+                                var his = e.jobHistory ?? [];
+
+                                DialogUtil.showCustomDialog(
+                                    maxHeight: 400,
+                                    context: buildContext,
+                                    title: "${e.projectName} 打包历史",
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ...his.reversed.map((s) {
+                                            var myAppInfo =
+                                                MyAppInfo.fromJsonString(s);
+                                            return Row(
+                                              children: [
+                                                Expanded(
+                                                    child: PackageHistoryCard(
+                                                        myAppInfo: myAppInfo,
+                                                        doFastUpload: (s) {
+                                                          openFastUploadDialogFunc
+                                                              ?.call(e, s);
+                                                        })),
+                                              ],
+                                            );
+                                          }).toList()
+                                        ],
+                                      ),
+                                    ).hideScrollbar(buildContext));
+                              }
+                            }))
+                  ]);
               break;
             case CellType.assembleOrders:
               cellWidget = SingleChildScrollView(

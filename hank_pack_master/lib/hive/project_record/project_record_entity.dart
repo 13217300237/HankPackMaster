@@ -39,6 +39,9 @@ class ProjectRecordEntity {
 
   double processValue = 0;
 
+  // 用一个字段保存apk路径(只有上传失败的任务才会短暂保存这个值)
+  String? apkPath;
+
   ProjectRecordEntity(
     this.gitUrl,
     this.branch,
@@ -84,6 +87,13 @@ class PackageSetting {
     if (selectedOrder == null || selectedOrder!.isEmpty) {
       return "打包命令必须选择";
     }
+    if (selectedUploadPlatform == null) {
+      return "上传方式必须选择";
+    }
+    return '';
+  }
+
+  String readyOnlyPlatform() {
     if (selectedUploadPlatform == null) {
       return "上传方式必须选择";
     }

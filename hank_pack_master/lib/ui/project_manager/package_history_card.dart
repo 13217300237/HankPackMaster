@@ -3,14 +3,17 @@ import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 
 import '../../comm/dialog_util.dart';
 import '../../comm/upload_platforms.dart';
+import '../../hive/project_record/project_record_entity.dart';
 import '../work_shop/app_info_card.dart';
 
 class PackageHistoryCard extends StatelessWidget {
   final MyAppInfo myAppInfo;
+  final Function(String apkPath)? doFastUpload;
 
   const PackageHistoryCard({
     super.key,
     required this.myAppInfo,
+    this.doFastUpload,
   });
 
   Color _bgColor() {
@@ -38,6 +41,27 @@ class PackageHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget fastUploadBtn;
+    // 如果显示的内容里包含了 []，那就提取出[]中的内容，并且启用强制上传策略
+    if (myAppInfo.errMessage != null &&
+        myAppInfo.errMessage!.contains("[") &&
+        myAppInfo.errMessage!.contains("]")) {
+      // 那就提炼出中括号中的内容
+
+      var apkPath = myAppInfo.errMessage!.substring(
+          myAppInfo.errMessage!.indexOf("[") + 1,
+          myAppInfo.errMessage!.indexOf("]"));
+      fastUploadBtn = FilledButton(
+        child: const Text("快速上传"),
+        onPressed: () {
+          Navigator.pop(context);
+          doFastUpload?.call(apkPath);
+        },
+      );
+    } else {
+      fastUploadBtn = const SizedBox();
+    }
+
     return GestureDetector(
         onTap: () => showMyAppInfo(myAppInfo, context),
         child: Card(
@@ -50,6 +74,13 @@ class PackageHistoryCard extends StatelessWidget {
               _uploadPlatformWidget(),
               _timeWidget(),
               errWidget(),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  fastUploadBtn,
+                ],
+              ),
             ])));
   }
 
@@ -67,11 +98,11 @@ class PackageHistoryCard extends StatelessWidget {
     var card = AppInfoCard(appInfo: s);
 
     DialogUtil.showCustomDialog(
-        context: context,
-        content: card,
-        title: '历史查看',
-        showCancel: false,
-        confirmText: "关闭");
+      context: context,
+      content: card,
+      title: '历史查看',
+      showActions: false,
+    );
   }
 
   _uploadPlatformWidget() {

@@ -11,6 +11,7 @@ import '../../comm/url_check_util.dart';
 import '../comm/theme.dart';
 import 'column_name_const.dart';
 import 'dialog/create_project_record_dialog.dart';
+import 'dialog/fast_upload_dialog.dart';
 import 'grid_datasource.dart';
 
 class ProjectManagerPage extends StatefulWidget {
@@ -57,6 +58,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             });
       },
       funcGoPackageAction: (e) {
+
+        e.apkPath = null;
+
         DialogUtil.showCustomDialog(
             context: context,
             title: "项目 ${e.projectName} 打包配置",
@@ -69,6 +73,15 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             showActions: false);
       },
       funJumpToWorkShop: confirmGoToWorkShop,
+      openFastUploadDialogFunc: (e, s) => DialogUtil.showCustomDialog(
+          showActions: false,
+          context: context,
+          title: "快速上传",
+          content: FastUploadDialogWidget(
+            projectRecordEntity: e,
+            workShopVm: _workShopVm,
+            apkPath: s,
+          )),
     );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
