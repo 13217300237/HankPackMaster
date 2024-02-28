@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:path/path.dart' as path;
 
 import 'dart:convert';
@@ -100,7 +101,12 @@ class OBSClient {
 
     Dio dio = _getDio();
 
-    await dio.put(url, data: data, options: options);
+    await dio.put(url, data: data, options: options,
+        onSendProgress: (count, total) {
+      debugPrint("============ 上传中 $count/$total");
+    }, onReceiveProgress: (count, total) {
+      debugPrint("============ 下载中... $count/$total");
+    });
     OBSResponse obsResponse = OBSResponse();
     obsResponse.md5 = contentMD5;
     obsResponse.objectName = objectName;

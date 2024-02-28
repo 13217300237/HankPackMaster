@@ -30,6 +30,8 @@ pgy: '_api_key': '3e3bb841269ccb9e3fb9b3feffa4273c'
 
 接下来要完成，打包失败的记录完整化，因为后续要提供 apk包上传失败后，允许重新从失败的阶段继续往下走。
 
+
+接下来最重要的改动就是，保留所有失败记录，包括项目激活的。并且支持从失败的节点继续往下走。
 2024年2月24日
 
 1. 打包成功之后，给一个未读数给打包历史上
@@ -41,3 +43,7 @@ pgy: '_api_key': '3e3bb841269ccb9e3fb9b3feffa4273c'
       domain:
       "https://kbzpay-apppackage.obs.ap-southeast-1.myhuaweicloud.com",
       bucketName: "kbzpay-apppackage");
+
+
+2024年2月27日：
+针对上传过程中失败的，允许以上传的那个包为起始点继续上传。
