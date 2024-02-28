@@ -6,3 +6,13 @@ bool isValidGitUrl(String url) {
   );
   return regex.hasMatch(url);
 }
+
+
+bool isHttpsUrl(String url) {
+  RegExp regex = RegExp(
+    r'^(http|https):\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(:[0-9]+)?(\/[a-zA-Z0-9\-_\.\~\%\/\?\#\&\=]*)?$',
+    caseSensitive: false,
+    multiLine: false,
+  );
+  return regex.hasMatch(url);
+}

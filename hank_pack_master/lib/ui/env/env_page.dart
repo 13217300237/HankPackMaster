@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/comm/url_check_util.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -396,7 +397,12 @@ class _EnvPageState extends State<EnvPage> {
     );
   }
 
-  Widget _textInput(String label, TextEditingController controller) {
+  Widget _textInput(String label, TextEditingController controller,
+      {bool judgeHttpsReg = false}) {
+    var dataCorrect = true;
+    if (judgeHttpsReg) {
+      dataCorrect = isHttpsUrl(controller.text);
+    }
     return Row(children: [
       Expanded(
           child: Row(
@@ -407,6 +413,10 @@ class _EnvPageState extends State<EnvPage> {
             const Spacer(),
             Expanded(
               child: TextBox(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                        color: dataCorrect ? Colors.white : Colors.red,
+                        width: 1)),
                 unfocusedColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 controller: controller,
@@ -430,7 +440,7 @@ class _EnvPageState extends State<EnvPage> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("华为OBS平台设置", style: _cTextStyle),
           const SizedBox(height: 20),
-          _textInput('end point ', _envParamModel.obsEndPointController),
+          _textInput('end point ', _envParamModel.obsEndPointController,judgeHttpsReg: true),
           const SizedBox(height: 10),
           _textInput('access key', _envParamModel.obsAccessKeyController),
           const SizedBox(height: 10),
