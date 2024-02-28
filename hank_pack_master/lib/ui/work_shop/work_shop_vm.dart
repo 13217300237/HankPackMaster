@@ -701,7 +701,7 @@ class WorkShopVm extends ChangeNotifier {
 
               stage.executeResultData = stageResult;
               actionResStr = stageResult;
-              await waitThreeSec();
+              await waitSomeSec();
             }
           }
         } else {
