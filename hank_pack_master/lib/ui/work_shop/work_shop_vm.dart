@@ -210,17 +210,17 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
         }
         var ori = gitAssembleTasksRes.res;
+        debugPrint("================找到的原始指令是:\n$ori");
         var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
         // 排除所有带test的，无论大小写
         orders = findLinesExceptKeyword(lines: orders, keyword: "test");
         orders = findLinesExceptKeyword(lines: orders, keyword: "bundle");
-        orders =
-            findLinesExceptKeyword(lines: orders, keyword: "app:assemble -");
+        orders = findLinesExceptKeyword(lines: orders, keyword: "assemble -");
 
         _enableAssembleOrders.clear();
         for (var e in orders) {
           if (e.lastIndexOf(" - ") != -1) {
-            _enableAssembleOrders.add(e.substring(4, e.lastIndexOf(" - ")));
+            _enableAssembleOrders.add(e.substring(0, e.lastIndexOf(" - ")));
           }
         }
 
@@ -520,6 +520,19 @@ class WorkShopVm extends ChangeNotifier {
 
     for (String line in lines) {
       if (!line.toLowerCase().contains(keyword.toLowerCase())) {
+        result.add(line.trim());
+      }
+    }
+
+    return result;
+  }
+
+  List<String> findLinesIfLengthEquals(
+      {required List<String> lines, required int length}) {
+    List<String> result = [];
+
+    for (String line in lines) {
+      if (line.length != length) {
         result.add(line.trim());
       }
     }
@@ -873,7 +886,6 @@ class WorkShopVm extends ChangeNotifier {
           apkLocationController.text = runningTask!.apkPath!;
 
           await startFastUpload(runningTask!.apkPath!);
-
         } else if (runningTask!.preCheckOk == true) {
           updateLogController.text = runningTask!.setting!.appUpdateStr ?? '';
           apkLocationController.text = runningTask!.setting!.apkLocation ?? '';

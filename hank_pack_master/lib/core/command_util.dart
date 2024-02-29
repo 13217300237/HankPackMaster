@@ -586,9 +586,9 @@ $sb"""
   }
 
   Future<ExecuteResult> gitPull(
-      String gitProjectDir,
-      Function(String s) logOutput,
-      ) async {
+    String gitProjectDir,
+    Function(String s) logOutput,
+  ) async {
     StringBuffer sb = StringBuffer();
 
     var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
@@ -645,10 +645,10 @@ $sb"""
   Future<ExecuteResult> gradleAssembleTasks(
       String projectRoot, Function(String s) logOutput) async {
     StringBuffer sb = StringBuffer();
-
+    // gradlew.bat app:tasks --all | findstr assemble
     var process = await execute(
       cmd: "gradlew.bat",
-      params: ["tasks", "--all"],
+      params: ["app:tasks", "--all", "|", "findstr", "assemble"],
       workDir: projectRoot,
       binRoot: projectRoot + Platform.pathSeparator,
       action: (res) {

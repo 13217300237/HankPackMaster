@@ -110,7 +110,6 @@ class _HomePageState extends State<HomePage> {
               controller: ScrollController(),
               selectable: false,
               data: text,
-
             ),
           )
         ],
