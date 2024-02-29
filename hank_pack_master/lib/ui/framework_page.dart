@@ -207,23 +207,24 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
               ),
             ),
           ),
-          Align( // TODO 模式切换再说吧
-            alignment: AlignmentDirectional.centerEnd,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8.0),
-              child: ToggleSwitch(
-                content: const Text('Dark Mode'),
-                checked: fluentTheme.brightness.isDark,
-                onChanged: (v) {
-                  if (v) {
-                    appTheme.mode = ThemeMode.dark;
-                  } else {
-                    appTheme.mode = ThemeMode.light;
-                  }
-                },
-              ),
-            ),
-          ),
+          // TODO 模式切换再说吧
+          // Align(
+          //   alignment: AlignmentDirectional.centerEnd,
+          //   child: Padding(
+          //     padding: const EdgeInsetsDirectional.only(end: 8.0),
+          //     child: ToggleSwitch(
+          //       content: const Text('Dark Mode'),
+          //       checked: fluentTheme.brightness.isDark,
+          //       onChanged: (v) {
+          //         if (v) {
+          //           appTheme.mode = ThemeMode.dark;
+          //         } else {
+          //           appTheme.mode = ThemeMode.light;
+          //         }
+          //       },
+          //     ),
+          //   ),
+          // ),
           const WindowButtons(),
         ]),
       ),
