@@ -57,42 +57,42 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       title: Text('打包工坊', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
-    PaneItem(
-      key: const ValueKey('/files'),
-      icon: const Icon(FluentIcons.a_t_p_logo),
-      title: Text('缓存文件迁移', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/trace'),
-      icon: const Icon(FluentIcons.app_icon_secure),
-      title: Text('应用包回溯', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/device'),
-      icon: const Icon(FluentIcons.analytics_query),
-      title: Text('设备相关', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/timer'),
-      icon: const Icon(FluentIcons.timer),
-      title: Text('定时任务', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/statistics'),
-      icon: const Icon(FluentIcons.archive),
-      title: Text('工作统计', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/information'),
-      icon: const Icon(FluentIcons.info),
-      title:  Text('技术资讯', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
+    // PaneItem( // TODO
+    //   key: const ValueKey('/files'),
+    //   icon: const Icon(FluentIcons.a_t_p_logo),
+    //   title: Text('缓存文件迁移', style: w600TextStyle),
+    //   body: const SizedBox.shrink(),
+    // ),
+    // PaneItem(
+    //   key: const ValueKey('/trace'),
+    //   icon: const Icon(FluentIcons.app_icon_secure),
+    //   title: Text('应用包回溯', style: w600TextStyle),
+    //   body: const SizedBox.shrink(),
+    // ),
+    // PaneItem(
+    //   key: const ValueKey('/device'),
+    //   icon: const Icon(FluentIcons.analytics_query),
+    //   title: Text('设备相关', style: w600TextStyle),
+    //   body: const SizedBox.shrink(),
+    // ),
+    // PaneItem(
+    //   key: const ValueKey('/timer'),
+    //   icon: const Icon(FluentIcons.timer),
+    //   title: Text('定时任务', style: w600TextStyle),
+    //   body: const SizedBox.shrink(),
+    // ),
+    // PaneItem(
+    //   key: const ValueKey('/statistics'),
+    //   icon: const Icon(FluentIcons.archive),
+    //   title: Text('工作统计', style: w600TextStyle),
+    //   body: const SizedBox.shrink(),
+    // ),
+    // PaneItem(
+    //   key: const ValueKey('/information'),
+    //   icon: const Icon(FluentIcons.info),
+    //   title:  Text('技术资讯', style: w600TextStyle),
+    //   body: const SizedBox.shrink(),
+    // ),
   ].map<NavigationPaneItem>((e) {
     PaneItem buildPaneItem(PaneItem item) {
       return PaneItem(
@@ -127,19 +127,20 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     return e;
   }).toList();
 
+  // TODO
   late final List<NavigationPaneItem> footerItems = [
-    PaneItemSeparator(),
-    PaneItem(
-      key: const ValueKey('/settings'),
-      icon: const Icon(FluentIcons.settings),
-      title: const Text('Settings'),
-      body: const SizedBox.shrink(),
-      onTap: () {
-        if (GoRouterState.of(context).uri.toString() != '/settings') {
-          context.go('/settings');
-        }
-      },
-    ),
+    // PaneItemSeparator(),
+    // PaneItem(
+    //   key: const ValueKey('/settings'),
+    //   icon: const Icon(FluentIcons.settings),
+    //   title: const Text('Settings'),
+    //   body: const SizedBox.shrink(),
+    //   onTap: () {
+    //     if (GoRouterState.of(context).uri.toString() != '/settings') {
+    //       context.go('/settings');
+    //     }
+    //   },
+    // ),
   ];
 
   @override
@@ -206,7 +207,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
               ),
             ),
           ),
-          Align(
+          Align( // TODO 模式切换再说吧
             alignment: AlignmentDirectional.centerEnd,
             child: Padding(
               padding: const EdgeInsetsDirectional.only(end: 8.0),
