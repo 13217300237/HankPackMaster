@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hank_pack_master/core/command_util.dart';
 
 import '../../comm/hwobs/obs_client.dart';
@@ -30,6 +31,8 @@ class _HomePageState extends State<HomePage> {
 
 这款PC软件名叫 “**安小助**”，它将作为安卓开发工程师的私人助手，有效管理自己负责的多个项目，以及多个项目的多个分支。
 
+---
+
 # 有什么主要功能模块？
 
 **“安小助”** 的主要功能模块包括:
@@ -48,13 +51,15 @@ class _HomePageState extends State<HomePage> {
 
 ## 工程管理模块
 
-**“安小助”** 中，用 一个`gitUrl` 和 一个`branch`，唯一确定一个 **工程**。也就是说，相同的`gitUrl`，但是 `branch`不同，可以共存。这是为了满足 相同安卓项目的不同分支的管理需要。
+**“安小助”** 中，用 一个**gitUrl** 和 一个**branch**，唯一确定一个 **工程**。也就是说，相同的**gitUrl**，但是 **branch**不同，可以共存。这是为了满足 相同安卓项目的不同分支的管理需要。
 
-确定一个**工程**之后，首先要对这个工程进行激活。激活的意思是，拉取这个`gitUrl`的指定`branch`代码，并且使用`gradle`命令尝试对它进行编译，并且得出它的所有`assemble`开头的可用命令。
+确定一个**工程**之后，首先要对这个工程进行激活。激活的意思是，拉取这个**gitUrl**的指定`branch`代码，并且使用**gradle**命令尝试对它进行编译，并且得出它的所有**assemble**开头的可用命令。
 
 激活完成之后，可以进行打包。打包时，必须选择 激活阶段产生的`assemble`命令中的某一个。并且提供 apk文件的检索路径（因为安卓项目通过gradle编程支持可以实现 更换apk的产出位置），本次打包的更新日志文案，以及上传平台（可选 华为obs平台 或者 蒲公英平台）。
 
 所有工程将会在此模块的表格中进行呈现和管理。包括：工程激活和 工程 打包的进度。
+
+---
 
 ## 打包工坊模块
 
@@ -69,37 +74,46 @@ class _HomePageState extends State<HomePage> {
 工程激活的细分任务阶段为：
 
 - git 克隆
-
+  
 - git 切换分支
-
+  
 - 可用assemble指令查询
-
+  
 
 工程打包的细分阶段为：
 
 - git pull
-
+  
 - assemble命令执行
-
+  
 - apk文件检测
-
+  
 - apk上传
-
+  
 - 构建打包结果
+  
+
+如果一切顺利，打包结果构建完成，在工程管理模块的历史记录中可以查看打包历史。
+
+如果打包过程中出现问题，也在打包历史中能看到失败的记录，
   """;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10),
-      color: Colors.transparent,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            // ...testLayout(),
-            Text(text,style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600),),
-          ],
-        ),
+      color: Colors.white.withOpacity(.2),
+      child: Column(
+        children: [
+          Expanded(
+            child: Markdown(
+              controller: ScrollController(),
+              selectable: false,
+              data: text,
+
+            ),
+          )
+        ],
       ),
     );
   }
