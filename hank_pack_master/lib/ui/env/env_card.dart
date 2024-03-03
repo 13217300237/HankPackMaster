@@ -276,10 +276,8 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
   bool judgeFlutterGit(String path) {
     if (path.contains("git.exe") &&
         path.contains("flutter${Platform.pathSeparator}bin")) {
-      debugPrint("judgeFlutterGit ${path} - > true");
       return true;
     } else {
-      debugPrint("judgeFlutterGit ${path} - > false");
       return false;
     }
   }
