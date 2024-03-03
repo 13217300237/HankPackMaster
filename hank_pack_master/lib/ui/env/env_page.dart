@@ -86,7 +86,10 @@ class _EnvPageState extends State<EnvPage> {
             downloadUrl: "https://git-scm.com/download/win",
           ),
           const EnvGroupCard(order: "adb"),
-          const EnvGroupCard(order: "flutter"),
+          const EnvGroupCard(
+            order: "flutter",
+            downloadUrl: "https://docs.flutter.dev/release/archive?tab=windows",
+          ),
           const SizedBox(height: 20),
           _manualSpecifyEnvTitle(),
           Row(children: [
@@ -460,5 +463,3 @@ class _EnvPageState extends State<EnvPage> {
   final _cTextStyle =
       const TextStyle(fontSize: 19, fontWeight: FontWeight.w600);
 }
-
-

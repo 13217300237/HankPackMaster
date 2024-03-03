@@ -68,3 +68,8 @@
 - apk上传
 
 - 构建打包结果
+
+TODO LIST:
+
+1. env模块重构，java，git，adb，flutter 环境的获取从 EnvGroup
+2. 打包工坊模块，要求能够对每个安卓工程的 gradle.properties文件进行临时性更改 JAVA_HOME
