@@ -1,0 +1,371 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
+import 'package:hank_pack_master/hive/env_group/env_check_result_entity.dart';
+import 'package:hank_pack_master/hive/env_group/env_group_entity.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../core/command_util.dart';
+import '../comm/theme.dart';
+import '../comm/vm/env_param_vm.dart';
+
+///
+/// 单独封装一个带动画特效的环境监测卡片
+///
+/// 1，执行where命令，找出 所有可执行文件的路径 (Done)
+/// 2. 逐个进行java指令的 version执行，看看版本号
+/// 3. 将执行的结果动态显示出来
+/// 4. 用单选框展示，默认选中第一个
+///
+class EnvGroupCard extends StatefulWidget {
+  final String order;
+  final String? downloadUrl;
+
+  const EnvGroupCard({super.key, required this.order, this.downloadUrl});
+
+  @override
+  State<EnvGroupCard> createState() => _EnvGroupCardState();
+}
+
+class _EnvGroupCardState extends State<EnvGroupCard> {
+  late AppTheme _appTheme;
+  late EnvParamVm _envParamModel;
+  List<String> whereRes = [];
+
+  /// 是否正在加载 环境group
+  bool _isEnvGroupLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    _envParamModel = context.watch<EnvParamVm>();
+    _appTheme = context.watch<AppTheme>();
+
+    return _createDynamicEnvCheckCard();
+  }
+
+  /// 带动态效果的环境监测卡片
+  Widget _createDynamicEnvCheckCard() {
+    return Row(children: [
+      Expanded(
+        child: Card(
+            backgroundColor: _appTheme.bgColorSucc,
+            margin: const EdgeInsets.all(8),
+            borderRadius: BorderRadius.circular(5),
+            borderColor: Colors.transparent,
+            child: _buildEnvRadioBtn(
+                widget.order, widget.downloadUrl, whereRes.toSet())),
+      )
+    ]);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((timeStamp) => _doWhereAction());
+  }
+
+  /// 可执行文件单选按钮组件
+  Widget _buildEnvRadioBtn(
+      String order, String? downloadUrl, Set<String> content) {
+    List<Widget> muEnv = [];
+
+    double cardWidth = 400;
+    double cardHeight = 100;
+
+    for (var binRoot in content) {
+      muEnv.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: Card(
+          borderColor: Colors.transparent,
+          backgroundColor: Colors.blue.withOpacity(.15),
+          borderRadius: BorderRadius.circular(5),
+          child: RadioButton(
+              checked: _envParamModel.judgeEnv(order, binRoot),
+              onChanged: (v) =>
+                  _envParamModel.setEnv(order, binRoot, needToOverride: true),
+              content: Padding(
+                padding: const EdgeInsets.only(left: 28.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _titleWidget(binRoot, cardWidth),
+                    const SizedBox(width: 20),
+                    EnvCheckWidget(
+                        cmdStr: binRoot,
+                        title: order,
+                        cardWidth: cardWidth,
+                        cardHeight: cardHeight),
+                  ],
+                ),
+              )),
+        ),
+      ));
+    }
+
+    return _card(order, muEnv);
+  }
+
+  Widget _titleWidget(String binRoot, double cardWidth) {
+    return Container(
+      width: cardWidth,
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Tooltip(
+        message: binRoot,
+        style: const TooltipThemeData(
+            textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        triggerMode: TooltipTriggerMode.manual,
+        child: Text(
+          binRoot,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  Widget _card(String title, List<Widget> muEnv) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 30, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 20),
+                if (widget.downloadUrl != null &&
+                    widget.downloadUrl!.isNotEmpty)
+                  Tooltip(
+                    message: "点击进入下载地址",
+                    child: IconButton(
+                      onPressed: () async {
+                        await launchUrl(
+                            Uri.parse(widget.downloadUrl!)); // 通过资源管理器打开该目录
+                      },
+                      icon: Icon(
+                        FluentIcons.cloud_link,
+                        size: 30,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            Button(
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['exe', 'bat'],
+                );
+
+                if (result != null) {
+                  String? path = result.files.single.path;
+                  debugPrint('选择了 $path');
+                  if (path != null && path.isNotEmpty && path.contains(title)) {
+                    saveEnvPath(path);
+                  } else {
+                    ToastUtil.showPrettyToast("只能选择 $title.exe 或者 $title.bat");
+                  }
+                }
+              },
+              child: const Text(
+                "手动改添加环境",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 15),
+        if (_isEnvGroupLoading) ...[
+          Wrap(children: [...muEnv]),
+          envErrWidget(title),
+        ] else ...[
+          const ProgressBar(),
+        ],
+      ],
+    );
+  }
+
+  bool hasExecutableExtension(String path) {
+    var extensions = ['.exe', '.bat', '.cmd'];
+
+    bool has = false;
+
+    for (var element in extensions) {
+      if (path.toLowerCase().endsWith(element)) {
+        has = true;
+        break;
+      }
+    }
+
+    return has;
+  }
+
+  /// 保存/更新 环境变量，并刷新UI
+  void saveEnvPath(String envPath) {
+    // 过滤掉 不带可执行后缀的
+    // 过滤掉重复的
+    if (hasExecutableExtension(envPath)) {
+      var find = EnvGroupOperator.find(widget.order);
+      find ??= EnvGroupEntity(envGroupName: widget.order); // 保证 find 非空
+      var envCheckResultEntityList = find.envValue; // 那就看检查结果
+      envCheckResultEntityList ??= []; // 保证list非空
+
+      // 这里必须保证同样的 envPath只被添加一次
+      var i = envCheckResultEntityList.indexWhere((e) => e.envPath == envPath);
+      if (i != -1) {
+        envCheckResultEntityList.removeAt(i);
+      }
+      envCheckResultEntityList
+          .add(EnvCheckResultEntity(envPath: envPath, envName: envPath));
+
+      find.envValue = envCheckResultEntityList;
+      EnvGroupOperator.insertOrUpdate(find);
+
+      find = EnvGroupOperator.find(widget.order);
+      if (find != null) {
+        find.envValue?.forEach((e) {
+          whereRes.add(e.envPath);
+        });
+      }
+      setState(() {});
+    }
+  }
+
+  String getFirstFromWhereRes() {
+    if (whereRes.isNotEmpty) {
+      return whereRes[0];
+    }
+    return "";
+  }
+
+  /// 初始化
+  void _doWhereAction() async {
+    /// 执行where命令
+    CommandUtil.getInstance().whereCmd(
+        order: widget.order,
+        action: (s) {
+          _isEnvGroupLoading = true;
+          var split = s.trim().split("\n");
+          for (var e in split) {
+            if (!judgeFlutterGit(s)) {
+              saveEnvPath(e);
+            }
+          }
+
+          // var savedEnv = _envParamModel.getEnv(widget.order);
+          // // debugPrint(
+          // //     '================================================== savedEnv -> $savedEnv');
+          // if (savedEnv.isNotEmpty) {
+          //   if (!whereRes.contains(savedEnv)) {
+          //     whereRes.add(savedEnv); // 別忘了上次设置好的环境，因为出现过where命令抽风导致没打印出任何结果的情况
+          //   }
+          // } else {
+          //   _envParamModel.setEnv(
+          //     widget.order,
+          //     getFirstFromWhereRes(),
+          //     needToOverride: false,
+          //   );
+          // }
+          //
+          // setState(() {});
+        });
+  }
+
+  /// 有个奇怪情况，flutterSDK自带git工具，但是并不是我手动安装的git，最好不要选，要将他排除在外
+  bool judgeFlutterGit(String path) {
+    if (path.contains("git.exe") &&
+        path.contains("flutter${Platform.pathSeparator}bin")) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void showCmdResultDialog(String res) {
+    DialogUtil.showEnvCheckDialog(
+      context: context,
+      onConfirm: null,
+      content: res,
+      title: "测试结果",
+    );
+  }
+
+  Widget envErrWidget(String title) {
+    if (_envParamModel.isEnvEmpty(title)) {
+      return Text("${_envParamModel.envGuide[title]}",
+          style: TextStyle(fontSize: 20, color: Colors.red));
+    } else {
+      return const SizedBox();
+    }
+  }
+}
+
+class EnvCheckWidget extends StatefulWidget {
+  final String cmdStr;
+  final String title;
+  final double cardWidth;
+  final double cardHeight;
+
+  const EnvCheckWidget(
+      {super.key,
+      required this.cmdStr,
+      required this.title,
+      required this.cardWidth,
+      required this.cardHeight});
+
+  @override
+  State<EnvCheckWidget> createState() => _EnvCheckWidgetState();
+}
+
+class _EnvCheckWidgetState extends State<EnvCheckWidget> {
+  String executeRes = "";
+
+  bool get _executing => executeRes.isEmpty;
+
+  void _envTestCheck(String binRoot) async {
+    executeRes = await CommandUtil.getInstance().checkVersion(binRoot);
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_executing) {
+      return const ProgressRing();
+    }
+
+    return SizedBox(
+      width: widget.cardWidth,
+      height: widget.cardHeight,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              executeRes,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addPostFrameCallback((timeStamp) => _envTestCheck(widget.cmdStr));
+  }
+}

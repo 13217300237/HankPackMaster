@@ -177,14 +177,7 @@ class EnvParamVm extends ChangeNotifier {
 
   set javaRoot(String javaPath) {
     EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envJavaKey, javaPath));
-    // 设置java环境时，必须同时设置 JAVA_HOME 到 用户环境变量
-
-    String path = File(javaPath).parent.parent.path;
-
-    CommandUtil.getInstance().setSystemEnvVar("JAVA_HOME",path).then((value) {
-      ToastUtil.showPrettyToast("JAVA_HOME -> $path  设置成功, 重启系统之后生效");
-      notifyListeners();
-    });
+    notifyListeners();
   }
 
   String get workSpaceRoot =>

@@ -9,6 +9,7 @@ import 'comm/functions.dart';
 import 'comm/hwobs/obs_client.dart';
 import 'comm/str_const.dart';
 import 'hive/env_config/env_config_operator.dart';
+import 'hive/env_group/env_group_operator.dart';
 import 'hive/project_record/project_record_operator.dart';
 import 'ui/app.dart';
 
@@ -17,6 +18,7 @@ void main() async {
   await Hive.initFlutter();
   await EnvConfigOperator.openBox();
   await ProjectRecordOperator.openBox();
+  await EnvGroupOperator.openBox();
 
   OBSClient.init(
     ak: EnvConfigOperator.searchEnvValue(Const.obsAccessKey),

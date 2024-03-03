@@ -10,7 +10,7 @@ import '../comm/str_const.dart';
 import '../hive/env_config/env_config_operator.dart';
 import '../ui/work_shop/temp_log_cache_entity.dart';
 
-bool cmdDebug = true;
+bool cmdDebug = false;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {
