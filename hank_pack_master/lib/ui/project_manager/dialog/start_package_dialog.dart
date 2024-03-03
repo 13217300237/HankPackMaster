@@ -44,6 +44,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   UploadPlatform? _selectedUploadPlatform;
 
+  String? jdk;
+
   @override
   void initState() {
     super.initState();
@@ -165,6 +167,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
           input("apk路径", "程序会根据此路径检测apk文件", _apkLocationController,
               maxLines: 1),
           chooseRadio('上传方式'),
+          javaHomeChoose(),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -182,5 +186,51 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         ]);
 
     return contentWidget;
+  }
+
+  javaHomeChoose() {
+    List<String> jdks = ["jdk17", "jdk11"];
+
+    Widget mustSpace = SizedBox(
+        width: 20,
+        child: Center(
+            child: Text(
+          '*',
+          style: TextStyle(fontSize: 18, color: Colors.red),
+        )));
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0),
+      child: Row(children: [
+        SizedBox(
+            width: 100,
+            child: Row(children: [
+              const Text("JavaHome",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              mustSpace
+            ])),
+        Expanded(
+          child: Row(
+            children: List.generate(jdks.length, (index) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 18.0),
+                child: RadioButton(
+                    checked: jdk == jdks[index],
+                    content: Text(
+                      jdks[index],
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    onChanged: (checked) {
+                      if (checked == true) {
+                        jdk = jdks[index];
+                        setState(() {});
+                      }
+                    }),
+              );
+            }),
+          ),
+        )
+      ]),
+    );
   }
 }

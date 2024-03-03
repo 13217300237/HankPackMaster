@@ -1,5 +1,3 @@
-import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
-
 import '../../comm/typedef_functions.dart';
 
 /// 任务阶段

@@ -7,6 +7,7 @@ import 'package:hank_pack_master/comm/apk_parser_result.dart';
 import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:hank_pack_master/ui/work_shop/task_stage.dart';
+import 'package:hank_pack_master/ui/work_shop/temp_log_cache_entity.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:path/path.dart' as path;
 
@@ -245,10 +246,11 @@ class WorkShopVm extends ChangeNotifier {
                 packageOrder: selectedOrder!,
                 versionCode: versionCode,
                 versionName: versionName,
-                logOutput: addNewLogLine);
+                logOutput: addNewLogLine,
+                tempLogCacheEntity: tempLog);
 
         if (gradleAssembleRes.exitCode != 0) {
-          String er = "打包失败，详情请看日志";
+          String er = "打包失败，详情请看日志 \n ${tempLog.get()}";
           return OrderExecuteResult(msg: er, succeed: false);
         }
         return OrderExecuteResult(succeed: true, data: gradleAssembleRes.res);
@@ -594,6 +596,8 @@ class WorkShopVm extends ChangeNotifier {
     _cmdExecLog.clear();
     notifyListeners();
   }
+
+  TempLogCacheEntity tempLog = TempLogCacheEntity();
 
   void addNewLogLine(String s) {
     if (s.isEmpty) {

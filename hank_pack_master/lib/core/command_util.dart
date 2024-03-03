@@ -8,6 +8,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import '../comm/apk_parser_result.dart';
 import '../comm/str_const.dart';
 import '../hive/env_config/env_config_operator.dart';
+import '../ui/work_shop/temp_log_cache_entity.dart';
 
 bool cmdDebug = true;
 
@@ -665,12 +666,14 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
-  Future<ExecuteResult> gradleAssemble(
-      {required String projectRoot,
-      required String packageOrder,
-      required String versionName,
-      required String versionCode,
-      required Function(String s) logOutput}) async {
+  Future<ExecuteResult> gradleAssemble({
+    required String projectRoot,
+    required String packageOrder,
+    required String versionName,
+    required String versionCode,
+    required Function(String s) logOutput,
+    TempLogCacheEntity? tempLogCacheEntity,
+  }) async {
     StringBuffer sb = StringBuffer();
 
     List<String> params = [];
@@ -679,6 +682,7 @@ $sb"""
     params.add("--stacktrace");
 
     debugPrint("$params");
+    tempLogCacheEntity?.clear();
 
     var process = await execute(
       cmd: "gradlew.bat",
@@ -688,6 +692,7 @@ $sb"""
       action: (res) {
         logOutput.call(res);
         sb.writeln(res);
+        tempLogCacheEntity?.append(res);
         debugCmdPrint(res);
       },
     );
