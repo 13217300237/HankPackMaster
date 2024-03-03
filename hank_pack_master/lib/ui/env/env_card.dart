@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
-import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/env_group/env_check_result_entity.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_entity.dart';
+import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -98,7 +97,8 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                     _titleWidget(binRoot, cardWidth),
                     const SizedBox(width: 20),
                     EnvCheckWidget(
-                        cmdStr: binRoot,
+                        order: widget.order,
+                        envPath: binRoot,
                         title: order,
                         cardWidth: cardWidth,
                         cardHeight: cardHeight),
@@ -186,7 +186,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
           ],
         ),
         const SizedBox(height: 15),
-        if (_isEnvGroupLoading) ...[
+        if (!_isEnvGroupLoading) ...[
           Wrap(children: [...muEnv]),
           envErrWidget(title),
         ] else ...[
@@ -215,31 +215,35 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
   void saveEnvPath(String envPath) {
     // 过滤掉 不带可执行后缀的
     // 过滤掉重复的
-    if (hasExecutableExtension(envPath)) {
-      var find = EnvGroupOperator.find(widget.order);
-      find ??= EnvGroupEntity(envGroupName: widget.order); // 保证 find 非空
-      var envCheckResultEntityList = find.envValue; // 那就看检查结果
-      envCheckResultEntityList ??= []; // 保证list非空
+    if (!hasExecutableExtension(envPath)) {
+      return;
+    }
 
-      // 这里必须保证同样的 envPath只被添加一次
-      var i = envCheckResultEntityList.indexWhere((e) => e.envPath == envPath);
-      if (i != -1) {
-        envCheckResultEntityList.removeAt(i);
-      }
-      envCheckResultEntityList
-          .add(EnvCheckResultEntity(envPath: envPath, envName: envPath));
+    var find = EnvGroupOperator.find(widget.order);
+    find ??= EnvGroupEntity(envGroupName: widget.order); // 保证 find 非空
+    var envCheckResultEntityList = find.envValue; // 那就看检查结果
+    envCheckResultEntityList ??= []; // 保证list非空
 
-      find.envValue = envCheckResultEntityList;
-      EnvGroupOperator.insertOrUpdate(find);
+    // 这里必须保证同样的 envPath只被添加一次
+    var i = envCheckResultEntityList.indexWhere((e) => e.envPath == envPath);
+    if (i != -1) {
+      envCheckResultEntityList.removeAt(i);
+    }
+    envCheckResultEntityList
+        .add(EnvCheckResultEntity(envPath: envPath, envName: envPath));
 
+    find.envValue = envCheckResultEntityList;
+    EnvGroupOperator.insertOrUpdate(find);
+
+    setState(() {
+      whereRes.clear();
       find = EnvGroupOperator.find(widget.order);
       if (find != null) {
-        find.envValue?.forEach((e) {
+        find!.envValue?.forEach((e) {
           whereRes.add(e.envPath);
         });
       }
-      setState(() {});
-    }
+    });
   }
 
   String getFirstFromWhereRes() {
@@ -251,34 +255,20 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
 
   /// 初始化
   void _doWhereAction() async {
+    _isEnvGroupLoading = true;
+
     /// 执行where命令
     CommandUtil.getInstance().whereCmd(
         order: widget.order,
         action: (s) {
-          _isEnvGroupLoading = true;
+          _isEnvGroupLoading = false;
           var split = s.trim().split("\n");
           for (var e in split) {
-            if (!judgeFlutterGit(s)) {
+            e = e.trim();
+            if (!judgeFlutterGit(e)) {
               saveEnvPath(e);
             }
           }
-
-          // var savedEnv = _envParamModel.getEnv(widget.order);
-          // // debugPrint(
-          // //     '================================================== savedEnv -> $savedEnv');
-          // if (savedEnv.isNotEmpty) {
-          //   if (!whereRes.contains(savedEnv)) {
-          //     whereRes.add(savedEnv); // 別忘了上次设置好的环境，因为出现过where命令抽风导致没打印出任何结果的情况
-          //   }
-          // } else {
-          //   _envParamModel.setEnv(
-          //     widget.order,
-          //     getFirstFromWhereRes(),
-          //     needToOverride: false,
-          //   );
-          // }
-          //
-          // setState(() {});
         });
   }
 
@@ -286,19 +276,12 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
   bool judgeFlutterGit(String path) {
     if (path.contains("git.exe") &&
         path.contains("flutter${Platform.pathSeparator}bin")) {
+      debugPrint("judgeFlutterGit ${path} - > true");
       return true;
     } else {
+      debugPrint("judgeFlutterGit ${path} - > false");
       return false;
     }
-  }
-
-  void showCmdResultDialog(String res) {
-    DialogUtil.showEnvCheckDialog(
-      context: context,
-      onConfirm: null,
-      content: res,
-      title: "测试结果",
-    );
   }
 
   Widget envErrWidget(String title) {
@@ -312,17 +295,20 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
 }
 
 class EnvCheckWidget extends StatefulWidget {
-  final String cmdStr;
+  final String order;
+  final String envPath;
   final String title;
   final double cardWidth;
   final double cardHeight;
 
-  const EnvCheckWidget(
-      {super.key,
-      required this.cmdStr,
-      required this.title,
-      required this.cardWidth,
-      required this.cardHeight});
+  const EnvCheckWidget({
+    super.key,
+    required this.envPath,
+    required this.title,
+    required this.cardWidth,
+    required this.cardHeight,
+    required this.order,
+  });
 
   @override
   State<EnvCheckWidget> createState() => _EnvCheckWidgetState();
@@ -334,7 +320,36 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
   bool get _executing => executeRes.isEmpty;
 
   void _envTestCheck(String binRoot) async {
-    executeRes = await CommandUtil.getInstance().checkVersion(binRoot);
+    EnvGroupEntity? find = EnvGroupOperator.find(widget.order);
+
+    if (find == null) {
+      // 主命令查询结果为空
+      return;
+    }
+
+    var index = find.envValue?.indexWhere((e) => e.envPath == widget.envPath);
+
+    if (index == null) {
+      // 没有任何子命令
+      return;
+    }
+
+    if (index == -1) {
+      // 存在子命令，但是并没有与当前 envPath匹配的
+      return;
+    }
+
+    // 检查当前这条命令的检查结果是否为空
+    var currentCheckResult = find.envValue![index].envCheckResult;
+    if (currentCheckResult == null || currentCheckResult.isEmpty) {
+      executeRes = await CommandUtil.getInstance().checkVersion(binRoot);
+      find.envValue![index].envCheckResult = executeRes;
+      EnvGroupOperator.insertOrUpdate(find); // 找不到执行结果，才进行更新
+    } else {
+      // 找到了执行结果，直接进行赋值
+      executeRes = currentCheckResult;
+    }
+
     setState(() {});
   }
 
@@ -366,6 +381,6 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance
-        .addPostFrameCallback((timeStamp) => _envTestCheck(widget.cmdStr));
+        .addPostFrameCallback((timeStamp) => _envTestCheck(widget.envPath));
   }
 }

@@ -81,12 +81,12 @@ class _EnvPageState extends State<EnvPage> {
             order: "java",
             downloadUrl: "https://www.oracle.com/java/technologies/downloads",
           ),
-          // const EnvGroupCard(
-          //   order: "git",
-          //   downloadUrl: "https://git-scm.com/download/win",
-          // ),
-          // const EnvGroupCard(order: "adb"),
-          // const EnvGroupCard(order: "flutter"),
+          const EnvGroupCard(
+            order: "git",
+            downloadUrl: "https://git-scm.com/download/win",
+          ),
+          const EnvGroupCard(order: "adb"),
+          const EnvGroupCard(order: "flutter"),
           const SizedBox(height: 20),
           _manualSpecifyEnvTitle(),
           Row(children: [

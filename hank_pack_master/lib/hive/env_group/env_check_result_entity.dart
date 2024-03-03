@@ -13,14 +13,15 @@ class EnvCheckResultEntity {
   @HiveField(3)
   String? envCheckResult;
 
-  EnvCheckResultEntity({required this.envPath, required this.envName});
+  EnvCheckResultEntity(
+      {required this.envPath, required this.envName, this.envCheckResult});
 
   @override
   String toString() {
     StringBuffer sb = StringBuffer();
-    sb.write("envName=$envName;");
-    sb.write("envPath=$envPath;");
-    sb.write("envCheckResult=$envCheckResult;");
+    sb.writeln("envName=$envName;");
+    sb.writeln("envPath=$envPath;");
+    sb.writeln("envCheckResult=${envCheckResult?.trim()};");
     return sb.toString();
   }
 }

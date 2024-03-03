@@ -17,10 +17,14 @@ class EnvGroupEntity {
   @override
   String toString() {
     StringBuffer sb = StringBuffer();
-    sb.writeln(envGroupName);
+    sb.writeln("envGroupName=>$envGroupName");
+
     envValue?.forEach((e) {
-      sb.writeln("$e");
+      sb.writeln("[");
+      sb.writeln(e.toString());
+      sb.writeln("]");
     });
+
     return sb.toString();
   }
 }

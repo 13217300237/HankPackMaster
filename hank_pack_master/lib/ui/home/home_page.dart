@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hank_pack_master/core/command_util.dart';
+import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 
 import '../../comm/hwobs/obs_client.dart';
 import '../../comm/ui/animation_widget.dart';
@@ -97,6 +98,18 @@ class _HomePageState extends State<HomePage> {
 
 如果打包过程中出现问题，也在打包历史中能看到失败的记录，
   """;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // EnvGroupOperator.clear();
+      // var list = EnvGroupOperator.list();
+      // for (var e in list) {
+      //   debugPrint(e.toString());
+      // }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
