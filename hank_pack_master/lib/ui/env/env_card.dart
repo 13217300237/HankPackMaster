@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_check_result_entity.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_entity.dart';
@@ -342,6 +343,8 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
     if (currentCheckResult == null || currentCheckResult.isEmpty) {
       executeRes = await CommandUtil.getInstance().checkVersion(binRoot);
       find.envValue![index].envCheckResult = executeRes;
+      find.envValue![index].envName =
+          executeRes.getFirstLine() ?? ""; // 把结论的第一行作为envName
       EnvGroupOperator.insertOrUpdate(find); // 找不到执行结果，才进行更新
     } else {
       // 找到了执行结果，直接进行赋值

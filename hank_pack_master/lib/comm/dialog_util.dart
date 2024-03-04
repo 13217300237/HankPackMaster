@@ -19,11 +19,18 @@ class DialogUtil {
     String cancelText = "取消",
     double maxWidth = 500,
     double maxHeight = 700,
+    Color dialogBgColor = Colors.white,
   }) {
     showDialog(
       context: context,
       builder: (context) {
         return ContentDialog(
+          style: ContentDialogThemeData(
+            decoration: BoxDecoration(
+              color: dialogBgColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
           title: Text(
             title,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
@@ -34,7 +41,8 @@ class DialogUtil {
               : SingleChildScrollView(
                   child: Text(
                     content,
-                    style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                 ),
           actions: showActions

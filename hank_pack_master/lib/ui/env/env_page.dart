@@ -5,13 +5,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
-import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/comm/url_check_util.dart';
-import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
-import 'package:hank_pack_master/hive/env_group/env_check_result_entity.dart';
-import 'package:hank_pack_master/hive/env_group/env_group_entity.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/command_util.dart';
 import '../comm/theme.dart';

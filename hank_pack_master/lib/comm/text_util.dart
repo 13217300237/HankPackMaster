@@ -5,3 +5,18 @@ extension StringEmpty on String? {
     return false;
   }
 }
+
+
+
+extension FirstLineExtension on String? {
+  String? getFirstLine() {
+    if (this == null) {
+      return null;
+    }
+    int end = this!.indexOf('\n');
+    if (end == -1) {
+      return this;
+    }
+    return this!.substring(0, end);
+  }
+}

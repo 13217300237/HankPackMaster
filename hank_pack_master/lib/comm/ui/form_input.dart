@@ -49,11 +49,14 @@ Widget input(
         ),
         Expanded(
           child: TextBox(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+              ),
               unfocusedColor: Colors.transparent,
               highlightColor: Colors.transparent,
               style: textStyle,
-              placeholder: " ", // 强制把placeHolder设置为-
+              placeholder: " ",
+              // 强制把placeHolder设置为-
               placeholderStyle: textStyle,
               expands: false,
               maxLines: maxLines,
@@ -98,7 +101,8 @@ Widget choose(String title, Map<String, String> orderList,
         .map((e) => ComboBoxItem(
             value: e.key,
             child: Text(e.key,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16))))
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: 16))))
         .toList(),
     onChanged: (order) {
       if (order != null) {

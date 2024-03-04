@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/comm/upload_platforms.dart';
+import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
@@ -46,19 +47,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   String? jdk;
 
-  @override
-  void initState() {
-    super.initState();
-    // _projectAppDescController.addListener(() {
-    //   if (_projectAppDescController.text.isEmpty) {
-    //     isValidGitUrlRes = true;
-    //   } else {
-    //     isValidGitUrlRes = isValidGitUrl(_projectAppDescController.text);
-    //   }
-    //   setState(() {});
-    // });
-  }
-
   Widget chooseRadio(String title) {
     Widget mustSpace = SizedBox(
         width: 20,
@@ -88,7 +76,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                     checked: index == _selectedUploadPlatform?.index,
                     content: Text(
                       uploadPlatforms[index].name,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 18),
                     ),
                     onChanged: (checked) {
                       if (checked == true) {
@@ -152,7 +141,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          input("更新日志", "输入更新日志...", _updateLogController, maxLines: 5),
+          input("更新日志", "输入更新日志...", _updateLogController,
+              maxLines: 5, must: true),
           choose('打包命令', enableAssembleMap, setSelectedOrder: (order) {
             // 同时设置默认的apk路径
             if (order == 'assembleDebug') {
@@ -188,8 +178,13 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
     return contentWidget;
   }
 
-  javaHomeChoose() {
-    List<String> jdks = ["jdk17", "jdk11"];
+  Widget javaHomeChoose() {
+    List<String> jdks = []; // 这里的数据应该从
+
+    var find = EnvGroupOperator.find("java");
+    if (find != null && find.envValue != null) {
+      jdks = find.envValue!.map((e) => e.envName).toList();
+    }
 
     Widget mustSpace = SizedBox(
         width: 20,
@@ -201,7 +196,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 0),
-      child: Row(children: [
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SizedBox(
             width: 100,
             child: Row(children: [
@@ -210,15 +205,18 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
               mustSpace
             ])),
         Expanded(
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: List.generate(jdks.length, (index) {
               return Padding(
-                padding: const EdgeInsets.only(right: 18.0),
+                padding: const EdgeInsets.only(right: 18.0, bottom: 10),
                 child: RadioButton(
                     checked: jdk == jdks[index],
                     content: Text(
                       jdks[index],
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     onChanged: (checked) {
                       if (checked == true) {
