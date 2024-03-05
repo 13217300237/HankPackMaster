@@ -25,9 +25,14 @@ import '../comm/vm/env_param_vm.dart';
 ///
 class EnvGroupCard extends StatefulWidget {
   final String order;
+  final String orderUse;
   final String? downloadUrl;
 
-  const EnvGroupCard({super.key, required this.order, this.downloadUrl});
+  const EnvGroupCard(
+      {super.key,
+      required this.order,
+      this.downloadUrl,
+      required this.orderUse});
 
   @override
   State<EnvGroupCard> createState() => _EnvGroupCardState();
@@ -37,6 +42,8 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
   late AppTheme _appTheme;
   late EnvParamVm _envParamModel;
   List<String> whereRes = [];
+
+  bool showInfo = true;
 
   /// 是否正在加载 环境group
   bool _isEnvGroupLoading = false;
@@ -100,10 +107,10 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                 _envParamModel.setEnv(order, binRoot, needToOverride: true),
             child: Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                  const EdgeInsets.only(left: 10.0, bottom: 10,right: 10,top: 0),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Column(
                       mainAxisSize: MainAxisSize.min,
@@ -180,7 +187,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                   ),
               ],
             ),
-            Button(
+            FilledButton(
               onPressed: () async {
                 FilePickerResult? result = await FilePicker.platform.pickFiles(
                   type: FileType.custom,
@@ -211,14 +218,47 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
           ],
         ),
         const SizedBox(height: 15),
+        _infoWidget(),
+        const SizedBox(height: 15),
         if (!_isEnvGroupLoading) ...[
-          Wrap(children: [...muEnv]),
-          envErrWidget(title),
+          SizedBox(
+            width: double.infinity,
+            height: 200,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [...muEnv],
+            ),
+          ),
         ] else ...[
           const ProgressBar(),
         ],
       ],
     );
+  }
+
+  Widget _infoWidget() {
+    if (showInfo) {
+      return Container(
+        margin: const EdgeInsets.only(left: 5),
+        child: InfoBar(
+          title: const Text(
+            '提示',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          content: SizedBox(
+            width: double.infinity,
+            child: Text('${widget.order}环境变量将用于${widget.orderUse}',
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          ),
+          severity: InfoBarSeverity.info,
+          isLong: true,
+          onClose: () => setState(() => showInfo = false),
+        ),
+      );
+    } else {
+      return const SizedBox();
+    }
   }
 
   bool hasExecutableExtension(String path) {

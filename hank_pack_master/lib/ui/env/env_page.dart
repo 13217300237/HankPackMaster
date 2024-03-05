@@ -74,16 +74,22 @@ class _EnvPageState extends State<EnvPage> {
           const Text("自动环境检测", style: TextStyle(fontSize: 30)),
           const EnvGroupCard(
             order: "java",
+            orderUse: "apk打包 \n\n不同的安卓项目对可能对jdk有版本要求，如果遇到由于版本原因的打包失败，尝试更换jdk版本解决",
             downloadUrl: "https://www.oracle.com/java/technologies/downloads",
           ),
           const EnvGroupCard(
             order: "git",
+            orderUse: "拉取远程仓库代码",
             downloadUrl: "https://git-scm.com/download/win",
           ),
-          const EnvGroupCard(order: "adb"),
+          const EnvGroupCard(
+            order: "adb",
+            orderUse: "与已连接设备进行交互",
+          ),
           const EnvGroupCard(
             order: "flutter",
             downloadUrl: "https://docs.flutter.dev/release/archive?tab=windows",
+            orderUse: 'flutter 打包',
           ),
           const SizedBox(height: 20),
           _manualSpecifyEnvTitle(),
