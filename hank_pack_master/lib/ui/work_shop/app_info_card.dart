@@ -1,13 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
-import 'package:hank_pack_master/comm/dialog_util.dart';
-import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/comm/upload_platforms.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../comm/pgy/pgy_entity.dart';
-import '../project_manager/dialog/fast_upload_dialog.dart';
 
 /// 流水线最终成果展示卡片
 class AppInfoCard extends StatelessWidget {

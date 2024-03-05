@@ -7,6 +7,7 @@ import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_check_result_entity.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_entity.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
+import 'package:hank_pack_master/ui/env/hover_container.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -79,33 +80,38 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     double cardHeight = 100;
 
     for (var binRoot in content) {
-      muEnv.add(Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      Color bgColor = Colors.blue.withOpacity(.15);
+      Color borderColor = Colors.transparent;
+      if (_envParamModel.judgeEnv(order, binRoot)) {
+        bgColor = Colors.green.withOpacity(.2);
+        borderColor = Colors.green.withOpacity(.2);
+      }
+
+      muEnv.add(HoverContainer(
         child: Card(
-          borderColor: Colors.transparent,
-          backgroundColor: Colors.blue.withOpacity(.15),
+          borderColor: borderColor,
+          backgroundColor: bgColor,
           borderRadius: BorderRadius.circular(5),
-          child: RadioButton(
-              checked: _envParamModel.judgeEnv(order, binRoot),
-              onChanged: (v) =>
-                  _envParamModel.setEnv(order, binRoot, needToOverride: true),
-              content: Padding(
-                padding: const EdgeInsets.only(left: 28.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    _titleWidget(binRoot, cardWidth),
-                    const SizedBox(width: 20),
-                    EnvCheckWidget(
-                        order: widget.order,
-                        envPath: binRoot,
-                        title: order,
-                        cardWidth: cardWidth,
-                        cardHeight: cardHeight),
-                  ],
-                ),
-              )),
+          child: GestureDetector(
+            onTap: () => _envParamModel.setEnv(order, binRoot, needToOverride: true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _titleWidget(binRoot, cardWidth),
+                  const SizedBox(width: 20),
+                  EnvCheckWidget(
+                      order: widget.order,
+                      envPath: binRoot,
+                      title: order,
+                      cardWidth: cardWidth,
+                      cardHeight: cardHeight),
+                ],
+              ),
+            ),
+          ),
         ),
       ));
     }
@@ -357,7 +363,11 @@ class _EnvCheckWidgetState extends State<EnvCheckWidget> {
   @override
   Widget build(BuildContext context) {
     if (_executing) {
-      return const ProgressRing();
+      return SizedBox(
+        width: widget.cardWidth,
+        height: widget.cardHeight,
+        child: const Center(child: ProgressRing()),
+      );
     }
 
     return SizedBox(
