@@ -297,7 +297,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
     ]);
   }
 
-  Widget _stageBtn({required TaskState stage, required int index}) {
+  Widget _stageBtn({required TaskStage stage, required int index}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(

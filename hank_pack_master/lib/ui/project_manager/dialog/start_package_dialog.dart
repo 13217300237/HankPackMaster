@@ -7,6 +7,7 @@ import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
 import '../../../comm/ui/form_input.dart';
 import '../../../comm/url_check_util.dart';
+import '../../../hive/env_group/env_check_result_entity.dart';
 
 class StartPackageDialogWidget extends StatefulWidget {
   final WorkShopVm workShopVm;
@@ -45,7 +46,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   UploadPlatform? _selectedUploadPlatform;
 
-  String? jdk;
+  EnvCheckResultEntity? jdk; // 当前使用的jdk版本
 
   Widget chooseRadio(String title) {
     Widget mustSpace = SizedBox(
@@ -113,10 +114,11 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
           // 将此任务添加到队列中去
           widget.projectRecordEntity.setting = PackageSetting(
-            appUpdateStr: appUpdateStr,
+            appUpdateLog: appUpdateStr,
             apkLocation: apkLocation,
             selectedOrder: selectedOrder,
             selectedUploadPlatform: selectedUploadPlatform,
+            jdk: jdk,
           );
 
           String errMsg = widget.projectRecordEntity.setting!.ready();
@@ -179,11 +181,11 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
   }
 
   Widget javaHomeChoose() {
-    List<String> jdks = []; // 这里的数据应该从
+    List<EnvCheckResultEntity> jdks = []; // 这里的数据应该从
 
     var find = EnvGroupOperator.find("java");
     if (find != null && find.envValue != null) {
-      jdks = find.envValue!.map((e) => e.envName).toList();
+      jdks = find.envValue!.toList();
     }
 
     Widget mustSpace = SizedBox(
@@ -213,15 +215,17 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                 child: RadioButton(
                     checked: jdk == jdks[index],
                     content: Text(
-                      jdks[index],
+                      jdks[index].envName,
                       style: const TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
                     onChanged: (checked) {
                       if (checked == true) {
-                        jdk = jdks[index];
-                        setState(() {});
+                        setState(() {
+                          jdk = jdks[index];
+                          debugPrint("当前使用的jdk是 ${jdk?.envPath}");
+                        });
                       }
                     }),
               );

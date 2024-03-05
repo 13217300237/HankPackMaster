@@ -15,6 +15,7 @@ import '../../comm/file_operation.dart';
 import '../../comm/order_execute_result.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/str_const.dart';
+import '../../comm/text_util.dart';
 import '../../comm/upload_platforms.dart';
 import '../../comm/wait_util.dart';
 import '../../core/command_util.dart';
@@ -52,7 +53,7 @@ class WorkShopVm extends ChangeNotifier {
   final pgyUploadMaxTimesController =
       TextEditingController(); // pgy平台每次上传的最大可执行次数
 
-  final List<TaskState> taskStateList = [];
+  final List<TaskStage> taskStateList = [];
 
   final List<String> _cmdExecLog = [];
 
@@ -130,7 +131,7 @@ class WorkShopVm extends ChangeNotifier {
     }
   }
 
-  get prepareParamTask => TaskState("参数准备", actionFunc: () async {
+  get prepareParamTask => TaskStage("参数准备", actionFunc: () async {
         if (gitUrl.isEmpty) {
           return OrderExecuteResult(msg: "git仓库地址 不能为空", succeed: false);
         }
@@ -141,7 +142,7 @@ class WorkShopVm extends ChangeNotifier {
             succeed: true, data: '打包参数正常 工作目录为,$projectPath ');
       });
 
-  get gitCloneTask => TaskState("工程克隆", actionFunc: () async {
+  get gitCloneTask => TaskStage("工程克隆", actionFunc: () async {
         // clone之前不再检查原有文件，而是另外起一个目录，单独存放，这样可以避免文件被占用的问题
         // 与此同时，必须设定缓存删除机制，避免产生过多无用垃圾文件
 
@@ -182,7 +183,7 @@ class WorkShopVm extends ChangeNotifier {
             succeed: true, data: 'clone成功,位置在 $projectPath');
       });
 
-  get branchCheckoutTask => TaskState("分支切换", actionFunc: () async {
+  get branchCheckoutTask => TaskStage("分支切换", actionFunc: () async {
         ExecuteResult gitCheckoutRes = await CommandUtil.getInstance()
             .gitCheckout(projectPath, gitBranch, addNewLogLine);
 
@@ -192,7 +193,7 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(succeed: true, data: '分支 $gitBranch 切换成功');
       });
 
-  get projectStructCheckTask => TaskState("工程结构检测", actionFunc: () async {
+  get projectStructCheckTask => TaskStage("工程结构检测", actionFunc: () async {
         // 工程结构检查
         // 检查目录下是否有 gradlew.bat 文件
         File gradlewFile =
@@ -204,7 +205,7 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
       });
 
-  get assembleOrdersTask => TaskState("可用指令查询", actionFunc: () async {
+  get assembleOrdersTask => TaskStage("可用指令查询", actionFunc: () async {
         ExecuteResult gitAssembleTasksRes = await CommandUtil.getInstance()
             .gradleAssembleTasks(projectPath, addNewLogLine);
         if (gitAssembleTasksRes.exitCode != 0) {
@@ -229,7 +230,7 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(succeed: true, data: _enableAssembleOrders);
       });
 
-  get gitPullTask => TaskState("工程同步", actionFunc: () async {
+  get gitPullTask => TaskStage("工程同步", actionFunc: () async {
         var gitCheckoutRes =
             await CommandUtil.getInstance().gitPull(projectPath, addNewLogLine);
         if (gitCheckoutRes.exitCode != 0) {
@@ -239,7 +240,47 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(data: "git pull 成功", succeed: true);
       });
 
-  get generateApkTask => TaskState("生成apk", actionFunc: () async {
+  get modifyGradlePropertiesFile =>
+      TaskStage("修改 gradle.properties文件 以指定Java环境", actionFunc: () async {
+        // 找到工程位置下的 gradle.properties 文件
+        var gradlePropertiesFile =
+            File("$projectPath${Platform.pathSeparator}gradle.properties");
+
+        if (!gradlePropertiesFile.existsSync()) {
+          return OrderExecuteResult(
+              msg: "gradle.properties 文件未找到", succeed: false);
+        }
+
+        // 在文件中写入 org.gradle.java.home变量，值为
+        var javaHomeValue = runningTask!.setting!.jdk!.envPath;
+        File fx = File(javaHomeValue);
+        if (!fx.existsSync()) {
+          return OrderExecuteResult(
+              msg: "$javaHomeValue 文件未找到", succeed: false);
+        }
+
+        updateGradleProperties(gradlePropertiesFile, "org.gradle.java.home",
+            escapeBackslashes(fx.parent.parent.path));
+        return OrderExecuteResult(data: "Java环境指定成功", succeed: true);
+      });
+
+  get recoverGradlePropertiesFile =>
+      TaskStage("恢复gradle.properties", actionFunc: () async {
+        String gradlePropertiesFilePath =
+            "$projectPath${Platform.pathSeparator}gradle.properties";
+
+        ExecuteResult executeResult = await CommandUtil.getInstance()
+            .gitCheckoutFile(
+                projectPath, gradlePropertiesFilePath, (s) => null, tempLog);
+        if (executeResult.exitCode != 0) {
+          String er = "还原失败，详情请看日志}";
+          return OrderExecuteResult(msg: er, succeed: false);
+        }
+
+        return OrderExecuteResult(data: "gradle.properties还原成功", succeed: true);
+      });
+
+  get generateApkTask => TaskStage("生成apk", actionFunc: () async {
         ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
             .gradleAssemble(
                 projectRoot: projectPath + Platform.pathSeparator,
@@ -256,7 +297,7 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(succeed: true, data: gradleAssembleRes.res);
       });
 
-  get apkCheckTask => TaskState("apk检测", actionFunc: () async {
+  get apkCheckTask => TaskStage("apk检测", actionFunc: () async {
         // 检查此目录下的apk文件，并且校验它的最后修改时间是不是在10分钟以内
         var list = await findApkFiles(_apkLocation);
 
@@ -277,7 +318,7 @@ class WorkShopVm extends ChangeNotifier {
             succeed: true, data: "打包产物的位置在: $apkToUpload");
       });
 
-  get pgyTokenFetchTask => TaskState("获取pgyToken", actionFunc: () async {
+  get pgyTokenFetchTask => TaskStage("获取pgyToken", actionFunc: () async {
         // 先获取当前git的最新提交记录
         var log =
             await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
@@ -307,7 +348,7 @@ class WorkShopVm extends ChangeNotifier {
             succeed: true, msg: '获取到的Token是 ${pgyToken.toString()}');
       });
 
-  get uploadToPgyTask => TaskState("上传pgy", actionFunc: () async {
+  get uploadToPgyTask => TaskStage("上传pgy", actionFunc: () async {
         if (!_pgyEntity!.isOk()) {
           return OrderExecuteResult(
               msg: "上传参数为空，流程终止!  [$apkToUpload]", succeed: false);
@@ -328,7 +369,7 @@ class WorkShopVm extends ChangeNotifier {
         }
       });
 
-  get pgyResultSearchTask => TaskState("检查pgy发布结果", actionFunc: () async {
+  get pgyResultSearchTask => TaskStage("检查pgy发布结果", actionFunc: () async {
         var s = await PgyUploadUtil.getInstance()
             .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
 
@@ -371,7 +412,7 @@ class WorkShopVm extends ChangeNotifier {
         }
       });
 
-  get uploadToObsTask => TaskState("上传到华为obs", actionFunc: () async {
+  get uploadToObsTask => TaskStage("上传到华为obs", actionFunc: () async {
         // 先获取当前git的最新提交记录
         var log =
             await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
@@ -403,7 +444,7 @@ class WorkShopVm extends ChangeNotifier {
         }
       });
 
-  get generateObsUploadResTask => TaskState("构建打包结果", actionFunc: () async {
+  get generateObsUploadResTask => TaskStage("构建打包结果", actionFunc: () async {
         if (apkToUpload == null) {
           return OrderExecuteResult(
               data: "error : apkToUpload is null!", succeed: false);
@@ -452,8 +493,8 @@ class WorkShopVm extends ChangeNotifier {
     selectedOrder = null;
     taskStateList.clear();
 
-    TaskState.onStateFinishedFunc = updateStageCostTime;
-    TaskState.onStageStartedFunc = updateStateStarted;
+    TaskStage.onStateFinishedFunc = updateStageCostTime;
+    TaskStage.onStageStartedFunc = updateStateStarted;
 
     taskStateList.add(prepareParamTask);
     taskStateList.add(gitCloneTask);
@@ -470,8 +511,14 @@ class WorkShopVm extends ChangeNotifier {
     taskStateList.clear();
 
     taskStateList.add(gitPullTask);
+
+    // 这里必须增加一个步骤，
+    taskStateList.add(modifyGradlePropertiesFile);
+
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);
+
+    taskStateList.add(recoverGradlePropertiesFile);
 
     // 如果是已有的apk文件进行上传的话，那就直接执行以下步骤就行了
 
@@ -550,7 +597,7 @@ class WorkShopVm extends ChangeNotifier {
   Color finishedColor = Colors.green;
   Color errColor = Colors.red;
 
-  Color getStatueColor(TaskState state) {
+  Color getStatueColor(TaskStage state) {
     switch (state.stageStatue) {
       case StageStatue.idle:
         return Colors.grey.withOpacity(.5);
@@ -564,7 +611,7 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   void updateStatue(int index, StageStatue newStatue) {
-    TaskState c = taskStateList[index];
+    TaskStage c = taskStateList[index];
     c.stageStatue = newStatue;
     notifyListeners();
   }
@@ -572,7 +619,7 @@ class WorkShopVm extends ChangeNotifier {
   final stageScrollerController = ScrollController();
 
   void updateStageCostTime(int index, String costTime) {
-    TaskState c = taskStateList[index];
+    TaskStage c = taskStateList[index];
     c.stageCostTime = costTime;
 
     notifyListeners();
@@ -686,7 +733,7 @@ class WorkShopVm extends ChangeNotifier {
         var taskFuture = stage.actionFunc();
         addNewLogLine("第${j + 1}次 执行开始: $taskName");
 
-        TaskState.onStageStartedFunc?.call(i);
+        TaskStage.onStageStartedFunc?.call(i);
 
         var stageResult =
             await Future.any([taskFuture, timeOutCounter()]); // 计算超时
@@ -697,7 +744,7 @@ class WorkShopVm extends ChangeNotifier {
         if (stageResult is OrderExecuteResult) {
           // 如果执行成功，则标记此阶段已完成
           if (stageResult.succeed == true) {
-            TaskState.onStateFinishedFunc
+            TaskStage.onStateFinishedFunc
                 ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} ms");
             taskOk = true;
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
@@ -891,7 +938,7 @@ class WorkShopVm extends ChangeNotifier {
 
           await startFastUpload(runningTask!.apkPath!);
         } else if (runningTask!.preCheckOk == true) {
-          updateLogController.text = runningTask!.setting!.appUpdateStr ?? '';
+          updateLogController.text = runningTask!.setting!.appUpdateLog ?? '';
           apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
           selectedOrder = runningTask!.setting!.selectedOrder ?? "";
           selectedOrderController.text = selectedOrder!;

@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:hank_pack_master/comm/url_check_util.dart';
+import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/command_util.dart';
@@ -71,10 +72,22 @@ class _EnvPageState extends State<EnvPage> {
         child: SingleChildScrollView(
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text("自动环境检测", style: TextStyle(fontSize: 30)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("开发环境", style: TextStyle(fontSize: 30)),
+              FilledButton(
+                  child: const Text(
+                    "清空开发环境数据表",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  ),
+                  onPressed: () => _envParamModel.clearEnvGroupBox()),
+            ],
+          ),
           const EnvGroupCard(
             order: "java",
-            orderUse: "apk打包 \n\n不同的安卓项目对可能对jdk有版本要求，如果遇到由于版本原因的打包失败，尝试更换jdk版本解决",
+            orderUse:
+                "apk打包.\n - 不同的安卓项目对可能对jdk有版本要求，如果遇到由于版本原因的打包失败，尝试更换jdk版本解决",
             downloadUrl: "https://www.oracle.com/java/technologies/downloads",
           ),
           const EnvGroupCard(

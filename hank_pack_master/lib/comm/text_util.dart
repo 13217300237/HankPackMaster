@@ -20,3 +20,7 @@ extension FirstLineExtension on String? {
     return this!.substring(0, end);
   }
 }
+
+String escapeBackslashes(String path) {
+  return path.replaceAll(r'\', r'\\');
+}

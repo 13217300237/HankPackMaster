@@ -8,6 +8,7 @@ import '../../../comm/str_const.dart';
 import '../../../core/command_util.dart';
 import '../../../hive/env_config/env_config_entity.dart';
 import '../../../hive/env_config/env_config_operator.dart';
+import '../../../hive/env_group/env_group_operator.dart';
 
 class EnvParamVm extends ChangeNotifier {
   /// 环境有问题时的错误提示
@@ -342,4 +343,9 @@ class EnvParamVm extends ChangeNotifier {
   // 用combox替换输入框
   List<String> executePeriodList = ["10", "20", "30", "40"]; // 每次最大可执行时间
   List<String> executeTimes = ["2", "3", "4", "5", "6", "7"]; // 每次最大可执行时间
+
+  void clearEnvGroupBox(){
+    EnvGroupOperator.clear();
+    notifyListeners();
+  }
 }

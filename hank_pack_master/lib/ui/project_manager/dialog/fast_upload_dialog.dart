@@ -110,7 +110,7 @@ class _FastUploadDialogWidgetState extends State<FastUploadDialogWidget> {
 
           // 将此任务添加到队列中去
           widget.projectRecordEntity.setting = PackageSetting(
-            appUpdateStr: appUpdateStr,
+            appUpdateLog: appUpdateStr,
             apkLocation: apkLocation,
             selectedUploadPlatform: selectedUploadPlatform,
           );

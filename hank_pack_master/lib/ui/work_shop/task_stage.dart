@@ -1,7 +1,7 @@
 import '../../comm/typedef_functions.dart';
 
 /// 任务阶段
-class TaskState {
+class TaskStage {
   String stageName;
   String? stageCostTime;
   StageStatue stageStatue = StageStatue.idle;
@@ -15,7 +15,7 @@ class TaskState {
 
   static OnStageStartedFunc? onStageStartedFunc;
 
-  TaskState(this.stageName, {required this.actionFunc});
+  TaskStage(this.stageName, {required this.actionFunc});
 }
 
 enum StageStatue { idle, executing, finished, error }

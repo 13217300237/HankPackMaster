@@ -643,6 +643,39 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
+  /// 将 example.txt 文件还原到最近一次提交的状态
+  Future<ExecuteResult> gitCheckoutFile(
+    String gitProjectDir,
+    String filePath,
+    Function(String s) logOutput,
+    TempLogCacheEntity? tempLogCacheEntity,
+  ) async {
+
+    StringBuffer sb = StringBuffer();
+    tempLogCacheEntity?.clear();
+    var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
+    var process = await execute(
+      cmd: '"$binRoot"',
+      params: ["checkout", "--", filePath],
+      workDir: gitProjectDir,
+      action: (res) {
+        logOutput(res);
+        sb.writeln(res);
+        tempLogCacheEntity?.append(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """
+cmd: git checkout -- $filePath
+exitCode : $exitCode
+$sb"""
+        .trim();
+
+    return ExecuteResult(res, exitCode!);
+  }
+
   Future<ExecuteResult> gradleAssembleTasks(
       String projectRoot, Function(String s) logOutput) async {
     StringBuffer sb = StringBuffer();

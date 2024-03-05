@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 
 import '../../comm/upload_platforms.dart';
+import '../env_group/env_check_result_entity.dart';
 
 part 'project_record_entity.g.dart';
 
@@ -71,16 +72,18 @@ class ProjectRecordEntity {
 }
 
 class PackageSetting {
-  String? appUpdateStr;
+  String? appUpdateLog;
   String? apkLocation;
   String? selectedOrder;
   UploadPlatform? selectedUploadPlatform;
+  EnvCheckResultEntity? jdk; // 当前使用的jdk版本
 
   PackageSetting({
-    this.appUpdateStr,
+    this.appUpdateLog,
     this.apkLocation,
     this.selectedOrder,
     this.selectedUploadPlatform,
+    this.jdk,
   });
 
   String ready() {

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+
 Future<List<String>> findApkFiles(String folderPath) async {
   List<String> apkFilePaths = [];
 
@@ -23,3 +25,30 @@ Future<List<String>> findApkFiles(String folderPath) async {
 
   return apkFilePaths;
 }
+
+void updateGradleProperties(File gradleFile, String key, String value) {
+  if (!gradleFile.existsSync()) {
+    debugPrint('gradle.properties文件不存在');
+    return;
+  }
+
+  List<String> lines = gradleFile.readAsLinesSync();
+  bool keyExists = false;
+
+  for (int i = 0; i < lines.length; i++) {
+    String line = lines[i];
+    if (line.startsWith('$key=')) {
+      lines[i] = '$key=$value';
+      keyExists = true;
+      break;
+    }
+  }
+
+  if (!keyExists) {
+    lines.add('$key=$value');
+  }
+
+  gradleFile.writeAsStringSync(lines.join('\n'));
+}
+
+
