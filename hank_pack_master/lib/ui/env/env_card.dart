@@ -106,8 +106,8 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
             onTap: () =>
                 _envParamModel.setEnv(order, binRoot, needToOverride: true),
             child: Container(
-              padding:
-                  const EdgeInsets.only(left: 10.0, bottom: 10,right: 10,top: 0),
+              padding: const EdgeInsets.only(
+                  left: 10.0, bottom: 10, right: 10, top: 0),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -157,6 +157,9 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
   }
 
   Widget _card(String title, List<Widget> muEnv) {
+
+    var listViewScroller = ScrollController();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -223,10 +226,26 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
         if (!_isEnvGroupLoading) ...[
           SizedBox(
             width: double.infinity,
-            height: 200,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [...muEnv],
+            height: 228,
+            child: Scrollbar(
+              thumbVisibility: false,
+              interactive: true,
+              style: const ScrollbarThemeData(
+                thickness: 8,
+                // 设置滚动条的宽度
+                radius: Radius.circular(10),
+                hoveringThickness: 10,
+                padding: EdgeInsets.all(5),
+              ),
+              controller: listViewScroller,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 28.0),
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  controller: listViewScroller,
+                  children: [...muEnv],
+                ),
+              ),
             ),
           ),
         ] else ...[
