@@ -84,7 +84,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
       Color borderColor = Colors.transparent;
       if (_envParamModel.judgeEnv(order, binRoot)) {
         bgColor = Colors.green.withOpacity(.2);
-        borderColor = Colors.green.withOpacity(.2);
+        borderColor = Colors.green.withOpacity(.4);
       }
 
       muEnv.add(HoverContainer(
@@ -92,6 +92,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
           borderColor: borderColor,
           backgroundColor: bgColor,
           borderRadius: BorderRadius.circular(5),
+          padding: const EdgeInsets.all(0),
           child: GestureDetector(
             onTap: () => _envParamModel.setEnv(order, binRoot, needToOverride: true),
             child: Container(
