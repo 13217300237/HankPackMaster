@@ -82,9 +82,11 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     for (var binRoot in content) {
       Color bgColor = Colors.blue.withOpacity(.15);
       Color borderColor = Colors.transparent;
+      IconData icon = FluentIcons.checkbox;
       if (_envParamModel.judgeEnv(order, binRoot)) {
         bgColor = Colors.green.withOpacity(.2);
         borderColor = Colors.green.withOpacity(.4);
+        icon = FluentIcons.skype_check;
       }
 
       muEnv.add(HoverContainer(
@@ -94,21 +96,30 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
           borderRadius: BorderRadius.circular(5),
           padding: const EdgeInsets.all(0),
           child: GestureDetector(
-            onTap: () => _envParamModel.setEnv(order, binRoot, needToOverride: true),
+            onTap: () =>
+                _envParamModel.setEnv(order, binRoot, needToOverride: true),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-              child: Column(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _titleWidget(binRoot, cardWidth),
-                  const SizedBox(width: 20),
-                  EnvCheckWidget(
-                      order: widget.order,
-                      envPath: binRoot,
-                      title: order,
-                      cardWidth: cardWidth,
-                      cardHeight: cardHeight),
+                  Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        _titleWidget(binRoot, cardWidth),
+                        const SizedBox(width: 20),
+                        EnvCheckWidget(
+                            order: widget.order,
+                            envPath: binRoot,
+                            title: order,
+                            cardWidth: cardWidth,
+                            cardHeight: cardHeight),
+                      ]),
+                  const SizedBox(width: 10),
+                  Icon(icon, size: 30, color: Colors.grey[180]),
                 ],
               ),
             ),
@@ -186,9 +197,15 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
                   }
                 }
               },
-              child: const Text(
-                "手动改添加环境",
-                style: TextStyle(fontWeight: FontWeight.w600),
+              child: const Row(
+                children: [
+                  Icon(FluentIcons.check_list_text, size: 28),
+                  SizedBox(width: 10),
+                  Text(
+                    "手动添加",
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                  ),
+                ],
               ),
             ),
           ],
