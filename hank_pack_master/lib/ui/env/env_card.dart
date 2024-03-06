@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/comm/ui/info_bar.dart';
 import 'package:hank_pack_master/hive/env_group/env_check_result_entity.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_entity.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
@@ -157,7 +158,6 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
   }
 
   Widget _card(String title, List<Widget> muEnv) {
-
     var listViewScroller = ScrollController();
 
     return Column(
@@ -259,19 +259,8 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     if (showInfo) {
       return Container(
         margin: const EdgeInsets.only(left: 5),
-        child: InfoBar(
-          title: const Text(
-            '提示',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          content: SizedBox(
-            width: double.infinity,
-            child: Text('${widget.order}环境变量将用于${widget.orderUse}',
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-          ),
-          severity: InfoBarSeverity.info,
-          isLong: true,
+        child: expandedInfoBar(
+          '${widget.order}环境变量将用于${widget.orderUse}',
           onClose: () => setState(() => showInfo = false),
         ),
       );

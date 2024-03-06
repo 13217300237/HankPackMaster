@@ -9,6 +9,8 @@ import 'package:hank_pack_master/comm/url_check_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:provider/provider.dart';
 
+import '../../comm/ui/info_bar.dart';
+import '../../comm/ui/my_tool_tip_icon.dart';
 import '../../core/command_util.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
@@ -39,10 +41,11 @@ class _EnvPageState extends State<EnvPage> {
   Widget _envChooseWidget(
       {required String title,
       required String Function() init,
-      required Function(String r) action}) {
+      required Function(String r) action,
+      required String tips}) {
     return _card(
-        title,
-        [
+        title: title,
+        muEnv: [
           if (!_envParamModel.isEnvEmpty(title)) ...[
             Padding(
               padding: const EdgeInsets.only(bottom: 0),
@@ -58,7 +61,8 @@ class _EnvPageState extends State<EnvPage> {
             )
           ],
         ],
-        action: action);
+        action: action,
+        tips: tips);
   }
 
   @override
@@ -172,8 +176,12 @@ class _EnvPageState extends State<EnvPage> {
     }
   }
 
-  Widget _card(String title, List<Widget> muEnv,
-      {required Function(String r) action}) {
+  Widget _card({
+    required String title,
+    required List<Widget> muEnv,
+    required Function(String r) action,
+    required String tips,
+  }) {
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
           child: Container(
@@ -190,19 +198,33 @@ class _EnvPageState extends State<EnvPage> {
                         Row(
                           children: [
                             FilledButton(
-                                child: const Text("更换路径"),
-                                onPressed: () async {
-                                  String? selectedDirectory = await FilePicker
-                                      .platform
-                                      .getDirectoryPath();
-                                  if (selectedDirectory != null) {
-                                    action(selectedDirectory);
-                                  }
-                                }),
+                              onPressed: () async {
+                                String? selectedDirectory = await FilePicker
+                                    .platform
+                                    .getDirectoryPath();
+                                if (selectedDirectory != null) {
+                                  action(selectedDirectory);
+                                }
+                              },
+                              child: const Row(
+                                children: [
+                                  Icon(FluentIcons.check_list_text, size: 28),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    "更换路径",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ],
                     ),
+                    const SizedBox(height: 15),
+                    expandedInfoBar(tips),
                     const SizedBox(height: 15),
                     ...muEnv,
                     const SizedBox(height: 5),
@@ -278,6 +300,7 @@ class _EnvPageState extends State<EnvPage> {
   Widget _workspaceChoose() {
     return _envChooseWidget(
         title: "工作空间",
+        tips: "用于存放从远程仓库拉取的所有工程文件",
         init: () => _envParamModel.workSpaceRoot,
         action: (selectedDirectory) {
           DialogUtil.showInfo(
@@ -289,6 +312,7 @@ class _EnvPageState extends State<EnvPage> {
   Widget _androidSdkChoose() {
     return _envChooseWidget(
         title: "Android SDK",
+        tips: "这是安卓打包的核心环境",
         init: () => _envParamModel.androidSdkRoot,
         action: (selectedDirectory) async {
           String envKey = "ANDROID_HOME";
@@ -349,7 +373,11 @@ class _EnvPageState extends State<EnvPage> {
         Expanded(
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("阶段任务执行参数设置", style: _cTextStyle),
+          Row(
+            children: [
+              Text("阶段任务执行参数设置", style: _cTextStyle),
+            ],
+          ),
           const SizedBox(height: 20),
           Row(children: [
             Expanded(
@@ -357,7 +385,16 @@ class _EnvPageState extends State<EnvPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                  Text("每次最大可执行时间", style: _cTextStyle),
+                  Row(
+                    children: [
+                      Text("每次最大可执行时间", style: _cTextStyle),
+                      toolTipIcon(
+                        msg:
+                            "单阶段任务超过此时长则会被认为执行超时，比如 git拉取代码，超过设定好的40分钟之后，会尝试重新拉取",
+                        iconColor: _appTheme.accentColor,
+                      ),
+                    ],
+                  ),
                   const Spacer(),
                   ComboBox<String>(
                     value: _envParamModel.stageTaskExecuteMaxPeriod,
@@ -378,7 +415,15 @@ class _EnvPageState extends State<EnvPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                  Text("最大可执行次数", style: _cTextStyle),
+                  Row(
+                    children: [
+                      Text("最大重试次数", style: _cTextStyle),
+                      toolTipIcon(
+                        msg: "阶段任务执行超时或执行失败时会尝试重试,超过设定的最大重试次数则会被认为阶段任务执行失败",
+                        iconColor: _appTheme.accentColor,
+                      ),
+                    ],
+                  ),
                   const Spacer(),
                   ComboBox<String>(
                     value: _envParamModel.stageTaskExecuteMaxRetryTimes,
@@ -412,14 +457,18 @@ class _EnvPageState extends State<EnvPage> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("蒲公英平台设置", style: _cTextStyle),
           const SizedBox(height: 20),
-          _textInput('_api_key', _envParamModel.pgyApiKeyController),
+          _textInput(
+            '_api_key',
+            _envParamModel.pgyApiKeyController,
+            toolTip: "设置_api_key使得 apk文件可以上传到蒲公英平台",
+          ),
         ]))
       ]),
     );
   }
 
   Widget _textInput(String label, TextEditingController controller,
-      {bool judgeHttpsReg = false}) {
+      {bool judgeHttpsReg = false, required String toolTip}) {
     var dataCorrect = true;
     if (judgeHttpsReg) {
       dataCorrect = isHttpsUrl(controller.text);
@@ -430,7 +479,13 @@ class _EnvPageState extends State<EnvPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-            SizedBox(width: 150, child: Text(label, style: _cTextStyle)),
+            SizedBox(width: 150, child: Row(
+              children: [
+                Text(label, style: _cTextStyle),
+                toolTipIcon(msg: toolTip, iconColor: _appTheme.accentColor),
+              ],
+            )),
+
             const Spacer(),
             Expanded(
               child: TextBox(
@@ -462,13 +517,16 @@ class _EnvPageState extends State<EnvPage> {
           Text("华为OBS平台设置", style: _cTextStyle),
           const SizedBox(height: 20),
           _textInput('end point ', _envParamModel.obsEndPointController,
-              judgeHttpsReg: true),
+              judgeHttpsReg: true, toolTip: "华为OBS的终端地址"),
           const SizedBox(height: 10),
-          _textInput('access key', _envParamModel.obsAccessKeyController),
+          _textInput('access key', _envParamModel.obsAccessKeyController,
+              toolTip: "访问权限key"),
           const SizedBox(height: 10),
-          _textInput('secret key', _envParamModel.obsSecretKeyController),
+          _textInput('secret key', _envParamModel.obsSecretKeyController,
+              toolTip: "秘钥key"),
           const SizedBox(height: 10),
-          _textInput('bucket name', _envParamModel.obsBucketNameController),
+          _textInput('bucket name', _envParamModel.obsBucketNameController,
+              toolTip: "桶名称"),
         ]))
       ]),
     );
