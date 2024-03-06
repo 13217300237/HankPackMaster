@@ -49,6 +49,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             ),
             confirmText: "确定激活",
             onConfirm: () {
+
+              // 项目激活也需要选择jdk版本，因为毕竟执行的是 gradle函数
+
               var enqueueSuccess = _workShopVm.enqueue(e);
               if (enqueueSuccess) {
                 confirmGoToWorkShop();

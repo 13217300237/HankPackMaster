@@ -29,33 +29,7 @@ class StageTaskCard extends StatefulWidget {
 }
 
 class _StageTaskCardState extends State<StageTaskCard> {
-  late Timer timer;
 
-  double costTime = 0;
-
-  void startTask() {
-    setState(() => costTime = 0);
-    timer = Timer.periodic(
-      const Duration(milliseconds: 100),
-      (timer) {
-        if(mounted) {
-          setState(() => costTime += 100);
-        }
-      },
-    );
-  }
-
-  void endTask() {
-    timer.cancel();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      startTask();
-    });
-  }
 
   void _showMyAppInfo(MyAppInfo s) {
     var card = AppInfoCard(appInfo: s);
