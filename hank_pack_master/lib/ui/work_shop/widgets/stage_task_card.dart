@@ -37,7 +37,11 @@ class _StageTaskCardState extends State<StageTaskCard> {
     setState(() => costTime = 0);
     timer = Timer.periodic(
       const Duration(milliseconds: 100),
-      (timer) => setState(() => costTime += 100),
+      (timer) {
+        if(mounted) {
+          setState(() => costTime += 100);
+        }
+      },
     );
   }
 
