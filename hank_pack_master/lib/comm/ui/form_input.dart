@@ -28,7 +28,7 @@ Widget input(
 
   var textStyle = const TextStyle(
       decoration: TextDecoration.none,
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: FontWeight.w600);
 
   return Padding(
@@ -49,9 +49,7 @@ Widget input(
         ),
         Expanded(
           child: TextBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
               unfocusedColor: Colors.transparent,
               highlightColor: Colors.transparent,
               style: textStyle,

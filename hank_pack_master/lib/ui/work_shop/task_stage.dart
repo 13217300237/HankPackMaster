@@ -1,3 +1,5 @@
+import 'package:hank_pack_master/ui/work_shop/widgets/stage_task_card.dart';
+
 import '../../comm/typedef_functions.dart';
 
 /// 任务阶段
@@ -6,6 +8,7 @@ class TaskStage {
   String? stageCostTime;
   StageStatue stageStatue = StageStatue.idle;
   dynamic executeResultData;
+  TimerController timerController = TimerController();
 
   // 当前阶段的行为, 返回null说明当前阶段正常，非null的情况分两种，一是有特殊输出的阶段，第二是结束阶段
   ActionFunc actionFunc;
@@ -15,7 +18,10 @@ class TaskStage {
 
   static OnStageStartedFunc? onStageStartedFunc;
 
-  TaskStage(this.stageName, {required this.actionFunc});
+  TaskStage(
+    this.stageName, {
+    required this.actionFunc,
+  });
 }
 
 enum StageStatue { idle, executing, finished, error }

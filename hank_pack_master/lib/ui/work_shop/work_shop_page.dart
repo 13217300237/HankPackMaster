@@ -6,6 +6,7 @@ import 'package:hank_pack_master/comm/order_execute_result.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/ui/work_shop/task_stage.dart';
+import 'package:hank_pack_master/ui/work_shop/widgets/stage_task_card.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,7 +34,8 @@ class _WorkShopPageState extends State<WorkShopPage> {
   late AppTheme _appTheme;
 
   Widget _mainTitleWidget(String title) {
-    return Text(title, style: const TextStyle(fontSize: 22,fontWeight: FontWeight.w600));
+    return Text(title,
+        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600));
   }
 
   @override
@@ -63,28 +65,6 @@ class _WorkShopPageState extends State<WorkShopPage> {
               _showErr();
             }
           }),
-    );
-  }
-
-  _showInfoDialog(
-    String title,
-    String msg,
-  ) {
-    DialogUtil.showCustomDialog(
-        context: context,
-        content: msg,
-        title: title,
-        showCancel: false,
-        confirmText: '我知道了...');
-  }
-
-  void showMyAppInfo(MyAppInfo s) {
-    var card = AppInfoCard(appInfo: s);
-
-    DialogUtil.showCustomDialog(
-      context: context,
-      content: card,
-      title: '流程结束',
     );
   }
 
@@ -172,17 +152,36 @@ class _WorkShopPageState extends State<WorkShopPage> {
             _mainTitleWidget("任务阶段"),
             const SizedBox(height: 10),
             SizedBox(
-              height: 120,
-              child: ListView.builder(
+              height: 130,
+              child: Scrollbar(
+                thumbVisibility: false,
+                interactive: true,
+                style: const ScrollbarThemeData(
+                  thickness: 5,
+                  radius: Radius.circular(10),
+                  hoveringThickness: 10,
+                  padding: EdgeInsets.all(5),
+                ),
                 controller: _workShopVm.stageScrollerController,
-                itemBuilder: (context, index) {
-                  var e = _workShopVm.taskStateList[index];
-                  return _stageBtn(stage: e, index: index);
-                },
-                itemCount: _workShopVm.taskStateList.length,
-                scrollDirection: m.Axis.horizontal,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: ListView.builder(
+                    controller: _workShopVm.stageScrollerController,
+                    itemBuilder: (context, index) {
+                      var e = _workShopVm.taskStateList[index];
+                      return StageTaskCard(
+                        stage: e,
+                        index: index,
+                        statueColor: _workShopVm.getStatueColor(e),
+                        controller: e.timerController,
+                      );
+                    },
+                    itemCount: _workShopVm.taskStateList.length,
+                    scrollDirection: m.Axis.horizontal,
+                  ),
+                ),
               ),
-            )
+            ),
           ]),
         ));
 
@@ -295,48 +294,5 @@ class _WorkShopPageState extends State<WorkShopPage> {
             stageLogWidget
           ]))
     ]);
-  }
-
-  Widget _stageBtn({required TaskStage stage, required int index}) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-        width: 100,
-        child: FilledButton(
-          onPressed: () {
-            // 按下之后，打开当前阶段的执行结果弹窗
-            var result = stage.executeResultData;
-            if (result is OrderExecuteResult) {
-              var data = result.data;
-              if (data is MyAppInfo) {
-                showMyAppInfo(data);
-              } else {
-                _showInfoDialog(stage.stageName, '${stage.executeResultData}');
-              }
-            }
-          },
-          style: ButtonStyle(
-              backgroundColor: ButtonState.resolveWith(
-                  (states) => _workShopVm.getStatueColor(stage))),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  stage.stageName,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                if (stage.stageCostTime != null &&
-                    stage.stageCostTime!.isNotEmpty)
-                  Text(
-                    stage.stageCostTime!,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

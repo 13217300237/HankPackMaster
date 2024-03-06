@@ -729,6 +729,9 @@ class WorkShopVm extends ChangeNotifier {
         stageTimeWatch.start();
 
         var stage = taskStateList[i];
+        stage.timerController.start();
+
+
         var taskName = stage.stageName;
         var taskFuture = stage.actionFunc();
         addNewLogLine("第${j + 1}次 执行开始: $taskName");
@@ -742,6 +745,7 @@ class WorkShopVm extends ChangeNotifier {
 
         // 如果任务在规定时间之内完成，则一定会返回一个OrderExecuteResult
         if (stageResult is OrderExecuteResult) {
+          stage.timerController.stop();
           // 如果执行成功，则标记此阶段已完成
           if (stageResult.succeed == true) {
             TaskStage.onStateFinishedFunc
@@ -778,6 +782,7 @@ class WorkShopVm extends ChangeNotifier {
             actionResStr = OrderExecuteResult(
                 succeed: false, msg: "第${j + 1}次:$stageResult");
             CommandUtil.getInstance().stopAllExec();
+            stage.timerController.stop();
             break;
           }
         }
