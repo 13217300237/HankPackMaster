@@ -121,15 +121,15 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             jdk: jdk,
           );
 
-          String errMsg = widget.projectRecordEntity.setting!.ready();
+          String errMsg = widget.projectRecordEntity.setting!.readyToPackage();
           if (errMsg.isNotEmpty) {
             setState(() => _errMsg = errMsg);
             return;
           }
 
           var success = widget.workShopVm.enqueue(widget.projectRecordEntity);
-          Navigator.pop(context);
           if (success) {
+            Navigator.pop(context);
             widget.goToWorkShop?.call();
           } else {
             ToastUtil.showPrettyToast('打包任务入列失败,发现重复任务');

@@ -261,7 +261,7 @@ class WorkShopVm extends ChangeNotifier {
 
         updateGradleProperties(gradlePropertiesFile, "org.gradle.java.home",
             escapeBackslashes(fx.parent.parent.path));
-        return OrderExecuteResult(data: "Java环境指定成功", succeed: true);
+        return OrderExecuteResult(data: "Java环境指定成功 ${fx.parent.parent.path}", succeed: true);
       });
 
   get recoverGradlePropertiesFile =>
@@ -500,6 +500,7 @@ class WorkShopVm extends ChangeNotifier {
     taskStateList.add(gitCloneTask);
     taskStateList.add(branchCheckoutTask);
     taskStateList.add(projectStructCheckTask);
+    taskStateList.add(modifyGradlePropertiesFile);
     taskStateList.add(assembleOrdersTask);
   }
 
@@ -510,18 +511,12 @@ class WorkShopVm extends ChangeNotifier {
   void initPackageTaskList() {
     taskStateList.clear();
 
+    taskStateList.add(recoverGradlePropertiesFile);
     taskStateList.add(gitPullTask);
-
-    // 这里必须增加一个步骤，
     taskStateList.add(modifyGradlePropertiesFile);
-
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);
-
     taskStateList.add(recoverGradlePropertiesFile);
-
-    // 如果是已有的apk文件进行上传的话，那就直接执行以下步骤就行了
-
     if (selectedUploadPlatform?.index == 0) {
       taskStateList.add(pgyTokenFetchTask);
       taskStateList.add(uploadToPgyTask);
@@ -749,7 +744,7 @@ class WorkShopVm extends ChangeNotifier {
           // 如果执行成功，则标记此阶段已完成
           if (stageResult.succeed == true) {
             TaskStage.onStateFinishedFunc
-                ?.call(i, "cost ${stageTimeWatch.elapsed.inMilliseconds} ms");
+                ?.call(i, "执行耗时: ${stageTimeWatch.elapsed.inMilliseconds} ms");
             taskOk = true;
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();

@@ -1,12 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/ui/project_manager/dialog/pre_check_dialog.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/start_package_dialog.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-import '../../comm/toast_util.dart';
 import '../../comm/url_check_util.dart';
 import '../comm/theme.dart';
 import 'column_name_const.dart';
@@ -41,31 +41,22 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       buildContext: context,
       funConfirmToActive: (e) {
         DialogUtil.showCustomDialog(
+            dialogBgColor: const Color(0xfff9f4ee),
             context: context,
-            title: "项目激活提醒",
-            content: Text(
-              "要激活项目  ${e.projectName} 么？ \n ",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            title: "项目 ${e.projectName} 激活配置",
+            content: PreCheckDialogWidget(
+              projectRecordEntity: e,
+              workShopVm: _workShopVm,
+              enableAssembleOrders: e.assembleOrders ?? [],
+              goToWorkShop: confirmGoToWorkShop,
             ),
-            confirmText: "确定激活",
-            onConfirm: () {
-
-              // 项目激活也需要选择jdk版本，因为毕竟执行的是 gradle函数
-
-              var enqueueSuccess = _workShopVm.enqueue(e);
-              if (enqueueSuccess) {
-                confirmGoToWorkShop();
-              } else {
-                ToastUtil.showPrettyToast('项目激活 入列失败,发现重复任务');
-              }
-            });
+            showActions: false);
       },
       funcGoPackageAction: (e) {
-
         e.apkPath = null;
 
         DialogUtil.showCustomDialog(
-          dialogBgColor: const Color(0xfff9f4ee),
+            dialogBgColor: const Color(0xfff9f4ee),
             context: context,
             title: "项目 ${e.projectName} 打包配置",
             content: StartPackageDialogWidget(

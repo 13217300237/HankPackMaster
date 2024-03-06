@@ -86,12 +86,22 @@ class PackageSetting {
     this.jdk,
   });
 
-  String ready() {
+  String readyToPackage() {
+    if (jdk == null) {
+      return "jdk必必须指定";
+    }
     if (selectedOrder == null || selectedOrder!.isEmpty) {
       return "打包命令必须选择";
     }
     if (selectedUploadPlatform == null) {
       return "上传方式必须选择";
+    }
+    return '';
+  }
+
+  String readyToActive() {
+    if (jdk == null) {
+      return "jdk必必须指定";
     }
     return '';
   }
