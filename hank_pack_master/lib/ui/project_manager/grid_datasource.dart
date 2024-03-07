@@ -299,11 +299,11 @@ class ProjectEntityDataSource extends DataGridSource {
                   ]);
               break;
             case CellType.assembleOrders:
-              cellWidget = SingleChildScrollView(
-                child: Wrap(
-                  children: [..._assembleOrdersWidget(cellValue.value)],
-                ),
-              ).hideScrollbar(buildContext);
+              cellWidget = ListView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                children: [..._assembleOrdersWidget(cellValue.value)],
+              );
               break;
             case CellType.recordAction:
               cellWidget = Wrap(
@@ -437,14 +437,37 @@ class ProjectEntityDataSource extends DataGridSource {
     if (null == orders) {
       return [const SizedBox()];
     }
+
+    Widget card(e) {
+      return Card(
+          margin: const EdgeInsets.all(2),
+          child: Text(e.replaceAll("assemble", ''),
+              style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 13)));
+    }
+
     return orders
-        .map((e) => Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 2.0, vertical: 4.0),
-              child: Button(
-                  onPressed: () {},
-                  child: Text(e.replaceAll("assemble", ''),
-                      style: const TextStyle(fontWeight: FontWeight.w600))),
+        .map((e) => GestureDetector(
+              onTap: () {
+                DialogUtil.showCustomDialog(
+                    showCancel: false,
+                    confirmText: "我知道了!",
+                    context: buildContext,
+                    title: "可用变体",
+                    content: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 20),
+                        child: Wrap(
+                          children: [
+                            ...orders.map(
+                              (e) => card(e),
+                            )
+                          ],
+                        ),
+                      ),
+                    ));
+              },
+              child: card(e),
             ))
         .toList();
   }
