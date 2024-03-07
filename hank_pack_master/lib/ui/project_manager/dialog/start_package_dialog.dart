@@ -5,6 +5,7 @@ import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
+import '../../../comm/text_util.dart';
 import '../../../comm/ui/form_input.dart';
 import '../../../comm/url_check_util.dart';
 import '../../../hive/env_group/env_check_result_entity.dart';
@@ -146,12 +147,11 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
           input("更新日志", "输入更新日志...", _updateLogController,
               maxLines: 5, must: true),
           choose('打包命令', enableAssembleMap, setSelectedOrder: (order) {
+            // 命令内容形如：assembleGoogleUat
+            // 那就提取出 assemble后面的第一个单词，并将它转化为小写
+            var apkChildFolder = extractFirstWordAfterAssemble(order);
             // 同时设置默认的apk路径
-            if (order == 'assembleDebug') {
-              _apkLocationController.text = 'app\\build\\outputs\\apk\\debug';
-            } else if (order == 'assembleRelease') {
-              _apkLocationController.text = 'app\\build\\outputs\\apk\\release';
-            }
+            _apkLocationController.text = 'app\\build\\outputs\\apk\\$apkChildFolder';
             _selectedOrder = order;
             setState(() {});
           }, selected: _selectedOrder),
