@@ -301,6 +301,12 @@ class WorkShopVm extends ChangeNotifier {
         // 检查此目录下的apk文件，并且校验它的最后修改时间是不是在10分钟以内
         var list = await findApkFiles(_apkLocation);
 
+        if (list.isEmpty) {
+          return OrderExecuteResult(
+              succeed: false,
+              msg: "查找打包产物 失败: $_apkLocation，没找到任何apk文件");
+        }
+
         if (list.length > 1) {
           return OrderExecuteResult(
               succeed: false,
@@ -310,12 +316,12 @@ class WorkShopVm extends ChangeNotifier {
         apkToUpload = list[0];
 
         if (await File(apkToUpload!).exists()) {
+          return OrderExecuteResult(
+              succeed: true, data: "打包产物的位置在: $apkToUpload");
         } else {
           return OrderExecuteResult(
               succeed: false, msg: "查找打包产物 失败: $apkToUpload，文件不存在");
         }
-        return OrderExecuteResult(
-            succeed: true, data: "打包产物的位置在: $apkToUpload");
       });
 
   get pgyTokenFetchTask => TaskStage("获取pgyToken", actionFunc: () async {
