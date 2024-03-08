@@ -44,3 +44,22 @@ String extractFirstWordAfterAssemble(String input) {
   // 如果没有匹配到合适的单词，返回空字符串或者其他你认为合适的默认值
   return '';
 }
+
+/// 将秒数，转化为 时分秒
+String formatSeconds(int seconds) {
+  int hours = seconds ~/ 3600;
+  int minutes = (seconds % 3600) ~/ 60;
+  int remainingSeconds = seconds % 60;
+
+  String hoursStr = hours > 0 ? '$hours小时' : '';
+  String minutesStr = (hours > 0 || minutes > 0) ? '$minutes分' : '';
+  String secondsStr = '$remainingSeconds秒';
+
+  if (hoursStr.isNotEmpty) {
+    return '$hoursStr$minutesStr$secondsStr';
+  } else if (minutesStr.isNotEmpty) {
+    return '$minutesStr$secondsStr';
+  } else {
+    return secondsStr;
+  }
+}

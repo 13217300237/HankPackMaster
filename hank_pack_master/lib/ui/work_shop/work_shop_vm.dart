@@ -750,7 +750,7 @@ class WorkShopVm extends ChangeNotifier {
           // 如果执行成功，则标记此阶段已完成
           if (stageResult.succeed == true) {
             TaskStage.onStateFinishedFunc
-                ?.call(i, "执行耗时: ${stageTimeWatch.elapsed.inMilliseconds} ms");
+                ?.call(i, "执行耗时: ${formatSeconds(stageTimeWatch.elapsed.inMilliseconds~/1000)}");
             taskOk = true;
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();

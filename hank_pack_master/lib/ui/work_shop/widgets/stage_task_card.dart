@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../comm/dialog_util.dart';
 import '../../../comm/order_execute_result.dart';
 import '../../../comm/pgy/pgy_entity.dart';
+import '../../../comm/text_util.dart';
 import '../app_info_card.dart';
 import '../task_stage.dart';
 
@@ -93,7 +94,7 @@ class _StageTaskCardState extends State<StageTaskCard> {
                   child: Consumer<TimerController>(
                     builder: (context, controller, _) {
                       if(controller.seconds>0) {
-                        return Text("执行耗时:${controller.seconds}秒");
+                        return Text("执行耗时:${formatSeconds(controller.seconds)}");
                       } else {
                         return const SizedBox();
                       }
