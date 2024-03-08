@@ -50,7 +50,8 @@ class _AppState extends State<App> {
 
   var tooltipTheme = const TooltipThemeData(
       waitDuration: Duration(milliseconds: 200),
-      textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w600));
+      textStyle: TextStyle(
+          fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'STKAITI'));
 
   Widget fluentUi(BuildContext context) {
     var appTheme = context.watch<AppTheme>();
