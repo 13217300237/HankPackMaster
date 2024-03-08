@@ -240,6 +240,25 @@ class WorkShopVm extends ChangeNotifier {
         );
       });
 
+  get mergeBranchListTask => TaskStage("合并其他分支", actionFunc: () async {
+        var mergeBranchList = runningTask!.setting!.mergeBranchList;
+        if (mergeBranchList == null || mergeBranchList.isEmpty) {
+          return OrderExecuteResult(data: "没有发现需要合并的其它分支", succeed: true);
+        }
+
+        var executeRes = await CommandUtil.getInstance()
+            .mergeBranch(projectPath, mergeBranchList, addNewLogLine);
+        if (executeRes.exitCode != 0) {
+          return OrderExecuteResult(msg: executeRes.res, succeed: false);
+        }
+
+        return OrderExecuteResult(
+          data: "合并其他分支 成功",
+          succeed: true,
+          executeLog: executeRes.res,
+        );
+      });
+
   get modifyGradlePropertiesFile =>
       TaskStage("修改 gradle.properties文件 以指定Java环境", actionFunc: () async {
         // 找到工程位置下的 gradle.properties 文件
@@ -534,6 +553,9 @@ class WorkShopVm extends ChangeNotifier {
 
     taskStateList.add(recoverGradlePropertiesFile);
     taskStateList.add(gitPullTask);
+
+    taskStateList.add(mergeBranchListTask);
+
     taskStateList.add(modifyGradlePropertiesFile);
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);

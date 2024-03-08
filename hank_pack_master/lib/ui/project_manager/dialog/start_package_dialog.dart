@@ -111,6 +111,10 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         onPressed: () {
           // 收集信息,并返回出去
           String appUpdateStr = _updateLogController.text;
+          List<String> mergeBranchList = _mergeBranchNameController.text
+              .split("\n")
+              .map((e) => e.trim())
+              .toList();
           String apkLocation = _apkLocationController.text;
           String? selectedOrder = _selectedOrder;
           UploadPlatform? selectedUploadPlatform = _selectedUploadPlatform;
@@ -122,6 +126,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             selectedOrder: selectedOrder,
             selectedUploadPlatform: selectedUploadPlatform,
             jdk: jdk,
+            mergeBranchList: mergeBranchList,
           );
 
           String errMsg = widget.projectRecordEntity.setting!.readyToPackage();
@@ -147,8 +152,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           input("更新日志", "输入更新日志...", _updateLogController,
-              maxLines: 5, must: true),
-          input("合并分支", "输入打包前要合入的其他分支名...", _mergeBranchNameController,
+              maxLines: 4, must: true),
+          input("合并分支", "输入打包前要合入的其他分支名...", _mergeBranchNameController, // 这些分支貌似不应该手动填，而是选择 TODO
               maxLines: 3,
               must: false,
               toolTip: "注意：多个分支换行为分隔",

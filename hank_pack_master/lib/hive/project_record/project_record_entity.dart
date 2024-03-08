@@ -76,6 +76,7 @@ class PackageSetting {
   String? apkLocation;
   String? selectedOrder;
   UploadPlatform? selectedUploadPlatform;
+  List<String>? mergeBranchList;
   EnvCheckResultEntity? jdk; // 当前使用的jdk版本
 
   PackageSetting({
@@ -84,6 +85,7 @@ class PackageSetting {
     this.selectedOrder,
     this.selectedUploadPlatform,
     this.jdk,
+    this.mergeBranchList,
   });
 
   String readyToPackage() {

@@ -614,6 +614,36 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
+  /// 合并其他分支
+  Future<ExecuteResult> mergeBranch(
+    String gitProjectDir,
+    List<String> branchList,
+    Function(String s) logOutput,
+  ) async {
+    StringBuffer sb = StringBuffer();
+
+    var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
+    var process = await execute(
+      cmd: '"$binRoot"',
+      params: ["merge", ...branchList],
+      workDir: gitProjectDir,
+      action: (res) {
+        logOutput(res);
+        sb.writeln(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """
+cmd: git merge
+exitCode : $exitCode
+$sb"""
+        .trim();
+
+    return ExecuteResult(res, exitCode!);
+  }
+
   Future<ExecuteResult> gitCheckout(
     String gitProjectDir,
     String branchName,
@@ -650,7 +680,6 @@ $sb"""
     Function(String s) logOutput,
     TempLogCacheEntity? tempLogCacheEntity,
   ) async {
-
     StringBuffer sb = StringBuffer();
     tempLogCacheEntity?.clear();
     var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
