@@ -7,7 +7,14 @@ class OrderExecuteResult {
 
   final dynamic data;
 
-  OrderExecuteResult({this.msg, required this.succeed, this.data});
+  String? executeLog; // 执行日志
+
+  OrderExecuteResult({
+    this.msg,
+    required this.succeed,
+    this.data,
+    this.executeLog,
+  });
 
   @override
   String toString() {

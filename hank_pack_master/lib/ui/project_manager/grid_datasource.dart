@@ -441,6 +441,7 @@ class ProjectEntityDataSource extends DataGridSource {
     Widget card(e) {
       return Card(
           borderColor: Colors.black,
+          borderRadius: BorderRadius.circular(2),
           backgroundColor: Colors.blue.withOpacity(.2),
           margin: const EdgeInsets.all(2),
           child: Text(e.replaceAll("assemble", ''),

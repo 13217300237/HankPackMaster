@@ -2,6 +2,7 @@ extension StringEmpty on String? {
   bool empty() {
     if (this == null) return true;
     if (this!.isEmpty) return true;
+    if (this == "null") return true;
     return false;
   }
 }
@@ -63,3 +64,18 @@ String formatSeconds(int seconds) {
     return secondsStr;
   }
 }
+
+String cloneFailedSolution = '''
+        clone失败：
+        如果是由于文件被占用的原因，在 Windows 平台上，
+      
+方法1：
+打开任务管理器，找到JDK相关进程，杀死，然后重新执行任务。
+
+方法2：        
+
+使用资源监视器（Resource Monitor）
+打开资源监视器。你可以通过按下 Win + R，然后输入 “resmon” 后按回车键来打开命令提示符，输入 “resmon” 并按回车键，或者在任务管理器的 “性能” 标签页中点击 “资源监视器” 按钮来打开资源监视器。
+在资源监视器的 “CPU” 标签页中，找到 “关联的句柄” 部分，并输入文件名或路径以筛选关联的句柄。
+根据结果，你可以看到哪个进程正在使用特定的文件。关闭该进程再次尝试clone即可。
+        ''';

@@ -153,44 +153,36 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(msg: err, succeed: false);
         }
 
-        ExecuteResult gitCloneRes = await CommandUtil.getInstance().gitClone(
+        ExecuteResult executeRes = await CommandUtil.getInstance().gitClone(
             clonePath: envWorkspaceRoot,
             gitUrl: gitUrl,
             logOutput: addNewLogLine);
 
-        String cloneFailedSolution = '''
-        clone失败：
-        如果是由于文件被占用的原因，在 Windows 平台上，
-      
-方法1：
-打开任务管理器，找到JDK相关进程，杀死，然后重新执行任务。
-
-方法2：        
-
-使用资源监视器（Resource Monitor）
-打开资源监视器。你可以通过按下 Win + R，然后输入 “resmon” 后按回车键来打开命令提示符，输入 “resmon” 并按回车键，或者在任务管理器的 “性能” 标签页中点击 “资源监视器” 按钮来打开资源监视器。
-在资源监视器的 “CPU” 标签页中，找到 “关联的句柄” 部分，并输入文件名或路径以筛选关联的句柄。
-根据结果，你可以看到哪个进程正在使用特定的文件。关闭该进程再次尝试clone即可。
-        ''';
-
-        if (gitCloneRes.exitCode != 0) {
+        if (executeRes.exitCode != 0) {
           return OrderExecuteResult(
               msg:
-                  "clone失败，具体问题请看日志... \n${gitCloneRes.res}\n\n $cloneFailedSolution",
+                  "clone失败，具体问题请看日志... \n${executeRes.res}\n\n $cloneFailedSolution",
               succeed: false);
         }
         return OrderExecuteResult(
-            succeed: true, data: 'clone成功,位置在 $projectPath');
+          succeed: true,
+          data: 'clone成功,位置在 $projectPath',
+          executeLog: executeRes.res,
+        );
       });
 
   get branchCheckoutTask => TaskStage("分支切换", actionFunc: () async {
-        ExecuteResult gitCheckoutRes = await CommandUtil.getInstance()
+        ExecuteResult executeRes = await CommandUtil.getInstance()
             .gitCheckout(projectPath, gitBranch, addNewLogLine);
 
-        if (gitCheckoutRes.exitCode != 0) {
-          return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
+        if (executeRes.exitCode != 0) {
+          return OrderExecuteResult(msg: executeRes.res, succeed: false);
         }
-        return OrderExecuteResult(succeed: true, data: '分支 $gitBranch 切换成功');
+        return OrderExecuteResult(
+          succeed: true,
+          data: '分支 $gitBranch 切换成功',
+          executeLog: executeRes.res,
+        );
       });
 
   get projectStructCheckTask => TaskStage("工程结构检测", actionFunc: () async {
@@ -206,12 +198,12 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get assembleOrdersTask => TaskStage("可用指令查询", actionFunc: () async {
-        ExecuteResult gitAssembleTasksRes = await CommandUtil.getInstance()
+        ExecuteResult executeRes = await CommandUtil.getInstance()
             .gradleAssembleTasks(projectPath, addNewLogLine);
-        if (gitAssembleTasksRes.exitCode != 0) {
+        if (executeRes.exitCode != 0) {
           return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
         }
-        var ori = gitAssembleTasksRes.res;
+        var ori = executeRes.res;
         debugPrint("================找到的原始指令是:\n$ori");
         var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
         // 排除所有带test的，无论大小写
@@ -227,17 +219,25 @@ class WorkShopVm extends ChangeNotifier {
         }
 
         debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
-        return OrderExecuteResult(succeed: true, data: _enableAssembleOrders);
+        return OrderExecuteResult(
+          succeed: true,
+          data: _enableAssembleOrders,
+          executeLog: executeRes.res,
+        );
       });
 
   get gitPullTask => TaskStage("工程同步", actionFunc: () async {
-        var gitCheckoutRes =
+        var executeRes =
             await CommandUtil.getInstance().gitPull(projectPath, addNewLogLine);
-        if (gitCheckoutRes.exitCode != 0) {
-          return OrderExecuteResult(msg: gitCheckoutRes.res, succeed: false);
+        if (executeRes.exitCode != 0) {
+          return OrderExecuteResult(msg: executeRes.res, succeed: false);
         }
 
-        return OrderExecuteResult(data: "git pull 成功", succeed: true);
+        return OrderExecuteResult(
+          data: "git pull 成功",
+          succeed: true,
+          executeLog: executeRes.res,
+        );
       });
 
   get modifyGradlePropertiesFile =>
@@ -261,7 +261,8 @@ class WorkShopVm extends ChangeNotifier {
 
         updateGradleProperties(gradlePropertiesFile, "org.gradle.java.home",
             escapeBackslashes(fx.parent.parent.path));
-        return OrderExecuteResult(data: "Java环境指定成功 ${fx.parent.parent.path}", succeed: true);
+        return OrderExecuteResult(
+            data: "Java环境指定成功 ${fx.parent.parent.path}", succeed: true);
       });
 
   get recoverGradlePropertiesFile =>
@@ -269,19 +270,23 @@ class WorkShopVm extends ChangeNotifier {
         String gradlePropertiesFilePath =
             "$projectPath${Platform.pathSeparator}gradle.properties";
 
-        ExecuteResult executeResult = await CommandUtil.getInstance()
+        ExecuteResult executeRes = await CommandUtil.getInstance()
             .gitCheckoutFile(
                 projectPath, gradlePropertiesFilePath, (s) => null, tempLog);
-        if (executeResult.exitCode != 0) {
+        if (executeRes.exitCode != 0) {
           String er = "还原失败，详情请看日志}";
-          return OrderExecuteResult(msg: er, succeed: false);
+          return OrderExecuteResult(
+            msg: er,
+            succeed: false,
+            executeLog: executeRes.res,
+          );
         }
 
         return OrderExecuteResult(data: "gradle.properties还原成功", succeed: true);
       });
 
   get generateApkTask => TaskStage("生成apk", actionFunc: () async {
-        ExecuteResult gradleAssembleRes = await CommandUtil.getInstance()
+        ExecuteResult executeRes = await CommandUtil.getInstance()
             .gradleAssemble(
                 projectRoot: projectPath + Platform.pathSeparator,
                 packageOrder: selectedOrder!,
@@ -290,11 +295,15 @@ class WorkShopVm extends ChangeNotifier {
                 logOutput: addNewLogLine,
                 tempLogCacheEntity: tempLog);
 
-        if (gradleAssembleRes.exitCode != 0) {
+        if (executeRes.exitCode != 0) {
           String er = "打包失败，详情请看日志 \n ${tempLog.get()}";
           return OrderExecuteResult(msg: er, succeed: false);
         }
-        return OrderExecuteResult(succeed: true, data: gradleAssembleRes.res);
+        return OrderExecuteResult(
+          succeed: true,
+          data: "apk生成成功",
+          executeLog: executeRes.res,
+        );
       });
 
   get apkCheckTask => TaskStage("apk检测", actionFunc: () async {
@@ -303,8 +312,7 @@ class WorkShopVm extends ChangeNotifier {
 
         if (list.isEmpty) {
           return OrderExecuteResult(
-              succeed: false,
-              msg: "查找打包产物 失败: $_apkLocation，没找到任何apk文件");
+              succeed: false, msg: "查找打包产物 失败: $_apkLocation，没找到任何apk文件");
         }
 
         if (list.length > 1) {
@@ -326,16 +334,16 @@ class WorkShopVm extends ChangeNotifier {
 
   get pgyTokenFetchTask => TaskStage("获取pgyToken", actionFunc: () async {
         // 先获取当前git的最新提交记录
-        var log =
+        var executeRes =
             await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
 
-        if (log.exitCode != 0) {
+        if (executeRes.exitCode != 0) {
           return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
         }
 
         var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
           buildDescription: projectAppDesc,
-          buildUpdateDescription: "$log \n $updateLog",
+          buildUpdateDescription: "$executeRes \n $updateLog",
         );
 
         if (pgyToken == null) {
@@ -351,7 +359,10 @@ class WorkShopVm extends ChangeNotifier {
         );
 
         return OrderExecuteResult(
-            succeed: true, msg: '获取到的Token是 ${pgyToken.toString()}');
+          succeed: true,
+          msg: '获取到的Token是 ${pgyToken.toString()}',
+          executeLog: executeRes.res,
+        );
       });
 
   get uploadToPgyTask => TaskStage("上传pgy", actionFunc: () async {
@@ -420,10 +431,10 @@ class WorkShopVm extends ChangeNotifier {
 
   get uploadToObsTask => TaskStage("上传到华为obs", actionFunc: () async {
         // 先获取当前git的最新提交记录
-        var log =
+        var executeRes =
             await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
 
-        if (log.exitCode != 0) {
+        if (executeRes.exitCode != 0) {
           return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
         }
         // 上传到OBS的时候，必须重命名,不然无法区分多版本
@@ -446,6 +457,7 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(
             data: "OBS上传成功,下载地址为 $obsDownloadUrl",
             succeed: true,
+            executeLog: executeRes.res,
           );
         }
       });
@@ -459,9 +471,8 @@ class WorkShopVm extends ChangeNotifier {
         File apkFile = File(apkToUpload!);
         if (await apkFile.exists()) {
           String fileSize = "${await apkFile.length()}"; // 文件大小
-          var executeResult =
-              await CommandUtil.getInstance().aapt(apkToUpload!);
-          var data = executeResult.data;
+          var executeRes = await CommandUtil.getInstance().aapt(apkToUpload!);
+          var data = executeRes.data;
           if (data is ApkParserResult) {
             appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
             appInfo.buildName = data.appName;
@@ -485,7 +496,11 @@ class WorkShopVm extends ChangeNotifier {
             debugPrint("应用更新时间: ${appInfo.buildUpdated}");
             debugPrint("应用描述: ${appInfo.buildDescription}");
             debugPrint("更新日志: ${appInfo.buildUpdateDescription}");
-            return OrderExecuteResult(data: appInfo, succeed: true);
+            return OrderExecuteResult(
+              data: appInfo,
+              succeed: true,
+              executeLog: executeRes.res,
+            );
           } else {
             return OrderExecuteResult(data: null, succeed: false);
           }
@@ -732,7 +747,6 @@ class WorkShopVm extends ChangeNotifier {
         var stage = taskStateList[i];
         stage.timerController.start();
 
-
         var taskName = stage.stageName;
         var taskFuture = stage.actionFunc();
         addNewLogLine("第${j + 1}次 执行开始: $taskName");
@@ -749,8 +763,8 @@ class WorkShopVm extends ChangeNotifier {
           stage.timerController.stop();
           // 如果执行成功，则标记此阶段已完成
           if (stageResult.succeed == true) {
-            TaskStage.onStateFinishedFunc
-                ?.call(i, "执行耗时: ${formatSeconds(stageTimeWatch.elapsed.inMilliseconds~/1000)}");
+            TaskStage.onStateFinishedFunc?.call(i,
+                "执行耗时: ${formatSeconds(stageTimeWatch.elapsed.inMilliseconds ~/ 1000)}");
             taskOk = true;
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();
@@ -804,7 +818,7 @@ class WorkShopVm extends ChangeNotifier {
     return OrderExecuteResult(
         succeed: true,
         msg:
-            "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionResStr?.msg}，任务总共花费时间${totalWatch.elapsed.inMilliseconds} ms ",
+            "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionResStr?.msg}，任务总共花费时间${formatSeconds(totalWatch.elapsed.inMilliseconds ~/ 1000)} ms ",
         data: actionResStr?.data);
   }
 

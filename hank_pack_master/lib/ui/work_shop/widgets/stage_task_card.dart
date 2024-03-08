@@ -9,6 +9,7 @@ import '../../../comm/pgy/pgy_entity.dart';
 import '../../../comm/text_util.dart';
 import '../app_info_card.dart';
 import '../task_stage.dart';
+import 'package:flutter/material.dart' as m;
 
 /// 每个阶段任务的卡片
 class StageTaskCard extends StatefulWidget {
@@ -30,8 +31,6 @@ class StageTaskCard extends StatefulWidget {
 }
 
 class _StageTaskCardState extends State<StageTaskCard> {
-
-
   void _showMyAppInfo(MyAppInfo s) {
     var card = AppInfoCard(appInfo: s);
 
@@ -42,13 +41,47 @@ class _StageTaskCardState extends State<StageTaskCard> {
     );
   }
 
-  void _showInfoDialog(
-    String title,
-    String msg,
-  ) {
+  void _showInfoDialog({
+    required String title,
+    required String msg,
+    String? executeLog,
+  }) {
     DialogUtil.showCustomDialog(
         context: context,
-        content: msg,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              msg,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            if (!executeLog.empty()) ...[
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 350,
+                child: m.Card(
+                  elevation: 3,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Text(
+                        "$executeLog",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
         title: title,
         showCancel: false,
         confirmText: '我知道了...');
@@ -65,12 +98,17 @@ class _StageTaskCardState extends State<StageTaskCard> {
             // 按下之后，打开当前阶段的执行结果弹窗
             var result = widget.stage.executeResultData;
             if (result is OrderExecuteResult) {
+              debugPrint("啊啊啊啊啊啊啊啊啊：${result.executeLog}");
               var data = result.data;
               if (data is MyAppInfo) {
+                // 最后阶段上传成功之后
                 _showMyAppInfo(data);
               } else {
-                _showInfoDialog(widget.stage.stageName,
-                    '${widget.stage.executeResultData}');
+                // 其他阶段
+                _showInfoDialog(
+                    title: widget.stage.stageName,
+                    msg: '${widget.stage.executeResultData}',
+                    executeLog: "${result.executeLog}");
               }
             }
           },
@@ -93,8 +131,9 @@ class _StageTaskCardState extends State<StageTaskCard> {
                   value: widget.controller,
                   child: Consumer<TimerController>(
                     builder: (context, controller, _) {
-                      if(controller.seconds>0) {
-                        return Text("执行耗时:${formatSeconds(controller.seconds)}");
+                      if (controller.seconds > 0) {
+                        return Text(
+                            "执行耗时:${formatSeconds(controller.seconds)}");
                       } else {
                         return const SizedBox();
                       }
