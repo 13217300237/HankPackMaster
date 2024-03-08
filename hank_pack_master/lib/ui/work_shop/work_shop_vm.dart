@@ -258,21 +258,20 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get gitBranchRemote => TaskStage("列出所有分支", actionFunc: () async {
+        var executeRes = await CommandUtil.getInstance().gitBranchRemote(
+          projectPath,
+          addNewLogLine,
+        );
+        if (executeRes.exitCode != 0) {
+          return OrderExecuteResult(msg: executeRes.res, succeed: false);
+        }
 
-    var executeRes = await CommandUtil.getInstance().gitBranchRemote(
-      projectPath,
-      addNewLogLine,
-    );
-    if (executeRes.exitCode != 0) {
-      return OrderExecuteResult(msg: executeRes.res, succeed: false);
-    }
-
-    return OrderExecuteResult(
-      data: "查询所有分支 成功",
-      succeed: true,
-      executeLog: executeRes.res,
-    );
-  });
+        return OrderExecuteResult(
+          data: "查询所有分支 成功",
+          succeed: true,
+          executeLog: executeRes.res,
+        );
+      });
 
   get mergeBranchListTask => TaskStage("合并其他分支", actionFunc: () async {
         var mergeBranchList = runningTask!.setting!.mergeBranchList;
@@ -508,7 +507,8 @@ class WorkShopVm extends ChangeNotifier {
         obsDownloadUrl = oBSResponse?.url;
         if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
           return OrderExecuteResult(
-              succeed: false, msg: "OBS上传失败, \n [$apkToUpload]  \n ");
+              succeed: false,
+              msg: "OBS上传失败, \n [$apkToUpload]  \n ${oBSResponse?.errMsg}");
         } else {
           return OrderExecuteResult(
             data: "OBS上传成功,下载地址为 $obsDownloadUrl",

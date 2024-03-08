@@ -15,6 +15,8 @@ class OBSResponse {
   int? size;
   String? ext;
   String? md5;
+
+  String? errMsg;
 }
 
 class OBSClient {
@@ -67,15 +69,18 @@ class OBSClient {
       {required String objectName,
       required File file,
       String xObsAcl = "public-read"}) async {
+    OBSResponse? obsResponse;
     try {
       var contentMD5 = await getFileMd5Base64(file);
       var stream = file.openRead();
-      OBSResponse? obsResponse = await put(
+      obsResponse = await put(
           objectName, stream, contentMD5, await file.length(),
           xObsAcl: xObsAcl);
       return obsResponse;
     } catch (e) {
-      return null;
+      obsResponse = OBSResponse();
+      obsResponse.errMsg = '$e';
+      return obsResponse;
     }
   }
 
@@ -106,7 +111,7 @@ class OBSClient {
       debugPrint("============ 上传中 $count/$total");
     }, onReceiveProgress: (count, total) {
       debugPrint("============ 下载中... $count/$total");
-    });
+    },);
     OBSResponse obsResponse = OBSResponse();
     obsResponse.md5 = contentMD5;
     obsResponse.objectName = objectName;

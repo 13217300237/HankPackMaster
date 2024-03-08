@@ -111,10 +111,12 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         onPressed: () {
           // 收集信息,并返回出去
           String appUpdateStr = _updateLogController.text;
-          List<String> mergeBranchList = _mergeBranchNameController.text
+          List<String> mergeBranchList = _mergeBranchNameController.text.trim()
               .split("\n")
               .map((e) => e.trim())
               .toList();
+          mergeBranchList.removeWhere((e) => e.trim().isEmpty);
+
           String apkLocation = _apkLocationController.text;
           String? selectedOrder = _selectedOrder;
           UploadPlatform? selectedUploadPlatform = _selectedUploadPlatform;
