@@ -257,6 +257,23 @@ class WorkShopVm extends ChangeNotifier {
         );
       });
 
+  get gitBranchRemote => TaskStage("列出所有分支", actionFunc: () async {
+
+    var executeRes = await CommandUtil.getInstance().gitBranchRemote(
+      projectPath,
+      addNewLogLine,
+    );
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(msg: executeRes.res, succeed: false);
+    }
+
+    return OrderExecuteResult(
+      data: "查询所有分支 成功",
+      succeed: true,
+      executeLog: executeRes.res,
+    );
+  });
+
   get mergeBranchListTask => TaskStage("合并其他分支", actionFunc: () async {
         var mergeBranchList = runningTask!.setting!.mergeBranchList;
         if (mergeBranchList == null || mergeBranchList.isEmpty) {
@@ -572,6 +589,7 @@ class WorkShopVm extends ChangeNotifier {
     taskStateList.clear();
 
     taskStateList.add(recoverGradlePropertiesFile);
+    taskStateList.add(gitBranchRemote);
     taskStateList.add(gitPullTask);
     taskStateList.add(gitFetchTask);
     taskStateList.add(mergeBranchListTask);
@@ -579,7 +597,7 @@ class WorkShopVm extends ChangeNotifier {
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);
     taskStateList.add(recoverGradlePropertiesFile);
-    if (selectedUploadPlatform?.index == 0) {
+    if (selectedUploadPlatform?.index == UploadPlatform.pgy.index) {
       taskStateList.add(pgyTokenFetchTask);
       taskStateList.add(uploadToPgyTask);
       taskStateList.add(pgyResultSearchTask);

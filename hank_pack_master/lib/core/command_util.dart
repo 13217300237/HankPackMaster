@@ -702,6 +702,31 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
+  /// 获得所有的远程分支
+  Future<ExecuteResult> gitBranchRemote(
+    String gitProjectDir,
+    Function(String s) logOutput,
+  ) async {
+    StringBuffer sb = StringBuffer();
+
+    var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
+    var process = await execute(
+      cmd: '"$binRoot" branch -r',
+      params: [],
+      workDir: gitProjectDir,
+      action: (res) {
+        logOutput(res);
+        sb.writeln(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """$sb""".trim();
+
+    return ExecuteResult(res, exitCode!);
+  }
+
   /// 将 example.txt 文件还原到最近一次提交的状态
   Future<ExecuteResult> gitCheckoutFile(
     String gitProjectDir,
