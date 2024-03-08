@@ -240,20 +240,40 @@ class WorkShopVm extends ChangeNotifier {
         );
       });
 
+  get gitFetchTask => TaskStage("同步远程仓库", actionFunc: () async {
+        // 首先必须同步远程仓库的最新改动 git fetch
+        var executeRes = await CommandUtil.getInstance().gitFetch(
+          projectPath,
+          addNewLogLine,
+        );
+        if (executeRes.exitCode != 0) {
+          return OrderExecuteResult(msg: executeRes.res, succeed: false);
+        }
+
+        return OrderExecuteResult(
+          data: "同步远程仓库 成功",
+          succeed: true,
+          executeLog: executeRes.res,
+        );
+      });
+
   get mergeBranchListTask => TaskStage("合并其他分支", actionFunc: () async {
         var mergeBranchList = runningTask!.setting!.mergeBranchList;
         if (mergeBranchList == null || mergeBranchList.isEmpty) {
           return OrderExecuteResult(data: "没有发现需要合并的其它分支", succeed: true);
         }
 
-        var executeRes = await CommandUtil.getInstance()
-            .mergeBranch(projectPath, mergeBranchList, addNewLogLine);
+        var executeRes = await CommandUtil.getInstance().mergeBranch(
+          projectPath,
+          mergeBranchList,
+          addNewLogLine,
+        );
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(msg: executeRes.res, succeed: false);
         }
 
         return OrderExecuteResult(
-          data: "合并其他分支 成功",
+          data: "合并其他分支 $mergeBranchList 成功",
           succeed: true,
           executeLog: executeRes.res,
         );
@@ -553,9 +573,8 @@ class WorkShopVm extends ChangeNotifier {
 
     taskStateList.add(recoverGradlePropertiesFile);
     taskStateList.add(gitPullTask);
-
+    taskStateList.add(gitFetchTask);
     taskStateList.add(mergeBranchListTask);
-
     taskStateList.add(modifyGradlePropertiesFile);
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);

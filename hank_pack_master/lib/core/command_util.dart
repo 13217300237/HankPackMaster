@@ -615,6 +615,35 @@ $sb"""
   }
 
   /// 合并其他分支
+  Future<ExecuteResult> gitFetch(
+    String gitProjectDir,
+    Function(String s) logOutput,
+  ) async {
+    StringBuffer sb = StringBuffer();
+
+    var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
+    var process = await execute(
+      cmd: '"$binRoot"',
+      params: ["fetch"],
+      workDir: gitProjectDir,
+      action: (res) {
+        logOutput(res);
+        sb.writeln(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """
+cmd: git fetch
+exitCode : $exitCode
+$sb"""
+        .trim();
+
+    return ExecuteResult(res, exitCode!);
+  }
+
+  /// 合并其他分支
   Future<ExecuteResult> mergeBranch(
     String gitProjectDir,
     List<String> branchList,
@@ -625,7 +654,7 @@ $sb"""
     var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
     var process = await execute(
       cmd: '"$binRoot"',
-      params: ["merge", ...branchList],
+      params: ["merge", ...branchList.map((e) => "origin/$e").toList()],
       workDir: gitProjectDir,
       action: (res) {
         logOutput(res);

@@ -48,7 +48,10 @@ class DialogUtil {
           actions: showActions
               ? [
                   FilledButton(
-                    child: Text(confirmText),
+                    child: Text(
+                      confirmText,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     onPressed: () {
                       if (judgePop == null || judgePop()) {
                         Navigator.pop(context);
