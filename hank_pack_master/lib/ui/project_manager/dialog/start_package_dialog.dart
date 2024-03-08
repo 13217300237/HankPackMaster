@@ -40,6 +40,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
   var errStyle = TextStyle(fontSize: 16, color: Colors.red);
 
   final TextEditingController _updateLogController = TextEditingController();
+  final TextEditingController _mergeBranchNameController =
+      TextEditingController();
 
   final TextEditingController _apkLocationController = TextEditingController();
 
@@ -146,12 +148,18 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         children: [
           input("更新日志", "输入更新日志...", _updateLogController,
               maxLines: 5, must: true),
+          input("合并分支", "输入打包前要合入的其他分支名...", _mergeBranchNameController,
+              maxLines: 3,
+              must: false,
+              toolTip: "注意：多个分支换行为分隔",
+              crossAxisAlignment: CrossAxisAlignment.center),
           choose('打包命令', enableAssembleMap, setSelectedOrder: (order) {
             // 命令内容形如：assembleGoogleUat
             // 那就提取出 assemble后面的第一个单词，并将它转化为小写
             var apkChildFolder = extractFirstWordAfterAssemble(order);
             // 同时设置默认的apk路径
-            _apkLocationController.text = 'app\\build\\outputs\\apk\\$apkChildFolder';
+            _apkLocationController.text =
+                'app\\build\\outputs\\apk\\$apkChildFolder';
             _selectedOrder = order;
             setState(() {});
           }, selected: _selectedOrder),

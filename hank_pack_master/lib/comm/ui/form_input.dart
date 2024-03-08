@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
 import '../upload_platforms.dart';
@@ -14,6 +15,8 @@ Widget input(
   int? maxLength,
   bool must = false,
   bool enable = true,
+  String? toolTip,
+  CrossAxisAlignment? crossAxisAlignment,
 }) {
   Widget mustSpace;
 
@@ -30,12 +33,13 @@ Widget input(
   var textStyle = const TextStyle(
       decoration: TextDecoration.none,
       fontSize: 15,
+      height: 1.5,
       fontWeight: FontWeight.w600);
 
   return Padding(
     padding: const EdgeInsets.only(bottom: 10),
     child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: crossAxisAlignment ?? CrossAxisAlignment.start,
       children: [
         SizedBox(
           width: 100,
@@ -50,7 +54,7 @@ Widget input(
         ),
         Expanded(
           child: TextBox(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),),
               unfocusedColor: Colors.transparent,
               highlightColor: Colors.transparent,
               style: textStyle,
@@ -63,7 +67,9 @@ Widget input(
               enabled: enable,
               controller: controller),
         ),
-        if (suffix != null) ...[suffix]
+        if (suffix != null) ...[suffix],
+        if (!toolTip.empty())
+          toolTipIcon(msg: "$toolTip", iconColor: Colors.blue),
       ],
     ),
   );
