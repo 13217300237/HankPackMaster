@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
 import '../upload_platforms.dart';
+import 'my_tool_tip_icon.dart';
 
 /// 输入框
 Widget input(
@@ -125,7 +126,8 @@ Widget choose(String title, Map<String, String> orderList,
           ],
         ),
       ),
-      comboBox
+      comboBox,
+      toolTipIcon(msg: "注意：如果选择的命令会打出多个apk包，会导致任务失败", iconColor: Colors.blue),
     ]),
   );
 }
