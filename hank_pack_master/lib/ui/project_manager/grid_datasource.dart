@@ -156,7 +156,7 @@ class ProjectEntityDataSource extends DataGridSource {
   @override
   List<DataGridRow> get rows => _rows;
 
-  double iconSize = 26;
+  double iconSize = 30;
 
   /// 每行UI的构建逻辑
   @override
@@ -187,14 +187,10 @@ class ProjectEntityDataSource extends DataGridSource {
               Widget statueWidget;
               String toolTip;
               if (entity.jobRunning == true) {
-                toolTip = "执行中 $runningProcessValue %";
+                toolTip = "执行中";
                 statueWidget = GestureDetector(
                   onTap: funJumpToWorkShop,
-                  child: ProgressRing(
-                    activeColor: Colors.blue,
-                    value: runningProcessValue,
-                    strokeWidth: 4,
-                  ),
+                  child: _progressRing(runningProcessValue),
                 );
               } else if (entity.preCheckOk == true) {
                 toolTip = "已激活";
@@ -371,6 +367,33 @@ class ProjectEntityDataSource extends DataGridSource {
         }).toList());
   }
 
+  Widget _progressRing(double progressValue) {
+    return AnimatedContainer(
+      width: iconSize,
+      height: iconSize,
+      duration: const Duration(milliseconds: 500),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ProgressRing(
+            activeColor: Colors.blue,
+            value: runningProcessValue,
+            strokeWidth: 4,
+          ),
+          Center(
+            child: Text(
+              "${progressValue.round()}%",
+              style: const TextStyle(
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 编辑工程
   void editAndroidProjectRecord(ProjectRecordEntity e) {
     TextEditingController gitUrlTextController = TextEditingController();
@@ -446,7 +469,8 @@ class ProjectEntityDataSource extends DataGridSource {
           backgroundColor: Colors.blue.withOpacity(.2),
           margin: const EdgeInsets.all(2),
           child: Text(e.replaceAll("assemble", ''),
-              style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 14)));
+              style:
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)));
     }
 
     return orders

@@ -68,9 +68,8 @@ class _AppState extends State<App> {
           brightness: Brightness.dark,
           accentColor: appTheme.accentColor,
           visualDensity: VisualDensity.standard,
-          focusTheme: FocusThemeData(
-            glowFactor: is10footScreen(context) ? 2.0 : 0.0,
-          ),
+          focusTheme:
+              FocusThemeData(glowFactor: is10footScreen(context) ? 2.0 : 0.0),
           fontFamily: 'STKAITI'),
       // 白天模式主题
       theme: FluentThemeData(
@@ -78,9 +77,8 @@ class _AppState extends State<App> {
           scrollbarTheme: const ScrollbarThemeData(),
           accentColor: appTheme.accentColor,
           visualDensity: VisualDensity.standard,
-          focusTheme: FocusThemeData(
-            glowFactor: is10footScreen(context) ? 2.0 : 0.0,
-          ),
+          focusTheme:
+              FocusThemeData(glowFactor: is10footScreen(context) ? 2.0 : 0.0),
           fontFamily: 'STKAITI'),
       // 语言环境
       locale: appTheme.locale,
@@ -90,8 +88,7 @@ class _AppState extends State<App> {
           textDirection: appTheme.textDirection,
           child: NavigationPaneTheme(
             data: const NavigationPaneThemeData(
-              backgroundColor: Color(0xFFF6EFE9)
-            ),
+                backgroundColor: Color(0xFFF6EFE9)),
             child: child!,
           ),
         );

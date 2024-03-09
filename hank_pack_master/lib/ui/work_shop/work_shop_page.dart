@@ -133,7 +133,9 @@ class _WorkShopPageState extends State<WorkShopPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
             input("更新日志", "输入更新日志...", _workShopVm.updateLogController,
-                maxLines: 5, enable: false),
+                maxLines: 3, enable: false),
+            input("git日志", "自动从git记录中获取...", _workShopVm.gitLogController,
+                maxLines: 2, enable: false),
             input('打包命令', "必须选择一个打包命令", _workShopVm.selectedOrderController,
                 enable: false),
             const SizedBox(height: 5),

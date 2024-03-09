@@ -17,9 +17,7 @@ final statefulRouter = GoRouter(
   initialLocation: '/',
   routes: <RouteBase>[
     StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return FrameworkPage(navigationShell);
-        },
+        builder: (context, state, navigationShell) => FrameworkPage(navigationShell),
         branches: [
           StatefulShellBranch(navigatorKey: _homeKey, routes: <RouteBase>[
             GoRoute(path: '/', builder: (context, state) => const HomePage()),

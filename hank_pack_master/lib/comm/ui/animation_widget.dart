@@ -54,9 +54,7 @@ class AnimatedShapeWidgetState extends State<AnimatedShapeWidget>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        change();
-      },
+      onTap: change,
       child: AnimatedContainer(
         width: widget.width,
         height: widget.height,

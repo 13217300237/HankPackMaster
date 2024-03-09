@@ -124,6 +124,7 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(gradient: mainPanelGradient),
       child: Column(
         children: [
+          ...testLayout(),
           Expanded(
             child: Markdown(
               styleSheetTheme: MarkdownStyleSheetBaseTheme.cupertino,

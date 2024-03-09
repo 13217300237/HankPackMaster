@@ -34,7 +34,8 @@ class WorkShopVm extends ChangeNotifier {
 
   final projectAppDescController = TextEditingController(); // 应用描述
   final updateLogController = TextEditingController(); // 更新日志
-  final apkLocationController = TextEditingController(); // 更新日志
+  final gitLogController = TextEditingController(); // 更新日志
+  final apkLocationController = TextEditingController(); // apk搜索路径
 
   final versionNameController = TextEditingController(); // 强制指定版本名
   final versionCodeController = TextEditingController(); // 强制指定版本号
@@ -80,12 +81,12 @@ class WorkShopVm extends ChangeNotifier {
 
   String get updateLog => updateLogController.text;
 
+  String get gitLog => gitLogController.text;
+
   String get _apkLocation =>
       "$projectPath${Platform.pathSeparator}${apkLocationController.text}";
 
-  void setApkLocation(String newPath) {
-    apkLocationController.text = newPath;
-  }
+  void setApkLocation(String newPath) => apkLocationController.text = newPath;
 
   String get envWorkspaceRoot =>
       EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey);
@@ -387,18 +388,24 @@ class WorkShopVm extends ChangeNotifier {
         }
       });
 
-  get pgyTokenFetchTask => TaskStage("获取pgyToken", actionFunc: () async {
+  get gitLogTask => TaskStage("获取git记录", actionFunc: () async {
         // 先获取当前git的最新提交记录
         var executeRes =
             await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
 
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
+        } else {
+          gitLogController.text = executeRes.res.replaceAll("\"", '');
+          return OrderExecuteResult(
+              data: "获取git记录成功,\n${executeRes.res}", succeed: true);
         }
+      });
 
+  get pgyTokenFetchTask => TaskStage("获取pgyToken", actionFunc: () async {
         var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
           buildDescription: projectAppDesc,
-          buildUpdateDescription: "$executeRes \n $updateLog",
+          buildUpdateDescription: updateLog,
         );
 
         if (pgyToken == null) {
@@ -416,7 +423,6 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(
           succeed: true,
           msg: '获取到的Token是 ${pgyToken.toString()}',
-          executeLog: executeRes.res,
         );
       });
 
@@ -597,6 +603,7 @@ class WorkShopVm extends ChangeNotifier {
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);
     taskStateList.add(recoverGradlePropertiesFile);
+    taskStateList.add(gitLogTask);
     if (selectedUploadPlatform?.index == UploadPlatform.pgy.index) {
       taskStateList.add(pgyTokenFetchTask);
       taskStateList.add(uploadToPgyTask);
@@ -886,15 +893,16 @@ class WorkShopVm extends ChangeNotifier {
     _cmdExecLog.clear();
     gitUrlController.text = '';
     projectNameController.text = '';
-    gitBranchController.text = "";
-    projectPathController.text = "";
-    projectAppDescController.text = "";
-    updateLogController.text = "";
-    apkLocationController.text = "";
-    selectedOrder = "";
-    selectedOrderController.text = "";
+    gitBranchController.text = '';
+    projectPathController.text = '';
+    gitLogController.text = '';
+    projectAppDescController.text = '';
+    updateLogController.text = '';
+    apkLocationController.text = '';
+    selectedOrder = '';
+    selectedOrderController.text = '';
     selectedUploadPlatform = null;
-    selectedUploadPlatformController.text = "";
+    selectedUploadPlatformController.text = '';
     runningTask = null;
     notifyListeners();
   }
@@ -1019,7 +1027,7 @@ class WorkShopVm extends ChangeNotifier {
         } else if (runningTask!.preCheckOk == true) {
           updateLogController.text = runningTask!.setting!.appUpdateLog ?? '';
           apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
-          selectedOrder = runningTask!.setting!.selectedOrder ?? "";
+          selectedOrder = runningTask!.setting!.selectedOrder ?? '';
           selectedOrderController.text = selectedOrder!;
           selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
           selectedUploadPlatformController.text =
