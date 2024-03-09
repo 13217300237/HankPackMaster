@@ -315,10 +315,16 @@ class WorkShopVm extends ChangeNotifier {
               msg: "$javaHomeValue 文件未找到", succeed: false);
         }
 
-        updateGradleProperties(gradlePropertiesFile, "org.gradle.java.home",
-            escapeBackslashes(fx.parent.parent.path));
-        return OrderExecuteResult(
-            data: "Java环境指定成功 ${fx.parent.parent.path}", succeed: true);
+        String? gradleRes = updateGradleProperties(gradlePropertiesFile,
+            "org.gradle.java.home", escapeBackslashes(fx.parent.parent.path));
+
+        if (gradleRes == null) {
+          return OrderExecuteResult(
+              data: "Java环境指定成功 ${fx.parent.parent.path}", succeed: true);
+        } else {
+          return OrderExecuteResult(
+              msg: gradleRes, succeed: false);
+        }
       });
 
   get recoverGradlePropertiesFile =>

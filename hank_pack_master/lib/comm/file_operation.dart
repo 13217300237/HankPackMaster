@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -26,13 +27,17 @@ Future<List<String>> findApkFiles(String folderPath) async {
   return apkFilePaths;
 }
 
-void updateGradleProperties(File gradleFile, String key, String value) {
+String? updateGradleProperties(File gradleFile, String key, String value) {
   if (!gradleFile.existsSync()) {
-    debugPrint('gradle.properties文件不存在');
-    return;
+    return 'gradle.properties文件不存在';
   }
 
-  List<String> lines = gradleFile.readAsLinesSync();
+  List<String> lines;
+  try {
+    lines = gradleFile.readAsLinesSync(encoding: utf8);
+  } catch (e) {
+    return 'utf8编码无法解析该 gradle.properties 文件';
+  }
   bool keyExists = false;
 
   for (int i = 0; i < lines.length; i++) {
@@ -49,6 +54,5 @@ void updateGradleProperties(File gradleFile, String key, String value) {
   }
 
   gradleFile.writeAsStringSync(lines.join('\n'));
+  return null;
 }
-
-
