@@ -600,10 +600,11 @@ class WorkShopVm extends ChangeNotifier {
     taskStateList.add(gitFetchTask);
     taskStateList.add(mergeBranchListTask);
     taskStateList.add(modifyGradlePropertiesFile);
+    taskStateList.add(gitLogTask);
     taskStateList.add(generateApkTask);
     taskStateList.add(apkCheckTask);
     taskStateList.add(recoverGradlePropertiesFile);
-    taskStateList.add(gitLogTask);
+
     if (selectedUploadPlatform?.index == UploadPlatform.pgy.index) {
       taskStateList.add(pgyTokenFetchTask);
       taskStateList.add(uploadToPgyTask);

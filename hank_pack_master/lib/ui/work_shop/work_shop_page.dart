@@ -103,17 +103,17 @@ class _WorkShopPageState extends State<WorkShopPage> {
         SingleChildScrollView(
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            input("工程名称 ", "输入工程名称", _workShopVm.projectNameController,
+            input("工程名称 ", "工程名称...", _workShopVm.projectNameController,
                 must: true, enable: false),
-            input("git地址 ", "输入git地址", _workShopVm.gitUrlController,
+            input("git地址 ", "git地址...", _workShopVm.gitUrlController,
                 must: true, enable: false),
-            input("工程位置", "输入工程名", _workShopVm.projectPathController,
+            input("工程位置", "工程名...", _workShopVm.projectPathController,
                 suffix: _toolTip(), enable: false),
-            input("分支名称", "输入分支名称", _workShopVm.gitBranchController,
+            input("分支名称", "分支名称...", _workShopVm.gitBranchController,
                 must: true, enable: false),
             input(
               "应用描述",
-              "输入应用描述...",
+              "应用描述...",
               _workShopVm.projectAppDescController,
               maxLines: 5,
               enable: false,
@@ -132,21 +132,21 @@ class _WorkShopPageState extends State<WorkShopPage> {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-            input("更新日志", "输入更新日志...", _workShopVm.updateLogController,
+            input("更新日志", "更新日志...", _workShopVm.updateLogController,
                 maxLines: 3, enable: false),
             input("git日志", "自动从git记录中获取...", _workShopVm.gitLogController,
                 maxLines: 2, enable: false),
-            input('打包命令', "必须选择一个打包命令", _workShopVm.selectedOrderController,
+            input('打包命令', "打包命令...", _workShopVm.selectedOrderController,
                 enable: false),
             const SizedBox(height: 5),
             input(
               "apk路径",
-              "请输入apk预计路径，程序会根据此路径检测apk文件",
+              "apk预计路径，程序会根据此路径检测apk文件...",
               _workShopVm.apkLocationController,
               maxLines: 1,
               enable: false,
             ),
-            input('上传方式', "必须选择一个上传平台",
+            input('上传方式', "上传平台...",
                 _workShopVm.selectedUploadPlatformController,
                 enable: false),
           ])).hideScrollbar(context))
