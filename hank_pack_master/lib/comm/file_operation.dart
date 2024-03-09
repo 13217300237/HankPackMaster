@@ -27,16 +27,26 @@ Future<List<String>> findApkFiles(String folderPath) async {
   return apkFilePaths;
 }
 
-String? updateGradleProperties(File gradleFile, String key, String value) {
+Future<List<String>?> readLinesWithEncoding(
+    File file, Encoding encoding) async {
+  try {
+    final lines = await file.readAsLines(encoding: encoding);
+    return lines;
+  } catch (e) {
+    return null;
+  }
+}
+
+Future<String?> updateGradleProperties(
+    File gradleFile, String key, String value) async {
   if (!gradleFile.existsSync()) {
     return 'gradle.properties文件不存在';
   }
 
-  List<String> lines;
-  try {
-    lines = gradleFile.readAsLinesSync(encoding: utf8);
-  } catch (e) {
-    return 'utf8编码无法解析该 gradle.properties 文件';
+  List<String>? lines = await readLinesWithEncoding(gradleFile, utf8);
+  lines ??= await readLinesWithEncoding(gradleFile, latin1);
+  if (lines == null) {
+    return 'utf8/latin1 编码均无法解析该 gradle.properties 文件';
   }
   bool keyExists = false;
 

@@ -315,7 +315,7 @@ class WorkShopVm extends ChangeNotifier {
               msg: "$javaHomeValue 文件未找到", succeed: false);
         }
 
-        String? gradleRes = updateGradleProperties(gradlePropertiesFile,
+        String? gradleRes = await updateGradleProperties(gradlePropertiesFile,
             "org.gradle.java.home", escapeBackslashes(fx.parent.parent.path));
 
         if (gradleRes == null) {

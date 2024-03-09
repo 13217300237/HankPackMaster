@@ -377,7 +377,6 @@ class ProjectEntityDataSource extends DataGridSource {
         children: [
           ProgressRing(
             activeColor: Colors.blue,
-            value: runningProcessValue,
             strokeWidth: 4,
           ),
           Center(

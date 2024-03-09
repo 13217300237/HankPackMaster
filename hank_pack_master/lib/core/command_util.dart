@@ -10,7 +10,7 @@ import '../comm/str_const.dart';
 import '../hive/env_config/env_config_operator.dart';
 import '../ui/work_shop/temp_log_cache_entity.dart';
 
-bool cmdDebug = false;
+bool cmdDebug = true;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {
@@ -399,8 +399,12 @@ class CommandUtil {
         ori,
       );
     } catch (e) {
-      debugPrint('遇到无法解析的结果 $ori');
-      return "";
+      try{
+        return latin1.decode(ori);
+      }catch(e){
+        debugPrint('遇到无法解析的结果 $ori');
+        return "";
+      }
     }
   }
 
