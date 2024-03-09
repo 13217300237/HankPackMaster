@@ -123,7 +123,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       );
     }
     return buildPaneItem(e);
-  
+
     return e;
   }).toList();
 
@@ -263,6 +263,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         items: originalItems,
         autoSuggestBox: Builder(builder: (context) {
           return AutoSuggestBox(
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             key: searchKey,
             focusNode: searchFocusNode,
             controller: searchController,
@@ -308,6 +309,8 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
               ),
             ),
             placeholder: 'Search',
+            placeholderStyle:
+                const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           );
         }),
         autoSuggestBoxReplacement: const Icon(FluentIcons.search),

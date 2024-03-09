@@ -89,11 +89,8 @@ class _AppState extends State<App> {
         return Directionality(
           textDirection: appTheme.textDirection,
           child: NavigationPaneTheme(
-            data: NavigationPaneThemeData(
-              backgroundColor:
-                  appTheme.windowEffect != flutter_acrylic.WindowEffect.disabled
-                      ? m.Colors.grey
-                      : null,
+            data: const NavigationPaneThemeData(
+              backgroundColor: Color(0xFFF6EFE9)
             ),
             child: child!,
           ),
