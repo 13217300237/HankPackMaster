@@ -6,6 +6,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hank_pack_master/core/command_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 
+import '../../comm/gradients.dart';
 import '../../comm/hwobs/obs_client.dart';
 import '../../comm/ui/animation_widget.dart';
 
@@ -32,7 +33,14 @@ class _HomePageState extends State<HomePage> {
 
 这款PC软件名叫 “**安小助**”，它将作为安卓开发工程师的私人助手，有效管理自己负责的多个项目，以及多个项目的多个分支。
 
----
+
+  
+  
+
+
+
+
+
 
 # 有什么主要功能模块？
 
@@ -48,7 +56,6 @@ class _HomePageState extends State<HomePage> {
 
 您可能还会看到 **阶段任务执行参数设置**, 这是打包工坊中用于单个阶段任务执行的相关参数，通常不需要修改。
 
----
 
 ## 工程管理模块
 
@@ -60,7 +67,6 @@ class _HomePageState extends State<HomePage> {
 
 所有工程将会在此模块的表格中进行呈现和管理。包括：工程激活和 工程 打包的进度。
 
----
 
 ## 打包工坊模块
 
@@ -115,7 +121,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10),
-      color: Colors.white.withOpacity(.2),
+      decoration: BoxDecoration(gradient: mainPanelGradient),
       child: Column(
         children: [
           Expanded(

@@ -34,7 +34,8 @@ Widget input(
       decoration: TextDecoration.none,
       fontSize: 15,
       height: 1.5,
-      fontWeight: FontWeight.w600);
+      fontWeight: FontWeight.w600,
+      fontFamily: 'STKAITI');
 
   return Padding(
     padding: const EdgeInsets.only(bottom: 10),
@@ -47,14 +48,18 @@ Widget input(
             children: [
               Text(title,
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w600)),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'STKAITI')),
               mustSpace
             ],
           ),
         ),
         Expanded(
           child: TextBox(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+              ),
               unfocusedColor: Colors.transparent,
               highlightColor: Colors.transparent,
               style: textStyle,

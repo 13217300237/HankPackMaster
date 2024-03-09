@@ -7,6 +7,7 @@ import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import '../../comm/gradients.dart';
 import '../../comm/url_check_util.dart';
 import '../comm/theme.dart';
 import 'column_name_const.dart';
@@ -264,19 +265,17 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     }
 
     return Container(
-      color: _appTheme.bgColor,
-      child: Card(
-          backgroundColor: Colors.blue.withOpacity(.2),
-          margin: const EdgeInsets.all(15),
-          child: Column(children: [
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                child: CommandBar(
-                    overflowBehavior: CommandBarOverflowBehavior.noWrap,
-                    primaryItems: [...simpleCommandBarItems])),
-            grid,
-            _buildDataPager()
-          ])),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
+      decoration: BoxDecoration(gradient: mainPanelGradient),
+      child: Column(children: [
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: CommandBar(
+                overflowBehavior: CommandBarOverflowBehavior.noWrap,
+                primaryItems: [...simpleCommandBarItems])),
+        grid,
+        _buildDataPager()
+      ]),
     );
   }
 

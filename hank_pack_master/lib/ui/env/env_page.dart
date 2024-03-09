@@ -9,6 +9,7 @@ import 'package:hank_pack_master/comm/url_check_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:provider/provider.dart';
 
+import '../../comm/gradients.dart';
 import '../../comm/ui/info_bar.dart';
 import '../../comm/ui/my_tool_tip_icon.dart';
 import '../../core/command_util.dart';
@@ -31,47 +32,12 @@ class _EnvPageState extends State<EnvPage> {
   late EnvParamVm _envParamModel;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _envParamModel.init();
-    });
-  }
-
-  Widget _envChooseWidget(
-      {required String title,
-      required String Function() init,
-      required Function(String r) action,
-      required String tips}) {
-    return _card(
-        title: title,
-        muEnv: [
-          if (!_envParamModel.isEnvEmpty(title)) ...[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 0),
-              child: Tooltip(
-                message: init(),
-                child: Text(
-                  init(),
-                  maxLines: 1,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 29),
-                ),
-              ),
-            )
-          ],
-        ],
-        action: action,
-        tips: tips);
-  }
-
-  @override
   Widget build(BuildContext context) {
     _envParamModel = context.watch<EnvParamVm>();
     _appTheme = context.watch<AppTheme>();
 
     return Container(
-        color: _appTheme.bgColor,
+        decoration: BoxDecoration(gradient: mainPanelGradient),
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
             child:
@@ -118,6 +84,41 @@ class _EnvPageState extends State<EnvPage> {
           Row(children: [Expanded(child: _pgySetting())]),
           Row(children: [Expanded(child: _hwobsSetting())]),
         ])).hideScrollbar(context));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _envParamModel.init();
+    });
+  }
+
+  Widget _envChooseWidget(
+      {required String title,
+      required String Function() init,
+      required Function(String r) action,
+      required String tips}) {
+    return _card(
+        title: title,
+        muEnv: [
+          if (!_envParamModel.isEnvEmpty(title)) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 0),
+              child: Tooltip(
+                message: init(),
+                child: Text(
+                  init(),
+                  maxLines: 1,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 29),
+                ),
+              ),
+            )
+          ],
+        ],
+        action: action,
+        tips: tips);
   }
 
   /// 这是为了解决 context可变的问题
@@ -479,13 +480,14 @@ class _EnvPageState extends State<EnvPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-            SizedBox(width: 150, child: Row(
-              children: [
-                Text(label, style: _cTextStyle),
-                toolTipIcon(msg: toolTip, iconColor: _appTheme.accentColor),
-              ],
-            )),
-
+            SizedBox(
+                width: 150,
+                child: Row(
+                  children: [
+                    Text(label, style: _cTextStyle),
+                    toolTipIcon(msg: toolTip, iconColor: _appTheme.accentColor),
+                  ],
+                )),
             const Spacer(),
             Expanded(
               child: TextBox(
