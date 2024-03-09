@@ -126,9 +126,11 @@ class _HomePageState extends State<HomePage> {
         children: [
           Expanded(
             child: Markdown(
+              styleSheetTheme: MarkdownStyleSheetBaseTheme.cupertino,
               controller: ScrollController(),
               selectable: false,
               data: text,
+              styleSheet: MarkdownStyleSheet(textScaleFactor: 1.0),
             ),
           )
         ],
