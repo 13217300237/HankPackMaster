@@ -14,6 +14,7 @@ import 'column_name_const.dart';
 import 'dialog/create_project_record_dialog.dart';
 import 'dialog/fast_upload_dialog.dart';
 import 'grid_datasource.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 
 class ProjectManagerPage extends StatefulWidget {
   const ProjectManagerPage({super.key});
@@ -192,15 +193,25 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   Widget _buildDataPager() {
-    return SfDataPager(
-      delegate: _dataSource,
-      availableRowsPerPage: const <int>[10, 15, 20],
-      pageCount: pageCount,
-      onRowsPerPageChanged: (int? rowsPerPage) {
-        setState(() {
-          _rowsPerPage = rowsPerPage!;
-        });
-      },
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: SfDataPagerTheme(
+        data: SfDataPagerThemeData(
+          backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
+          itemColor: Colors.white,
+          itemBorderColor: Colors.orange
+        ),
+        child: SfDataPager(
+          delegate: _dataSource,
+          availableRowsPerPage: const <int>[10, 15, 20],
+          pageCount: pageCount,
+          onRowsPerPageChanged: (int? rowsPerPage) {
+            setState(() {
+              _rowsPerPage = rowsPerPage!;
+            });
+          },
+        ),
+      ),
     );
   }
 
