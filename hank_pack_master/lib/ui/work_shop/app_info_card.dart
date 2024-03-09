@@ -19,30 +19,37 @@ class AppInfoCard extends StatelessWidget {
       onPressed: () => Navigator.pop(context),
     );
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _line('App名称', "${appInfo.buildName}"),
-          _line('App版本', "${appInfo.buildVersion}"),
-          _line('编译版本', "${appInfo.buildVersionNo}"),
-          _line('上传批次', "${appInfo.buildBuildVersion}"),
-          _line('App包名', "${appInfo.buildIdentifier}"),
-          _line('应用描述', "${appInfo.buildDescription}"),
-          _line('更新日志', "${appInfo.buildUpdateDescription}"),
-          _line('更新时间', "${appInfo.buildUpdated}"),
-          qrCode(),
-          msgWidget(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const SizedBox(width: 20),
-              cancelActionBtn,
-            ],
-          )
-        ],
-      ),
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _line('App名称', "${appInfo.buildName}"),
+                _line('App版本', "${appInfo.buildVersion}"),
+                _line('编译版本', "${appInfo.buildVersionNo}"),
+                _line('上传批次', "${appInfo.buildBuildVersion}"),
+                _line('App包名', "${appInfo.buildIdentifier}"),
+                _line('应用描述', "${appInfo.buildDescription}"),
+                _line('更新日志', "${appInfo.buildUpdateDescription}"),
+                _line('更新时间', "${appInfo.buildUpdated}"),
+                qrCode(),
+                msgWidget(),
+              ],
+            ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const SizedBox(width: 20),
+            cancelActionBtn,
+          ],
+        )
+      ],
     );
   }
 
@@ -50,7 +57,7 @@ class AppInfoCard extends StatelessWidget {
     if (appInfo.errMessage != null && appInfo.errMessage!.isNotEmpty) {
       return Text(
         "${appInfo.errMessage}",
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       );
     }
     return const SizedBox();

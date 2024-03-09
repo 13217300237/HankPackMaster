@@ -190,20 +190,20 @@ class EnvParamVm extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isAndroidEnvOk() {
+  String isAndroidEnvOk() {
     if (workSpaceRoot.isEmpty) {
-      return false;
+      return '工作空间未设置';
     }
 
     if (androidSdkRoot.isEmpty) {
-      return false;
+      return '安卓SDK未设置';
     }
 
     if (pgyApiKey.isEmpty) {
-      return false;
+      return 'pgy未设置';
     }
 
-    return true;
+    return '';
   }
 
   TextEditingController stageTaskExecuteMaxPeriodController =

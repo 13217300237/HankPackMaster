@@ -28,9 +28,12 @@ class PackageHistoryCard extends StatelessWidget {
   Widget errWidget() {
     String? errMsg = myAppInfo.errMessage;
     if (errMsg != null && errMsg.isNotEmpty) {
-      return Text(
-        errMsg,
-        style: _style,
+      return Container(
+        constraints: const BoxConstraints(maxHeight: 300),
+        child: Text(
+          errMsg,
+          style: _style,
+        ),
       );
     } else {
       return const SizedBox();

@@ -203,7 +203,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
               child: Text(
                 "工作空间: ${envParamModel.workSpaceRoot}",
                 style:
-                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
               ),
             ),
           ),

@@ -269,7 +269,8 @@ class ProjectEntityDataSource extends DataGridSource {
                                 var his = e.jobHistory ?? [];
 
                                 DialogUtil.showCustomDialog(
-                                    maxHeight: 400,
+                                    maxHeight: 600,
+                                    maxWidth: 600,
                                     context: buildContext,
                                     title: "${e.projectName} 打包历史",
                                     content: SingleChildScrollView(
