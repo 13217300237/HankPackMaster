@@ -1,12 +1,8 @@
-import 'dart:ffi';
-
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
-import 'package:hank_pack_master/comm/toast_util.dart';
-import 'package:hank_pack_master/ui/project_manager/dialog/fast_upload_dialog.dart';
 import 'package:hank_pack_master/ui/project_manager/package_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -32,6 +28,13 @@ enum CellType {
   recordAction, // 项目操作
 }
 
+enum ProjectRecordStatue {
+  unchecked, // 未激活
+  running, // 执行中
+  waiting, // 排队中
+  checked, // 已激活
+}
+
 class CellValue {
   CellType cellType;
   dynamic value;
@@ -51,6 +54,8 @@ class ProjectEntityDataSource extends DataGridSource {
   Function(ProjectRecordEntity)? funConfirmToActive;
   Function(ProjectRecordEntity)? funcGoPackageAction;
   Function()? funJumpToWorkShop;
+
+  ProjectRecordStatue Function(ProjectRecordEntity) funJudgeProjectStatue; // 设定一个函数，判断 工程实体的状态
 
   Function(ProjectRecordEntity, String)? openFastUploadDialogFunc;
 
@@ -107,6 +112,7 @@ class ProjectEntityDataSource extends DataGridSource {
     required this.funJumpToWorkShop,
     required this.buildContext,
     required this.openFastUploadDialogFunc,
+    required this.funJudgeProjectStatue,
   }) {
     _buildRows();
   }
@@ -265,26 +271,39 @@ class ProjectEntityDataSource extends DataGridSource {
               ProjectRecordEntity entity = cellValue.value;
               Widget statueWidget;
               String toolTip;
-              if (entity.jobRunning == true) {
-                toolTip = "执行中";
-                statueWidget = GestureDetector(
-                  onTap: funJumpToWorkShop,
-                  child: _progressRing(runningProcessValue),
-                );
-              } else if (entity.preCheckOk == true) {
-                toolTip = "已激活";
-                statueWidget = Icon(
-                  FluentIcons.skype_circle_check,
-                  color: Colors.green,
-                  size: iconSize,
-                );
-              } else {
-                toolTip = "未激活";
-                statueWidget = Icon(
-                  FluentIcons.unknown,
-                  color: Colors.red.withOpacity(.5),
-                  size: iconSize,
-                );
+              ProjectRecordStatue projectRecordStatue = funJudgeProjectStatue(entity);
+              switch(projectRecordStatue){
+                case ProjectRecordStatue.unchecked:
+                  toolTip = "未激活";
+                  statueWidget = Icon(
+                    FluentIcons.unknown,
+                    color: Colors.red.withOpacity(.5),
+                    size: iconSize,
+                  );
+                  break;
+                case ProjectRecordStatue.running:
+                  toolTip = "执行中";
+                  statueWidget = GestureDetector(
+                    onTap: funJumpToWorkShop,
+                    child: _progressRing(runningProcessValue),
+                  );
+                  break;
+                case ProjectRecordStatue.waiting:
+                  toolTip = "排队中";
+                  statueWidget = Icon(
+                    FluentIcons.waitlist_confirm,
+                    color: Colors.teal,
+                    size: iconSize,
+                  );
+                  break;
+                case ProjectRecordStatue.checked:
+                  toolTip = "已激活";
+                  statueWidget = Icon(
+                    FluentIcons.skype_circle_check,
+                    color: Colors.green,
+                    size: iconSize,
+                  );
+                  break;
               }
               cellWidget = Tooltip(message: toolTip, child: statueWidget);
               break;

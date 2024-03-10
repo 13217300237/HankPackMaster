@@ -62,8 +62,8 @@ class _PreCheckDialogWidgetState extends State<PreCheckDialogWidget> {
           }
 
           var success = widget.workShopVm.enqueue(widget.projectRecordEntity);
+          Navigator.pop(context);
           if (success) {
-            Navigator.pop(context);
             widget.goToWorkShop?.call();
           } else {
             ToastUtil.showPrettyToast('激活任务入列失败,发现重复任务');

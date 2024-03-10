@@ -9,6 +9,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/gradients.dart';
 import '../../comm/url_check_util.dart';
+import '../../hive/project_record/project_record_entity.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
 import 'column_name_const.dart';
@@ -37,6 +38,83 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   double assembleOrdersWidth = 250;
   double jobOperationWidth = minimumWidth;
 
+  late WorkShopVm _workShopVm;
+  late EnvParamVm _envParamVm;
+  late AppTheme _appTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    _envParamVm = context.watch<EnvParamVm>();
+    _workShopVm = context.watch<WorkShopVm>();
+    _appTheme = context.watch<AppTheme>();
+
+    var grid = Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(.6),
+          border: Border.all(color: Colors.teal, width: .1),
+          borderRadius: const BorderRadius.all(Radius.circular(3)),
+        ),
+        margin: const EdgeInsets.all(15),
+        child: SfDataGrid(
+          columnWidthMode: ColumnWidthMode.fill,
+          allowColumnsResizing: true,
+          columnResizeMode: ColumnResizeMode.onResize,
+          onColumnResizeUpdate: (ColumnResizeUpdateDetails args) {
+            setState(() {
+              switch (args.column.columnName) {
+                case ColumnNameConst.gitUrl:
+                  gitUrlColumnWidth = args.width;
+                  break;
+                case ColumnNameConst.projectName:
+                  projectNameColumnWidth = args.width;
+                  break;
+                case ColumnNameConst.branch:
+                  branchColumnWidth = args.width;
+                  break;
+                case ColumnNameConst.statue:
+                  statueColumnWidth = args.width;
+                  break;
+                case ColumnNameConst.assembleOrders:
+                  assembleOrdersWidth = args.width;
+                  break;
+                case ColumnNameConst.jobOperation:
+                  jobOperationWidth = args.width;
+                  break;
+              }
+            });
+            return true;
+          },
+          gridLinesVisibility: GridLinesVisibility.none,
+          headerGridLinesVisibility: GridLinesVisibility.none,
+          rowsPerPage: _rowsPerPage,
+          source: _dataSource,
+          columns: _getGridHeader,
+        ),
+      ),
+    );
+
+    var size = _dataSource.dataList.length;
+    // 矫正size，以计算页数
+    if (size == 0) {
+      size = 1;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
+      decoration: BoxDecoration(gradient: mainPanelGradient),
+      child: Column(children: [
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: CommandBar(
+                overflowBehavior: CommandBarOverflowBehavior.noWrap,
+                primaryItems: [...simpleCommandBarItems])),
+        grid,
+        _buildDataPager()
+      ]),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -52,7 +130,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             workShopVm: _workShopVm,
             enableAssembleOrders: e.assembleOrders ?? [],
             goToWorkShop: null,
-            defaultJavaHome:_envParamVm.javaRoot,
+            defaultJavaHome: _envParamVm.javaRoot,
           ),
           showActions: false,
         );
@@ -69,7 +147,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               workShopVm: _workShopVm,
               enableAssembleOrders: e.assembleOrders ?? [],
               goToWorkShop: null,
-              defaultJavaHome:_envParamVm.javaRoot,
+              defaultJavaHome: _envParamVm.javaRoot,
             ),
             showActions: false);
       },
@@ -83,6 +161,19 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             workShopVm: _workShopVm,
             apkPath: s,
           )),
+      funJudgeProjectStatue: (ProjectRecordEntity entity) {
+        // 判断当前工程的状态
+        if (_workShopVm.runningTask != null &&
+            _workShopVm.runningTask! == entity) {
+          return ProjectRecordStatue.running;
+        } else if (_workShopVm.getQueueList().contains(entity)) {
+          return ProjectRecordStatue.waiting;
+        } else if (entity.preCheckOk == true) {
+          return ProjectRecordStatue.checked;
+        } else {
+          return ProjectRecordStatue.unchecked;
+        }
+      },
     );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -139,9 +230,48 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             child: commandCard(w),
           ),
           wrappedItem: CommandBarButton(
-            icon: const Icon(FluentIcons.go),
-            label: const Text('进入工坊',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            icon: Icon(
+              FluentIcons.a_t_p_logo,
+              color: _getWorkshopColor(),
+            ),
+            label: Row(
+              children: [
+                const Text('工坊', style: TextStyle(fontWeight: FontWeight.w600)),
+                if (_workShopVm.runningTask != null) ...[
+                  const SizedBox(width: 20),
+                  Icon(
+                    FluentIcons.bus_solid,
+                    color: _getWorkshopColor(),
+                  ),
+                  const Text(
+                    " 繁忙中",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  )
+                ] else ...[
+                  const SizedBox(width: 20),
+                  Icon(
+                    FluentIcons.information_barriers,
+                    color: _getWorkshopColor(),
+                  ),
+                  const Text(
+                    " 闲置中",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  )
+                ],
+                if (_workShopVm.queryListNotEmpty) ...[
+                  const SizedBox(width: 10),
+                  Icon(
+                    FluentIcons.waitlist_confirm,
+                    color: _getWorkshopColor(),
+                  ),
+                  Text(
+                    " 等待队列: ${_workShopVm.getQueueList().length}",
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  )
+                ],
+                const SizedBox(width: 10),
+              ],
+            ),
             onPressed: () => context.go('/work_shop'),
           ),
         ),
@@ -239,83 +369,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     );
   }
 
-  late WorkShopVm _workShopVm;
-  late EnvParamVm _envParamVm;
-  late AppTheme _appTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    _envParamVm = context.watch<EnvParamVm>();
-    _workShopVm = context.watch<WorkShopVm>();
-    _appTheme = context.watch<AppTheme>();
-
-    var grid = Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(.6),
-          border: Border.all(color: Colors.teal, width: .1),
-          borderRadius: const BorderRadius.all(Radius.circular(3)),
-        ),
-        margin: const EdgeInsets.all(15),
-        child: SfDataGrid(
-          columnWidthMode: ColumnWidthMode.fill,
-          allowColumnsResizing: true,
-          columnResizeMode: ColumnResizeMode.onResize,
-          onColumnResizeUpdate: (ColumnResizeUpdateDetails args) {
-            setState(() {
-              switch (args.column.columnName) {
-                case ColumnNameConst.gitUrl:
-                  gitUrlColumnWidth = args.width;
-                  break;
-                case ColumnNameConst.projectName:
-                  projectNameColumnWidth = args.width;
-                  break;
-                case ColumnNameConst.branch:
-                  branchColumnWidth = args.width;
-                  break;
-                case ColumnNameConst.statue:
-                  statueColumnWidth = args.width;
-                  break;
-                case ColumnNameConst.assembleOrders:
-                  assembleOrdersWidth = args.width;
-                  break;
-                case ColumnNameConst.jobOperation:
-                  jobOperationWidth = args.width;
-                  break;
-              }
-            });
-            return true;
-          },
-          gridLinesVisibility: GridLinesVisibility.none,
-          headerGridLinesVisibility: GridLinesVisibility.none,
-          rowsPerPage: _rowsPerPage,
-          source: _dataSource,
-          columns: _getGridHeader,
-        ),
-      ),
-    );
-
-    var size = _dataSource.dataList.length;
-    // 矫正size，以计算页数
-    if (size == 0) {
-      size = 1;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
-      decoration: BoxDecoration(gradient: mainPanelGradient),
-      child: Column(children: [
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0),
-            child: CommandBar(
-                overflowBehavior: CommandBarOverflowBehavior.noWrap,
-                primaryItems: [...simpleCommandBarItems])),
-        grid,
-        _buildDataPager()
-      ]),
-    );
-  }
-
   List<GridColumn> get _getGridHeader {
     var bg = Colors.green.withOpacity(.3);
     var zeroBorder = const BorderRadius.only(topRight: Radius.circular(0));
@@ -395,5 +448,13 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       content: '正在执行任务，是否进入工坊查看',
       onConfirm: () => context.go('/work_shop'),
     );
+  }
+
+  Color _getWorkshopColor() {
+    if (_workShopVm.runningTask != null) {
+      return Colors.red;
+    } else {
+      return Colors.black;
+    }
   }
 }

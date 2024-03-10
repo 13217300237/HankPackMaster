@@ -22,23 +22,26 @@ class AppInfoCard extends StatelessWidget {
     return Column(
       children: [
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _line('App名称', "${appInfo.buildName}"),
-                _line('App版本', "${appInfo.buildVersion}"),
-                _line('编译版本', "${appInfo.buildVersionNo}"),
-                _line('上传批次', "${appInfo.buildBuildVersion}"),
-                _line('App包名', "${appInfo.buildIdentifier}"),
-                _line('应用描述', "${appInfo.buildDescription}"),
-                _line('更新日志', "${appInfo.buildUpdateDescription}"),
-                _line('更新时间', "${appInfo.buildUpdated}"),
-                qrCode(),
-                msgWidget(),
-              ],
+          child: Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _line('App名称', "${appInfo.buildName}"),
+                  _line('App版本', "${appInfo.buildVersion}"),
+                  _line('编译版本', "${appInfo.buildVersionNo}"),
+                  _line('上传批次', "${appInfo.buildBuildVersion}"),
+                  _line('App包名', "${appInfo.buildIdentifier}"),
+                  _line('应用描述', "${appInfo.buildDescription}"),
+                  _line('更新日志', "${appInfo.buildUpdateDescription}"),
+                  _line('更新时间', "${appInfo.buildUpdated}"),
+                  qrCode(),
+                  msgWidget(),
+                ],
+              ),
             ),
           ),
         ),

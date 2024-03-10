@@ -928,6 +928,8 @@ class WorkShopVm extends ChangeNotifier {
 
   List<ProjectRecordEntity> getQueueList() => _taskQueue.toList();
 
+  bool get queryListNotEmpty => _taskQueue.isNotEmpty;
+
   String taskQueueString() => _taskQueue.map((e) => "$e\n").toList().toString();
 
   bool enqueue(ProjectRecordEntity e) {
@@ -946,6 +948,8 @@ class WorkShopVm extends ChangeNotifier {
 
     _taskQueue.add(e);
     _loop();
+
+    notifyListeners();
 
     return true;
   }
