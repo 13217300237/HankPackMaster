@@ -184,7 +184,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     maxWidth: 600,
                     context: buildContext,
                     title: "${e.projectName} 打包历史",
-                    content: SingleChildScrollView(
+                    content: SingleChildScrollView( // TODO 这里需要优化，使用listView的builder函数来写这段代码可以优化性能
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
