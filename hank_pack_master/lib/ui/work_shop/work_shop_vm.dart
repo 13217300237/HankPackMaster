@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/apk_parser_result.dart';
 import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/ui/work_shop/task_stage.dart';
 import 'package:hank_pack_master/ui/work_shop/temp_log_cache_entity.dart';
 import 'package:jiffy/jiffy.dart';
@@ -986,10 +987,14 @@ class WorkShopVm extends ChangeNotifier {
         runningTask!.jobHistory = [];
       }
       runningTask!.jobHistory!.add("${orderExecuteResult.msg}");
+      ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看激活历史",
+          success: false);
       setProjectRecordJobRunning(false);
       _reset();
       return;
     }
+
+    ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行成功, 详情查看激活历史");
 
     onProjectActiveFinished(orderExecuteResult.data);
     _reset();
@@ -1068,8 +1073,12 @@ class WorkShopVm extends ChangeNotifier {
     }
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
+      ToastUtil.showPrettyToast(
+          "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
     } else {
       myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
+      ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
+          success: false);
     }
 
     onProjectPackageFinished(myAppInfo!);
@@ -1086,7 +1095,12 @@ class WorkShopVm extends ChangeNotifier {
     }
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
+
+      ToastUtil.showPrettyToast(
+          "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
     } else {
+      ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
+          success: false);
       myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
     }
 

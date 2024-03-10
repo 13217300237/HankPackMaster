@@ -163,7 +163,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         children: [
           input("更新日志", "输入更新日志...", _updateLogController,
               maxLines: 4,
-              must: true,
+              must: false,
               crossAxisAlignment: CrossAxisAlignment.center),
           input("合并分支", "输入打包前要合入的其他分支名...", _mergeBranchNameController,
               // 这些分支貌似不应该手动填，而是选择 TODO
