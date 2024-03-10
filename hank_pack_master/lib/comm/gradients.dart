@@ -6,12 +6,12 @@ import 'package:fluent_ui/fluent_ui.dart';
 var mainPanelGradient = const LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
-  colors: [Color(0xffe4efd3), Color(0xffcde1ae)], // 渐变色数组
+  colors: [Color(0xffE7F9F6), Color(0xffFAE9F9)], // 渐变色数组
 );
 
 
 var cardGradient = const LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
-  colors: [Color(0xff81D5A2), Color(0xffC1E7CD)], // 渐变色数组
+  colors: [Color(0xffE5EFFC), Color(0xffADCCEF)], // 渐变色数组
 );

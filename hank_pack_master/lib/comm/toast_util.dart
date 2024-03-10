@@ -27,14 +27,14 @@ class CustomToast extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.message,
+            success ? Icons.message : Icons.warning,
             color: success ? Colors.green : Colors.red,
           ),
           const SizedBox(width: 10.0),
           Text(
             message,
-            style: TextStyle(
-              color: success ? Colors.black : Colors.red,
+            style: const TextStyle(
+              color: Colors.black,
               fontWeight: FontWeight.w600,
             ),
             overflow: TextOverflow.ellipsis,
@@ -46,7 +46,7 @@ class CustomToast extends StatelessWidget {
 }
 
 class ToastUtil {
-  static void showPrettyToast(String msg, {bool success = true}) {
+  static void showPrettyToast(String msg, {bool success = false}) {
     showToastWidget(CustomToast(
       message: msg,
       success: success,
