@@ -10,6 +10,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../comm/gradients.dart';
 import '../../comm/url_check_util.dart';
 import '../comm/theme.dart';
+import '../comm/vm/env_param_vm.dart';
 import 'column_name_const.dart';
 import 'dialog/create_project_record_dialog.dart';
 import 'dialog/fast_upload_dialog.dart';
@@ -43,16 +44,18 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       buildContext: context,
       funConfirmToActive: (e) {
         DialogUtil.showCustomDialog(
-            dialogBgColor: const Color(0xfff9f4ee),
-            context: context,
-            title: "项目 ${e.projectName} 激活配置",
-            content: PreCheckDialogWidget(
-              projectRecordEntity: e,
-              workShopVm: _workShopVm,
-              enableAssembleOrders: e.assembleOrders ?? [],
-              goToWorkShop: confirmGoToWorkShop,
-            ),
-            showActions: false);
+          dialogBgColor: const Color(0xfff9f4ee),
+          context: context,
+          title: "项目 ${e.projectName} 激活配置",
+          content: PreCheckDialogWidget(
+            projectRecordEntity: e,
+            workShopVm: _workShopVm,
+            enableAssembleOrders: e.assembleOrders ?? [],
+            goToWorkShop: null,
+            defaultJavaHome:_envParamVm.javaRoot,
+          ),
+          showActions: false,
+        );
       },
       funcGoPackageAction: (e) {
         e.apkPath = null;
@@ -65,7 +68,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               projectRecordEntity: e,
               workShopVm: _workShopVm,
               enableAssembleOrders: e.assembleOrders ?? [],
-              goToWorkShop: confirmGoToWorkShop,
+              goToWorkShop: null,
+              defaultJavaHome:_envParamVm.javaRoot,
             ),
             showActions: false);
       },
@@ -96,7 +100,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         CommandBarBuilderItem(
           builder: (context, mode, w) => Tooltip(
             message: "新建一个安卓工程",
-            child: w,
+            child: commandCard(w),
           ),
           wrappedItem: CommandBarButton(
             icon: const Icon(FluentIcons.add),
@@ -108,7 +112,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         CommandBarBuilderItem(
           builder: (context, mode, w) => Tooltip(
             message: "清空所有工程",
-            child: w,
+            child: commandCard(w),
           ),
           wrappedItem: CommandBarButton(
             icon: const Icon(FluentIcons.clear),
@@ -120,7 +124,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         CommandBarBuilderItem(
           builder: (context, mode, w) => Tooltip(
             message: "刷新表格数据",
-            child: w,
+            child: commandCard(w),
           ),
           wrappedItem: CommandBarButton(
             icon: const Icon(FluentIcons.refresh),
@@ -129,7 +133,28 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             onPressed: _dataSource.init,
           ),
         ),
+        CommandBarBuilderItem(
+          builder: (context, mode, w) => Tooltip(
+            message: "进入工坊查看详情",
+            child: commandCard(w),
+          ),
+          wrappedItem: CommandBarButton(
+            icon: const Icon(FluentIcons.go),
+            label: const Text('进入工坊',
+                style: TextStyle(fontWeight: FontWeight.w600)),
+            onPressed: () => context.go('/work_shop'),
+          ),
+        ),
       ];
+
+  Widget commandCard(Widget w) {
+    return Container(
+      margin: const EdgeInsets.only(right: 5),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5), gradient: cardGradient),
+      child: w,
+    );
+  }
 
   void clearAllProjectRecord() {
     DialogUtil.showCustomDialog(
@@ -197,10 +222,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: SfDataPagerTheme(
         data: SfDataPagerThemeData(
-          backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
-          itemColor: Colors.white,
-          itemBorderColor: Colors.orange
-        ),
+            backgroundColor: _appTheme.bgColorSucc.withOpacity(.1),
+            itemColor: Colors.white,
+            itemBorderColor: Colors.orange),
         child: SfDataPager(
           delegate: _dataSource,
           availableRowsPerPage: const <int>[10, 15, 20],
@@ -216,10 +240,12 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   late WorkShopVm _workShopVm;
+  late EnvParamVm _envParamVm;
   late AppTheme _appTheme;
 
   @override
   Widget build(BuildContext context) {
+    _envParamVm = context.watch<EnvParamVm>();
     _workShopVm = context.watch<WorkShopVm>();
     _appTheme = context.watch<AppTheme>();
 
@@ -364,9 +390,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
 
   void confirmGoToWorkShop() {
     DialogUtil.showCustomDialog(
-        context: context,
-        title: '提示',
-        content: '正在执行任务，是否进入工坊查看',
-        onConfirm: () => context.go('/work_shop'));
+      context: context,
+      title: '提示',
+      content: '正在执行任务，是否进入工坊查看',
+      onConfirm: () => context.go('/work_shop'),
+    );
   }
 }

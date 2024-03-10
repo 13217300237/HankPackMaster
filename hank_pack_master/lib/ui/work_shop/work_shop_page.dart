@@ -162,7 +162,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
           thumbVisibility: false,
           interactive: true,
           style: const ScrollbarThemeData(
-            thickness: 5,
+            thickness: 3,
             radius: Radius.circular(10),
             hoveringThickness: 10,
             padding: EdgeInsets.all(5),

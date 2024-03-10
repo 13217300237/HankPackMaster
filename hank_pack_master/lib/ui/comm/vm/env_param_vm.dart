@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
 import '../../../comm/hwobs/obs_client.dart';
 import '../../../comm/str_const.dart';
-import '../../../core/command_util.dart';
 import '../../../hive/env_config/env_config_entity.dart';
 import '../../../hive/env_config/env_config_operator.dart';
 import '../../../hive/env_group/env_group_operator.dart';
@@ -111,6 +108,7 @@ class EnvParamVm extends ChangeNotifier {
           workSpaceRoot = value;
         }
     }
+    ToastUtil.showPrettyToast("默认 $title 环境已设置为:$value");
   }
 
   /// 重置所有环境参数

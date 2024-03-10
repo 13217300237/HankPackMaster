@@ -17,12 +17,15 @@ class PreCheckDialogWidget extends StatefulWidget {
 
   final Function? goToWorkShop;
 
+  final String defaultJavaHome;
+
   const PreCheckDialogWidget({
     super.key,
     required this.projectRecordEntity,
     required this.workShopVm,
     required this.enableAssembleOrders,
     this.goToWorkShop,
+    required this.defaultJavaHome,
   });
 
   @override
@@ -32,6 +35,12 @@ class PreCheckDialogWidget extends StatefulWidget {
 class _PreCheckDialogWidgetState extends State<PreCheckDialogWidget> {
   EnvCheckResultEntity? _jdk; // 当前使用的jdk版本
   String _errMsg = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
+  }
 
   @override
   Widget build(BuildContext context) {

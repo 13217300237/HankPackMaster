@@ -24,7 +24,7 @@ class ProjectRecordOperator {
 
     if (index != -1) {
       debugPrint(
-          "执行更新 ${entity.gitUrl}  ${entity.branch} ${entity.preCheckOk}");
+          "执行更新 gitUrl=${entity.gitUrl}\nbranch=${entity.branch}\npreCheckOk=${entity.preCheckOk}\n====================");
       _box!.putAt(index, entity); // 执行更新操作
     } else {
       debugPrint("执行插入");

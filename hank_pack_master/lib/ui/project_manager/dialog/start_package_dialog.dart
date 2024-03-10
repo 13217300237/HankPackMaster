@@ -15,6 +15,7 @@ class StartPackageDialogWidget extends StatefulWidget {
 
   final List<String> enableAssembleOrders;
   final ProjectRecordEntity projectRecordEntity;
+  final String defaultJavaHome;
 
   final Function? goToWorkShop;
 
@@ -23,7 +24,7 @@ class StartPackageDialogWidget extends StatefulWidget {
     required this.projectRecordEntity,
     required this.workShopVm,
     required this.enableAssembleOrders,
-    this.goToWorkShop,
+    this.goToWorkShop, required this.defaultJavaHome,
   });
 
   @override
@@ -49,7 +50,13 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   UploadPlatform? _selectedUploadPlatform;
 
-  EnvCheckResultEntity? jdk; // 当前使用的jdk版本
+  EnvCheckResultEntity? _jdk; // 当前使用的jdk版本
+
+  @override
+  void initState() {
+    super.initState();
+    _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
+  }
 
   Widget chooseRadio(String title) {
     Widget mustSpace = SizedBox(
@@ -128,7 +135,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             apkLocation: apkLocation,
             selectedOrder: selectedOrder,
             selectedUploadPlatform: selectedUploadPlatform,
-            jdk: jdk,
+            jdk: _jdk,
             mergeBranchList: mergeBranchList,
           );
 
@@ -232,7 +239,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
               return Padding(
                 padding: const EdgeInsets.only(right: 18.0, bottom: 10),
                 child: RadioButton(
-                    checked: jdk == jdks[index],
+                    checked: _jdk == jdks[index],
                     content: Text(
                       jdks[index].envName,
                       style: const TextStyle(
@@ -242,8 +249,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                     onChanged: (checked) {
                       if (checked == true) {
                         setState(() {
-                          jdk = jdks[index];
-                          debugPrint("当前使用的jdk是 ${jdk?.envPath}");
+                          _jdk = jdks[index];
+                          debugPrint("当前使用的jdk是 ${_jdk?.envPath}");
                         });
                       }
                     }),

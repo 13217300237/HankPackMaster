@@ -24,4 +24,14 @@ class EnvCheckResultEntity {
     sb.writeln("envCheckResult=${envCheckResult?.trim()};");
     return sb.toString();
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is EnvCheckResultEntity && other.envPath == envPath;
+  }
+
+  @override
+  int get hashCode => envPath.hashCode;
+
 }
