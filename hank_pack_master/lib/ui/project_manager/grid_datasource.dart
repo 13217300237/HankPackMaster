@@ -225,15 +225,21 @@ class ProjectEntityDataSource extends DataGridSource {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ...his.reversed.map((s) {
-                            return m.Card(
-                              color: Colors.white,
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              child: Container(
-                                decoration:
-                                    BoxDecoration(gradient: mainPanelGradient),
-                                padding: const EdgeInsets.all(10.0),
-                                child: SelectableText(s),
-                              ),
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: m.Card(
+                                    color: Colors.white,
+                                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                                    child: Container(
+                                      decoration:
+                                          BoxDecoration(gradient: mainPanelGradient),
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: SelectableText(s),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             );
                           }).toList()
                         ],
@@ -292,7 +298,7 @@ class ProjectEntityDataSource extends DataGridSource {
                   toolTip = "排队中";
                   statueWidget = Icon(
                     FluentIcons.waitlist_confirm,
-                    color: Colors.teal,
+                    color: Colors.yellow.darkest,
                     size: iconSize,
                   );
                   break;

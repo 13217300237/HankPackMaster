@@ -275,6 +275,26 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             onPressed: () => context.go('/work_shop'),
           ),
         ),
+        CommandBarBuilderItem(
+          builder: (context, mode, w) => Tooltip(
+            message: "最近作业历史",
+            child: commandCard(w),
+          ),
+          wrappedItem: CommandBarButton(
+            icon: const Icon(FluentIcons.history),
+            label: const Text('最近作业历史',
+                style: TextStyle(fontWeight: FontWeight.w600)),
+            onPressed: () {
+              DialogUtil.showCustomDialog(
+                context: context,
+                title: "最近作业历史",
+                content: ListView(children: [
+                  ...getRecentJobResult()
+                ],),
+              );
+            },
+          ),
+        ),
       ];
 
   Widget commandCard(Widget w) {
@@ -456,5 +476,11 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     } else {
       return Colors.black;
     }
+  }
+
+  List<Widget> getRecentJobResult() {
+    return [
+      Text("TODO 展示最近所有的激活/打包历史"),
+    ];
   }
 }
