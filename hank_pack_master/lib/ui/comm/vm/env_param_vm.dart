@@ -75,40 +75,59 @@ class EnvParamVm extends ChangeNotifier {
     String value, {
     required bool needToOverride,
   }) {
+    // 判断入参值和当前存储的值是否相同，如果相同，则不执行任何
+
     switch (title) {
       case "git":
         if (needToOverride || gitRoot.isEmpty) {
-          gitRoot = value;
+          if (gitRoot != value) {
+            gitRoot = value;
+            ToastUtil.showPrettyToast("默认 $title 环境已设置为:$value");
+          }
         }
         break;
       case "flutter":
         if (needToOverride || flutterRoot.isEmpty) {
-          flutterRoot = value;
+          if (flutterRoot != value) {
+            flutterRoot = value;
+            ToastUtil.showPrettyToast("默认 $title 环境已设置为:$value");
+          }
         }
         break;
       case "adb":
         if (needToOverride || adbRoot.isEmpty) {
-          adbRoot = value;
+          if (adbRoot != value) {
+            adbRoot = value;
+            ToastUtil.showPrettyToast("默认 $title 环境已设置为:$value");
+          }
         }
 
         break;
       case "android":
         if (needToOverride || androidSdkRoot.isEmpty) {
-          androidSdkRoot = value;
+          if (androidSdkRoot != value) {
+            androidSdkRoot = value;
+            ToastUtil.showPrettyToast("默认 $title 环境已设置为:$value");
+          }
         }
 
         break;
       case "java":
         if (needToOverride || javaRoot.isEmpty) {
-          javaRoot = value;
+          if (javaRoot != value) {
+            javaRoot = value;
+            ToastUtil.showPrettyToast("默认 $title 环境已设置为:$value");
+          }
         }
         break;
       case "workSpaceRoot":
         if (needToOverride || workSpaceRoot.isEmpty) {
-          workSpaceRoot = value;
+          if (workSpaceRoot != value) {
+            workSpaceRoot = value;
+            ToastUtil.showPrettyToast("默认 $title 环境已设置为:$value");
+          }
         }
     }
-    ToastUtil.showPrettyToast("默认 $title 环境已设置为:$value");
   }
 
   /// 重置所有环境参数
@@ -175,7 +194,8 @@ class EnvParamVm extends ChangeNotifier {
   String get javaRoot => EnvConfigOperator.searchEnvValue(Const.envJavaKey);
 
   set javaRoot(String javaPath) {
-    EnvConfigOperator.insertOrUpdate(EnvConfigEntity(Const.envJavaKey, javaPath));
+    EnvConfigOperator.insertOrUpdate(
+        EnvConfigEntity(Const.envJavaKey, javaPath));
     notifyListeners();
   }
 
@@ -342,7 +362,7 @@ class EnvParamVm extends ChangeNotifier {
   List<String> executePeriodList = ["10", "20", "30", "40"]; // 每次最大可执行时间
   List<String> executeTimes = ["2", "3", "4", "5", "6", "7"]; // 每次最大可执行时间
 
-  void clearEnvGroupBox(){
+  void clearEnvGroupBox() {
     EnvGroupOperator.clear();
     notifyListeners();
   }

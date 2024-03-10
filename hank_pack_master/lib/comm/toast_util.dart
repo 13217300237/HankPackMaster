@@ -46,7 +46,7 @@ class CustomToast extends StatelessWidget {
 }
 
 class ToastUtil {
-  static void showPrettyToast(String msg, {bool success = false}) {
+  static void showPrettyToast(String msg, {bool success = true}) {
     showToastWidget(CustomToast(
       message: msg,
       success: success,
