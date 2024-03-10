@@ -1,13 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 
 Future<List<String>> findApkFiles(String folderPath) async {
   List<String> apkFilePaths = [];
 
   // 遍历文件夹中的文件
   Directory folder = Directory(folderPath);
+  if (!(await folder.exists())) {
+    debugPrint("folderPath-> $folderPath 目录不存在");
+    return apkFilePaths;
+  }
+
   List<FileSystemEntity> files = folder.listSync(recursive: false);
 
   for (var file in files) {

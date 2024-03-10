@@ -200,9 +200,11 @@ class WorkShopVm extends ChangeNotifier {
 
   get assembleOrdersTask => TaskStage("可用指令查询", actionFunc: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance()
-            .gradleAssembleTasks(projectPath, addNewLogLine);
+            .gradleAssembleTasks(projectPath, addNewLogLine,
+                tempLogCacheEntity: tempLog);
         if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(msg: "可用指令查询 存在问题!!!", succeed: false);
+          return OrderExecuteResult(
+              msg: "可用指令查询 存在问题!!! ${tempLog.get()}", succeed: false);
         }
         var ori = executeRes.res;
         debugPrint("================找到的原始指令是:\n$ori");
@@ -322,8 +324,7 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(
               data: "Java环境指定成功 ${fx.parent.parent.path}", succeed: true);
         } else {
-          return OrderExecuteResult(
-              msg: gradleRes, succeed: false);
+          return OrderExecuteResult(msg: gradleRes, succeed: false);
         }
       });
 
@@ -370,6 +371,10 @@ class WorkShopVm extends ChangeNotifier {
 
   get apkCheckTask => TaskStage("apk检测", actionFunc: () async {
         // 检查此目录下的apk文件，并且校验它的最后修改时间是不是在10分钟以内
+
+        // apk查找路径
+        debugPrint("_apkLocation-> $_apkLocation");
+
         var list = await findApkFiles(_apkLocation);
 
         if (list.isEmpty) {
@@ -796,7 +801,7 @@ class WorkShopVm extends ChangeNotifier {
 
     addNewLogLine("开始流程...${taskStateList.length}");
 
-    OrderExecuteResult? actionResStr;
+    OrderExecuteResult? actionRes; // 本次任务的执行结果
 
     Stopwatch totalWatch = Stopwatch();
     totalWatch.start();
@@ -842,7 +847,7 @@ class WorkShopVm extends ChangeNotifier {
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();
             stage.executeResultData = stageResult; // 保存当前阶段的执行成功的结果
-            actionResStr = stageResult; // 本次任务的执行结果
+            actionRes = stageResult; // 本次任务的执行结果
             break;
           } else {
             updateStatue(i, StageStatue.error);
@@ -856,7 +861,7 @@ class WorkShopVm extends ChangeNotifier {
               addNewEmptyLine();
 
               stage.executeResultData = stageResult;
-              actionResStr = stageResult;
+              actionRes = stageResult;
               await waitSomeSec();
             }
           }
@@ -867,7 +872,7 @@ class WorkShopVm extends ChangeNotifier {
 
           // 如果到了最后一次
           if (j == maxTimes - 1) {
-            actionResStr = OrderExecuteResult(
+            actionRes = OrderExecuteResult(
                 succeed: false, msg: "第${j + 1}次:$stageResult");
             CommandUtil.getInstance().stopAllExec();
             stage.timerController.stop();
@@ -891,8 +896,8 @@ class WorkShopVm extends ChangeNotifier {
     return OrderExecuteResult(
         succeed: true,
         msg:
-            "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionResStr?.msg}，任务总共花费时间${formatSeconds(totalWatch.elapsed.inMilliseconds ~/ 1000)} ms ",
-        data: actionResStr?.data);
+            "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionRes?.msg}，任务总共花费时间${formatSeconds(totalWatch.elapsed.inMilliseconds ~/ 1000)} ms ",
+        data: actionRes?.data);
   }
 
   void _reset() {
@@ -966,20 +971,27 @@ class WorkShopVm extends ChangeNotifier {
     setProjectPath();
 
     initPreCheckTaskList();
-    var value = await startSchedule();
-    if (value == null) {
+    OrderExecuteResult? orderExecuteResult = await startSchedule();
+    if (orderExecuteResult == null) {
       setProjectRecordJobRunning(false);
       _reset();
       return;
     }
 
-    if (value.succeed != true || value.data is! List<String>) {
+    /// 激活失败时
+    if (orderExecuteResult.succeed != true ||
+        orderExecuteResult.data is! List<String>) {
+      var his = runningTask!.jobHistory;
+      if (his == null) {
+        runningTask!.jobHistory = [];
+      }
+      runningTask!.jobHistory!.add("${orderExecuteResult.msg}");
       setProjectRecordJobRunning(false);
       _reset();
       return;
     }
 
-    onProjectActiveFinished(value.data);
+    onProjectActiveFinished(orderExecuteResult.data);
     _reset();
     onTaskFinished?.call();
   }
@@ -990,17 +1002,6 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   ProjectRecordEntity? runningTask;
-
-  /// 项目激活成功之后
-  void onProjectActiveFinished(List<String> assembleOrders) {
-    if (assembleOrders.isNotEmpty) {
-      runningTask!.preCheckOk = true;
-      runningTask!.assembleOrders = assembleOrders;
-      setProjectRecordJobRunning(false);
-    }
-    _reset();
-    notifyListeners();
-  }
 
   Timer? taskTimer;
 
@@ -1090,6 +1091,16 @@ class WorkShopVm extends ChangeNotifier {
     }
 
     onProjectPackageFinished(myAppInfo!);
+  }
+
+  /// 项目激活成功之后
+  void onProjectActiveFinished(List<String> assembleOrders) {
+    if (assembleOrders.isNotEmpty) {
+      runningTask!.preCheckOk = true;
+      runningTask!.assembleOrders = assembleOrders;
+    }
+    setProjectRecordJobRunning(false);
+    _reset();
   }
 
   /// 流程结束时，无论成功或者失败

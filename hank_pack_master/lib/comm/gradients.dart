@@ -13,5 +13,5 @@ var mainPanelGradient = const LinearGradient(
 var cardGradient = const LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
-  colors: [Color(0xffc3dae6), Color(0xffafc3cf),Color(0xff828eb1)], // 渐变色数组
+  colors: [Color(0xff81D5A2), Color(0xffC1E7CD)], // 渐变色数组
 );

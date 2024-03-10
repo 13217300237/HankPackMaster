@@ -1,8 +1,11 @@
 import 'dart:ffi';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/fast_upload_dialog.dart';
 import 'package:hank_pack_master/ui/project_manager/package_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
@@ -158,6 +161,74 @@ class ProjectEntityDataSource extends DataGridSource {
 
   double iconSize = 30;
 
+  _queryJobHistoryWidget(CellValue cellValue) {
+    return Tooltip(
+        message: "查看作业历史",
+        child: IconButton(
+            icon: Icon(FluentIcons.full_history,
+                size: iconSize, color: Colors.green.withOpacity(.8)),
+            onPressed: () {
+              if (cellValue.value is ProjectRecordEntity) {
+                var e = cellValue.value as ProjectRecordEntity;
+
+                var his = e.jobHistory ?? [];
+
+                DialogUtil.showCustomDialog(
+                    maxHeight: 600,
+                    maxWidth: 600,
+                    context: buildContext,
+                    title: "${e.projectName} 打包历史",
+                    content: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...his.reversed.map((s) {
+                            var myAppInfo = MyAppInfo.fromJsonString(s);
+                            return Row(
+                              children: [
+                                Expanded(
+                                    child: PackageHistoryCard(
+                                        myAppInfo: myAppInfo,
+                                        doFastUpload: (s) {
+                                          openFastUploadDialogFunc?.call(e, s);
+                                        })),
+                              ],
+                            );
+                          }).toList()
+                        ],
+                      ),
+                    ).hideScrollbar(buildContext));
+              } else {
+                var e = cellValue.entity!;
+                var his = e.jobHistory ?? [];
+
+                DialogUtil.showCustomDialog(
+                    maxHeight: 600,
+                    maxWidth: 600,
+                    context: buildContext,
+                    title: "${e.projectName} 激活历史",
+                    content: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...his.reversed.map((s) {
+                            return m.Card(
+                              color: Colors.white,
+                              clipBehavior: Clip.antiAliasWithSaveLayer,
+                              child: Container(
+                                decoration: BoxDecoration(gradient: mainPanelGradient),
+                                padding: const EdgeInsets.all(10.0),
+                                child: SelectableText(s),
+                              ),
+                            );
+                          }).toList()
+                        ],
+                      ),
+                    ).hideScrollbar(buildContext));
+              }
+            }));
+  }
+
   /// 每行UI的构建逻辑
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
@@ -203,20 +274,27 @@ class ProjectEntityDataSource extends DataGridSource {
                 toolTip = "未激活";
                 statueWidget = Icon(
                   FluentIcons.unknown,
-                  color: Colors.grey.withOpacity(.5),
+                  color: Colors.red.withOpacity(.5),
                   size: iconSize,
                 );
               }
               cellWidget = Tooltip(message: toolTip, child: statueWidget);
               break;
             case CellType.goPreCheck:
-              cellWidget = Tooltip(
-                message: "${cellValue.value}",
-                child: IconButton(
-                  icon: Icon(FluentIcons.build_queue_new,
-                      size: iconSize, color: Colors.green.withOpacity(.8)),
-                  onPressed: () => funConfirmToActive?.call(cellValue.entity!),
-                ),
+              cellWidget = Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Tooltip(
+                    message: "${cellValue.value}",
+                    child: IconButton(
+                      icon: Icon(FluentIcons.build_queue_new,
+                          size: iconSize, color: Colors.green.withOpacity(.8)),
+                      onPressed: () =>
+                          funConfirmToActive?.call(cellValue.entity!),
+                    ),
+                  ),
+                  _queryJobHistoryWidget(cellValue)
+                ],
               );
               break;
             case CellType.goPackageAction:
@@ -252,47 +330,7 @@ class ProjectEntityDataSource extends DataGridSource {
                             funcGoPackageAction?.call(cellValue.entity!),
                       ),
                     ),
-                    Tooltip(
-                        message: "查看打包历史",
-                        child: IconButton(
-                            icon: Icon(FluentIcons.full_history,
-                                size: iconSize,
-                                color: Colors.green.withOpacity(.8)),
-                            onPressed: () {
-                              if (cellValue.value is ProjectRecordEntity) {
-                                var e = cellValue.value as ProjectRecordEntity;
-
-                                var his = e.jobHistory ?? [];
-
-                                DialogUtil.showCustomDialog(
-                                    maxHeight: 600,
-                                    maxWidth: 600,
-                                    context: buildContext,
-                                    title: "${e.projectName} 打包历史",
-                                    content: SingleChildScrollView(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          ...his.reversed.map((s) {
-                                            var myAppInfo =
-                                                MyAppInfo.fromJsonString(s);
-                                            return Row(
-                                              children: [
-                                                Expanded(
-                                                    child: PackageHistoryCard(
-                                                        myAppInfo: myAppInfo,
-                                                        doFastUpload: (s) {
-                                                          openFastUploadDialogFunc
-                                                              ?.call(e, s);
-                                                        })),
-                                              ],
-                                            );
-                                          }).toList()
-                                        ],
-                                      ),
-                                    ).hideScrollbar(buildContext));
-                              }
-                            }))
+                    _queryJobHistoryWidget(cellValue)
                   ]);
               break;
             case CellType.assembleOrders:
@@ -485,11 +523,9 @@ class ProjectEntityDataSource extends DataGridSource {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 20),
                         child: Wrap(
-                          children: [
-                            ...orders.map(
-                              (e) => card(e),
-                            )
-                          ],
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [...orders.map((e) => card(e))],
                         ),
                       ),
                     ));

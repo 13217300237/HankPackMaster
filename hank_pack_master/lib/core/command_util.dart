@@ -10,7 +10,7 @@ import '../comm/str_const.dart';
 import '../hive/env_config/env_config_operator.dart';
 import '../ui/work_shop/temp_log_cache_entity.dart';
 
-bool cmdDebug = true;
+bool cmdDebug = false;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {
@@ -399,9 +399,9 @@ class CommandUtil {
         ori,
       );
     } catch (e) {
-      try{
+      try {
         return latin1.decode(ori);
-      }catch(e){
+      } catch (e) {
         debugPrint('遇到无法解析的结果 $ori');
         return "";
       }
@@ -764,8 +764,12 @@ $sb"""
   }
 
   Future<ExecuteResult> gradleAssembleTasks(
-      String projectRoot, Function(String s) logOutput) async {
+    String projectRoot,
+    Function(String s) logOutput, {
+    required TempLogCacheEntity? tempLogCacheEntity,
+  }) async {
     StringBuffer sb = StringBuffer();
+    tempLogCacheEntity?.clear();
     // gradlew.bat app:tasks --all | findstr assemble
     var process = await execute(
       cmd: "gradlew.bat",
@@ -776,6 +780,7 @@ $sb"""
         logOutput.call(res);
         sb.writeln(res);
         debugCmdPrint(res);
+        tempLogCacheEntity?.append(res);
       },
     );
     var exitCode = await process?.exitCode;
