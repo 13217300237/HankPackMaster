@@ -183,7 +183,14 @@ class ProjectEntityDataSource extends DataGridSource {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           ...his.reversed.map((s) {
-                            var myAppInfo = MyAppInfo.fromJsonString(s);
+                            // 尝试将打包历史字符串转化为 MyAppInfo 对象
+                            MyAppInfo myAppInfo;
+                            try {
+                              myAppInfo = MyAppInfo.fromJsonString(s);
+                            } catch (ex) {
+                              myAppInfo = MyAppInfo(errMessage: s);
+                            }
+
                             return Row(
                               children: [
                                 Expanded(
@@ -216,7 +223,8 @@ class ProjectEntityDataSource extends DataGridSource {
                               color: Colors.white,
                               clipBehavior: Clip.antiAliasWithSaveLayer,
                               child: Container(
-                                decoration: BoxDecoration(gradient: mainPanelGradient),
+                                decoration:
+                                    BoxDecoration(gradient: mainPanelGradient),
                                 padding: const EdgeInsets.all(10.0),
                                 child: SelectableText(s),
                               ),
