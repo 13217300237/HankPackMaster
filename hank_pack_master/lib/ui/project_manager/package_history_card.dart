@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
+import 'package:hank_pack_master/comm/text_util.dart';
 
 import '../../comm/dialog_util.dart';
 import '../../comm/upload_platforms.dart';
@@ -31,8 +32,10 @@ class PackageHistoryCard extends StatelessWidget {
       return Container(
         constraints: const BoxConstraints(maxHeight: 300),
         child: Text(
-          errMsg,
+          errMsg.sub(100),
           style: _style,
+          maxLines: 4,
+          overflow: TextOverflow.clip,
         ),
       );
     } else {
@@ -105,6 +108,7 @@ class PackageHistoryCard extends StatelessWidget {
       content: card,
       title: '历史查看',
       showActions: false,
+      maxWidth: 800,
     );
   }
 

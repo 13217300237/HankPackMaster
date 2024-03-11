@@ -55,7 +55,8 @@ class ProjectEntityDataSource extends DataGridSource {
   Function(ProjectRecordEntity)? funcGoPackageAction;
   Function()? funJumpToWorkShop;
 
-  ProjectRecordStatue Function(ProjectRecordEntity) funJudgeProjectStatue; // 设定一个函数，判断 工程实体的状态
+  ProjectRecordStatue Function(ProjectRecordEntity)
+      funJudgeProjectStatue; // 设定一个函数，判断 工程实体的状态
 
   Function(ProjectRecordEntity, String)? openFastUploadDialogFunc;
 
@@ -179,38 +180,40 @@ class ProjectEntityDataSource extends DataGridSource {
 
                 var his = e.jobHistory ?? [];
 
+                var content = ListView.builder(
+                  itemBuilder: (context, index) {
+                    var s = his[index];
+                    // 尝试将打包历史字符串转化为 MyAppInfo 对象
+                    MyAppInfo myAppInfo;
+                    try {
+                      myAppInfo = MyAppInfo.fromJsonString(s);
+                    } catch (ex) {
+                      myAppInfo = MyAppInfo(errMessage: s);
+                    }
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right:10.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                              child: PackageHistoryCard(
+                                  myAppInfo: myAppInfo,
+                                  doFastUpload: (s) {
+                                    openFastUploadDialogFunc?.call(e, s);
+                                  })),
+                        ],
+                      ),
+                    );
+                  },
+                  itemCount: his.length,
+                );
+
                 DialogUtil.showCustomDialog(
                     maxHeight: 600,
                     maxWidth: 600,
                     context: buildContext,
                     title: "${e.projectName} 打包历史",
-                    content: SingleChildScrollView( // TODO 这里需要优化，使用listView的builder函数来写这段代码可以优化性能
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ...his.reversed.map((s) {
-                            // 尝试将打包历史字符串转化为 MyAppInfo 对象
-                            MyAppInfo myAppInfo;
-                            try {
-                              myAppInfo = MyAppInfo.fromJsonString(s);
-                            } catch (ex) {
-                              myAppInfo = MyAppInfo(errMessage: s);
-                            }
-
-                            return Row(
-                              children: [
-                                Expanded(
-                                    child: PackageHistoryCard(
-                                        myAppInfo: myAppInfo,
-                                        doFastUpload: (s) {
-                                          openFastUploadDialogFunc?.call(e, s);
-                                        })),
-                              ],
-                            );
-                          }).toList()
-                        ],
-                      ),
-                    ).hideScrollbar(buildContext));
+                    content: content);
               } else {
                 var e = cellValue.entity!;
                 var his = e.jobHistory ?? [];
@@ -232,8 +235,8 @@ class ProjectEntityDataSource extends DataGridSource {
                                     color: Colors.white,
                                     clipBehavior: Clip.antiAliasWithSaveLayer,
                                     child: Container(
-                                      decoration:
-                                          BoxDecoration(gradient: mainPanelGradient),
+                                      decoration: BoxDecoration(
+                                          gradient: mainPanelGradient),
                                       padding: const EdgeInsets.all(10.0),
                                       child: SelectableText(s),
                                     ),
@@ -277,8 +280,9 @@ class ProjectEntityDataSource extends DataGridSource {
               ProjectRecordEntity entity = cellValue.value;
               Widget statueWidget;
               String toolTip;
-              ProjectRecordStatue projectRecordStatue = funJudgeProjectStatue(entity);
-              switch(projectRecordStatue){
+              ProjectRecordStatue projectRecordStatue =
+                  funJudgeProjectStatue(entity);
+              switch (projectRecordStatue) {
                 case ProjectRecordStatue.unchecked:
                   toolTip = "未激活";
                   statueWidget = Icon(

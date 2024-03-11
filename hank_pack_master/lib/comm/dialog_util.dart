@@ -1,6 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:hank_pack_master/comm/gradients.dart';
 
 class DialogUtil {
   ///
@@ -19,17 +20,16 @@ class DialogUtil {
     String cancelText = "取消",
     double maxWidth = 500,
     double maxHeight = 700,
-    Color dialogBgColor = Colors.white,
   }) {
     showDialog(
       context: context,
       builder: (context) {
         return ContentDialog(
           style: ContentDialogThemeData(
+            actionsDecoration: const BoxDecoration(color: Color(0xFFF6EFE9)),
             decoration: BoxDecoration(
-              color: dialogBgColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
+                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFFF6EFE9)),
           ),
           title: Text(
             title,
@@ -37,7 +37,7 @@ class DialogUtil {
           ),
           constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
           content: content is Widget
-              ? content
+              ? Row(children: [Expanded(child: content)])
               : SingleChildScrollView(
                   child: Text(
                     content,

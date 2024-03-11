@@ -5,6 +5,18 @@ extension StringEmpty on String? {
     if (this == "null") return true;
     return false;
   }
+
+  String sub(int maxLength) {
+    if (this == null) return '';
+    if (this!.isEmpty) return '';
+    if (this == "null") return '';
+
+    if (this!.length >= maxLength) {
+      return this!.substring(0, maxLength);
+    } else {
+      return this!;
+    }
+  }
 }
 
 extension FirstLineExtension on String? {

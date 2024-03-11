@@ -122,7 +122,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       buildContext: context,
       funConfirmToActive: (e) {
         DialogUtil.showCustomDialog(
-          dialogBgColor: const Color(0xfff9f4ee),
           context: context,
           title: "项目 ${e.projectName} 激活配置",
           content: PreCheckDialogWidget(
@@ -139,7 +138,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         e.apkPath = null;
 
         DialogUtil.showCustomDialog(
-            dialogBgColor: const Color(0xfff9f4ee),
             context: context,
             title: "项目 ${e.projectName} 打包配置",
             content: StartPackageDialogWidget(

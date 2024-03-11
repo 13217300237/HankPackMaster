@@ -98,7 +98,7 @@ class _StageTaskCardState extends State<StageTaskCard> {
             // 按下之后，打开当前阶段的执行结果弹窗
             var result = widget.stage.executeResultData;
             if (result is OrderExecuteResult) {
-              debugPrint("啊啊啊啊啊啊啊啊啊：${result.executeLog}");
+              debugPrint("执行日志：${result.executeLog}");
               var data = result.data;
               if (data is MyAppInfo) {
                 // 最后阶段上传成功之后
