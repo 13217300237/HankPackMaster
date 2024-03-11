@@ -987,14 +987,14 @@ class WorkShopVm extends ChangeNotifier {
         runningTask!.jobHistory = [];
       }
       runningTask!.jobHistory!.add("${orderExecuteResult.msg}");
-      ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看激活历史",
+      ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 激活失败, 详情查看激活历史",
           success: false);
       setProjectRecordJobRunning(false);
       _reset();
       return;
     }
 
-    ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行成功, 详情查看激活历史");
+    ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 激活成功, 详情查看激活历史");
 
     onProjectActiveFinished(orderExecuteResult.data);
     _reset();
