@@ -5,7 +5,6 @@ class EnvConfigOperator {
   static const String _boxName = "envConfigDbV2";
 
   static Future<void> openBox() async {
-    Hive.registerAdapter(EnvConfigEntityAdapter(), override: true);
     await Hive.openBox<EnvConfigEntity>(_boxName);
   }
 

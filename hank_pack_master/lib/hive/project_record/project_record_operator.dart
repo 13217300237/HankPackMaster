@@ -9,9 +9,6 @@ class ProjectRecordOperator {
   static const String _boxName = "projectRecordDbV2"; // 每一次更新
 
   static Future<void> openBox() async {
-    Hive.registerAdapter(PackageSettingAdapter(), override: true);
-    Hive.registerAdapter(UploadPlatformAdapter(), override: true);
-    Hive.registerAdapter(ProjectRecordEntityAdapter(), override: true);
     await Hive.openBox<ProjectRecordEntity>(_boxName);
   }
 

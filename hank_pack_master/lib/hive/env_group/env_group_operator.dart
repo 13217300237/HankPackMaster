@@ -7,8 +7,6 @@ class EnvGroupOperator {
   static const String _boxName = "envGroupDb";
 
   static Future<void> openBox() async {
-    Hive.registerAdapter(EnvGroupEntityAdapter(), override: true);
-    Hive.registerAdapter(EnvCheckResultEntityAdapter(), override: true);
     await Hive.openBox<EnvGroupEntity>(_boxName);
   }
 

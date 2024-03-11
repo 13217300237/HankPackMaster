@@ -8,13 +8,27 @@ import 'package:window_manager/window_manager.dart';
 import 'comm/functions.dart';
 import 'comm/hwobs/obs_client.dart';
 import 'comm/str_const.dart';
+import 'hive/env_config/env_config_entity.dart';
 import 'hive/env_config/env_config_operator.dart';
+import 'hive/env_group/env_check_result_entity.dart';
+import 'hive/env_group/env_group_entity.dart';
 import 'hive/env_group/env_group_operator.dart';
+import 'hive/project_record/package_setting_entity.dart';
+import 'hive/project_record/project_record_entity.dart';
 import 'hive/project_record/project_record_operator.dart';
+import 'hive/project_record/upload_platforms.dart';
 import 'ui/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  Hive.registerAdapter(EnvConfigEntityAdapter(), override: true);
+  Hive.registerAdapter(PackageSettingAdapter(), override: true);
+  Hive.registerAdapter(UploadPlatformAdapter(), override: true);
+  Hive.registerAdapter(ProjectRecordEntityAdapter(), override: true);
+  Hive.registerAdapter(EnvGroupEntityAdapter(), override: true);
+  Hive.registerAdapter(EnvCheckResultEntityAdapter(), override: true);
+
   await Hive.initFlutter();
   await EnvConfigOperator.openBox();
   await ProjectRecordOperator.openBox();

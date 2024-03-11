@@ -17,31 +17,31 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return ProjectRecordEntity(
-      fields[1] as String,
       fields[2] as String,
-      fields[4] as String,
+      fields[3] as String,
+      fields[1] as String,
       fields[8] as String?,
-      preCheckOk: fields[3] as bool,
+      preCheckOk: fields[4] as bool,
       jobRunning: fields[7] as bool?,
       assembleOrders: (fields[5] as List?)?.cast<String>(),
       jobHistory: (fields[6] as List?)?.cast<String>(),
     )
       ..activeSetting = fields[9] as PackageSetting?
-      ..packageSetting = fields[16] as PackageSetting?
-      ..fastUploadSetting = fields[17] as PackageSetting?;
+      ..packageSetting = fields[10] as PackageSetting?
+      ..fastUploadSetting = fields[11] as PackageSetting?;
   }
 
   @override
   void write(BinaryWriter writer, ProjectRecordEntity obj) {
     writer
       ..writeByte(11)
-      ..writeByte(4)
-      ..write(obj.projectName)
       ..writeByte(1)
-      ..write(obj.gitUrl)
+      ..write(obj.projectName)
       ..writeByte(2)
-      ..write(obj.branch)
+      ..write(obj.gitUrl)
       ..writeByte(3)
+      ..write(obj.branch)
+      ..writeByte(4)
       ..write(obj.preCheckOk)
       ..writeByte(5)
       ..write(obj.assembleOrders)
@@ -53,9 +53,9 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       ..write(obj.projectDesc)
       ..writeByte(9)
       ..write(obj.activeSetting)
-      ..writeByte(16)
+      ..writeByte(10)
       ..write(obj.packageSetting)
-      ..writeByte(17)
+      ..writeByte(11)
       ..write(obj.fastUploadSetting);
   }
 

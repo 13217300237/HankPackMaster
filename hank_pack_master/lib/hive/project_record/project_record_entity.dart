@@ -7,38 +7,38 @@ part 'project_record_entity.g.dart';
 /// 概念：当设定一个 gitUrl 和 branch 时，一个 projectRecord就已经确定，后续它的打包结果，都会依附于此projectRecord
 @HiveType(typeId: 2)
 class ProjectRecordEntity {
-  @HiveField(0x04)
+  @HiveField(1)
   late String projectName;
 
-  @HiveField(0x01)
+  @HiveField(2)
   late String gitUrl;
 
-  @HiveField(0x02)
+  @HiveField(3)
   late String branch;
 
-  @HiveField(0x03)
+  @HiveField(4)
   late bool preCheckOk; // 是否已预检成功
 
-  @HiveField(0x05)
+  @HiveField(5)
   List<String>? assembleOrders;
 
-  @HiveField(0x06)
+  @HiveField(6)
   List<String>? jobHistory;
 
   /// 是否处在工作中...
-  @HiveField(0x07)
+  @HiveField(7)
   bool? jobRunning;
 
-  @HiveField(0x08)
+  @HiveField(8)
   String? projectDesc;
 
-  @HiveField(0x09)
+  @HiveField(9)
   PackageSetting? activeSetting; // 激活阶段的配置
 
-  @HiveField(0x10)
+  @HiveField(10)
   PackageSetting? packageSetting; // 打包阶段的配置
 
-  @HiveField(0x11)
+  @HiveField(11)
   PackageSetting? fastUploadSetting; // 快速上传阶段的配置
 
 
