@@ -792,7 +792,7 @@ class WorkShopVm extends ChangeNotifier {
   ///
   /// 开始流水线工作
   ///
-  Future<OrderExecuteResult?> startSchedule() async {
+  Future<OrderExecuteResult> startSchedule() async {
     cleanLog();
 
     if (_workThreadRunning) {
@@ -978,11 +978,6 @@ class WorkShopVm extends ChangeNotifier {
 
     initPreCheckTaskList();
     OrderExecuteResult? orderExecuteResult = await startSchedule();
-    if (orderExecuteResult == null) {
-      setProjectRecordJobRunning(false);
-      _reset();
-      return;
-    }
 
     /// 激活失败时
     if (orderExecuteResult.succeed != true ||

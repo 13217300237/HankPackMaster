@@ -1,0 +1,16 @@
+默认的蒲公英apiKey:
+3e3bb841269ccb9e3fb9b3feffa4273c
+
+OBS:
+
+endPoint:
+https://kbzpay-apppackage.obs.ap-southeast-1.myhuaweicloud.com
+
+ak:
+WME9RK9W2EA5J7WMG0ZD
+
+sk:
+mW2cNSmvCgDBk2WSeqNSdJowr7KlMTe5FxDl9ovB
+
+bucketName:
+kbzpay-apppackage
