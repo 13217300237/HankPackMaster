@@ -54,7 +54,15 @@ class _FastUploadDialogWidgetState extends State<FastUploadDialogWidget> {
   }
 
   void initSetting(PackageSetting? fastUploadSetting) {
-
+    if (fastUploadSetting == null) {
+      return;
+    }
+    var selectedUploadPlatform = fastUploadSetting.selectedUploadPlatform;
+    if (selectedUploadPlatform == null) {
+      return;
+    }
+    _selectedUploadPlatform = selectedUploadPlatform;
+    setState(() {});
   }
 
   Widget chooseRadio(String title) {
@@ -170,6 +178,4 @@ class _FastUploadDialogWidgetState extends State<FastUploadDialogWidget> {
 
     return contentWidget;
   }
-
-
 }

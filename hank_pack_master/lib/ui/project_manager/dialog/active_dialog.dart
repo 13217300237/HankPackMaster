@@ -40,14 +40,22 @@ class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      initSetting(widget.projectRecordEntity.fastUploadSetting);
       _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
+      initSetting(widget.projectRecordEntity.activeSetting);
     });
 
   }
 
-  void initSetting(PackageSetting? fastUploadSetting) {
-
+  void initSetting(PackageSetting? activeSetting) {
+    if (activeSetting == null) {
+      return;
+    }
+    var jdk = activeSetting.jdk;
+    if (jdk == null) {
+      return;
+    }
+    _jdk = jdk;
+    setState(() {});
   }
 
   @override

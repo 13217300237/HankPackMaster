@@ -60,12 +60,27 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
-      initSetting(widget.projectRecordEntity.fastUploadSetting);
+      initSetting(widget.projectRecordEntity.packageSetting);
     });
   }
 
-  void initSetting(PackageSetting? fastUploadSetting) {
+  void initSetting(PackageSetting? packageSetting) {
+    if (packageSetting == null) {
+      return;
+    }
 
+    StringBuffer sb = StringBuffer();
+    packageSetting.mergeBranchList?.forEach((e) {
+      sb.writeln(e);
+    });
+
+    _mergeBranchNameController.text = sb.toString().trim();
+    _selectedOrder = packageSetting.selectedOrder;
+    _selectedUploadPlatform = packageSetting.selectedUploadPlatform;
+    _apkLocationController.text = packageSetting.apkLocation ?? '';
+    _jdk = packageSetting.jdk;
+
+    setState(() {});
   }
 
   Widget chooseRadio(String title) {
@@ -149,7 +164,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             jdk: _jdk,
             mergeBranchList: mergeBranchList,
           );
-
           ProjectRecordOperator.insertOrUpdate(widget.projectRecordEntity);
 
           String errMsg = widget.projectRecordEntity.setting!.readyToPackage();
