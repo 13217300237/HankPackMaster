@@ -26,7 +26,10 @@ class DialogUtil {
       builder: (context) {
         return ContentDialog(
           style: ContentDialogThemeData(
-            actionsDecoration: const BoxDecoration(color: Color(0xFFF6EFE9)),
+            actionsDecoration: BoxDecoration(
+              color: const Color(0xFFF6EFE9),
+              borderRadius: BorderRadius.circular(10),
+            ),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: const Color(0xFFF6EFE9)),

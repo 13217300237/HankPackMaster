@@ -107,8 +107,11 @@ class PackageHistoryCard extends StatelessWidget {
       context: context,
       content: card,
       title: '历史查看',
-      showActions: false,
-      maxWidth: 800,
+      showActions: true,
+      showCancel: false,
+      confirmText: '我知道了！',
+      maxWidth: 600,
+      maxHeight: 700,
     );
   }
 
