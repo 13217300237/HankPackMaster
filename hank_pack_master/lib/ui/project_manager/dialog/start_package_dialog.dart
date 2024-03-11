@@ -10,6 +10,7 @@ import '../../../comm/ui/form_input.dart';
 import '../../../comm/upload_platforms.dart';
 import '../../../hive/env_group/env_check_result_entity.dart';
 import '../../../hive/project_record/package_setting_entity.dart';
+import '../../../hive/project_record/project_record_operator.dart';
 
 class StartPackageDialogWidget extends StatefulWidget {
   final WorkShopVm workShopVm;
@@ -25,7 +26,8 @@ class StartPackageDialogWidget extends StatefulWidget {
     required this.projectRecordEntity,
     required this.workShopVm,
     required this.enableAssembleOrders,
-    this.goToWorkShop, required this.defaultJavaHome,
+    this.goToWorkShop,
+    required this.defaultJavaHome,
   });
 
   @override
@@ -56,7 +58,14 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
   @override
   void initState() {
     super.initState();
-    _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
+      initSetting(widget.projectRecordEntity.fastUploadSetting);
+    });
+  }
+
+  void initSetting(PackageSetting? fastUploadSetting) {
+
   }
 
   Widget chooseRadio(String title) {
@@ -131,7 +140,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
           UploadPlatform? selectedUploadPlatform = _selectedUploadPlatform;
 
           // 将此任务添加到队列中去
-          widget.projectRecordEntity.setting = PackageSetting(
+          widget.projectRecordEntity.packageSetting =
+              widget.projectRecordEntity.setting = PackageSetting(
             appUpdateLog: appUpdateStr,
             apkLocation: apkLocation,
             selectedOrder: selectedOrder,
@@ -139,6 +149,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             jdk: _jdk,
             mergeBranchList: mergeBranchList,
           );
+
+          ProjectRecordOperator.insertOrUpdate(widget.projectRecordEntity);
 
           String errMsg = widget.projectRecordEntity.setting!.readyToPackage();
           if (errMsg.isNotEmpty) {

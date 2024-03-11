@@ -2,11 +2,13 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
 import '../../../hive/env_group/env_check_result_entity.dart';
 import '../../../hive/project_record/package_setting_entity.dart';
 
+/// 工程激活弹窗
 class ActiveDialogWidget extends StatefulWidget {
   final WorkShopVm workShopVm;
 
@@ -37,7 +39,15 @@ class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
   @override
   void initState() {
     super.initState();
-    _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      initSetting(widget.projectRecordEntity.fastUploadSetting);
+      _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
+    });
+
+  }
+
+  void initSetting(PackageSetting? fastUploadSetting) {
+
   }
 
   @override
@@ -51,7 +61,10 @@ class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
         child: const Text("确定"),
         onPressed: () {
           // 将此任务添加到队列中去
-          widget.projectRecordEntity.setting = PackageSetting(jdk: _jdk);
+          widget.projectRecordEntity.activeSetting =
+              widget.projectRecordEntity.setting = PackageSetting(jdk: _jdk);
+
+          ProjectRecordOperator.insertOrUpdate(widget.projectRecordEntity);
 
           String errMsg = widget.projectRecordEntity.setting!.readyToActive();
           if (errMsg.isNotEmpty) {

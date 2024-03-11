@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
@@ -46,10 +47,14 @@ class _FastUploadDialogWidgetState extends State<FastUploadDialogWidget> {
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _apkLocationController.text = widget.apkPath;
+      initSetting(widget.projectRecordEntity.fastUploadSetting);
     });
+  }
+
+  void initSetting(PackageSetting? fastUploadSetting) {
+
   }
 
   Widget chooseRadio(String title) {
@@ -110,19 +115,24 @@ class _FastUploadDialogWidgetState extends State<FastUploadDialogWidget> {
           UploadPlatform? selectedUploadPlatform = _selectedUploadPlatform;
 
           // 将此任务添加到队列中去
-          widget.projectRecordEntity.setting = PackageSetting(
+          widget.projectRecordEntity.fastUploadSetting =
+              widget.projectRecordEntity.setting = PackageSetting(
             appUpdateLog: appUpdateStr,
             apkLocation: apkLocation,
             selectedUploadPlatform: selectedUploadPlatform,
           );
 
-          String errMsg = widget.projectRecordEntity.setting!.readyOnlyPlatform();
+          ProjectRecordOperator.insertOrUpdate(widget.projectRecordEntity);
+
+          String errMsg =
+              widget.projectRecordEntity.setting!.readyOnlyPlatform();
           if (errMsg.isNotEmpty) {
             setState(() => _errMsg = errMsg);
             return;
           }
 
-          widget.projectRecordEntity.apkPath = apkLocation; // 如果apkLocation为空，则认为是要快速上传
+          widget.projectRecordEntity.apkPath =
+              apkLocation; // 如果apkLocation为空，则认为是要快速上传
 
           var success = widget.workShopVm.enqueue(widget.projectRecordEntity);
           Navigator.pop(context);
@@ -160,4 +170,6 @@ class _FastUploadDialogWidgetState extends State<FastUploadDialogWidget> {
 
     return contentWidget;
   }
+
+
 }
