@@ -192,7 +192,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     }
 
                     return Padding(
-                      padding: const EdgeInsets.only(right:10.0),
+                      padding: const EdgeInsets.only(right: 10.0),
                       child: Row(
                         children: [
                           Expanded(
@@ -213,7 +213,9 @@ class ProjectEntityDataSource extends DataGridSource {
                     maxWidth: 600,
                     context: buildContext,
                     title: "${e.projectName} 打包历史",
-                    content: content);
+                    content: content,
+                    showCancel: false,
+                    confirmText: '我知道了!');
               } else {
                 var e = cellValue.entity!;
                 var his = e.jobHistory ?? [];
@@ -222,6 +224,8 @@ class ProjectEntityDataSource extends DataGridSource {
                     maxHeight: 600,
                     maxWidth: 600,
                     context: buildContext,
+                    showCancel: false,
+                    confirmText: '我知道了!',
                     title: "${e.projectName} 激活历史",
                     content: SingleChildScrollView(
                       child: Column(
@@ -232,13 +236,17 @@ class ProjectEntityDataSource extends DataGridSource {
                               children: [
                                 Expanded(
                                   child: m.Card(
+                                    margin: const EdgeInsets.only(right: 10,bottom: 10),
                                     color: Colors.white,
                                     clipBehavior: Clip.antiAliasWithSaveLayer,
                                     child: Container(
                                       decoration: BoxDecoration(
                                           gradient: mainPanelGradient),
                                       padding: const EdgeInsets.all(10.0),
-                                      child: SelectableText(s),
+                                      child: SelectableText(
+                                        s,
+                                        style: gridTextStyle,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -247,7 +255,7 @@ class ProjectEntityDataSource extends DataGridSource {
                           }).toList()
                         ],
                       ),
-                    ).hideScrollbar(buildContext));
+                    ));
               }
             }));
   }
