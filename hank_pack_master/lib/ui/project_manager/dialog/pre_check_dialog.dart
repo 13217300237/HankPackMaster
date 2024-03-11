@@ -1,15 +1,13 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
-import 'package:hank_pack_master/comm/upload_platforms.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
-import '../../../comm/ui/form_input.dart';
-import '../../../comm/url_check_util.dart';
 import '../../../hive/env_group/env_check_result_entity.dart';
+import '../../../hive/project_record/package_setting_entity.dart';
 
-class PreCheckDialogWidget extends StatefulWidget {
+class ActiveDialogWidget extends StatefulWidget {
   final WorkShopVm workShopVm;
 
   final List<String> enableAssembleOrders;
@@ -19,7 +17,7 @@ class PreCheckDialogWidget extends StatefulWidget {
 
   final String defaultJavaHome;
 
-  const PreCheckDialogWidget({
+  const ActiveDialogWidget({
     super.key,
     required this.projectRecordEntity,
     required this.workShopVm,
@@ -29,10 +27,10 @@ class PreCheckDialogWidget extends StatefulWidget {
   });
 
   @override
-  State<PreCheckDialogWidget> createState() => _PreCheckDialogWidgetState();
+  State<ActiveDialogWidget> createState() => _ActiveDialogWidgetState();
 }
 
-class _PreCheckDialogWidgetState extends State<PreCheckDialogWidget> {
+class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
   EnvCheckResultEntity? _jdk; // 当前使用的jdk版本
   String _errMsg = "";
 

@@ -19,7 +19,8 @@ class EnvCheckResultEntityAdapter extends TypeAdapter<EnvCheckResultEntity> {
     return EnvCheckResultEntity(
       envPath: fields[2] as String,
       envName: fields[1] as String,
-    )..envCheckResult = fields[3] as String?;
+      envCheckResult: fields[3] as String?,
+    );
   }
 
   @override

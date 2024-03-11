@@ -1,7 +1,5 @@
+import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hive/hive.dart';
-
-import '../../comm/upload_platforms.dart';
-import '../env_group/env_check_result_entity.dart';
 
 part 'project_record_entity.g.dart';
 
@@ -71,47 +69,4 @@ class ProjectRecordEntity {
   int get hashCode => branch.hashCode ^ gitUrl.hashCode;
 }
 
-class PackageSetting {
-  String? appUpdateLog;
-  String? apkLocation;
-  String? selectedOrder;
-  UploadPlatform? selectedUploadPlatform;
-  List<String>? mergeBranchList;
-  EnvCheckResultEntity? jdk; // 当前使用的jdk版本
 
-  PackageSetting({
-    this.appUpdateLog,
-    this.apkLocation,
-    this.selectedOrder,
-    this.selectedUploadPlatform,
-    this.jdk,
-    this.mergeBranchList,
-  });
-
-  String readyToPackage() {
-    if (jdk == null) {
-      return "jdk必必须指定";
-    }
-    if (selectedOrder == null || selectedOrder!.isEmpty) {
-      return "打包命令必须选择";
-    }
-    if (selectedUploadPlatform == null) {
-      return "上传方式必须选择";
-    }
-    return '';
-  }
-
-  String readyToActive() {
-    if (jdk == null) {
-      return "jdk必必须指定";
-    }
-    return '';
-  }
-
-  String readyOnlyPlatform() {
-    if (selectedUploadPlatform == null) {
-      return "上传方式必须选择";
-    }
-    return '';
-  }
-}

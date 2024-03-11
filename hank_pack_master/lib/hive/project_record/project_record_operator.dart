@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
+import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hive/hive.dart';
 
 class ProjectRecordOperator {
@@ -8,6 +10,8 @@ class ProjectRecordOperator {
 
   static Future<void> openBox() async {
     Hive.registerAdapter(ProjectRecordEntityAdapter(), override: true);
+    Hive.registerAdapter(PackageSettingAdapter(), override: true);
+    Hive.registerAdapter(UploadPlatformAdapter(), override: true);
     await Hive.openBox<ProjectRecordEntity>(_boxName);
   }
 

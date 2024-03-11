@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
+import '../../hive/project_record/upload_platforms.dart';
 import '../upload_platforms.dart';
 import 'my_tool_tip_icon.dart';
 
@@ -177,7 +178,7 @@ Widget chooseRadio(
               padding: const EdgeInsets.only(right: 18.0),
               child: RadioButton(
                   checked: index == selectedUploadPlatform?.index,
-                  content: Text(uploadPlatforms[index].name),
+                  content: Text(uploadPlatforms[index].name!),
                   onChanged: (checked) {
                     selectedUploadPlatform = uploadPlatforms[index];
                     debugPrint(

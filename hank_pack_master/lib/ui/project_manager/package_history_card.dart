@@ -3,7 +3,7 @@ import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
 
 import '../../comm/dialog_util.dart';
-import '../../comm/upload_platforms.dart';
+import '../../hive/project_record/upload_platforms.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../work_shop/app_info_card.dart';
 

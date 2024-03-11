@@ -54,7 +54,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     PaneItem(
       key: const ValueKey('/work_shop'),
       icon: const Icon(FluentIcons.a_t_p_logo),
-      title: Text('打包工坊', style: w600TextStyle),
+      title: Text('作业工坊', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
     // PaneItem( // TODO

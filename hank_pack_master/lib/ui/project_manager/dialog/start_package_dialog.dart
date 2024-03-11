@@ -1,14 +1,15 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
-import 'package:hank_pack_master/comm/upload_platforms.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
+import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
 import '../../../comm/text_util.dart';
 import '../../../comm/ui/form_input.dart';
-import '../../../comm/url_check_util.dart';
+import '../../../comm/upload_platforms.dart';
 import '../../../hive/env_group/env_check_result_entity.dart';
+import '../../../hive/project_record/package_setting_entity.dart';
 
 class StartPackageDialogWidget extends StatefulWidget {
   final WorkShopVm workShopVm;
@@ -86,7 +87,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                 child: RadioButton(
                     checked: index == _selectedUploadPlatform?.index,
                     content: Text(
-                      uploadPlatforms[index].name,
+                      uploadPlatforms[index].name!,
                       style: const TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 18),
                     ),

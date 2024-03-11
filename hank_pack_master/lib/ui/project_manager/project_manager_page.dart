@@ -124,7 +124,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         DialogUtil.showCustomDialog(
           context: context,
           title: "项目 ${e.projectName} 激活配置",
-          content: PreCheckDialogWidget(
+          content: ActiveDialogWidget(
             projectRecordEntity: e,
             workShopVm: _workShopVm,
             enableAssembleOrders: e.assembleOrders ?? [],
