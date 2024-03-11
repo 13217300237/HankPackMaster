@@ -39,8 +39,8 @@ class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
   @override
   void initState() {
     super.initState();
+    _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
       initSetting(widget.projectRecordEntity.activeSetting);
     });
 
