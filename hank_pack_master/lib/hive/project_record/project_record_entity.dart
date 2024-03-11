@@ -32,6 +32,16 @@ class ProjectRecordEntity {
   @HiveField(0x08)
   String? projectDesc;
 
+  @HiveField(0x09)
+  PackageSetting? activeSetting; // 激活阶段的配置
+
+  @HiveField(0x10)
+  PackageSetting? packageSetting; // 打包阶段的配置
+
+  @HiveField(0x11)
+  PackageSetting? fastUploadSetting; // 快速上传阶段的配置
+
+
   /// 临时字段，不用存数据库
   /// 传递给工坊的对象，包含了打包所需的所有参数
   PackageSetting? setting;

@@ -5,6 +5,7 @@ import '../env_group/env_check_result_entity.dart';
 
 part 'package_setting_entity.g.dart';
 
+/// 打包作业配置
 @HiveType(typeId: 5)
 class PackageSetting {
   @HiveField(1)
