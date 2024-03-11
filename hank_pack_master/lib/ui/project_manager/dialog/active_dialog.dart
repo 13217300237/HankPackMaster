@@ -60,11 +60,6 @@ class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, String> enableAssembleMap = {};
-    for (var e in widget.enableAssembleOrders) {
-      enableAssembleMap[e] = e;
-    }
-
     var confirmActionBtn = FilledButton(
         child: const Text("确定"),
         onPressed: () {
