@@ -495,13 +495,13 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("工程名:${e.projectName}", style: gridTextStyle),
-                Text("git地址:${e.gitUrl}", style: gridTextStyle),
-                Text("分支名：${e.branchName}", style: gridTextStyle),
+                Text("工程名:${e.projectName}", style: gridTextStyle2),
+                Text("git地址:${e.gitUrl}", style: gridTextStyle2),
+                Text("分支名：${e.branchName}", style: gridTextStyle2),
                 Text(
                     "构建时间:${Jiffy.parseFromDateTime(DateTime.fromMillisecondsSinceEpoch(e.buildTime ?? 0)).format(pattern: "yyyy-MM-dd HH:mm:ss")}",
-                    style: gridTextStyle),
-                Text("打包历史内容:${e.historyContent}", style: gridTextStyle),
+                    style: gridTextStyle2),
+                Text("打包历史内容:${e.historyContent}", style: gridTextStyle2),
               ],
             ),
           ),

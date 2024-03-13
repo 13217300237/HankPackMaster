@@ -19,6 +19,12 @@ const TextStyle gridTextStyle = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600);
 
+const TextStyle gridTextStyle2 = TextStyle(
+    color: Colors.black,
+    fontFamily: 'STKAITI',
+    fontSize: 16,
+    fontWeight: FontWeight.w600);
+
 enum CellType {
   text, // 纯文案显示
   assembleOrders, // 进入打包操作
