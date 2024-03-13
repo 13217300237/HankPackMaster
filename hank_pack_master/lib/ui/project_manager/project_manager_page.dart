@@ -486,6 +486,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     return [
       ...recentJobHistoryList.map((e) {
         return m.Card(
+          color: e.success == true
+              ? Colors.green.withOpacity(.1)
+              : Colors.red.withOpacity(.1),
           margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: Padding(
             padding: const EdgeInsets.all(15.0),
@@ -498,7 +501,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                 Text(
                     "构建时间:${Jiffy.parseFromDateTime(DateTime.fromMillisecondsSinceEpoch(e.buildTime ?? 0)).format(pattern: "yyyy-MM-dd HH:mm:ss")}",
                     style: gridTextStyle),
-                Text("是否成功${e.success}", style: gridTextStyle),
                 Text("打包历史内容:${e.historyContent}", style: gridTextStyle),
               ],
             ),
