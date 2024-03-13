@@ -19,8 +19,9 @@ class ProjectRecordEntity {
   @HiveField(4)
   late bool preCheckOk; // 是否已预检成功
 
+  /// [已废弃]
   @HiveField(5)
-  List<String>? assembleOrders; // listString的存储方式存在bug
+  List<String>? assembleOrders; // TODO  listString的存储方式存在bug
 
   @HiveField(6)
   List<String>? jobHistory;

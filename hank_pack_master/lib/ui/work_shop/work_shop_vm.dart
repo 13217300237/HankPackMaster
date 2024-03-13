@@ -1131,14 +1131,15 @@ class WorkShopVm extends ChangeNotifier {
   void onProjectActiveFinished(List<String> assembleOrders) {
     if (assembleOrders.isNotEmpty) {
       runningTask!.preCheckOk = true;
+
       StringBuffer sb = StringBuffer();
       for (var e in assembleOrders) {
         if (e.trim().isNotEmpty) {
           sb.writeln(e);
         }
       }
-
       runningTask!.assembleOrdersStr = sb.toString();
+
     }
     setProjectRecordJobRunning(false);
     _reset();

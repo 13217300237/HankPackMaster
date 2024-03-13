@@ -180,6 +180,8 @@ class ProjectEntityDataSource extends DataGridSource {
 
                 var his = e.jobHistory ?? [];
 
+                his = his.reversed.toList();
+
                 var content = ListView.builder(
                   itemBuilder: (context, index) {
                     var s = his[index];
