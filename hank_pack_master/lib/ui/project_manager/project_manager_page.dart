@@ -243,7 +243,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                     color: _getWorkshopColor(),
                   ),
                   const Text(
-                    " 繁忙中",
+                    " 作业中",
                     style: TextStyle(fontWeight: FontWeight.w600),
                   )
                 ] else ...[

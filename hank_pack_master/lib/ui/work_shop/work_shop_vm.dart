@@ -8,6 +8,7 @@ import 'package:hank_pack_master/comm/apk_parser_result.dart';
 import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
 import 'package:hank_pack_master/ui/work_shop/task_stage.dart';
 import 'package:hank_pack_master/ui/work_shop/temp_log_cache_entity.dart';
 import 'package:jiffy/jiffy.dart';
@@ -1007,6 +1008,9 @@ class WorkShopVm extends ChangeNotifier {
         runningTask!.jobHistory = [];
       }
       runningTask!.jobHistory!.add("${orderExecuteResult.msg}");
+
+      _insertIntoJobHistoryList(false, "${orderExecuteResult.msg}");
+
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 激活失败, 详情查看激活历史",
           success: false);
       setProjectRecordJobRunning(false);
@@ -1047,7 +1051,7 @@ class WorkShopVm extends ChangeNotifier {
         gitUrlController.text = runningTask!.gitUrl;
         gitBranchController.text = runningTask!.branch;
         setProjectPath();
-        projectNameController.text = runningTask!.projectName ?? '';
+        projectNameController.text = runningTask!.projectName;
         projectAppDescController.text = runningTask!.projectDesc ?? '';
 
         if (runningTask!.apkPath != null && runningTask!.apkPath!.isNotEmpty) {
@@ -1085,20 +1089,16 @@ class WorkShopVm extends ChangeNotifier {
   Future<void> startPackage() async {
     initPackageTaskList();
     var scheduleRes = await startSchedule();
-
-    if (scheduleRes == null) {
-      setProjectRecordJobRunning(false);
-      _reset();
-      return;
-    }
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
+      _insertIntoJobHistoryList(true, myAppInfo?.toJsonString() ?? "");
     } else {
       myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
+      _insertIntoJobHistoryList(false, myAppInfo?.toJsonString() ?? "");
     }
 
     onProjectPackageFinished(myAppInfo!);
@@ -1107,21 +1107,17 @@ class WorkShopVm extends ChangeNotifier {
   Future<void> startFastUpload(String apkPath) async {
     initFastUploadTaskList(apkPath);
     var scheduleRes = await startSchedule();
-
-    if (scheduleRes == null) {
-      setProjectRecordJobRunning(false);
-      _reset();
-      return;
-    }
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
 
+      _insertIntoJobHistoryList(true, myAppInfo.toString());
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
     } else {
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
       myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
+      _insertIntoJobHistoryList(false, myAppInfo.toString());
     }
 
     onProjectPackageFinished(myAppInfo!);
@@ -1139,7 +1135,6 @@ class WorkShopVm extends ChangeNotifier {
         }
       }
       runningTask!.assembleOrdersStr = sb.toString();
-
     }
     setProjectRecordJobRunning(false);
     _reset();
@@ -1162,5 +1157,15 @@ class WorkShopVm extends ChangeNotifier {
     runningTask!.jobRunning = running;
     _updateToDb();
     notifyListeners();
+  }
+
+  void _insertIntoJobHistoryList(bool success, String historyContent) {
+    var hisList = runningTask!.jobHistoryList;
+    hisList ??= runningTask!.jobHistoryList = [];
+    hisList.add(JobHistoryEntity(
+      buildTime: DateTime.now().millisecondsSinceEpoch,
+      success: success,
+      historyContent: historyContent,
+    ));
   }
 }

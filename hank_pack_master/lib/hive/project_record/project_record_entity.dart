@@ -1,6 +1,8 @@
 import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hive/hive.dart';
 
+import 'job_history_entity.dart';
+
 part 'project_record_entity.g.dart';
 
 /// 打包任务实体类
@@ -44,6 +46,9 @@ class ProjectRecordEntity {
 
   @HiveField(12)
   String? assembleOrdersStr; // 换个方式存储可用变体
+
+  @HiveField(13)
+  List<JobHistoryEntity>? jobHistoryList; // 换个方式存储作业历史
 
   List<String> get assembleOrderList {
     List<String> list = [];

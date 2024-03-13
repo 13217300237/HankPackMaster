@@ -178,7 +178,7 @@ class ProjectEntityDataSource extends DataGridSource {
               if (cellValue.value is ProjectRecordEntity) {
                 var e = cellValue.value as ProjectRecordEntity;
 
-                var his = e.jobHistory ?? [];
+                var his = e.jobHistoryList ?? [];
 
                 his = his.reversed.toList();
 
@@ -188,9 +188,9 @@ class ProjectEntityDataSource extends DataGridSource {
                     // 尝试将打包历史字符串转化为 MyAppInfo 对象
                     MyAppInfo myAppInfo;
                     try {
-                      myAppInfo = MyAppInfo.fromJsonString(s);
+                      myAppInfo = MyAppInfo.fromJsonString(s.historyContent!);
                     } catch (ex) {
-                      myAppInfo = MyAppInfo(errMessage: s);
+                      myAppInfo = MyAppInfo(errMessage: s.historyContent);
                     }
 
                     return Padding(
@@ -220,7 +220,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     confirmText: '我知道了!');
               } else {
                 var e = cellValue.entity!;
-                var his = e.jobHistory ?? [];
+                var his = e.jobHistoryList ?? [];
 
                 DialogUtil.showCustomDialog(
                     maxHeight: 600,
@@ -238,7 +238,8 @@ class ProjectEntityDataSource extends DataGridSource {
                               children: [
                                 Expanded(
                                   child: m.Card(
-                                    margin: const EdgeInsets.only(right: 10,bottom: 10),
+                                    margin: const EdgeInsets.only(
+                                        right: 10, bottom: 10),
                                     color: Colors.white,
                                     clipBehavior: Clip.antiAliasWithSaveLayer,
                                     child: Container(
@@ -246,7 +247,7 @@ class ProjectEntityDataSource extends DataGridSource {
                                           gradient: mainPanelGradient),
                                       padding: const EdgeInsets.all(10.0),
                                       child: SelectableText(
-                                        s,
+                                        s.historyContent ?? '',
                                         style: gridTextStyle,
                                       ),
                                     ),
@@ -570,8 +571,8 @@ class ProjectEntityDataSource extends DataGridSource {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 20),
                         child: Wrap(
-                          alignment: WrapAlignment.center,
-                          crossAxisAlignment: WrapCrossAlignment.center,
+                          alignment: WrapAlignment.start,
+                          crossAxisAlignment: WrapCrossAlignment.start,
                           children: [...orders.map((e) => card(e))],
                         ),
                       ),
