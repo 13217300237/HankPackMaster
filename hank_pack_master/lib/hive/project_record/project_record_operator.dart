@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hive/hive.dart';
 
@@ -36,7 +37,8 @@ class ProjectRecordOperator {
 
       var findAllResult = findAll();
       for (var e in findAllResult) {
-        debugPrint("=find== ${e.projectName} - ${e.assembleOrders}   - ${e.assembleOrdersStr} ===");
+        debugPrint(
+            "=find== ${e.projectName} - ${e.assembleOrders}   - ${e.assembleOrdersStr} ===");
       }
     } else {
       debugPrint("执行插入");
@@ -78,6 +80,36 @@ class ProjectRecordOperator {
     } catch (e) {
       debugPrint('删除全部时出现问题:$e');
       return null;
+    }
+  }
+
+  /// 获取最近10条打包记录
+  static List<JobHistoryEntity> getRecentJobHistoryList({int recentCount = 10}) {
+    List<JobHistoryEntity> recent = [];
+
+    var allProject = findAll();
+
+    for (var e in allProject) {
+      var temp = e.jobHistoryList;
+      temp?.forEach((j) {
+        j.projectName = e.projectName;
+        j.gitUrl = e.gitUrl;
+        j.branchName = e.branch;
+      });
+
+      if (temp != null) {
+        recent.addAll(temp);
+      }
+    }
+
+    recent.sort((c1, c2) {
+      return c1.buildTime ?? 0 - (c2.buildTime ?? 0);
+    });
+
+    if (recent.length > recentCount) {
+      return recent.sublist(0, recentCount);
+    } else {
+      return recent;
     }
   }
 }

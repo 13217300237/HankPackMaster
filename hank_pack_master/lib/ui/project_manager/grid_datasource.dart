@@ -214,7 +214,7 @@ class ProjectEntityDataSource extends DataGridSource {
                     maxHeight: 600,
                     maxWidth: 600,
                     context: buildContext,
-                    title: "${e.projectName} 打包历史",
+                    title: "${e.projectName} 作业历史",
                     content: content,
                     showCancel: false,
                     confirmText: '我知道了!');

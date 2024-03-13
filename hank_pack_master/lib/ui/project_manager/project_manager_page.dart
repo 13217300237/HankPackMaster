@@ -1,9 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/active_dialog.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/start_package_dialog.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -17,6 +19,7 @@ import 'dialog/create_project_record_dialog.dart';
 import 'dialog/fast_upload_dialog.dart';
 import 'grid_datasource.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
+import 'package:flutter/material.dart' as m;
 
 class ProjectManagerPage extends StatefulWidget {
   const ProjectManagerPage({super.key});
@@ -51,11 +54,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     var grid = Expanded(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(.6),
-          border: Border.all(color: Colors.teal, width: .2),
-          borderRadius: const BorderRadius.all(Radius.circular(3)),
-          gradient: cardGradient
-        ),
+            color: Colors.white.withOpacity(.6),
+            border: Border.all(color: Colors.teal, width: .2),
+            borderRadius: const BorderRadius.all(Radius.circular(3)),
+            gradient: cardGradient),
         margin: const EdgeInsets.all(15),
         child: SfDataGrid(
           columnWidthMode: ColumnWidthMode.fill,
@@ -287,9 +289,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               DialogUtil.showCustomDialog(
                 context: context,
                 title: "最近作业历史",
-                content: ListView(children: [
-                  ...getRecentJobResult()
-                ],),
+                content: ListView(
+                  children: [...getRecentJobResult()],
+                ),
               );
             },
           ),
@@ -478,8 +480,31 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   List<Widget> getRecentJobResult() {
+    var recentJobHistoryList =
+        ProjectRecordOperator.getRecentJobHistoryList(recentCount: 3);
+
     return [
-      Text("TODO 展示最近所有的激活/打包历史"),
+      ...recentJobHistoryList.map((e) {
+        return m.Card(
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("工程名:${e.projectName}", style: gridTextStyle),
+                Text("git地址:${e.gitUrl}", style: gridTextStyle),
+                Text("分支名：${e.branchName}", style: gridTextStyle),
+                Text(
+                    "构建时间:${Jiffy.parseFromDateTime(DateTime.fromMillisecondsSinceEpoch(e.buildTime ?? 0)).format(pattern: "yyyy-MM-dd HH:mm:ss")}",
+                    style: gridTextStyle),
+                Text("是否成功${e.success}", style: gridTextStyle),
+                Text("打包历史内容:${e.historyContent}", style: gridTextStyle),
+              ],
+            ),
+          ),
+        );
+      }).toList()
     ];
   }
 }

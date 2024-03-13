@@ -11,7 +11,12 @@ class JobHistoryEntity {
   int? buildTime; // 构建时间
 
   @HiveField(2)
-  String? historyContent; // 构建时间
+  String? historyContent; // 作业历史内容
+
+  /// 3个临时字段，不必存到数据库
+  String? projectName;
+  String? gitUrl;
+  String? branchName;
 
   JobHistoryEntity({
     required this.buildTime,
