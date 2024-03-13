@@ -154,7 +154,7 @@ class ProjectEntityDataSource extends DataGridSource {
               DataGridCell<CellValue>(
                   columnName: ColumnNameConst.assembleOrders,
                   value: CellValue(
-                      value: e.assembleOrders,
+                      value: e.assembleOrderList,
                       cellType: CellType.assembleOrders)),
               DataGridCell<CellValue>(
                   columnName: ColumnNameConst.recordOperation,
@@ -582,7 +582,7 @@ class ProjectEntityDataSource extends DataGridSource {
 
   void _resetProjectRecord(ProjectRecordEntity e) {
     e.preCheckOk = false;
-    e.assembleOrders = [];
+    e.assembleOrdersStr = null;
     e.jobHistory = [];
     ProjectRecordOperator.insertOrUpdate(e);
     _refresh();

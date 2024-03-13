@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/apk_parser_result.dart';
@@ -228,6 +229,23 @@ class WorkShopVm extends ChangeNotifier {
           succeed: true,
           data: _enableAssembleOrders,
           executeLog: executeRes.res,
+        );
+      });
+
+  get assembleOrdersTestTask => TaskStage("可用指令查询测试", actionFunc: () async {
+        await waitSomeSec();
+
+        _enableAssembleOrders.clear();
+        for (int i = 0; i < 4; i++) {
+          _enableAssembleOrders
+              .add("${DateTime.now().millisecond}-${Random().nextInt(10)}");
+        }
+
+        debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
+        return OrderExecuteResult(
+          succeed: true,
+          data: _enableAssembleOrders,
+          executeLog: "变体获取成功",
         );
       });
 
@@ -598,6 +616,8 @@ class WorkShopVm extends ChangeNotifier {
     taskStateList.add(projectStructCheckTask);
     taskStateList.add(modifyGradlePropertiesFile);
     taskStateList.add(assembleOrdersTask);
+
+    // taskStateList.add(assembleOrdersTestTask);
   }
 
   String? apkToUpload; // 即将上传的文件地址
@@ -1111,7 +1131,14 @@ class WorkShopVm extends ChangeNotifier {
   void onProjectActiveFinished(List<String> assembleOrders) {
     if (assembleOrders.isNotEmpty) {
       runningTask!.preCheckOk = true;
-      runningTask!.assembleOrders = assembleOrders;
+      StringBuffer sb = StringBuffer();
+      for (var e in assembleOrders) {
+        if (e.trim().isNotEmpty) {
+          sb.writeln(e);
+        }
+      }
+
+      runningTask!.assembleOrdersStr = sb.toString();
     }
     setProjectRecordJobRunning(false);
     _reset();

@@ -20,7 +20,7 @@ class ProjectRecordEntity {
   late bool preCheckOk; // 是否已预检成功
 
   @HiveField(5)
-  List<String>? assembleOrders;
+  List<String>? assembleOrders; // listString的存储方式存在bug
 
   @HiveField(6)
   List<String>? jobHistory;
@@ -41,6 +41,21 @@ class ProjectRecordEntity {
   @HiveField(11)
   PackageSetting? fastUploadSetting; // 快速上传阶段的配置
 
+  @HiveField(12)
+  String? assembleOrdersStr; // 换个方式存储可用变体
+
+  List<String> get assembleOrderList {
+    List<String> list = [];
+    if (assembleOrdersStr == null) return list;
+
+    var split = assembleOrdersStr!.split("\n");
+    for (var e in split) {
+      if (e.isNotEmpty) {
+        list.add(e.trim());
+      }
+    }
+    return list;
+  }
 
   /// 临时字段，不用存数据库
   /// 传递给工坊的对象，包含了打包所需的所有参数
@@ -78,5 +93,3 @@ class ProjectRecordEntity {
   @override
   int get hashCode => branch.hashCode ^ gitUrl.hashCode;
 }
-
-

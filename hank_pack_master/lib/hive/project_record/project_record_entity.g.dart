@@ -28,13 +28,14 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
     )
       ..activeSetting = fields[9] as PackageSetting?
       ..packageSetting = fields[10] as PackageSetting?
-      ..fastUploadSetting = fields[11] as PackageSetting?;
+      ..fastUploadSetting = fields[11] as PackageSetting?
+      ..assembleOrdersStr = fields[12] as String?;
   }
 
   @override
   void write(BinaryWriter writer, ProjectRecordEntity obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(1)
       ..write(obj.projectName)
       ..writeByte(2)
@@ -56,7 +57,9 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       ..writeByte(10)
       ..write(obj.packageSetting)
       ..writeByte(11)
-      ..write(obj.fastUploadSetting);
+      ..write(obj.fastUploadSetting)
+      ..writeByte(12)
+      ..write(obj.assembleOrdersStr);
   }
 
   @override

@@ -1,7 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
-import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hive/hive.dart';
 
 class ProjectRecordOperator {
@@ -24,9 +22,22 @@ class ProjectRecordOperator {
         (p) => p.gitUrl == entity.gitUrl && p.branch == entity.branch);
 
     if (index != -1) {
-      debugPrint(
-          "执行更新 gitUrl=${entity.gitUrl}\nbranch=${entity.branch}\npreCheckOk=${entity.preCheckOk}\n====================");
+      debugPrint('''
+      执行更新 
+      index=$index 
+      gitUrl=${entity.gitUrl}
+      branch=${entity.branch}
+      preCheckOk=${entity.preCheckOk}
+      assembleOrders=${entity.assembleOrders}
+      assembleOrdersStr=${entity.assembleOrdersStr}
+      ====================
+      ''');
       _box!.putAt(index, entity); // 执行更新操作
+
+      var findAllResult = findAll();
+      for (var e in findAllResult) {
+        debugPrint("=find== ${e.projectName} - ${e.assembleOrders}   - ${e.assembleOrdersStr} ===");
+      }
     } else {
       debugPrint("执行插入");
       _box!.add(entity); // 执行插入操作

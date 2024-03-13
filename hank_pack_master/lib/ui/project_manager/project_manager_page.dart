@@ -52,8 +52,9 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(.6),
-          border: Border.all(color: Colors.teal, width: .1),
+          border: Border.all(color: Colors.teal, width: .2),
           borderRadius: const BorderRadius.all(Radius.circular(3)),
+          gradient: cardGradient
         ),
         margin: const EdgeInsets.all(15),
         child: SfDataGrid(
@@ -127,7 +128,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           content: ActiveDialogWidget(
             projectRecordEntity: e,
             workShopVm: _workShopVm,
-            enableAssembleOrders: e.assembleOrders ?? [],
+            enableAssembleOrders: e.assembleOrderList,
             goToWorkShop: null,
             defaultJavaHome: _envParamVm.javaRoot,
           ),
@@ -143,7 +144,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             content: StartPackageDialogWidget(
               projectRecordEntity: e,
               workShopVm: _workShopVm,
-              enableAssembleOrders: e.assembleOrders ?? [],
+              enableAssembleOrders: e.assembleOrderList,
               goToWorkShop: null,
               defaultJavaHome: _envParamVm.javaRoot,
             ),
