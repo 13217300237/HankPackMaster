@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
@@ -36,6 +37,7 @@ Widget input(
       fontSize: 15,
       height: 1.5,
       fontWeight: FontWeight.w600,
+      color: Colors.black,
       fontFamily: 'STKAITI');
 
   return Padding(
@@ -59,7 +61,9 @@ Widget input(
         Expanded(
           child: TextBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(8),
+                gradient: mainPanelGradient,
+                border: Border.all(color: Colors.white,width: .35)
               ),
               unfocusedColor: Colors.transparent,
               highlightColor: Colors.transparent,
@@ -71,6 +75,7 @@ Widget input(
               maxLines: maxLines,
               maxLength: maxLength,
               enabled: enable,
+
               controller: controller),
         ),
         if (suffix != null) ...[suffix],

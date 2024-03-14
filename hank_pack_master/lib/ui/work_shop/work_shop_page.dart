@@ -138,7 +138,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
                 maxLines: 2, enable: false),
             input('打包命令', "打包命令...", _workShopVm.selectedOrderController,
                 enable: false),
-            input('JavaHome', "jdk...", _workShopVm.javaHomeController,
+            input('JavaHome', "jdk可执行路径", _workShopVm.javaHomeController,
                 enable: false),
             const SizedBox(height: 5),
             input(
