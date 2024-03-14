@@ -15,43 +15,42 @@ class AppInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     if (!appInfo.errMessage.empty()) {
-      return msgWidget();
+      return Card(
+        backgroundColor: Colors.red.withOpacity(.1),
+        borderRadius: BorderRadius.circular(10),
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        child: Container(
+            constraints: const BoxConstraints(maxHeight:200), child: msgWidget()),
+      );
     } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 15),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _line('App名称', "${appInfo.buildName}"),
-                          _line('App版本', "${appInfo.buildVersion}"),
-                          _line('编译版本', "${appInfo.buildVersionNo}"),
-                          _line('上传批次', "${appInfo.buildBuildVersion}"),
-                          _line('App包名', "${appInfo.buildIdentifier}"),
-                          _line('应用描述', "${appInfo.buildDescription}"),
-                          _line('更新日志', "${appInfo.buildUpdateDescription}"),
-                          _line('更新时间', "${appInfo.buildUpdated}"),
-                          qrCode(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      return Card(
+        backgroundColor: Colors.blue.withOpacity(.1),
+        borderRadius: BorderRadius.circular(10),
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _line('App名称', "${appInfo.buildName}"),
+                _line('App版本', "${appInfo.buildVersion}"),
+                _line('编译版本', "${appInfo.buildVersionNo}"),
+                _line('上传批次', "${appInfo.buildBuildVersion}"),
+                _line('App包名', "${appInfo.buildIdentifier}"),
+                _line('应用描述', "${appInfo.buildDescription}"),
+                _line('更新日志', "${appInfo.buildUpdateDescription}"),
+                _line('更新时间', "${appInfo.buildUpdated}"),
+              ],
             ),
-          ),
-        ],
+            qrCode(),
+          ],
+        ),
       );
     }
   }
@@ -83,8 +82,8 @@ class AppInfoCard extends StatelessWidget {
       if (appInfo.uploadPlatform == '${UploadPlatform.pgy.index}') {
         return Center(
           child: CachedNetworkImage(
-            width: 260,
-            height: 260,
+            width: qrCodeSize,
+            height: qrCodeSize,
             imageUrl: "${appInfo.buildQRCodeURL}",
             placeholder: (context, url) => const Center(
                 child: m.CircularProgressIndicator(
@@ -98,7 +97,7 @@ class AppInfoCard extends StatelessWidget {
         return Center(
           child: QrImageView(
             data: '${appInfo.buildQRCodeURL}',
-            size: 260,
+            size: qrCodeSize,
             version: QrVersions.auto,
           ),
         );
@@ -111,34 +110,27 @@ class AppInfoCard extends StatelessWidget {
       return const SizedBox();
     }
 
-    var fontSize = 15.0;
-
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-                fontSize: fontSize,
-                color: Colors.black,
-                fontWeight: FontWeight.w600),
-          ),
+          Text(title, style: _style),
           const SizedBox(width: 5),
-          Text(":", style: TextStyle(fontSize: fontSize, color: Colors.black)),
+          Text(":", style: _style),
           const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              value,
-              style: TextStyle(
-                  fontSize: fontSize,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w800),
-            ),
-          ),
+          Text(value, style: _style),
         ],
       ),
     );
   }
+
+  final qrCodeSize = 160.0;
+
+  final TextStyle _style = const TextStyle(
+    fontSize: 15,
+    color: Colors.black,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'STKAITI',
+  );
 }

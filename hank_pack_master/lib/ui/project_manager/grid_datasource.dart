@@ -22,7 +22,7 @@ const TextStyle gridTextStyle = TextStyle(
 const TextStyle gridTextStyle2 = TextStyle(
     color: Colors.black,
     fontFamily: 'STKAITI',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: FontWeight.w600);
 
 enum CellType {

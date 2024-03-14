@@ -10,10 +10,12 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/gradients.dart';
+import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/url_check_util.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
+import '../work_shop/app_info_card.dart';
 import 'column_name_const.dart';
 import 'dialog/create_project_record_dialog.dart';
 import 'dialog/fast_upload_dialog.dart';
@@ -289,9 +291,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               DialogUtil.showCustomDialog(
                 context: context,
                 title: "最近作业历史",
-                content: ListView(
-                  children: [...getRecentJobResult()],
-                ),
+                maxWidth: 800,
+                content: ListView(children: [...getRecentJobResult()]),
               );
             },
           ),
@@ -481,32 +482,48 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
 
   List<Widget> getRecentJobResult() {
     var recentJobHistoryList =
-        ProjectRecordOperator.getRecentJobHistoryList(recentCount: 3);
+        ProjectRecordOperator.getRecentJobHistoryList(recentCount: 10);
 
     return [
       ...recentJobHistoryList.map((e) {
-        return m.Card(
-          color: e.success == true
+        MyAppInfo myAppInfo;
+        try {
+          myAppInfo = MyAppInfo.fromJsonString(e.historyContent!);
+        } catch (ex) {
+          myAppInfo = MyAppInfo(errMessage: e.historyContent);
+        }
+
+        return Card(
+          backgroundColor: e.success == true
               ? Colors.green.withOpacity(.1)
               : Colors.red.withOpacity(.1),
-          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("工程名:${e.projectName}", style: gridTextStyle2),
-                Text("git地址:${e.gitUrl}", style: gridTextStyle2),
-                Text("分支名：${e.branchName}", style: gridTextStyle2),
-                Text(
-                    "构建时间:${Jiffy.parseFromDateTime(DateTime.fromMillisecondsSinceEpoch(e.buildTime ?? 0)).format(pattern: "yyyy-MM-dd HH:mm:ss")}",
-                    style: gridTextStyle2),
-                Text("打包历史内容:${e.historyContent}", style: gridTextStyle2),
-              ],
-            ),
+          borderRadius: BorderRadius.circular(10),
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _text("git地址", e.gitUrl ?? ''),
+              _text("分支名", e.branchName ?? ''),
+              _text(
+                  "构建时间",
+                  Jiffy.parseFromDateTime(
+                          DateTime.fromMillisecondsSinceEpoch(e.buildTime ?? 0))
+                      .format(pattern: "yyyy-MM-dd HH:mm:ss")),
+              AppInfoCard(appInfo: myAppInfo),
+              const SizedBox(height: 10),
+              _text("作业配置", ""),
+              _text("阶段日志详情", "")
+            ],
           ),
         );
       }).toList()
     ];
+  }
+
+  Widget _text(String title, String content) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 5),
+      child: Text("$title : $content", style: gridTextStyle2),
+    );
   }
 }
