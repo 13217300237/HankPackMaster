@@ -20,19 +20,22 @@ class JobHistoryEntityAdapter extends TypeAdapter<JobHistoryEntity> {
       buildTime: fields[3] as int?,
       success: fields[1] as bool?,
       historyContent: fields[2] as String?,
+      hasRead: fields[4] as bool?,
     );
   }
 
   @override
   void write(BinaryWriter writer, JobHistoryEntity obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(1)
       ..write(obj.success)
       ..writeByte(3)
       ..write(obj.buildTime)
       ..writeByte(2)
-      ..write(obj.historyContent);
+      ..write(obj.historyContent)
+      ..writeByte(4)
+      ..write(obj.hasRead);
   }
 
   @override

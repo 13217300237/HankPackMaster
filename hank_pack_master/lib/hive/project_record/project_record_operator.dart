@@ -84,7 +84,9 @@ class ProjectRecordOperator {
   }
 
   /// 获取最近10条打包记录
-  static List<JobHistoryEntity> getRecentJobHistoryList({int recentCount = 10}) {
+  /// [recentCount] 正数，表示取最大多少条, 为-1时，将会返回所有的打包记录
+  static List<JobHistoryEntity> getRecentJobHistoryList(
+      {int recentCount = 10}) {
     List<JobHistoryEntity> recent = [];
 
     var allProject = findAll();
@@ -108,10 +110,42 @@ class ProjectRecordOperator {
       return (c2.buildTime ?? 0) - (c1.buildTime ?? 0);
     });
 
+    if (recentCount == -1) {
+      return recent;
+    }
+
     if (recent.length > recentCount) {
       return recent.sublist(0, recentCount);
     } else {
       return recent;
     }
   }
+
+  /// 找出所有未读的作业历史
+  /// 获取最近10条打包记录
+  /// [recentCount] 正数，表示取最大多少条, 为-1时，将会返回所有的打包记录
+  static List<JobHistoryEntity> findAllUnreadJobHistoryEntity() {
+    List<JobHistoryEntity> recent = [];
+
+    var allProject = findAll();
+
+    for (var e in allProject) {
+      var temp = e.jobHistoryList;
+      temp?.forEach((j) {
+        j.projectName = e.projectName;
+        j.gitUrl = e.gitUrl;
+        j.branchName = e.branch;
+      });
+
+      if (temp != null) {
+        recent.addAll(temp);
+      }
+    }
+
+    recent.removeWhere((e) => e.hasRead == true);
+
+    return recent;
+  }
+
+  /// 还缺少setRead方法和 setAllRead方法
 }

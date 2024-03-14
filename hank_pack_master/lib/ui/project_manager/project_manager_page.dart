@@ -47,6 +47,11 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   late EnvParamVm _envParamVm;
   late AppTheme _appTheme;
 
+  int get unreadHisCount {
+    var unreadHisList = ProjectRecordOperator.findAllUnreadJobHistoryEntity();
+    return unreadHisList.length;
+  }
+
   @override
   Widget build(BuildContext context) {
     _envParamVm = context.watch<EnvParamVm>();
@@ -280,13 +285,13 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         ),
         CommandBarBuilderItem(
           builder: (context, mode, w) => Tooltip(
-            message: "最近作业历史",
+            message: "最近作业历史 (未读$unreadHisCount)",
             child: commandCard(w),
           ),
           wrappedItem: CommandBarButton(
             icon: const Icon(FluentIcons.history),
-            label: const Text('最近作业历史',
-                style: TextStyle(fontWeight: FontWeight.w600)),
+            label: Text('最近作业历史 （ 未读 $unreadHisCount ）',
+                style: const TextStyle(fontWeight: FontWeight.w600)),
             onPressed: () {
               DialogUtil.showCustomDialog(
                 context: context,

@@ -1173,6 +1173,7 @@ class WorkShopVm extends ChangeNotifier {
       buildTime: DateTime.now().millisecondsSinceEpoch,
       success: success,
       historyContent: historyContent,
+      hasRead: false,
     ));
   }
 }

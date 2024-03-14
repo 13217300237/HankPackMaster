@@ -25,5 +25,6 @@ class JobHistoryEntity {
     required this.buildTime,
     required this.success,
     required this.historyContent,
+    required this.hasRead,
   });
 }
