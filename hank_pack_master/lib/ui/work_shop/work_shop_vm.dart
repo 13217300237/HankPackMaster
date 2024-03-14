@@ -35,6 +35,7 @@ class WorkShopVm extends ChangeNotifier {
   final projectPathController = TextEditingController(); // 工程路径
   final selectedOrderController = TextEditingController(); // 选中的打包命令
   final selectedUploadPlatformController = TextEditingController(); // 工程路径
+  final javaHomeController = TextEditingController(); // 选中的打包命令
 
   final projectAppDescController = TextEditingController(); // 应用描述
   final updateLogController = TextEditingController(); // 更新日志
@@ -144,7 +145,7 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
         }
         return OrderExecuteResult(
-            succeed: true, data: '打包参数正常 工作目录为,$projectPath ');
+            succeed: true, data: '打包参数正常 工作目录为 \n$projectPath ');
       });
 
   get gitCloneTask => TaskStage("工程克隆", actionFunc: () async {
@@ -934,6 +935,7 @@ class WorkShopVm extends ChangeNotifier {
     projectAppDescController.text = '';
     updateLogController.text = '';
     apkLocationController.text = '';
+    javaHomeController.text = '';
     selectedOrder = '';
     selectedOrderController.text = '';
     selectedUploadPlatform = null;
@@ -995,6 +997,7 @@ class WorkShopVm extends ChangeNotifier {
   Future<void> startActive() async {
     gitUrlController.text = runningTask!.gitUrl;
     gitBranchController.text = runningTask!.branch;
+    javaHomeController.text = runningTask!.setting!.jdk!.envName;
     setProjectPath();
 
     initPreCheckTaskList();
@@ -1054,21 +1057,11 @@ class WorkShopVm extends ChangeNotifier {
         projectNameController.text = runningTask!.projectName;
         projectAppDescController.text = runningTask!.projectDesc ?? '';
 
+        // apk路径不为空时，走快速上传
         if (runningTask!.apkPath != null && runningTask!.apkPath!.isNotEmpty) {
-          selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
-          selectedUploadPlatformController.text =
-              selectedUploadPlatform!.name ?? '';
-          apkLocationController.text = runningTask!.apkPath!;
-
           await startFastUpload(runningTask!.apkPath!);
         } else if (runningTask!.preCheckOk == true) {
-          updateLogController.text = runningTask!.setting!.appUpdateLog ?? '';
-          apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
-          selectedOrder = runningTask!.setting!.selectedOrder ?? '';
-          selectedOrderController.text = selectedOrder!;
-          selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
-          selectedUploadPlatformController.text =
-              selectedUploadPlatform!.name ?? '';
+          // 已激活的项目，走打包
           await startPackage();
         } else {
           // 否则，先进行激活
@@ -1087,6 +1080,16 @@ class WorkShopVm extends ChangeNotifier {
   MyAppInfo? myAppInfo;
 
   Future<void> startPackage() async {
+    updateLogController.text = runningTask!.setting!.appUpdateLog ?? '';
+    apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
+    selectedOrder = runningTask!.setting!.selectedOrder ?? '';
+    selectedOrderController.text = selectedOrder!;
+
+    debugPrint("runningTask!.setting!.jdk!-> ${runningTask!.setting!.jdk!.toString()}");
+
+    javaHomeController.text = runningTask!.setting!.jdk!.envPath;
+    selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
+    selectedUploadPlatformController.text = selectedUploadPlatform!.name ?? '';
     initPackageTaskList();
     var scheduleRes = await startSchedule();
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
@@ -1105,6 +1108,10 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   Future<void> startFastUpload(String apkPath) async {
+    selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
+    selectedUploadPlatformController.text = selectedUploadPlatform!.name ?? '';
+    apkLocationController.text = runningTask!.apkPath!;
+
     initFastUploadTaskList(apkPath);
     var scheduleRes = await startSchedule();
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
