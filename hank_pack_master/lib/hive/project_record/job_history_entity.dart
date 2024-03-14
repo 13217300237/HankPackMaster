@@ -13,6 +13,9 @@ class JobHistoryEntity {
   @HiveField(2)
   String? historyContent; // 作业历史内容
 
+  @HiveField(4)
+  bool? hasRead; // 是否已读
+
   /// 3个临时字段，不必存到数据库
   String? projectName;
   String? gitUrl;

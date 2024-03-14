@@ -102,8 +102,10 @@ class ProjectRecordOperator {
       }
     }
 
+    debugPrint("recent.length-> ${recent.length}");
+
     recent.sort((c1, c2) {
-      return c1.buildTime ?? 0 - (c2.buildTime ?? 0);
+      return (c2.buildTime ?? 0) - (c1.buildTime ?? 0);
     });
 
     if (recent.length > recentCount) {

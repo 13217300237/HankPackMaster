@@ -102,6 +102,8 @@ class PackageHistoryCard extends StatelessWidget {
   void showMyAppInfo(MyAppInfo s, BuildContext context) {
     var card = AppInfoCard(appInfo: s);
 
+    double maxHeight = s.errMessage.empty() ? 400 : 900;
+
     DialogUtil.showCustomDialog(
       context: context,
       content: card,
@@ -110,7 +112,7 @@ class PackageHistoryCard extends StatelessWidget {
       showCancel: false,
       confirmText: '我知道了！',
       maxWidth: 800,
-      maxHeight: 400,
+      maxHeight: maxHeight,
     );
   }
 

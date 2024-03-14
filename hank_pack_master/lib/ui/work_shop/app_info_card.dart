@@ -22,7 +22,7 @@ class AppInfoCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 10),
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: Container(
-            constraints: const BoxConstraints(maxHeight:200), child: msgWidget()),
+            constraints: const BoxConstraints(maxHeight:400), child: msgWidget()),
       );
     } else {
       return Card(
