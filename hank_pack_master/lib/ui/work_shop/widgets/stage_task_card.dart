@@ -32,7 +32,10 @@ class StageTaskCard extends StatefulWidget {
 
 class _StageTaskCardState extends State<StageTaskCard> {
   void _showMyAppInfo(MyAppInfo s) {
-    var card = AppInfoCard(appInfo: s);
+    var card = AppInfoCard(
+      appInfo: s,
+      initiallyExpanded: true,
+    );
 
     DialogUtil.showCustomDialog(
       context: context,

@@ -10,8 +10,10 @@ import '../../comm/pgy/pgy_entity.dart';
 /// 流水线最终成果展示卡片
 class AppInfoCard extends StatelessWidget {
   final MyAppInfo appInfo;
+  final bool initiallyExpanded;
 
-  const AppInfoCard({super.key, required this.appInfo});
+  const AppInfoCard(
+      {super.key, required this.appInfo, required this.initiallyExpanded});
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +23,7 @@ class AppInfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         margin: const EdgeInsets.symmetric(vertical: 10),
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: Container(
-            constraints: const BoxConstraints(maxHeight:400), child: msgWidget()),
+        child: msgWidget(),
       );
     } else {
       return Card(
@@ -58,8 +59,7 @@ class AppInfoCard extends StatelessWidget {
   Widget msgWidget() {
     if (appInfo.errMessage != null && appInfo.errMessage!.isNotEmpty) {
       List<String> listString = appInfo.errMessage!.split("\n");
-
-      return ListView.builder(
+      var ex = ListView.builder(
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.only(right: 15.0),
@@ -70,6 +70,19 @@ class AppInfoCard extends StatelessWidget {
           );
         },
         itemCount: listString.length,
+      );
+      return Expander(
+        initiallyExpanded: initiallyExpanded,
+        headerBackgroundColor:
+            ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
+        header: Text(
+          '查看错误详情',
+          style: _style,
+        ),
+        content: SizedBox(
+          height: 500,
+          child: ex,
+        ),
       );
     }
     return const SizedBox();

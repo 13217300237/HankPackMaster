@@ -514,7 +514,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                   Jiffy.parseFromDateTime(
                           DateTime.fromMillisecondsSinceEpoch(e.buildTime ?? 0))
                       .format(pattern: "yyyy-MM-dd HH:mm:ss")),
-              AppInfoCard(appInfo: myAppInfo),
+              AppInfoCard(appInfo: myAppInfo,initiallyExpanded: false),
               const SizedBox(height: 10),
               _text("作业配置", ""),
               _text("阶段日志详情", "")

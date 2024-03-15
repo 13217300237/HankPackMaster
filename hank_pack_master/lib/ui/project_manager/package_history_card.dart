@@ -100,7 +100,7 @@ class PackageHistoryCard extends StatelessWidget {
   }
 
   void showMyAppInfo(MyAppInfo s, BuildContext context) {
-    var card = AppInfoCard(appInfo: s);
+    var card = AppInfoCard(appInfo: s,initiallyExpanded: true,);
 
     double maxHeight = s.errMessage.empty() ? 400 : 900;
 
