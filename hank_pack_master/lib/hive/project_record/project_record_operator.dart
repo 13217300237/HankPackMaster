@@ -23,10 +23,6 @@ class ProjectRecordOperator {
         (p) => p.gitUrl == entity.gitUrl && p.branch == entity.branch);
 
     if (index != -1) {
-
-      // 先找出现有的 entity
-      var current = _box!.values.toList()[index];
-
       debugPrint('''
       执行更新 
       index=$index 
@@ -151,5 +147,37 @@ class ProjectRecordOperator {
     return recent;
   }
 
-  /// 还缺少setRead方法和 setAllRead方法
+  /// TODO 还缺少setRead方法和 setAllRead方法
+  ///
+  /// 将指定工程的某一条历史记录设置为已读并入库
+  static void setRead(ProjectRecordEntity projectRecordEntity,
+      JobHistoryEntity jobHistoryEntity) {
+    _initBox();
+    jobHistoryEntity.hasRead = true;
+    int projectRecordIndex = _box!.values.toList().indexWhere((p) =>
+        p.gitUrl == projectRecordEntity.gitUrl &&
+        p.branch == projectRecordEntity.branch);
+
+    if (projectRecordIndex == -1) {
+      return;
+    }
+
+    var find = _box!.values.toList()[projectRecordIndex]; // 先找到这条工程记录
+    if (find.jobHistoryList == null) {
+      return;
+    }
+
+    var hisIndex = find.jobHistoryList!.indexWhere((e) =>
+        e.buildTime == jobHistoryEntity.buildTime &&
+        e.historyContent == jobHistoryEntity.historyContent);
+
+    if (hisIndex == -1) {
+      return;
+    }
+
+    var findHis = find.jobHistoryList![hisIndex]; // 再找到这条历史记录
+    findHis.hasRead = true;
+
+    _box!.put(projectRecordIndex, projectRecordEntity);
+  }
 }

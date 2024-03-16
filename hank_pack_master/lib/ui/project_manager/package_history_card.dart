@@ -1,19 +1,28 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
+import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 
 import '../../comm/dialog_util.dart';
 import '../../hive/project_record/upload_platforms.dart';
 import '../work_shop/app_info_card.dart';
 
 class PackageHistoryCard extends StatelessWidget {
+  final ProjectRecordEntity projectRecordEntity;
+  final JobHistoryEntity jobHistoryEntity;
   final MyAppInfo myAppInfo;
   final Function(String apkPath)? doFastUpload;
+  final Function() onRefresh;
 
   const PackageHistoryCard({
     super.key,
     required this.myAppInfo,
     this.doFastUpload,
+    required this.projectRecordEntity,
+    required this.jobHistoryEntity,
+    required this.onRefresh,
   });
 
   Color _bgColor() {
@@ -68,7 +77,11 @@ class PackageHistoryCard extends StatelessWidget {
     }
 
     return GestureDetector(
-        onTap: () => showMyAppInfo(myAppInfo, context),
+        onTap: () {
+          ProjectRecordOperator.setRead(projectRecordEntity, jobHistoryEntity);
+          onRefresh();
+          showMyAppInfo(myAppInfo, context);
+        },
         child: Card(
             margin: const EdgeInsets.all(4),
             backgroundColor: _bgColor(),
@@ -100,8 +113,7 @@ class PackageHistoryCard extends StatelessWidget {
   }
 
   void showMyAppInfo(MyAppInfo s, BuildContext context) {
-    var card = AppInfoCard(appInfo: s,initiallyExpanded: true,);
-
+    var card = AppInfoCard(appInfo: s, initiallyExpanded: true);
     double maxHeight = s.errMessage.empty() ? 400 : 900;
 
     DialogUtil.showCustomDialog(

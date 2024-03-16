@@ -208,13 +208,15 @@ class ProjectEntityDataSource extends DataGridSource {
 
                 var content = ListView.builder(
                   itemBuilder: (context, index) {
-                    var s = his[index];
+                    var jobHistoryEntity = his[index];
                     // 尝试将打包历史字符串转化为 MyAppInfo 对象
                     MyAppInfo myAppInfo;
                     try {
-                      myAppInfo = MyAppInfo.fromJsonString(s.historyContent!);
+                      myAppInfo = MyAppInfo.fromJsonString(
+                          jobHistoryEntity.historyContent!);
                     } catch (ex) {
-                      myAppInfo = MyAppInfo(errMessage: s.historyContent);
+                      myAppInfo = MyAppInfo(
+                          errMessage: jobHistoryEntity.historyContent);
                     }
 
                     return Padding(
@@ -223,10 +225,13 @@ class ProjectEntityDataSource extends DataGridSource {
                         children: [
                           Expanded(
                               child: PackageHistoryCard(
-                                  myAppInfo: myAppInfo,
-                                  doFastUpload: (s) {
-                                    openFastUploadDialogFunc?.call(entity, s);
-                                  })),
+                            projectRecordEntity: entity,
+                            jobHistoryEntity: jobHistoryEntity,
+                            myAppInfo: myAppInfo,
+                            doFastUpload: (s) =>
+                                openFastUploadDialogFunc?.call(entity, s),
+                            onRefresh: () => notifyListeners(),
+                          )),
                         ],
                       ),
                     );
