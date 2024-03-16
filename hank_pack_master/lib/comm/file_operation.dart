@@ -3,6 +3,22 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 
+///
+/// [path] 指定路径
+/// [outputList] 输入数组
+void searchForAPKFiles(String path, List<String> apkFilePaths) {
+  final dir = Directory(path);
+  dir.list(recursive: true).listen((fileSystemEntity) {
+    if (fileSystemEntity is File) {
+      if (fileSystemEntity.path.endsWith('.apk')) {
+        apkFilePaths.add(fileSystemEntity.path);
+      }
+    } else if (fileSystemEntity is Directory) {
+      searchForAPKFiles(fileSystemEntity.path, apkFilePaths);
+    }
+  });
+}
+
 Future<List<String>> findApkFiles(String folderPath) async {
   List<String> apkFilePaths = [];
 

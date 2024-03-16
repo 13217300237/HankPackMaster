@@ -117,19 +117,6 @@ class WorkShopVm extends ChangeNotifier {
 
   String? selectedOrder;
 
-  void setSelectedOrder(String order) {
-    selectedOrder = order;
-
-    // 同时设置默认的apk路径
-    if (order == 'assembleDebug') {
-      setApkLocation('app\\build\\outputs\\apk\\debug');
-    } else if (order == 'assembleRelease') {
-      setApkLocation('app\\build\\outputs\\apk\\release');
-    }
-
-    notifyListeners();
-  }
-
   void deleteDirectory(String path) {
     Directory directory = Directory(path);
     if (directory.existsSync()) {
@@ -396,12 +383,18 @@ class WorkShopVm extends ChangeNotifier {
 
         // apk查找路径
         debugPrint("_apkLocation-> $_apkLocation");
+        List<String> list = await findApkFiles(_apkLocation);
+        String directoryPath = '$projectPath/app/build/outputs';
 
-        var list = await findApkFiles(_apkLocation);
+        if (list.isEmpty) {
+          addNewLogLine(
+              '指定的路径$_apkLocation下没找到apk，那就尝试在 默认目录$directoryPath下进行深度搜索，找到所有apk文件');
+          list = await findApkFiles(directoryPath);
+        }
 
         if (list.isEmpty) {
           return OrderExecuteResult(
-              succeed: false, msg: "查找打包产物 失败: $_apkLocation，没找到任何apk文件");
+              succeed: false, msg: "查找打包产物 失败: $_apkLocation 以及 默认目录$directoryPath，没找到任何apk文件");
         }
 
         if (list.length > 1) {
@@ -1085,7 +1078,8 @@ class WorkShopVm extends ChangeNotifier {
     selectedOrder = runningTask!.setting!.selectedOrder ?? '';
     selectedOrderController.text = selectedOrder!;
 
-    debugPrint("runningTask!.setting!.jdk!-> ${runningTask!.setting!.jdk!.toString()}");
+    debugPrint(
+        "runningTask!.setting!.jdk!-> ${runningTask!.setting!.jdk!.toString()}");
 
     javaHomeController.text = runningTask!.setting!.jdk!.envPath;
     selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
