@@ -383,7 +383,7 @@ class WorkShopVm extends ChangeNotifier {
 
         // apk查找路径
         debugPrint("_apkLocation-> $_apkLocation");
-        List<String> list = await findApkFiles(_apkLocation);
+        List<File> list =  findApkFiles(_apkLocation);
         String directoryPath = '$projectPath/app/build/outputs';
 
         if (list.isEmpty) {
@@ -403,7 +403,7 @@ class WorkShopVm extends ChangeNotifier {
               msg: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
         }
 
-        apkToUpload = list[0];
+        apkToUpload = list[0].path;
 
         if (await File(apkToUpload!).exists()) {
           return OrderExecuteResult(

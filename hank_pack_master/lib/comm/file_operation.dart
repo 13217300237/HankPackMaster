@@ -19,33 +19,29 @@ void searchForAPKFiles(String path, List<String> apkFilePaths) {
   });
 }
 
-Future<List<String>> findApkFiles(String folderPath) async {
-  List<String> apkFilePaths = [];
+List<File> findApkFiles(String folderPath) {
+  List<File> apkFiles = [];
+  Directory directory = Directory(folderPath);
 
-  // 遍历文件夹中的文件
-  Directory folder = Directory(folderPath);
-  if (!(await folder.exists())) {
-    debugPrint("folderPath-> $folderPath 目录不存在");
-    return apkFilePaths;
+  if (directory.existsSync()) {
+    _explore(directory, apkFiles);
+  } else {
+    print('文件夹不存在: $folderPath');
   }
 
-  List<FileSystemEntity> files = folder.listSync(recursive: false);
+  return apkFiles;
+}
 
-  for (var file in files) {
-    // 检查文件是否为apk文件
-    if (file.path.endsWith('.apk')) {
-      // 检查文件修改时间
-      FileStat stat = await file.stat();
-      Duration timeDiff = DateTime.now().difference(stat.modified);
+void _explore(Directory directory, List<File> apkFiles) {
+  List<FileSystemEntity> entities = directory.listSync();
 
-      // 判断修改时间是否在10分钟以内
-      if (timeDiff.inMinutes <= 10) {
-        apkFilePaths.add(file.path); // 将符合条件的apk文件路径添加到列表中
-      }
+  for (FileSystemEntity entity in entities) {
+    if (entity is File && entity.path.toLowerCase().endsWith('.apk')) {
+      apkFiles.add(entity);
+    } else if (entity is Directory) {
+      _explore(entity, apkFiles);
     }
   }
-
-  return apkFilePaths;
 }
 
 Future<List<String>?> readLinesWithEncoding(

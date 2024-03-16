@@ -6,6 +6,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hank_pack_master/core/command_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 
+import '../../comm/file_operation.dart';
 import '../../comm/gradients.dart';
 import '../../comm/hwobs/obs_client.dart';
 import '../../comm/ui/animation_widget.dart';
@@ -174,6 +175,12 @@ class _HomePageState extends State<HomePage> {
 
                 CommandUtil.getInstance().aapt(apkPath);
               }),
+          const SizedBox(width: 20),
+          FilledButton(
+              child: const Text("测试深度遍历"),
+              onPressed: () async {
+                testDepthFirstSearch();
+              }),
         ],
       ),
       const SizedBox(height: 30),
@@ -191,7 +198,14 @@ class _HomePageState extends State<HomePage> {
 
   /// [path] 搜索目录
   /// [ext] 文件后缀
-  void testDepthFirstSearch(String path,String ext){
+  void testDepthFirstSearch(){
+    String folderPath = 'E:\\packTest\\EnjoyGradleHank\\app\\build\\outputs'; // 替换为你要遍历的文件夹路径
+    List<File> apkFiles = findApkFiles(folderPath);
 
+    for (File file in apkFiles) {
+      print('APK文件: ${file.path}');
+    }
   }
+
+
 }
