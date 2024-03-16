@@ -1,3 +1,4 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hive/hive.dart';
 
@@ -60,7 +61,41 @@ class ProjectRecordEntity {
         list.add(e.trim());
       }
     }
+
+    // 这里先判断命令的节数，找出最大节数值
+    // 然后遍历所有的命令，仅保留节数值符合最大节数值的命令
+    int maxWords = findMaxWords(list);
+    list.removeWhere((element) => countUppercaseLetters(element) != maxWords);
+
     return list;
+  }
+
+  /// 找出一个字符串数组中，每个单词的大写字母数量的最大值
+  int findMaxWords(List<String> tasks) {
+    int maxWords = 0;
+
+    for (String task in tasks) {
+      int wordCount = countUppercaseLetters(task);
+      if (wordCount > maxWords) {
+        maxWords = wordCount;
+      }
+    }
+
+    return maxWords;
+  }
+
+  /// 计算字符串中大写字母的数量
+  int countUppercaseLetters(String str) {
+    int count = 0;
+
+    for (int i = 0; i < str.length; i++) {
+      if (str.codeUnitAt(i) >= 65 && str.codeUnitAt(i) <= 90) {
+        // 65到90，对应 A到Z
+        count++;
+      }
+    }
+
+    return count;
   }
 
   /// 临时字段，不用存数据库
