@@ -42,7 +42,7 @@ class ProjectRecordOperator {
       // }
     } else {
       debugPrint("执行插入");
-      _box!.add(entity); // 执行插入操作
+      _box!.add(entity); // 执行插入操作   激活失败会导致多条相同 gitUrl和branch的工程记录产生
     }
   }
 
