@@ -131,13 +131,18 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                     const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 backgroundColor: Colors.teal,
                 child: GestureDetector(
-                  onTap: () => DialogUtil.showCustomDialog(
+                  onTap: () {
+                    DialogUtil.showCustomDialog(
                       context: context,
                       title: "最近作业历史",
                       maxWidth: 850,
                       content: ListView(children: [...getRecentJobResult()]),
                       showCancel: false,
-                      confirmText: '我知道了！'),
+                      confirmText: '我知道了！').then((value) {
+                        setState(() {});
+                        _dataSource.notifyListeners();
+                    });
+                  },
                   child: Row(
                     children: [
                       const Text('最近作业历史',
@@ -151,7 +156,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: badges.Badge(
                             ignorePointer: false,
-                            badgeContent: Text('${unreadHisCount}',
+                            badgeContent: Text('$unreadHisCount',
                                 style: const TextStyle(color: Colors.white)),
                             badgeStyle: badges.BadgeStyle(
                               shape: badges.BadgeShape.square,
@@ -542,27 +547,61 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           myAppInfo = MyAppInfo(errMessage: e.historyContent);
         }
 
-        return Card(
-          backgroundColor: e.success == true
-              ? Colors.green.withOpacity(.1)
-              : Colors.red.withOpacity(.1),
-          borderRadius: BorderRadius.circular(10),
-          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _text("git地址", e.gitUrl ?? ''),
-              _text("分支名", e.branchName ?? ''),
-              _text(
-                  "构建时间",
-                  Jiffy.parseFromDateTime(
-                          DateTime.fromMillisecondsSinceEpoch(e.buildTime ?? 0))
-                      .format(pattern: "yyyy-MM-dd HH:mm:ss")),
-              AppInfoCard(appInfo: myAppInfo, initiallyExpanded: false),
-              const SizedBox(height: 10),
-              _text("作业配置", ""),
-              _text("阶段日志详情", "")
-            ],
+        return MouseRegion(
+          onEnter: (event) {
+            ProjectRecordOperator.setReadV2(jobHistoryEntity: e);
+          },
+          child: Card(
+            backgroundColor: e.success == true
+                ? Colors.green.withOpacity(.1)
+                : Colors.red.withOpacity(.1),
+            borderRadius: BorderRadius.circular(10),
+            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+            child: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _text("git地址", e.gitUrl ?? ''),
+                    _text("分支名", e.branchName ?? ''),
+                    _text(
+                        "构建时间",
+                        Jiffy.parseFromDateTime(
+                                DateTime.fromMillisecondsSinceEpoch(
+                                    e.buildTime ?? 0))
+                            .format(pattern: "yyyy-MM-dd HH:mm:ss")),
+                    AppInfoCard(appInfo: myAppInfo, initiallyExpanded: false),
+                    const SizedBox(height: 10),
+                    _text("作业配置 TODO", ""),
+                    _text("阶段日志详情 TODO", "")
+                  ],
+                ),
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Visibility(
+                    visible: e.hasRead != true,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Card(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 15),
+                            backgroundColor: Colors.red,
+                            borderRadius: BorderRadius.circular(7),
+                            child: const Text(
+                              "未读",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: Colors.white),
+                            )),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }).toList()

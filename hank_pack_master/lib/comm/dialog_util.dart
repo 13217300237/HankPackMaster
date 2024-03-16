@@ -8,7 +8,7 @@ class DialogUtil {
   ///
   /// [content] 动态类型，如果传 String，则解析成 Text，如果是Widget，则直接赋值
   ///
-  static void showCustomDialog({
+  static Future showCustomDialog({
     required BuildContext context,
     Function? onConfirm,
     bool Function()? judgePop,
@@ -21,7 +21,7 @@ class DialogUtil {
     double maxWidth = 500,
     double maxHeight = 700,
   }) {
-    showDialog(
+    return showDialog(
       context: context,
       builder: (context) {
         return ContentDialog(

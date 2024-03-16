@@ -157,8 +157,6 @@ class ProjectRecordOperator {
     return recent;
   }
 
-  /// TODO 还缺少setRead方法和 setAllRead方法
-  ///
   /// 将指定工程的某一条历史记录设置为已读并入库
   static void setRead({
     required ProjectRecordEntity projectRecordEntity,
@@ -170,12 +168,14 @@ class ProjectRecordOperator {
         p.gitUrl == projectRecordEntity.gitUrl &&
         p.branch == projectRecordEntity.branch);
 
-    if (projectRecordIndex == -1) { // 没找到该条工程记录，拒绝执行setRead
+    if (projectRecordIndex == -1) {
+      // 没找到该条工程记录，拒绝执行setRead
       return;
     }
 
     var find = _box!.values.toList()[projectRecordIndex]; // 找到这条工程记录
-    if (find.jobHistoryList == null) { // 如果这条记录没有历史，那就没办法更新历史记录
+    if (find.jobHistoryList == null) {
+      // 如果这条记录没有历史，那就没办法更新历史记录
       return;
     }
 
@@ -183,7 +183,8 @@ class ProjectRecordOperator {
         e.buildTime == jobHistoryEntity.buildTime &&
         e.historyContent == jobHistoryEntity.historyContent); // 尝试找到这一条历史记录
 
-    if (hisIndex == -1) { // 没找到
+    if (hisIndex == -1) {
+      // 没找到
       return;
     }
 
@@ -192,6 +193,51 @@ class ProjectRecordOperator {
 
     debugPrint("setRead $projectRecordIndex");
     _box!.putAt(projectRecordIndex, projectRecordEntity);
+
+    debugShowAll();
+  }
+
+  /// 将指定工程的某一条历史记录设置为已读并入库
+  static void setReadV2({required JobHistoryEntity jobHistoryEntity}) {
+    _initBox();
+
+    if (jobHistoryEntity.hasRead == true) { // 已经阅读过的，不再入库
+      return;
+    }
+
+    jobHistoryEntity.hasRead = true;
+    int projectRecordIndex = _box!.values.toList().indexWhere((p) =>
+        p.gitUrl == jobHistoryEntity.gitUrl &&
+        p.branch == jobHistoryEntity.branchName);
+
+    if (projectRecordIndex == -1) {
+      // 没找到该条工程记录，拒绝执行setRead
+      return;
+    }
+
+    var projectRecordEntity =
+        find(jobHistoryEntity.gitUrl!, jobHistoryEntity.branchName!);
+
+    var findRes = _box!.values.toList()[projectRecordIndex]; // 找到这条工程记录
+    if (findRes.jobHistoryList == null) {
+      // 如果这条记录没有历史，那就没办法更新历史记录
+      return;
+    }
+
+    var hisIndex = findRes.jobHistoryList!.indexWhere((e) =>
+        e.buildTime == jobHistoryEntity.buildTime &&
+        e.historyContent == jobHistoryEntity.historyContent); // 尝试找到这一条历史记录
+
+    if (hisIndex == -1) {
+      // 没找到
+      return;
+    }
+
+    var findHis = findRes.jobHistoryList![hisIndex]; // 再找到这条历史记录
+    findHis.hasRead = true;
+
+    debugPrint("setRead $projectRecordIndex");
+    _box!.putAt(projectRecordIndex, projectRecordEntity!);
 
     debugShowAll();
   }
