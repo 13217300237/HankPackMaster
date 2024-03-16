@@ -123,49 +123,58 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                 child: CommandBar(
                     overflowBehavior: CommandBarOverflowBehavior.noWrap,
                     primaryItems: [...simpleCommandBarItems])),
-            Card(
-              borderRadius: BorderRadius.circular(10),
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-              backgroundColor: Colors.teal,
-              child: GestureDetector(
-                onTap: () => DialogUtil.showCustomDialog(
-                    context: context,
-                    title: "最近作业历史",
-                    maxWidth: 850,
-                    content: ListView(children: [...getRecentJobResult()]),
-                    showCancel: false,
-                    confirmText: '我知道了！'),
-                child: Row(
-                  children: [
-                    const Text('最近作业历史',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20,
-                            color: Colors.white)),
-                    const SizedBox(width: 10),
-                    badges.Badge(
-                      showBadge: unreadHisCount > 0,
-                      ignorePointer: false,
-                      badgeContent: Text('$unreadHisCount',
-                          style: const TextStyle(color: Colors.white)),
-                      badgeStyle: badges.BadgeStyle(
-                        shape: badges.BadgeShape.square,
-                        badgeColor: Colors.red,
-                        padding: const EdgeInsets.all(5),
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide:
-                            const BorderSide(color: Colors.black, width: 1),
-                        elevation: 0,
+            Padding(
+              padding: const EdgeInsets.only(right: 15.0),
+              child: Card(
+                borderRadius: BorderRadius.circular(10),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                backgroundColor: Colors.teal,
+                child: GestureDetector(
+                  onTap: () => DialogUtil.showCustomDialog(
+                      context: context,
+                      title: "最近作业历史",
+                      maxWidth: 850,
+                      content: ListView(children: [...getRecentJobResult()]),
+                      showCancel: false,
+                      confirmText: '我知道了！'),
+                  child: Row(
+                    children: [
+                      const Text('最近作业历史',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20,
+                              color: Colors.white)),
+                      Visibility(
+                        visible: unreadHisCount > 0,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: badges.Badge(
+                            ignorePointer: false,
+                            badgeContent: Text('${unreadHisCount}',
+                                style: const TextStyle(color: Colors.white)),
+                            badgeStyle: badges.BadgeStyle(
+                              shape: badges.BadgeShape.square,
+                              badgeColor: Colors.red,
+                              padding: const EdgeInsets.all(5),
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: const BorderSide(
+                                  color: Colors.black, width: 1),
+                              elevation: 0,
+                            ),
+                            badgeAnimation: const badges.BadgeAnimation.fade(
+                              animationDuration: Duration(seconds: 1),
+                              colorChangeAnimationDuration:
+                                  Duration(seconds: 1),
+                              loopAnimation: false,
+                              curve: Curves.fastOutSlowIn,
+                              colorChangeAnimationCurve: Curves.easeInCubic,
+                            ),
+                          ),
+                        ),
                       ),
-                      badgeAnimation: const badges.BadgeAnimation.fade(
-                        animationDuration: Duration(seconds: 1),
-                        colorChangeAnimationDuration: Duration(seconds: 1),
-                        loopAnimation: false,
-                        curve: Curves.fastOutSlowIn,
-                        colorChangeAnimationCurve: Curves.easeInCubic,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             )
@@ -180,6 +189,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   @override
   void initState() {
     super.initState();
+
     _dataSource = ProjectEntityDataSource(
       buildContext: context,
       funConfirmToActive: (e) {
@@ -234,6 +244,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           return ProjectRecordStatue.unchecked;
         }
       },
+      onRead: () => setState(() {}),
     );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {

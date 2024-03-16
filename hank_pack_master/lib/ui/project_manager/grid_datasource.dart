@@ -1,9 +1,6 @@
 import 'package:badges/badges.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/dialog_util.dart';
-import 'package:hank_pack_master/comm/gradients.dart';
-import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:hank_pack_master/ui/project_manager/package_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -58,6 +55,7 @@ class ProjectEntityDataSource extends DataGridSource {
 
   BuildContext buildContext;
 
+  final Function() onRead;
   Function(ProjectRecordEntity)? funConfirmToActive;
   Function(ProjectRecordEntity)? funcGoPackageAction;
   Function()? funJumpToWorkShop;
@@ -121,6 +119,7 @@ class ProjectEntityDataSource extends DataGridSource {
   }
 
   ProjectEntityDataSource({
+    required this.onRead,
     required this.funConfirmToActive,
     required this.funcGoPackageAction,
     required this.funJumpToWorkShop,
@@ -224,13 +223,19 @@ class ProjectEntityDataSource extends DataGridSource {
                       child: Row(
                         children: [
                           Expanded(
-                              child: PackageHistoryCard(
+                              child: JobHistoryCard(
                             projectRecordEntity: entity,
                             jobHistoryEntity: jobHistoryEntity,
                             myAppInfo: myAppInfo,
                             doFastUpload: (s) =>
                                 openFastUploadDialogFunc?.call(entity, s),
-                            onRefresh: () => notifyListeners(),
+                            onRead: () {
+                              ProjectRecordOperator.setRead(
+                                  entity, jobHistoryEntity);
+                              notifyListeners();
+                              // 通知外部刷新
+                              onRead();
+                            },
                           )),
                         ],
                       ),
