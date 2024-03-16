@@ -129,13 +129,12 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               backgroundColor: Colors.teal,
               child: GestureDetector(
                 onTap: () => DialogUtil.showCustomDialog(
-                  context: context,
-                  title: "最近作业历史",
-                  maxWidth: 850,
-                  content: ListView(children: [...getRecentJobResult()]),
-                  showCancel: false,
-                  confirmText: '我知道了！'
-                ),
+                    context: context,
+                    title: "最近作业历史",
+                    maxWidth: 850,
+                    content: ListView(children: [...getRecentJobResult()]),
+                    showCancel: false,
+                    confirmText: '我知道了！'),
                 child: Row(
                   children: [
                     const Text('最近作业历史',
@@ -145,7 +144,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                             color: Colors.white)),
                     const SizedBox(width: 10),
                     badges.Badge(
-                      showBadge: true,
+                      showBadge: unreadHisCount > 0,
                       ignorePointer: false,
                       badgeContent: Text('$unreadHisCount',
                           style: const TextStyle(color: Colors.white)),
@@ -380,7 +379,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           if (!isValidGitUrl(gitUrlTextController.text)) {
             return false;
           }
-          _dataSource.insertOrUpdateProjectRecord(
+          _dataSource.insertProjectRecord(
             gitUrlTextController.text,
             branchNameTextController.text,
             projectNameTextController.text,

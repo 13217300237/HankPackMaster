@@ -23,6 +23,10 @@ class ProjectRecordOperator {
         (p) => p.gitUrl == entity.gitUrl && p.branch == entity.branch);
 
     if (index != -1) {
+
+      // 先找出现有的 entity
+      var current = _box!.values.toList()[index];
+
       debugPrint('''
       执行更新 
       index=$index 

@@ -96,6 +96,10 @@ class ProjectRecordEntity {
         other.branch == branch;
   }
 
+  /// 获得所有未读历史的数量
+  int get getUnReadHisCount =>
+      jobHistoryList?.where((element) => element.hasRead != true).length ?? 0;
+
   @override
   int get hashCode => branch.hashCode ^ gitUrl.hashCode;
 }

@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/dialog_util.dart';
@@ -77,8 +78,8 @@ class ProjectEntityDataSource extends DataGridSource {
     _refresh();
   }
 
-  bool insertOrUpdateProjectRecord(String gitUrl, String branchName,
-      String projectName, String projectDesc) {
+  bool insertProjectRecord(String gitUrl, String branchName, String projectName,
+      String projectDesc) {
     if (gitUrl.isEmpty ||
         branchName.isEmpty ||
         projectName.isEmpty ||
@@ -92,6 +93,12 @@ class ProjectEntityDataSource extends DataGridSource {
 
     _refresh();
 
+    return true;
+  }
+
+  bool updateProjectRecord(ProjectRecordEntity e) {
+    ProjectRecordOperator.insertOrUpdate(e);
+    _refresh();
     return true;
   }
 
@@ -175,16 +182,27 @@ class ProjectEntityDataSource extends DataGridSource {
   double iconSize = 30;
 
   _queryJobHistoryWidget(CellValue cellValue) {
+    ProjectRecordEntity entity;
+    if (cellValue.value is ProjectRecordEntity) {
+      entity = cellValue.value as ProjectRecordEntity;
+    } else {
+      entity = cellValue.entity!;
+    }
+
     return Tooltip(
         message: "查看作业历史",
-        child: IconButton(
-            icon: Icon(FluentIcons.full_history,
-                size: iconSize, color: Colors.green.withOpacity(.8)),
-            onPressed: () {
-              if (cellValue.value is ProjectRecordEntity) {
-                var e = cellValue.value as ProjectRecordEntity;
-
-                var his = e.jobHistoryList ?? [];
+        child: Badge(
+          showBadge: entity.getUnReadHisCount > 0,
+          badgeAnimation: const BadgeAnimation.fade(
+              animationDuration: Duration(seconds: 0)),
+          position: BadgePosition.topEnd(top: -5, end: 2),
+          badgeContent: Text("${entity.getUnReadHisCount}",
+              style: const TextStyle(color: Colors.white)),
+          child: IconButton(
+              icon: Icon(FluentIcons.full_history,
+                  size: iconSize, color: Colors.green.withOpacity(.8)),
+              onPressed: () {
+                var his = entity.jobHistoryList ?? [];
 
                 his = his.reversed.toList();
 
@@ -207,7 +225,7 @@ class ProjectEntityDataSource extends DataGridSource {
                               child: PackageHistoryCard(
                                   myAppInfo: myAppInfo,
                                   doFastUpload: (s) {
-                                    openFastUploadDialogFunc?.call(e, s);
+                                    openFastUploadDialogFunc?.call(entity, s);
                                   })),
                         ],
                       ),
@@ -220,53 +238,12 @@ class ProjectEntityDataSource extends DataGridSource {
                     maxHeight: 600,
                     maxWidth: 600,
                     context: buildContext,
-                    title: "${e.projectName} 作业历史",
+                    title: "${entity.projectName} 作业历史",
                     content: content,
                     showCancel: false,
                     confirmText: '我知道了!');
-              } else {
-                var e = cellValue.entity!;
-                var his = e.jobHistoryList ?? [];
-
-                DialogUtil.showCustomDialog(
-                    maxHeight: 600,
-                    maxWidth: 600,
-                    context: buildContext,
-                    showCancel: false,
-                    confirmText: '我知道了!',
-                    title: "${e.projectName} 激活历史",
-                    content: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ...his.reversed.map((s) {
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: m.Card(
-                                    margin: const EdgeInsets.only(
-                                        right: 10, bottom: 10),
-                                    color: Colors.white,
-                                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          gradient: mainPanelGradient),
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: SelectableText(
-                                        s.historyContent ?? '',
-                                        style: gridTextStyle,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }).toList()
-                        ],
-                      ),
-                    ));
-              }
-            }));
+              }),
+        ));
   }
 
   /// 每行UI的构建逻辑
@@ -514,12 +491,11 @@ class ProjectEntityDataSource extends DataGridSource {
           if (!isValidGitUrl(gitUrlTextController.text)) {
             return false;
           }
-          insertOrUpdateProjectRecord(
-            gitUrlTextController.text,
-            branchNameTextController.text,
-            projectNameTextController.text,
-            projectDescTextController.text,
-          );
+
+          e.projectName = projectNameTextController.text;
+          e.projectDesc = projectDescTextController.text;
+
+          updateProjectRecord(e);
         },
         judgePop: () {
           if (gitUrlTextController.text.isEmpty ||
