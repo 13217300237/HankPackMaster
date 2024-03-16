@@ -67,7 +67,7 @@ class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
           widget.projectRecordEntity.activeSetting =
               widget.projectRecordEntity.setting = PackageSetting(jdk: _jdk);
 
-          ProjectRecordOperator.insertOrUpdate(widget.projectRecordEntity);
+          ProjectRecordOperator.update(widget.projectRecordEntity);
 
           String errMsg = widget.projectRecordEntity.setting!.readyToActive();
           if (errMsg.isNotEmpty) {

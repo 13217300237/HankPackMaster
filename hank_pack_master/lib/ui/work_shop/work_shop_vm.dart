@@ -1158,7 +1158,7 @@ class WorkShopVm extends ChangeNotifier {
     _reset();
   }
 
-  void _updateToDb() => ProjectRecordOperator.insertOrUpdate(runningTask!);
+  void _updateToDb() => ProjectRecordOperator.update(runningTask!);
 
   void setProjectRecordJobRunning(bool running) {
     runningTask!.jobRunning = running;

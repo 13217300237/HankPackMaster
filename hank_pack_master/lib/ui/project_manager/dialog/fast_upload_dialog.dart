@@ -130,7 +130,7 @@ class _FastUploadDialogWidgetState extends State<FastUploadDialogWidget> {
             selectedUploadPlatform: selectedUploadPlatform,
           );
 
-          ProjectRecordOperator.insertOrUpdate(widget.projectRecordEntity);
+          ProjectRecordOperator.update(widget.projectRecordEntity);
 
           String errMsg =
               widget.projectRecordEntity.setting!.readyOnlyPlatform();

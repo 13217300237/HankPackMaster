@@ -85,8 +85,13 @@ class ProjectEntityDataSource extends DataGridSource {
       return false;
     }
 
-    ProjectRecordOperator.insertOrUpdate(
-      ProjectRecordEntity(gitUrl, branchName, projectName, projectDesc),
+    ProjectRecordOperator.insert(
+      ProjectRecordEntity(
+        gitUrl,
+        branchName,
+        projectName,
+        projectDesc,
+      ),
     );
 
     _refresh();
@@ -95,12 +100,13 @@ class ProjectEntityDataSource extends DataGridSource {
   }
 
   bool updateProjectRecord(ProjectRecordEntity e) {
-    ProjectRecordOperator.insertOrUpdate(e);
+    ProjectRecordOperator.update(e);
     _refresh();
     return true;
   }
 
   void init() {
+    ProjectRecordOperator.debugShowAll();
     _refresh();
   }
 
@@ -231,10 +237,11 @@ class ProjectEntityDataSource extends DataGridSource {
                                 openFastUploadDialogFunc?.call(entity, s),
                             onRead: () {
                               ProjectRecordOperator.setRead(
-                                  entity, jobHistoryEntity);
-                              notifyListeners();
-                              // 通知外部刷新
-                              onRead();
+                                projectRecordEntity: entity,
+                                jobHistoryEntity: jobHistoryEntity,
+                              );
+                              notifyListeners(); // 表格刷新
+                              onRead(); // 通知外部刷新
                             },
                           )),
                         ],
@@ -579,7 +586,8 @@ class ProjectEntityDataSource extends DataGridSource {
     e.preCheckOk = false;
     e.assembleOrdersStr = null;
     e.jobHistory = [];
-    ProjectRecordOperator.insertOrUpdate(e);
+    bool updateRes = ProjectRecordOperator.update(e);
+    debugPrint("_resetProjectRecord -> $updateRes");
     _refresh();
   }
 }

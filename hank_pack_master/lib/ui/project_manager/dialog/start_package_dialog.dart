@@ -164,7 +164,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             jdk: _jdk,
             mergeBranchList: mergeBranchList,
           );
-          ProjectRecordOperator.insertOrUpdate(widget.projectRecordEntity);
+          ProjectRecordOperator.update(widget.projectRecordEntity);
 
           String errMsg = widget.projectRecordEntity.setting!.readyToPackage();
           if (errMsg.isNotEmpty) {
