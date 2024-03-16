@@ -35,11 +35,11 @@ class ProjectRecordOperator {
       ''');
       _box!.putAt(index, entity); // 执行更新操作
 
-      var findAllResult = findAll();
-      for (var e in findAllResult) {
-        debugPrint(
-            "=find== ${e.projectName} - ${e.assembleOrders}   - ${e.assembleOrdersStr} ===");
-      }
+      // var findAllResult = findAll();
+      // for (var e in findAllResult) {
+      //   debugPrint(
+      //       "=find== ${e.projectName} - ${e.assembleOrders}   - ${e.assembleOrdersStr} ===");
+      // }
     } else {
       debugPrint("执行插入");
       _box!.add(entity); // 执行插入操作
