@@ -379,9 +379,6 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get apkCheckTask => TaskStage("apk检测", actionFunc: () async {
-        // 检查此目录下的apk文件，并且校验它的最后修改时间是不是在10分钟以内
-
-        // apk查找路径
         debugPrint("_apkLocation-> $_apkLocation");
         List<File> list =  findApkFiles(_apkLocation);
         String directoryPath = '$projectPath/app/build/outputs';
