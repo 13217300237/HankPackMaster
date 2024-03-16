@@ -389,7 +389,7 @@ class WorkShopVm extends ChangeNotifier {
         if (list.isEmpty) {
           addNewLogLine(
               '指定的路径$_apkLocation下没找到apk，那就尝试在 默认目录$directoryPath下进行深度搜索，找到所有apk文件');
-          list = await findApkFiles(directoryPath);
+          list = findApkFiles(directoryPath);
         }
 
         if (list.isEmpty) {

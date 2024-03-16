@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fluent_ui/fluent_ui.dart';
-
 ///
 /// [path] 指定路径
 /// [outputList] 输入数组
