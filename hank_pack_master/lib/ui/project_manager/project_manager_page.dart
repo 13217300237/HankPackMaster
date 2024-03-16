@@ -22,6 +22,7 @@ import 'dialog/fast_upload_dialog.dart';
 import 'grid_datasource.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:badges/badges.dart' as badges;
 
 class ProjectManagerPage extends StatefulWidget {
   const ProjectManagerPage({super.key});
@@ -114,11 +115,63 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
       decoration: BoxDecoration(gradient: mainPanelGradient),
       child: Column(children: [
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0),
-            child: CommandBar(
-                overflowBehavior: CommandBarOverflowBehavior.noWrap,
-                primaryItems: [...simpleCommandBarItems])),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: CommandBar(
+                    overflowBehavior: CommandBarOverflowBehavior.noWrap,
+                    primaryItems: [...simpleCommandBarItems])),
+            Card(
+              borderRadius: BorderRadius.circular(10),
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              backgroundColor: Colors.teal,
+              child: GestureDetector(
+                onTap: () => DialogUtil.showCustomDialog(
+                  context: context,
+                  title: "最近作业历史",
+                  maxWidth: 850,
+                  content: ListView(children: [...getRecentJobResult()]),
+                  showCancel: false,
+                  confirmText: '我知道了！'
+                ),
+                child: Row(
+                  children: [
+                    const Text('最近作业历史',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 20,
+                            color: Colors.white)),
+                    const SizedBox(width: 10),
+                    badges.Badge(
+                      showBadge: true,
+                      ignorePointer: false,
+                      badgeContent: Text('$unreadHisCount',
+                          style: const TextStyle(color: Colors.white)),
+                      badgeStyle: badges.BadgeStyle(
+                        shape: badges.BadgeShape.square,
+                        badgeColor: Colors.red,
+                        padding: const EdgeInsets.all(5),
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide:
+                            const BorderSide(color: Colors.black, width: 1),
+                        elevation: 0,
+                      ),
+                      badgeAnimation: const badges.BadgeAnimation.fade(
+                        animationDuration: Duration(seconds: 1),
+                        colorChangeAnimationDuration: Duration(seconds: 1),
+                        loopAnimation: false,
+                        curve: Curves.fastOutSlowIn,
+                        colorChangeAnimationCurve: Curves.easeInCubic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
         grid,
         _buildDataPager()
       ]),
@@ -281,25 +334,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               ],
             ),
             onPressed: () => context.go('/work_shop'),
-          ),
-        ),
-        CommandBarBuilderItem(
-          builder: (context, mode, w) => Tooltip(
-            message: "最近作业历史 (未读$unreadHisCount)",
-            child: commandCard(w),
-          ),
-          wrappedItem: CommandBarButton(
-            icon: const Icon(FluentIcons.history),
-            label: Text('最近作业历史 （ 未读 $unreadHisCount ）',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
-            onPressed: () {
-              DialogUtil.showCustomDialog(
-                context: context,
-                title: "最近作业历史",
-                maxWidth: 800,
-                content: ListView(children: [...getRecentJobResult()]),
-              );
-            },
           ),
         ),
       ];
@@ -514,7 +548,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                   Jiffy.parseFromDateTime(
                           DateTime.fromMillisecondsSinceEpoch(e.buildTime ?? 0))
                       .format(pattern: "yyyy-MM-dd HH:mm:ss")),
-              AppInfoCard(appInfo: myAppInfo,initiallyExpanded: false),
+              AppInfoCard(appInfo: myAppInfo, initiallyExpanded: false),
               const SizedBox(height: 10),
               _text("作业配置", ""),
               _text("阶段日志详情", "")
