@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
+import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 
 import '../../comm/dialog_util.dart';
@@ -82,6 +83,7 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
     }
 
     var hasRead = (widget.jobHistoryEntity.hasRead ?? false);
+    var jobSetting = widget.jobHistoryEntity.jobSetting;
 
     return GestureDetector(
         onTap: () {
@@ -99,8 +101,8 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _uploadPlatformWidget(),
                       _timeWidget(),
+                      _jobSettingWidget(jobSetting),
                       errWidget(),
                       const SizedBox(height: 20),
                       Row(
@@ -142,7 +144,7 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
     }
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
-      child: Text("打包时间: ${widget.myAppInfo.buildUpdated}", style: _style),
+      child: Text("作业时间: ${widget.myAppInfo.buildUpdated}", style: _style),
     );
   }
 
@@ -162,17 +164,28 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
     );
   }
 
-  _uploadPlatformWidget() {
-    if (widget.myAppInfo.buildUpdated == null ||
-        widget.myAppInfo.buildUpdated!.isEmpty) {
+
+  _jobSettingWidget(PackageSetting? jobSetting) {
+    if (jobSetting == null) {
       return const SizedBox();
     }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: Text(
-        "上传方式: ${UploadPlatform.findNameByIndex('${widget.myAppInfo.uploadPlatform}')}",
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-      ),
+    return Row(
+      children: [
+        Expanded(
+          child: Card(
+            margin: const EdgeInsets.only(top: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("打包命令: ${jobSetting.selectedOrder}", style: _style),
+                Text("更新日志: ${jobSetting.appUpdateLog}", style: _style),
+                Text("jdk: ${jobSetting.jdk?.envPath}", style: _style),
+                Text("上传平台: ${jobSetting.selectedUploadPlatform?.name}", style: _style),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

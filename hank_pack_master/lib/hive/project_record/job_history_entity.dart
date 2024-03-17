@@ -1,3 +1,4 @@
+import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hive/hive.dart';
 part 'job_history_entity.g.dart';
 
@@ -16,6 +17,9 @@ class JobHistoryEntity {
   @HiveField(4)
   bool? hasRead; // 是否已读
 
+  @HiveField(5)
+  PackageSetting? jobSetting; // 作业配置
+
   /// 3个临时字段，不必存到数据库
   String? projectName;
   String? gitUrl;
@@ -26,5 +30,6 @@ class JobHistoryEntity {
     required this.success,
     required this.historyContent,
     required this.hasRead,
+    required this.jobSetting,
   });
 }
