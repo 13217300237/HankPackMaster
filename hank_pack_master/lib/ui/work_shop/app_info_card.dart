@@ -18,13 +18,7 @@ class AppInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!appInfo.errMessage.empty()) {
-      return Card(
-        backgroundColor: Colors.red.withOpacity(.1),
-        borderRadius: BorderRadius.circular(10),
-        margin: const EdgeInsets.symmetric(vertical: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: msgWidget(),
-      );
+      return msgWidget();
     } else {
       return Card(
         backgroundColor: Colors.blue.withOpacity(.1),
@@ -75,10 +69,7 @@ class AppInfoCard extends StatelessWidget {
         initiallyExpanded: initiallyExpanded,
         headerBackgroundColor:
             ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
-        header: Text(
-          '查看错误详情',
-          style: _style,
-        ),
+        header: Text('查看错误详情', style: _style),
         content: SizedBox(
           height: 500,
           child: ex,
@@ -128,11 +119,11 @@ class AppInfoCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: _style),
-          const SizedBox(width: 5),
+          SizedBox(width: 63, child: Text(title, style: _style)),
           Text(":", style: _style),
           const SizedBox(width: 5),
-          Text(value, style: _style),
+          const SizedBox(width: 5),
+          Text(value, style: _style.copyWith(color: Color(0xff24292E))),
         ],
       ),
     );

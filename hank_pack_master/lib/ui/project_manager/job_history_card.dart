@@ -8,6 +8,7 @@ import 'package:hank_pack_master/hive/project_record/project_record_entity.dart'
 import '../../comm/dialog_util.dart';
 import '../../hive/project_record/upload_platforms.dart';
 import '../work_shop/app_info_card.dart';
+import 'job_setting_card.dart';
 
 /// 作业历史弹窗
 class JobHistoryCard extends StatefulWidget {
@@ -43,13 +44,19 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
   Widget errWidget() {
     String? errMsg = widget.myAppInfo.errMessage;
     if (errMsg != null && errMsg.isNotEmpty) {
-      return Container(
-        constraints: const BoxConstraints(maxHeight: 300),
-        child: Text(
-          errMsg.sub(100),
-          style: _style,
-          maxLines: 4,
-          overflow: TextOverflow.clip,
+      return Expander(
+        initiallyExpanded: true,
+        headerBackgroundColor:
+            ButtonState.resolveWith((states) => Colors.orange.withOpacity(.1)),
+        header: Text("错误详情", style: _style),
+        content: Container(
+          constraints: const BoxConstraints(maxHeight: 300),
+          child: Text(
+            errMsg.sub(600),
+            style: _style,
+            maxLines: 4,
+            overflow: TextOverflow.clip,
+          ),
         ),
       );
     } else {
@@ -102,14 +109,14 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _timeWidget(),
-                      _jobSettingWidget(jobSetting),
-                      errWidget(),
+                      JobSettingCard(jobSetting),
+                      Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: errWidget()),
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          fastUploadBtn,
-                        ],
+                        children: [fastUploadBtn],
                       ),
                     ])),
             Positioned(
@@ -126,7 +133,7 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
                         backgroundColor: Colors.red,
                         borderRadius: BorderRadius.circular(7),
                         child: Text(
-                          hasRead ? "已读" : "未读",
+                          "NEW",
                           style: _style.copyWith(color: Colors.white),
                         )),
                   ],
@@ -161,31 +168,6 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
       confirmText: '我知道了！',
       maxWidth: 800,
       maxHeight: maxHeight,
-    );
-  }
-
-
-  _jobSettingWidget(PackageSetting? jobSetting) {
-    if (jobSetting == null) {
-      return const SizedBox();
-    }
-    return Row(
-      children: [
-        Expanded(
-          child: Card(
-            margin: const EdgeInsets.only(top: 15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("打包命令: ${jobSetting.selectedOrder}", style: _style),
-                Text("更新日志: ${jobSetting.appUpdateLog}", style: _style),
-                Text("jdk: ${jobSetting.jdk?.envPath}", style: _style),
-                Text("上传平台: ${jobSetting.selectedUploadPlatform?.name}", style: _style),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

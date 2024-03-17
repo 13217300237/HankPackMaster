@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart' as badges;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
@@ -7,6 +8,7 @@ import 'package:hank_pack_master/ui/project_manager/dialog/start_package_dialog.
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/gradients.dart';
@@ -20,9 +22,7 @@ import 'column_name_const.dart';
 import 'dialog/create_project_record_dialog.dart';
 import 'dialog/fast_upload_dialog.dart';
 import 'grid_datasource.dart';
-import 'package:syncfusion_flutter_core/theme.dart';
-import 'package:flutter/material.dart' as m;
-import 'package:badges/badges.dart' as badges;
+import 'job_setting_card.dart';
 
 class ProjectManagerPage extends StatefulWidget {
   const ProjectManagerPage({super.key});
@@ -133,14 +133,16 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                 child: GestureDetector(
                   onTap: () {
                     DialogUtil.showCustomDialog(
-                      context: context,
-                      title: "最近作业历史",
-                      maxWidth: 850,
-                      content: ListView(children: [...getRecentJobResult()]),
-                      showCancel: false,
-                      confirmText: '我知道了！').then((value) {
-                        setState(() {});
-                        _dataSource.notifyListeners();
+                            context: context,
+                            title: "最近作业历史",
+                            maxWidth: 850,
+                            content:
+                                ListView(children: [...getRecentJobResult()]),
+                            showCancel: false,
+                            confirmText: '我知道了！')
+                        .then((value) {
+                      setState(() {});
+                      _dataSource.notifyListeners();
                     });
                   },
                   child: Row(
@@ -259,6 +261,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         _dataSource.runningProcessValue = v;
         _dataSource.notifyListeners();
       };
+
+      setState(() {}); // 表格刷新貌似有bug，必须加这一句主动再刷新一次，才能让分页标签出现
     });
   }
 
@@ -534,6 +538,13 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     }
   }
 
+  final TextStyle _style = const TextStyle(
+    fontSize: 15,
+    color: Colors.black,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'STKAITI',
+  );
+
   List<Widget> getRecentJobResult() {
     var recentJobHistoryList =
         ProjectRecordOperator.getRecentJobHistoryList(recentCount: 10);
@@ -570,10 +581,15 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                                 DateTime.fromMillisecondsSinceEpoch(
                                     e.buildTime ?? 0))
                             .format(pattern: "yyyy-MM-dd HH:mm:ss")),
+                    const SizedBox(height: 10),
+                    JobSettingCard(e.jobSetting),
+                    const SizedBox(height: 10),
                     AppInfoCard(appInfo: myAppInfo, initiallyExpanded: false),
                     const SizedBox(height: 10),
-                    _text("作业配置 TODO", ""),
-                    _text("阶段日志详情 TODO", "")
+                    Expander(
+                      content: _text("阶段日志详情 TODO", ""),
+                      header: Text("阶段日志详情", style: _style),
+                    )
                   ],
                 ),
                 Positioned(
@@ -590,7 +606,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                             backgroundColor: Colors.red,
                             borderRadius: BorderRadius.circular(7),
                             child: const Text(
-                              "未读",
+                              "NEW",
                               style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,

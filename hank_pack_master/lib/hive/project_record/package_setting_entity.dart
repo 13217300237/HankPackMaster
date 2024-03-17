@@ -35,6 +35,14 @@ class PackageSetting {
     this.mergeBranchList,
   });
 
+  String get mergedList {
+    StringBuffer sb = StringBuffer();
+    mergeBranchList?.forEach((element) {
+      sb.writeln(element);
+    });
+    return sb.toString().trim();
+  }
+
   String readyToPackage() {
     if (jdk == null) {
       return "jdk必必须指定";
