@@ -822,12 +822,10 @@ class WorkShopVm extends ChangeNotifier {
 
     addNewLogLine("开始流程...${taskStateList.length}");
 
-    OrderExecuteResult? actionRes; // 本次任务的执行结果
+    OrderExecuteResult actionRes = OrderExecuteResult(succeed: false);
 
     Stopwatch totalWatch = Stopwatch();
     totalWatch.start();
-
-    onProcessChanged?.call(10);
 
     // 开始整体流程
     for (int i = 0; i < taskStateList.length; i++) {
@@ -868,7 +866,7 @@ class WorkShopVm extends ChangeNotifier {
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();
             stage.executeResultData = stageResult; // 保存当前阶段的执行成功的结果
-            actionRes = stageResult; // 本次任务的执行结果
+            actionRes.addChild(stageResult);
             break;
           } else {
             updateStatue(i, StageStatue.error);
@@ -882,7 +880,7 @@ class WorkShopVm extends ChangeNotifier {
               addNewEmptyLine();
 
               stage.executeResultData = stageResult;
-              actionRes = stageResult;
+              actionRes.addChild(stageResult);
               await waitSomeSec();
             }
           }
@@ -893,8 +891,8 @@ class WorkShopVm extends ChangeNotifier {
 
           // 如果到了最后一次
           if (j == maxTimes - 1) {
-            actionRes = OrderExecuteResult(
-                succeed: false, msg: "第${j + 1}次:$stageResult");
+            actionRes.addChild(OrderExecuteResult(
+                succeed: false, msg: "第${j + 1}次:$stageResult"));
             CommandUtil.getInstance().stopAllExec();
             stage.timerController.stop();
             break;
@@ -917,8 +915,8 @@ class WorkShopVm extends ChangeNotifier {
     return OrderExecuteResult(
         succeed: true,
         msg:
-            "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionRes?.msg}，任务总共花费时间${formatSeconds(totalWatch.elapsed.inMilliseconds ~/ 1000)} ms ",
-        data: actionRes?.data);
+            "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionRes.msg}，任务总共花费时间${formatSeconds(totalWatch.elapsed.inMilliseconds ~/ 1000)} ms ",
+        data: actionRes.data);
   }
 
   void _reset() {
@@ -998,7 +996,14 @@ class WorkShopVm extends ChangeNotifier {
     setProjectPath();
 
     initPreCheckTaskList();
-    OrderExecuteResult? orderExecuteResult = await startSchedule();
+    OrderExecuteResult orderExecuteResult = await startSchedule();
+    var lastChild = orderExecuteResult.getLastChild();
+    if (lastChild == null) {
+      ToastUtil.showPrettyToast("lastChild is null");
+      return;
+    }
+
+    orderExecuteResult = lastChild;
 
     /// 激活失败时
     if (orderExecuteResult.succeed != true ||
@@ -1090,7 +1095,14 @@ class WorkShopVm extends ChangeNotifier {
     selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
     selectedUploadPlatformController.text = selectedUploadPlatform!.name ?? '';
     initPackageTaskList();
-    var scheduleRes = await startSchedule();
+    OrderExecuteResult scheduleRes = await startSchedule();
+    var lastChild = scheduleRes.getLastChild();
+    if (lastChild == null) {
+      ToastUtil.showPrettyToast("lastChild is null");
+      return;
+    }
+    scheduleRes = lastChild;
+
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
       ToastUtil.showPrettyToast(
@@ -1114,7 +1126,14 @@ class WorkShopVm extends ChangeNotifier {
     apkLocationController.text = runningTask!.apkPath!;
 
     initFastUploadTaskList(apkPath);
-    var scheduleRes = await startSchedule();
+    OrderExecuteResult scheduleRes = await startSchedule();
+    var lastChild = scheduleRes.getLastChild();
+    if (lastChild == null) {
+      ToastUtil.showPrettyToast("lastChild is null");
+      return;
+    }
+
+    scheduleRes = lastChild;
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
 
