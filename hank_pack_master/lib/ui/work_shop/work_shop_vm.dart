@@ -536,6 +536,10 @@ class WorkShopVm extends ChangeNotifier {
         );
 
         obsDownloadUrl = oBSResponse?.url;
+
+        debugPrint(
+            "OBS上传结束.... ${obsDownloadUrl == null || obsDownloadUrl!.isEmpty}");
+
         if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
           return OrderExecuteResult(
               succeed: false,
@@ -554,6 +558,7 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(
               data: "error : apkToUpload is null!", succeed: false);
         }
+        debugPrint("进入构建打包结果...");
         MyAppInfo appInfo = MyAppInfo();
         File apkFile = File(apkToUpload!);
         if (await apkFile.exists()) {
@@ -1090,12 +1095,14 @@ class WorkShopVm extends ChangeNotifier {
       myAppInfo = scheduleRes.data;
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
-      _insertIntoJobHistoryList(true, myAppInfo?.toJsonString() ?? "", runningTask!.setting!);
+      _insertIntoJobHistoryList(
+          true, myAppInfo?.toJsonString() ?? "", runningTask!.setting!);
     } else {
       myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
-      _insertIntoJobHistoryList(false, myAppInfo?.toJsonString() ?? "", runningTask!.setting!);
+      _insertIntoJobHistoryList(
+          false, myAppInfo?.toJsonString() ?? "", runningTask!.setting!);
     }
 
     onProjectPackageFinished(myAppInfo!);
@@ -1111,14 +1118,16 @@ class WorkShopVm extends ChangeNotifier {
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
 
-      _insertIntoJobHistoryList(true, myAppInfo.toString(), runningTask!.setting!);
+      _insertIntoJobHistoryList(
+          true, myAppInfo?.toJsonString() ?? '', runningTask!.setting!);
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
     } else {
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
       myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
-      _insertIntoJobHistoryList(false, myAppInfo.toString(), runningTask!.setting!);
+      _insertIntoJobHistoryList(
+          false, "${scheduleRes.msg}", runningTask!.setting!);
     }
 
     onProjectPackageFinished(myAppInfo!);
