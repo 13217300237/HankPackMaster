@@ -12,7 +12,6 @@ import '../../../hive/project_record/package_setting_entity.dart';
 class ActiveDialogWidget extends StatefulWidget {
   final WorkShopVm workShopVm;
 
-  final List<String> enableAssembleOrders;
   final ProjectRecordEntity projectRecordEntity;
 
   final Function? goToWorkShop;
@@ -23,7 +22,6 @@ class ActiveDialogWidget extends StatefulWidget {
     super.key,
     required this.projectRecordEntity,
     required this.workShopVm,
-    required this.enableAssembleOrders,
     this.goToWorkShop,
     required this.defaultJavaHome,
   });

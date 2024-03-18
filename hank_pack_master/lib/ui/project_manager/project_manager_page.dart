@@ -2,6 +2,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/active_dialog.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/start_package_dialog.dart';
@@ -207,7 +208,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           content: ActiveDialogWidget(
             projectRecordEntity: e,
             workShopVm: _workShopVm,
-            enableAssembleOrders: e.assembleOrderList,
             goToWorkShop: null,
             defaultJavaHome: _envParamVm.javaRoot,
           ),
@@ -388,10 +388,12 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       gitUrlTextController: gitUrlTextController,
       branchNameTextController: branchNameTextController,
       projectDescTextController: projectDescTextController,
+      defaultBranch: "master",
     );
 
     DialogUtil.showCustomDialog(
         context: context,
+        maxWidth: 700,
         title: '新建工程',
         content: contentWidget,
         showActions: true,
@@ -400,11 +402,33 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           if (!isValidGitUrl(gitUrlTextController.text)) {
             return false;
           }
-          _dataSource.insertProjectRecord(
+          var insertProjectRecord = _dataSource.insertProjectRecord(
             gitUrlTextController.text,
             branchNameTextController.text,
             projectNameTextController.text,
             projectDescTextController.text,
+          );
+
+          if (insertProjectRecord != true) {
+            ToastUtil.showPrettyToast("已存在相同项目, 请检查现有项目列表 ");
+            return false;
+          }
+
+          DialogUtil.showCustomDialog(
+            context: context,
+            title: "项目 ${projectNameTextController.text} 激活配置",
+            content: ActiveDialogWidget(
+              projectRecordEntity: ProjectRecordEntity(
+                gitUrlTextController.text,
+                branchNameTextController.text,
+                projectNameTextController.text,
+                projectDescTextController.text,
+              ),
+              workShopVm: _workShopVm,
+              goToWorkShop: null,
+              defaultJavaHome: _envParamVm.javaRoot,
+            ),
+            showActions: false,
           );
         },
         judgePop: () {

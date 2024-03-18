@@ -23,7 +23,7 @@ const TextStyle gridTextStyle2 = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600);
 
- TextStyle gridTextStyle3 = TextStyle(
+TextStyle gridTextStyle3 = TextStyle(
     color: Colors.teal,
     fontFamily: 'STKAITI',
     fontSize: 19,
@@ -91,7 +91,7 @@ class ProjectEntityDataSource extends DataGridSource {
       return false;
     }
 
-    ProjectRecordOperator.insert(
+    var insert = ProjectRecordOperator.insert(
       ProjectRecordEntity(
         gitUrl,
         branchName,
@@ -100,9 +100,12 @@ class ProjectEntityDataSource extends DataGridSource {
       ),
     );
 
-    _refresh();
+    if (insert == true) {
+      _refresh();
+      return true;
+    }
 
-    return true;
+    return false;
   }
 
   bool updateProjectRecord(ProjectRecordEntity e) {

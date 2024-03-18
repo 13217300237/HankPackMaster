@@ -11,12 +11,15 @@ class CreateProjectDialogWidget extends StatefulWidget {
 
   final TextEditingController projectDescTextController;
 
+  final String defaultBranch;
+
   const CreateProjectDialogWidget({
     super.key,
     required this.gitUrlTextController,
     required this.branchNameTextController,
     required this.projectNameTextController,
     required this.projectDescTextController,
+    required this.defaultBranch,
   });
 
   @override
@@ -42,6 +45,10 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
         isValidGitUrlRes = isValidGitUrl(widget.gitUrlTextController.text);
       }
       setState(() {});
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      widget.branchNameTextController.text = widget.defaultBranch;
     });
   }
 
@@ -98,7 +105,7 @@ class _CreateProjectDialogWidgetState extends State<CreateProjectDialogWidget> {
           unfocusedColor: Colors.transparent,
           highlightColor: Colors.transparent,
           expands: false,
-          maxLines: 2,
+          maxLines: 1,
           style: textStyle,
           controller: widget.gitUrlTextController),
     );
