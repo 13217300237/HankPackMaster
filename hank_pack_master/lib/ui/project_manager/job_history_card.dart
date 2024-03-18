@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_entity.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
@@ -66,29 +68,51 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
 
   final _style = const TextStyle(fontWeight: FontWeight.w600, fontSize: 16);
 
-  @override
-  Widget build(BuildContext context) {
+  bool _needFastUpload() {
+    return widget.myAppInfo.errMessage != null &&
+        widget.myAppInfo.errMessage!.contains("[") &&
+        widget.myAppInfo.errMessage!.contains("]");
+  }
+
+  String? getApkPath() {
+    var path = widget.myAppInfo.errMessage!.substring(
+        widget.myAppInfo.errMessage!.indexOf("[") + 1,
+        widget.myAppInfo.errMessage!.indexOf("]"));
+
+    File f = File(path);
+    if (f.existsSync()) {
+      return path;
+    } else {
+      return null;
+    }
+  }
+
+  _fastUploadWidget() {
     Widget fastUploadBtn;
     // 如果显示的内容里包含了 []，那就提取出[]中的内容，并且启用强制上传策略
-    if (widget.myAppInfo.errMessage != null &&
-        widget.myAppInfo.errMessage!.contains("[") &&
-        widget.myAppInfo.errMessage!.contains("]")) {
+    if (_needFastUpload()) {
       // 那就提炼出中括号中的内容
+      var apkPath = getApkPath();
 
-      var apkPath = widget.myAppInfo.errMessage!.substring(
-          widget.myAppInfo.errMessage!.indexOf("[") + 1,
-          widget.myAppInfo.errMessage!.indexOf("]"));
-      fastUploadBtn = FilledButton(
-        child: const Text("快速上传"),
-        onPressed: () {
-          Navigator.pop(context);
-          widget.doFastUpload?.call(apkPath);
-        },
-      );
+      return apkPath == null
+          ? const SizedBox()
+          : FilledButton(
+              child: const Text("快速上传",
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              onPressed: () {
+                Navigator.pop(context);
+                widget.doFastUpload?.call(apkPath);
+              },
+            );
     } else {
       fastUploadBtn = const SizedBox();
     }
 
+    return fastUploadBtn;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     var hasRead = (widget.jobHistoryEntity.hasRead ?? false);
     var jobSetting = widget.jobHistoryEntity.jobSetting;
 
@@ -116,7 +140,7 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
-                        children: [fastUploadBtn],
+                        children: [_fastUploadWidget()],
                       ),
                     ])),
             Positioned(

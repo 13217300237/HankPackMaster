@@ -21,7 +21,7 @@ class JobSettingCard extends StatelessWidget {
 
     return Expander(
       headerBackgroundColor:
-      ButtonState.resolveWith((states) => Colors.orange.withOpacity(.1)),
+          ButtonState.resolveWith((states) => Colors.orange.withOpacity(.1)),
       header: Text('查看打包配置', style: _style),
       initiallyExpanded: true,
       content: Row(
@@ -30,12 +30,13 @@ class JobSettingCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _tileText(title: "打包命令 :", content: s.selectedOrder??''),
+                _tileText(title: "打包命令 :", content: s.selectedOrder ?? ''),
                 _tileText(
-                    title: "更新日志 :", content: s.appUpdateLog??'', maxLines: 3),
+                    title: "更新日志 :",
+                    content: s.appUpdateLog ?? '',
+                    maxLines: 3),
                 _tileText(
-                    title: " JDK路径 :",
-                    content: "${s.jdk?.envPath.trim()}"),
+                    title: " JDK路径 :", content: s.jdk?.envPath.trim() ?? ''),
                 _tileText(
                     title: "上传平台 :",
                     content: s.selectedUploadPlatform?.name ?? ''),
@@ -51,6 +52,7 @@ class JobSettingCard extends StatelessWidget {
 
   _tileText(
       {required String title, required String content, int maxLines = 1}) {
+    if (content.isEmpty) return const SizedBox();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
