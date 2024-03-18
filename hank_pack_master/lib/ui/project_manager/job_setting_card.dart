@@ -30,15 +30,15 @@ class JobSettingCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _tileText(title: "打包命令 :", content: "${s.selectedOrder}"),
+                _tileText(title: "打包命令 :", content: s.selectedOrder??''),
                 _tileText(
-                    title: "更新日志 :", content: "${s.appUpdateLog}", maxLines: 3),
+                    title: "更新日志 :", content: s.appUpdateLog??'', maxLines: 3),
                 _tileText(
                     title: " JDK路径 :",
                     content: "${s.jdk?.envPath.trim()}"),
                 _tileText(
                     title: "上传平台 :",
-                    content: "${s.selectedUploadPlatform?.name}"),
+                    content: s.selectedUploadPlatform?.name ?? ''),
                 _tileText(title: "合并分支 :", content: s.mergedList),
                 _tileText(title: "APK位置 :", content: s.apkLocation ?? ''),
               ],
