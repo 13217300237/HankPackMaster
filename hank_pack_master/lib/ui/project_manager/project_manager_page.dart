@@ -14,6 +14,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../comm/gradients.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/url_check_util.dart';
+import '../../hive/project_record/job_history_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
@@ -558,62 +559,75 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           myAppInfo = MyAppInfo(errMessage: e.historyContent);
         }
 
+        var color = e.success == true
+            ? Colors.green.withOpacity(.1)
+            : Colors.red.withOpacity(.1);
+
         return MouseRegion(
           onEnter: (event) {
             ProjectRecordOperator.setReadV2(jobHistoryEntity: e);
           },
-          child: Card(
-            backgroundColor: e.success == true
-                ? Colors.green.withOpacity(.1)
-                : Colors.red.withOpacity(.1),
-            borderRadius: BorderRadius.circular(10),
-            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-            child: Stack(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+            child: Column(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _text("git地址", e.gitUrl ?? ''),
-                    _text("分支名", e.branchName ?? ''),
-                    _text(
-                        "构建时间",
-                        Jiffy.parseFromDateTime(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                    e.buildTime ?? 0))
-                            .format(pattern: "yyyy-MM-dd HH:mm:ss")),
-                    const SizedBox(height: 10),
-                    JobSettingCard(e.jobSetting),
-                    const SizedBox(height: 10),
-                    AppInfoCard(appInfo: myAppInfo, initiallyExpanded: false),
-                    const SizedBox(height: 10),
-                    Expander(
-                      content: _text("阶段日志详情 TODO", ""),
-                      header: Text("阶段日志详情", style: _style),
-                    )
-                  ],
-                ),
-                Positioned(
-                  right: 10,
-                  top: 10,
-                  child: Visibility(
-                    visible: e.hasRead != true,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Card(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 15),
-                            backgroundColor: Colors.red,
-                            borderRadius: BorderRadius.circular(7),
-                            child: const Text(
-                              "NEW",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  color: Colors.white),
-                            )),
-                      ],
-                    ),
+                _title(e, color),
+                Card(
+                  borderColor: Colors.transparent,
+                  backgroundColor: color,
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10)),
+                  child: Stack(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _text("git地址", e.gitUrl ?? ''),
+                          _text("分支名", e.branchName ?? ''),
+                          _text(
+                              "构建时间",
+                              Jiffy.parseFromDateTime(
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                          e.buildTime ?? 0))
+                                  .format(pattern: "yyyy-MM-dd HH:mm:ss")),
+                          const SizedBox(height: 10),
+                          JobSettingCard(e.jobSetting),
+                          const SizedBox(height: 10),
+                          AppInfoCard(
+                              appInfo: myAppInfo, initiallyExpanded: false),
+                          const SizedBox(height: 10),
+                          Expander(
+                            content: _text("阶段日志详情 TODO", ""),
+                            header: Text("阶段日志详情", style: _style),
+                          )
+                        ],
+                      ),
+                      Positioned(
+                        right: 10,
+                        top: 10,
+                        child: Visibility(
+                          visible: e.hasRead != true,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Card(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 5, horizontal: 15),
+                                  backgroundColor: Colors.red,
+                                  borderRadius: BorderRadius.circular(7),
+                                  child: const Text(
+                                    "NEW",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                        color: Colors.white),
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -624,10 +638,34 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     ];
   }
 
+  Widget _title(JobHistoryEntity e, Color color) {
+    return Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+        decoration: BoxDecoration(
+            color: color.withBlue(20),
+            borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(10), topLeft: Radius.circular(10))),
+        width: double.infinity,
+        child: Text("${e.projectName}",
+            style: const TextStyle(
+              fontSize: 25,
+              color: Colors.black,
+              fontWeight: FontWeight.w600,
+            )));
+  }
+
   Widget _text(String title, String content) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 5),
-      child: Text("$title : $content", style: gridTextStyle2),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 5),
+      child: Row(
+        children: [
+          Text("$title : ", style: gridTextStyle2),
+          Text(
+            content,
+            style: gridTextStyle3,
+          )
+        ],
+      ),
     );
   }
 }

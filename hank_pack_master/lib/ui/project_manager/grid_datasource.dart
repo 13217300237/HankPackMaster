@@ -23,6 +23,12 @@ const TextStyle gridTextStyle2 = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w600);
 
+ TextStyle gridTextStyle3 = TextStyle(
+    color: Colors.teal,
+    fontFamily: 'STKAITI',
+    fontSize: 19,
+    fontWeight: FontWeight.w700);
+
 enum CellType {
   text, // 纯文案显示
   assembleOrders, // 进入打包操作
