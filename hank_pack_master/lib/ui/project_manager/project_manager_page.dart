@@ -703,7 +703,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     }
 
     return Expander(
-      initiallyExpanded: true,
+      initiallyExpanded: !(e.success ?? false),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -724,30 +724,33 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                       ])),
                       content: Container(
                         width: double.infinity,
+                        constraints: const BoxConstraints(maxHeight: 300),
                         margin: const EdgeInsets.symmetric(vertical: 5.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Card(
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: TextSelectionTheme(
-                                  data: TextSelectionThemeData(
-                                    selectionColor:
-                                        Colors.green.withOpacity(.3),
-                                    // 修改选中文本的背景颜色
-                                    selectionHandleColor:
-                                        Colors.red, // 修改选中文本的选择手柄颜色
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Card(
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: TextSelectionTheme(
+                                    data: TextSelectionThemeData(
+                                      selectionColor:
+                                          Colors.green.withOpacity(.3),
+                                      // 修改选中文本的背景颜色
+                                      selectionHandleColor:
+                                          Colors.red, // 修改选中文本的选择手柄颜色
+                                    ),
+                                    child: SelectableText(
+                                        "${stageRecord.resultStr?.formatJson()}",
+                                        style: _style),
                                   ),
-                                  child: SelectableText(
-                                      "${stageRecord.resultStr}",
-                                      style: _style),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 15),
-                            Text("${stageRecord.fullLog}", style: _style)
-                          ],
+                              const SizedBox(height: 15),
+                              Text("${stageRecord.fullLog}", style: _style)
+                            ],
+                          ),
                         ),
                       ),
                     ),

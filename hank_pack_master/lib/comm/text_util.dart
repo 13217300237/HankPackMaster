@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 extension StringEmpty on String? {
   bool empty() {
     if (this == null) return true;
@@ -15,6 +17,17 @@ extension StringEmpty on String? {
       return this!.substring(0, maxLength);
     } else {
       return this!;
+    }
+  }
+}
+
+extension JsonFormatting on String {
+  String formatJson() {
+    try {
+      var jsonMap = json.decode(this);
+      return const JsonEncoder.withIndent('  ').convert(jsonMap);
+    } catch (_) {
+      return this;
     }
   }
 }
