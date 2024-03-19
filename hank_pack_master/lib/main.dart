@@ -17,6 +17,7 @@ import 'hive/project_record/job_history_entity.dart';
 import 'hive/project_record/package_setting_entity.dart';
 import 'hive/project_record/project_record_entity.dart';
 import 'hive/project_record/project_record_operator.dart';
+import 'hive/project_record/stage_record_entity.dart';
 import 'hive/project_record/upload_platforms.dart';
 import 'ui/app.dart';
 
@@ -29,7 +30,8 @@ void main() async {
   Hive.registerAdapter(ProjectRecordEntityAdapter(), override: true);
   Hive.registerAdapter(EnvGroupEntityAdapter(), override: true);
   Hive.registerAdapter(EnvCheckResultEntityAdapter(), override: true);
-  Hive.registerAdapter(JobHistoryEntityAdapter(), override: true);
+  Hive.registerAdapter(JobHistoryEntityAdapter(), override: true); // StageRecordEntityAdapter
+  Hive.registerAdapter(StageRecordEntityAdapter(), override: true);
 
   await Hive.initFlutter();
   await EnvConfigOperator.openBox();

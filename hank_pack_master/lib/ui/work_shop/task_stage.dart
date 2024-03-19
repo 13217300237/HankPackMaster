@@ -8,10 +8,10 @@ class TaskStage {
   String? stageCostTime;
   StageStatue stageStatue = StageStatue.idle;
   dynamic executeResultData;
-  TimerController timerController = TimerController();
+  TimerController timerController = TimerController(); // 阶段任务的正向计时器
 
   // 当前阶段的行为, 返回null说明当前阶段正常，非null的情况分两种，一是有特殊输出的阶段，第二是结束阶段
-  ActionFunc actionFunc;
+  ActionFunc stageAction;
 
   // 当前阶段结束之后的行为（无论成功或者失败）
   static OnStageFinishedFunc? onStateFinishedFunc;
@@ -20,7 +20,7 @@ class TaskStage {
 
   TaskStage(
     this.stageName, {
-    required this.actionFunc,
+    required this.stageAction,
   });
 }
 

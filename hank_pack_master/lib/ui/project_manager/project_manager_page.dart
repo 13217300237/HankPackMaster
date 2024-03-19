@@ -14,6 +14,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/gradients.dart';
 import '../../comm/pgy/pgy_entity.dart';
+import '../../comm/text_util.dart';
 import '../../comm/url_check_util.dart';
 import '../../hive/project_record/job_history_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
@@ -621,10 +622,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                           AppInfoCard(
                               appInfo: myAppInfo, initiallyExpanded: false),
                           const SizedBox(height: 10),
-                          Expander(
-                            content: _text("阶段日志详情 TODO", ""),
-                            header: Text("阶段日志详情", style: _style),
-                          )
+                          _stageListCard(e),
                         ],
                       ),
                       Positioned(
@@ -690,6 +688,51 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           )
         ],
       ),
+    );
+  }
+
+  _stageListCard(JobHistoryEntity e) {
+    Color bg(bool? success) {
+      return (success ?? false)
+          ? Colors.green.withOpacity(.1)
+          : Colors.red.withOpacity(.1);
+    }
+
+    return Expander(
+      initiallyExpanded: true,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...?e.stageRecordList
+              ?.map((stageRecord) => Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8.0),
+                    margin: const EdgeInsets.symmetric(vertical: 5.0),
+                    decoration: BoxDecoration(
+                        color: bg(stageRecord.success),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("${stageRecord.name}", style: _style),
+                        Text(
+                            "执行耗时: ${formatSeconds(stageRecord.costTime ?? 0)}",
+                            style: _style),
+                        Text(
+                          "${stageRecord.resultStr}",
+                          style: _style,
+                        ),
+                        Text(
+                          "${stageRecord.fullLog}",
+                          style: _style,
+                        )
+                      ],
+                    ),
+                  ))
+              .toList()
+        ],
+      ),
+      header: Text("阶段日志详情", style: _style),
     );
   }
 }

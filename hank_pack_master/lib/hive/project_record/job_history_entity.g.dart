@@ -22,13 +22,14 @@ class JobHistoryEntityAdapter extends TypeAdapter<JobHistoryEntity> {
       historyContent: fields[2] as String?,
       hasRead: fields[4] as bool?,
       jobSetting: fields[5] as PackageSetting?,
+      stageRecordList: (fields[6] as List?)?.cast<StageRecordEntity>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, JobHistoryEntity obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(1)
       ..write(obj.success)
       ..writeByte(3)
@@ -38,7 +39,9 @@ class JobHistoryEntityAdapter extends TypeAdapter<JobHistoryEntity> {
       ..writeByte(4)
       ..write(obj.hasRead)
       ..writeByte(5)
-      ..write(obj.jobSetting);
+      ..write(obj.jobSetting)
+      ..writeByte(6)
+      ..write(obj.stageRecordList);
   }
 
   @override

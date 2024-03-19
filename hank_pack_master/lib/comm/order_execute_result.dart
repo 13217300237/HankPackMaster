@@ -1,3 +1,5 @@
+import '../hive/project_record/stage_record_entity.dart';
+
 class OrderExecuteResult {
   // 执行结果的字符串文案
   final String? msg;
@@ -9,11 +11,14 @@ class OrderExecuteResult {
 
   String? executeLog; // 执行日志
 
+  List<StageRecordEntity>? stageRecordList;
+
   OrderExecuteResult({
     this.msg,
     required this.succeed,
     this.data,
     this.executeLog,
+    this.stageRecordList,
   });
 
   @override

@@ -1,4 +1,5 @@
 import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
+import 'package:hank_pack_master/hive/project_record/stage_record_entity.dart';
 import 'package:hive/hive.dart';
 part 'job_history_entity.g.dart';
 
@@ -12,13 +13,16 @@ class JobHistoryEntity {
   int? buildTime; // 构建时间
 
   @HiveField(2)
-  String? historyContent; // 作业历史内容
+  String? historyContent; // 作业历史内容,保存的是json，可能是MyAppInfo的json串，也有可能是不规律的错误日志
 
   @HiveField(4)
   bool? hasRead; // 是否已读
 
   @HiveField(5)
   PackageSetting? jobSetting; // 作业配置
+
+  @HiveField(6)
+  List<StageRecordEntity>? stageRecordList; // 阶段执行日志
 
   /// 3个临时字段，不必存到数据库
   String? projectName;
@@ -31,5 +35,6 @@ class JobHistoryEntity {
     required this.historyContent,
     required this.hasRead,
     required this.jobSetting,
+    this.stageRecordList,
   });
 }
