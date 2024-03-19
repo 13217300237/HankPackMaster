@@ -50,15 +50,15 @@ class WorkShopVm extends ChangeNotifier {
   final cloneMaxTimesController = TextEditingController(); // clone的最大可执行次数
 
   final enableOrderCheckMaxDurationController =
-      TextEditingController(); // 可用指令查询的每次最大可执行时间
+  TextEditingController(); // 可用指令查询的每次最大可执行时间
   final enableOrderCheckMaxTimesController =
-      TextEditingController(); // 可用指令查询阶段的最大可执行次数
+  TextEditingController(); // 可用指令查询阶段的最大可执行次数
 
   final pgyApiKeyController = TextEditingController(); // pgy平台apkKey设置
   final pgyUploadMaxDurationController =
-      TextEditingController(); // pgy平台每次上传的最大可执行时间
+  TextEditingController(); // pgy平台每次上传的最大可执行时间
   final pgyUploadMaxTimesController =
-      TextEditingController(); // pgy平台每次上传的最大可执行次数
+  TextEditingController(); // pgy平台每次上传的最大可执行次数
 
   final List<TaskStage> taskStateList = [];
 
@@ -126,193 +126,193 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   get prepareParamTask => TaskStage("参数准备", actionFunc: () async {
-        if (gitUrl.isEmpty) {
-          return OrderExecuteResult(msg: "git仓库地址 不能为空", succeed: false);
-        }
-        if (projectPath.isEmpty) {
-          return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
-        }
-        return OrderExecuteResult(
-            succeed: true, data: '打包参数正常 工作目录为 \n$projectPath ');
-      });
+    if (gitUrl.isEmpty) {
+      return OrderExecuteResult(msg: "git仓库地址 不能为空", succeed: false);
+    }
+    if (projectPath.isEmpty) {
+      return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
+    }
+    return OrderExecuteResult(
+        succeed: true, data: '打包参数正常 工作目录为 \n$projectPath ');
+  });
 
   get gitCloneTask => TaskStage("工程克隆", actionFunc: () async {
-        // clone之前不再检查原有文件，而是另外起一个目录，单独存放，这样可以避免文件被占用的问题
-        // 与此同时，必须设定缓存删除机制，避免产生过多无用垃圾文件
+    // clone之前不再检查原有文件，而是另外起一个目录，单独存放，这样可以避免文件被占用的问题
+    // 与此同时，必须设定缓存删除机制，避免产生过多无用垃圾文件
 
-        try {
-          deleteDirectory(projectPath);
-        } catch (e) {
-          String err = "删除$projectPath失败,原因是：\n$e\n";
-          return OrderExecuteResult(msg: err, succeed: false);
-        }
+    try {
+      deleteDirectory(projectPath);
+    } catch (e) {
+      String err = "删除$projectPath失败,原因是：\n$e\n";
+      return OrderExecuteResult(msg: err, succeed: false);
+    }
 
-        ExecuteResult executeRes = await CommandUtil.getInstance().gitClone(
-            clonePath: envWorkspaceRoot,
-            gitUrl: gitUrl,
-            logOutput: addNewLogLine);
+    ExecuteResult executeRes = await CommandUtil.getInstance().gitClone(
+        clonePath: envWorkspaceRoot,
+        gitUrl: gitUrl,
+        logOutput: addNewLogLine);
 
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(
-              msg:
-                  "clone失败，具体问题请看日志... \n${executeRes.res}\n\n $cloneFailedSolution",
-              succeed: false);
-        }
-        return OrderExecuteResult(
-          succeed: true,
-          data: 'clone成功,位置在 $projectPath',
-          executeLog: executeRes.res,
-        );
-      });
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(
+          msg:
+          "clone失败，具体问题请看日志... \n${executeRes.res}\n\n $cloneFailedSolution",
+          succeed: false);
+    }
+    return OrderExecuteResult(
+      succeed: true,
+      data: 'clone成功,位置在 $projectPath',
+      executeLog: executeRes.res,
+    );
+  });
 
   get branchCheckoutTask => TaskStage("分支切换", actionFunc: () async {
-        ExecuteResult executeRes = await CommandUtil.getInstance()
-            .gitCheckout(projectPath, gitBranch, addNewLogLine);
+    ExecuteResult executeRes = await CommandUtil.getInstance()
+        .gitCheckout(projectPath, gitBranch, addNewLogLine);
 
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(msg: executeRes.res, succeed: false);
-        }
-        return OrderExecuteResult(
-          succeed: true,
-          data: '分支 $gitBranch 切换成功',
-          executeLog: executeRes.res,
-        );
-      });
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(msg: executeRes.res, succeed: false);
+    }
+    return OrderExecuteResult(
+      succeed: true,
+      data: '分支 $gitBranch 切换成功',
+      executeLog: executeRes.res,
+    );
+  });
 
   get projectStructCheckTask => TaskStage("工程结构检测", actionFunc: () async {
-        // 工程结构检查
-        // 检查目录下是否有 gradlew.bat 文件
-        File gradlewFile =
-            File("$projectPath${Platform.pathSeparator}gradlew.bat");
-        if (!gradlewFile.existsSync()) {
-          String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
-          return OrderExecuteResult(msg: er, succeed: false);
-        }
-        return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
-      });
+    // 工程结构检查
+    // 检查目录下是否有 gradlew.bat 文件
+    File gradlewFile =
+    File("$projectPath${Platform.pathSeparator}gradlew.bat");
+    if (!gradlewFile.existsSync()) {
+      String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
+      return OrderExecuteResult(msg: er, succeed: false);
+    }
+    return OrderExecuteResult(succeed: true, data: '这是一个正常的安卓工程');
+  });
 
   get assembleOrdersTask => TaskStage("可用指令查询", actionFunc: () async {
-        ExecuteResult executeRes = await CommandUtil.getInstance()
-            .gradleAssembleTasks(projectPath, addNewLogLine,
-                tempLogCacheEntity: tempLog);
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(
-              msg: "可用指令查询 存在问题!!! ${tempLog.get()}", succeed: false);
-        }
-        var ori = executeRes.res;
-        debugPrint("================找到的原始指令是:\n$ori");
-        var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
-        // 排除所有带test的，无论大小写
-        orders = findLinesExceptKeyword(lines: orders, keyword: "test");
-        orders = findLinesExceptKeyword(lines: orders, keyword: "bundle");
-        orders = findLinesExceptKeyword(lines: orders, keyword: "assemble -");
+    ExecuteResult executeRes = await CommandUtil.getInstance()
+        .gradleAssembleTasks(projectPath, addNewLogLine,
+        tempLogCacheEntity: tempLog);
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(
+          msg: "可用指令查询 存在问题!!! ${tempLog.get()}", succeed: false);
+    }
+    var ori = executeRes.res;
+    debugPrint("================找到的原始指令是:\n$ori");
+    var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
+    // 排除所有带test的，无论大小写
+    orders = findLinesExceptKeyword(lines: orders, keyword: "test");
+    orders = findLinesExceptKeyword(lines: orders, keyword: "bundle");
+    orders = findLinesExceptKeyword(lines: orders, keyword: "assemble -");
 
-        _enableAssembleOrders.clear();
-        for (var e in orders) {
-          if (e.lastIndexOf(" - ") != -1) {
-            _enableAssembleOrders.add(e.substring(0, e.lastIndexOf(" - ")));
-          }
-        }
+    _enableAssembleOrders.clear();
+    for (var e in orders) {
+      if (e.lastIndexOf(" - ") != -1) {
+        _enableAssembleOrders.add(e.substring(0, e.lastIndexOf(" - ")));
+      }
+    }
 
-        debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
-        return OrderExecuteResult(
-          succeed: true,
-          data: _enableAssembleOrders,
-          executeLog: executeRes.res,
-        );
-      });
+    debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
+    return OrderExecuteResult(
+      succeed: true,
+      data: _enableAssembleOrders,
+      executeLog: executeRes.res,
+    );
+  });
 
   get assembleOrdersTestTask => TaskStage("可用指令查询测试", actionFunc: () async {
-        await waitSomeSec();
+    await waitSomeSec();
 
-        _enableAssembleOrders.clear();
-        for (int i = 0; i < 4; i++) {
-          _enableAssembleOrders
-              .add("${DateTime.now().millisecond}-${Random().nextInt(10)}");
-        }
+    _enableAssembleOrders.clear();
+    for (int i = 0; i < 4; i++) {
+      _enableAssembleOrders
+          .add("${DateTime.now().millisecond}-${Random().nextInt(10)}");
+    }
 
-        debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
-        return OrderExecuteResult(
-          succeed: true,
-          data: _enableAssembleOrders,
-          executeLog: "变体获取成功",
-        );
-      });
+    debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
+    return OrderExecuteResult(
+      succeed: true,
+      data: _enableAssembleOrders,
+      executeLog: "变体获取成功",
+    );
+  });
 
   get gitPullTask => TaskStage("工程同步", actionFunc: () async {
-        var executeRes =
-            await CommandUtil.getInstance().gitPull(projectPath, addNewLogLine);
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(msg: executeRes.res, succeed: false);
-        }
+    var executeRes =
+    await CommandUtil.getInstance().gitPull(projectPath, addNewLogLine);
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(msg: executeRes.res, succeed: false);
+    }
 
-        return OrderExecuteResult(
-          data: "git pull 成功",
-          succeed: true,
-          executeLog: executeRes.res,
-        );
-      });
+    return OrderExecuteResult(
+      data: "git pull 成功",
+      succeed: true,
+      executeLog: executeRes.res,
+    );
+  });
 
   get gitFetchTask => TaskStage("同步远程仓库", actionFunc: () async {
-        // 首先必须同步远程仓库的最新改动 git fetch
-        var executeRes = await CommandUtil.getInstance().gitFetch(
-          projectPath,
-          addNewLogLine,
-        );
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(msg: executeRes.res, succeed: false);
-        }
+    // 首先必须同步远程仓库的最新改动 git fetch
+    var executeRes = await CommandUtil.getInstance().gitFetch(
+      projectPath,
+      addNewLogLine,
+    );
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(msg: executeRes.res, succeed: false);
+    }
 
-        return OrderExecuteResult(
-          data: "同步远程仓库 成功",
-          succeed: true,
-          executeLog: executeRes.res,
-        );
-      });
+    return OrderExecuteResult(
+      data: "同步远程仓库 成功",
+      succeed: true,
+      executeLog: executeRes.res,
+    );
+  });
 
   get gitBranchRemote => TaskStage("列出所有分支", actionFunc: () async {
-        var executeRes = await CommandUtil.getInstance().gitBranchRemote(
-          projectPath,
-          addNewLogLine,
-        );
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(msg: executeRes.res, succeed: false);
-        }
+    var executeRes = await CommandUtil.getInstance().gitBranchRemote(
+      projectPath,
+      addNewLogLine,
+    );
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(msg: executeRes.res, succeed: false);
+    }
 
-        return OrderExecuteResult(
-          data: "查询所有分支 成功",
-          succeed: true,
-          executeLog: executeRes.res,
-        );
-      });
+    return OrderExecuteResult(
+      data: "查询所有分支 成功",
+      succeed: true,
+      executeLog: executeRes.res,
+    );
+  });
 
   get mergeBranchListTask => TaskStage("合并其他分支", actionFunc: () async {
-        var mergeBranchList = runningTask!.setting!.mergeBranchList;
-        if (mergeBranchList == null || mergeBranchList.isEmpty) {
-          return OrderExecuteResult(data: "没有发现需要合并的其它分支", succeed: true);
-        }
+    var mergeBranchList = runningTask!.setting!.mergeBranchList;
+    if (mergeBranchList == null || mergeBranchList.isEmpty) {
+      return OrderExecuteResult(data: "没有发现需要合并的其它分支", succeed: true);
+    }
 
-        var executeRes = await CommandUtil.getInstance().mergeBranch(
-          projectPath,
-          mergeBranchList,
-          addNewLogLine,
-        );
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(msg: executeRes.res, succeed: false);
-        }
+    var executeRes = await CommandUtil.getInstance().mergeBranch(
+      projectPath,
+      mergeBranchList,
+      addNewLogLine,
+    );
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(msg: executeRes.res, succeed: false);
+    }
 
-        return OrderExecuteResult(
-          data: "合并其他分支 $mergeBranchList 成功",
-          succeed: true,
-          executeLog: executeRes.res,
-        );
-      });
+    return OrderExecuteResult(
+      data: "合并其他分支 $mergeBranchList 成功",
+      succeed: true,
+      executeLog: executeRes.res,
+    );
+  });
 
   get modifyGradlePropertiesFile =>
       TaskStage("修改 gradle.properties文件 以指定Java环境", actionFunc: () async {
         // 找到工程位置下的 gradle.properties 文件
         var gradlePropertiesFile =
-            File("$projectPath${Platform.pathSeparator}gradle.properties");
+        File("$projectPath${Platform.pathSeparator}gradle.properties");
 
         if (!gradlePropertiesFile.existsSync()) {
           return OrderExecuteResult(
@@ -345,7 +345,7 @@ class WorkShopVm extends ChangeNotifier {
 
         ExecuteResult executeRes = await CommandUtil.getInstance()
             .gitCheckoutFile(
-                projectPath, gradlePropertiesFilePath, (s) => null, tempLog);
+            projectPath, gradlePropertiesFilePath, (s) => null, tempLog);
         if (executeRes.exitCode != 0) {
           String er = "还原失败，详情请看日志}";
           return OrderExecuteResult(
@@ -359,247 +359,247 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get generateApkTask => TaskStage("生成apk", actionFunc: () async {
-        ExecuteResult executeRes = await CommandUtil.getInstance()
-            .gradleAssemble(
-                projectRoot: projectPath + Platform.pathSeparator,
-                packageOrder: selectedOrder!,
-                versionCode: versionCode,
-                versionName: versionName,
-                logOutput: addNewLogLine,
-                tempLogCacheEntity: tempLog);
+    ExecuteResult executeRes = await CommandUtil.getInstance()
+        .gradleAssemble(
+        projectRoot: projectPath + Platform.pathSeparator,
+        packageOrder: selectedOrder!,
+        versionCode: versionCode,
+        versionName: versionName,
+        logOutput: addNewLogLine,
+        tempLogCacheEntity: tempLog);
 
-        if (executeRes.exitCode != 0) {
-          String er = "打包失败，详情请看日志 \n ${tempLog.get()}";
-          return OrderExecuteResult(msg: er, succeed: false);
-        }
-        return OrderExecuteResult(
-          succeed: true,
-          data: "apk生成成功",
-          executeLog: executeRes.res,
-        );
-      });
+    if (executeRes.exitCode != 0) {
+      String er = "打包失败，详情请看日志 \n ${tempLog.get()}";
+      return OrderExecuteResult(msg: er, succeed: false);
+    }
+    return OrderExecuteResult(
+      succeed: true,
+      data: "apk生成成功",
+      executeLog: executeRes.res,
+    );
+  });
 
   get apkCheckTask => TaskStage("apk检测", actionFunc: () async {
-        debugPrint("_apkLocation-> $_apkLocation");
-        List<File> list = findApkFiles(_apkLocation);
-        String directoryPath = '$projectPath/app/build/outputs';
+    debugPrint("_apkLocation-> $_apkLocation");
+    List<File> list = findApkFiles(_apkLocation);
+    String directoryPath = '$projectPath/app/build/outputs';
 
-        if (list.isEmpty) {
-          addNewLogLine(
-              '指定的路径$_apkLocation下没找到apk，那就尝试在 默认目录$directoryPath下进行深度搜索，找到所有apk文件');
-          list = findApkFiles(directoryPath);
-        }
+    if (list.isEmpty) {
+      addNewLogLine(
+          '指定的路径$_apkLocation下没找到apk，那就尝试在 默认目录$directoryPath下进行深度搜索，找到所有apk文件');
+      list = findApkFiles(directoryPath);
+    }
 
-        if (list.isEmpty) {
-          return OrderExecuteResult(
-              succeed: false,
-              msg: "查找打包产物 失败: $_apkLocation 以及 默认目录$directoryPath，没找到任何apk文件");
-        }
+    if (list.isEmpty) {
+      return OrderExecuteResult(
+          succeed: false,
+          msg: "查找打包产物 失败: $_apkLocation 以及 默认目录$directoryPath，没找到任何apk文件");
+    }
 
-        if (list.length > 1) {
-          return OrderExecuteResult(
-              succeed: false,
-              msg: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
-        }
+    if (list.length > 1) {
+      return OrderExecuteResult(
+          succeed: false,
+          msg: "查找打包产物 失败: $_apkLocation，存在多个apk文件，无法确定需上传的apk");
+    }
 
-        apkToUpload = list[0].path;
+    apkToUpload = list[0].path;
 
-        if (await File(apkToUpload!).exists()) {
-          return OrderExecuteResult(
-              succeed: true, data: "打包产物的位置在: $apkToUpload");
-        } else {
-          return OrderExecuteResult(
-              succeed: false, msg: "查找打包产物 失败: $apkToUpload，文件不存在");
-        }
-      });
+    if (await File(apkToUpload!).exists()) {
+      return OrderExecuteResult(
+          succeed: true, data: "打包产物的位置在: $apkToUpload");
+    } else {
+      return OrderExecuteResult(
+          succeed: false, msg: "查找打包产物 失败: $apkToUpload，文件不存在");
+    }
+  });
 
   get gitLogTask => TaskStage("获取git记录", actionFunc: () async {
-        // 先获取当前git的最新提交记录
-        var executeRes =
-            await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
+    // 先获取当前git的最新提交记录
+    var executeRes =
+    await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
 
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
-        } else {
-          gitLogController.text = executeRes.res.replaceAll("\"", '');
-          return OrderExecuteResult(
-              data: "获取git记录成功,\n${executeRes.res}", succeed: true);
-        }
-      });
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(msg: "获取git最近提交记录失败...", succeed: false);
+    } else {
+      gitLogController.text = executeRes.res.replaceAll("\"", '');
+      return OrderExecuteResult(
+          data: "获取git记录成功,\n${executeRes.res}", succeed: true);
+    }
+  });
 
   get pgyTokenFetchTask => TaskStage("获取pgyToken", actionFunc: () async {
-        var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
-          buildDescription: projectAppDesc,
-          buildUpdateDescription: updateLog,
-        );
+    var pgyToken = await PgyUploadUtil.getInstance().getPgyToken(
+      buildDescription: projectAppDesc,
+      buildUpdateDescription: updateLog,
+    );
 
-        if (pgyToken == null) {
-          return OrderExecuteResult(
-              msg: "pgy token获取失败... [$apkToUpload]", succeed: false);
-        }
+    if (pgyToken == null) {
+      return OrderExecuteResult(
+          msg: "pgy token获取失败... [$apkToUpload]", succeed: false);
+    }
 
-        _pgyEntity = PgyEntity(
-          endpoint: pgyToken.data?.endpoint,
-          key: pgyToken.data?.params?.key,
-          signature: pgyToken.data?.params?.signature,
-          xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
-        );
+    _pgyEntity = PgyEntity(
+      endpoint: pgyToken.data?.endpoint,
+      key: pgyToken.data?.params?.key,
+      signature: pgyToken.data?.params?.signature,
+      xCosSecurityToken: pgyToken.data?.params?.xCosSecurityToken,
+    );
 
-        return OrderExecuteResult(
-          succeed: true,
-          msg: '获取到的Token是 ${pgyToken.toString()}',
-        );
-      });
+    return OrderExecuteResult(
+      succeed: true,
+      msg: '获取到的Token是 ${pgyToken.toString()}',
+    );
+  });
 
   get uploadToPgyTask => TaskStage("上传pgy", actionFunc: () async {
-        if (!_pgyEntity!.isOk()) {
-          return OrderExecuteResult(
-              msg: "上传参数为空，流程终止!  [$apkToUpload]", succeed: false);
-        }
+    if (!_pgyEntity!.isOk()) {
+      return OrderExecuteResult(
+          msg: "上传参数为空，流程终止!  [$apkToUpload]", succeed: false);
+    }
 
-        String oriFileName = path.basename(File(apkToUpload!).path);
+    String oriFileName = path.basename(File(apkToUpload!).path);
 
-        var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
-            filePath: apkToUpload!,
-            oriFileName: oriFileName,
-            uploadProgressAction: addNewLogLine);
+    var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
+        filePath: apkToUpload!,
+        oriFileName: oriFileName,
+        uploadProgressAction: addNewLogLine);
 
-        if (res != null) {
-          return OrderExecuteResult(
-              msg: "上传失败,$res \n [$apkToUpload] \n", succeed: false);
-        } else {
-          return OrderExecuteResult(succeed: true, data: '上传成功');
-        }
-      });
+    if (res != null) {
+      return OrderExecuteResult(
+          msg: "上传失败,$res \n [$apkToUpload] \n", succeed: false);
+    } else {
+      return OrderExecuteResult(succeed: true, data: '上传成功');
+    }
+  });
 
   get pgyResultSearchTask => TaskStage("检查pgy发布结果", actionFunc: () async {
-        var s = await PgyUploadUtil.getInstance()
-            .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
+    var s = await PgyUploadUtil.getInstance()
+        .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
 
-        if (s == null) {
-          return OrderExecuteResult(
-              succeed: false, msg: " \n [$apkToUpload] \n");
-        }
+    if (s == null) {
+      return OrderExecuteResult(
+          succeed: false, msg: " \n [$apkToUpload] \n");
+    }
 
-        if (s.code == 1216) {
-          // 发布失败，流程终止
-          return OrderExecuteResult(
-              succeed: false, msg: "发布失败，流程终止, \n [$apkToUpload] \n");
-        } else {
-          // 发布成功，打印结果
-          // 开始解析发布结果,
-          if (s.data is Map<String, dynamic>) {
-            MyAppInfo appInfo =
-                MyAppInfo.fromJson(s.data as Map<String, dynamic>);
-            appInfo.buildDescription = projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
-            appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
+    if (s.code == 1216) {
+      // 发布失败，流程终止
+      return OrderExecuteResult(
+          succeed: false, msg: "发布失败，流程终止, \n [$apkToUpload] \n");
+    } else {
+      // 发布成功，打印结果
+      // 开始解析发布结果,
+      if (s.data is Map<String, dynamic>) {
+        MyAppInfo appInfo =
+        MyAppInfo.fromJson(s.data as Map<String, dynamic>);
+        appInfo.buildDescription = projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
+        appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
 
-            addNewLogLine("应用名称: ${appInfo.buildName}");
-            addNewLogLine("大小: ${appInfo.buildFileSize}");
-            addNewLogLine("版本号: ${appInfo.buildVersion}");
-            addNewLogLine("上传批次: ${appInfo.buildBuildVersion}");
-            addNewLogLine("应用描述: ${appInfo.buildDescription}");
-            addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
-            addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
-            addNewLogLine(
-                "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
-            addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
-            addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
-            addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
+        addNewLogLine("应用名称: ${appInfo.buildName}");
+        addNewLogLine("大小: ${appInfo.buildFileSize}");
+        addNewLogLine("版本号: ${appInfo.buildVersion}");
+        addNewLogLine("上传批次: ${appInfo.buildBuildVersion}");
+        addNewLogLine("应用描述: ${appInfo.buildDescription}");
+        addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
+        addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
+        addNewLogLine(
+            "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
+        addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
+        addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
+        addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
 
-            return OrderExecuteResult(succeed: true, data: appInfo);
-          } else {
-            return OrderExecuteResult(
-                succeed: false, data: "发布结果解析失败,  \n [$apkToUpload] \n ");
-          }
-        }
-      });
+        return OrderExecuteResult(succeed: true, data: appInfo);
+      } else {
+        return OrderExecuteResult(
+            succeed: false, data: "发布结果解析失败,  \n [$apkToUpload] \n ");
+      }
+    }
+  });
 
   get uploadToObsTask => TaskStage("上传到华为obs", actionFunc: () async {
-        // 先获取当前git的最新提交记录
-        var executeRes =
-            await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
+    // 先获取当前git的最新提交记录
+    var executeRes =
+    await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
 
-        if (executeRes.exitCode != 0) {
-          return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
-        }
-        // 上传到OBS的时候，必须重命名,不然无法区分多版本
-        File fileToUpload = File(apkToUpload!);
+    if (executeRes.exitCode != 0) {
+      return OrderExecuteResult(data: "获取git最近提交记录失败...", succeed: false);
+    }
+    // 上传到OBS的时候，必须重命名,不然无法区分多版本
+    File fileToUpload = File(apkToUpload!);
 
-        String childFolderName = path.basename(projectPath); // 用项目名称作为分隔
-        String buildUpdated = Jiffy.now().format(pattern: "yyyyMMdd_HHmmss_");
+    String childFolderName = path.basename(projectPath); // 用项目名称作为分隔
+    String buildUpdated = Jiffy.now().format(pattern: "yyyyMMdd_HHmmss_");
 
-        var oBSResponse = await OBSClient.putFile(
-          objectName:
-              "${childFolderName}_$buildUpdated${path.basename(apkToUpload!)}",
-          file: fileToUpload,
-        );
+    var oBSResponse = await OBSClient.putFile(
+      objectName:
+      "${childFolderName}_$buildUpdated${path.basename(apkToUpload!)}",
+      file: fileToUpload,
+    );
 
-        obsDownloadUrl = oBSResponse?.url;
+    obsDownloadUrl = oBSResponse?.url;
 
-        debugPrint(
-            "OBS上传结束.... ${obsDownloadUrl == null || obsDownloadUrl!.isEmpty}");
+    debugPrint(
+        "OBS上传结束.... ${obsDownloadUrl == null || obsDownloadUrl!.isEmpty}");
 
-        if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
-          return OrderExecuteResult(
-              succeed: false,
-              msg: "OBS上传失败, \n [$apkToUpload]  \n ${oBSResponse?.errMsg}");
-        } else {
-          return OrderExecuteResult(
-            data: "OBS上传成功,下载地址为 $obsDownloadUrl",
-            succeed: true,
-            executeLog: executeRes.res,
-          );
-        }
-      });
+    if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
+      return OrderExecuteResult(
+          succeed: false,
+          msg: "OBS上传失败, \n [$apkToUpload]  \n ${oBSResponse?.errMsg}");
+    } else {
+      return OrderExecuteResult(
+        data: "OBS上传成功,下载地址为 $obsDownloadUrl",
+        succeed: true,
+        executeLog: executeRes.res,
+      );
+    }
+  });
 
   get generateObsUploadResTask => TaskStage("构建打包结果", actionFunc: () async {
-        if (apkToUpload == null) {
-          return OrderExecuteResult(
-              data: "error : apkToUpload is null!", succeed: false);
-        }
-        debugPrint("进入构建打包结果...");
-        MyAppInfo appInfo = MyAppInfo();
-        File apkFile = File(apkToUpload!);
-        if (await apkFile.exists()) {
-          String fileSize = "${await apkFile.length()}"; // 文件大小
-          var executeRes = await CommandUtil.getInstance().aapt(apkToUpload!);
-          var data = executeRes.data;
-          if (data is ApkParserResult) {
-            appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
-            appInfo.buildName = data.appName;
-            appInfo.buildVersion = data.versionName;
-            appInfo.buildVersionNo = data.versioncode;
-            appInfo.buildIdentifier = data.packageName;
-            appInfo.buildFileSize = fileSize;
-            appInfo.buildQRCodeURL = obsDownloadUrl;
-            appInfo.buildUpdated =
-                Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
-            // 更新日志
-            appInfo.buildUpdateDescription = updateLog;
-            // 应用描述
-            appInfo.buildDescription = projectAppDesc;
+    if (apkToUpload == null) {
+      return OrderExecuteResult(
+          data: "error : apkToUpload is null!", succeed: false);
+    }
+    debugPrint("进入构建打包结果...");
+    MyAppInfo appInfo = MyAppInfo();
+    File apkFile = File(apkToUpload!);
+    if (await apkFile.exists()) {
+      String fileSize = "${await apkFile.length()}"; // 文件大小
+      var executeRes = await CommandUtil.getInstance().aapt(apkToUpload!);
+      var data = executeRes.data;
+      if (data is ApkParserResult) {
+        appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
+        appInfo.buildName = data.appName;
+        appInfo.buildVersion = data.versionName;
+        appInfo.buildVersionNo = data.versioncode;
+        appInfo.buildIdentifier = data.packageName;
+        appInfo.buildFileSize = fileSize;
+        appInfo.buildQRCodeURL = obsDownloadUrl;
+        appInfo.buildUpdated =
+            Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
+        // 更新日志
+        appInfo.buildUpdateDescription = updateLog;
+        // 应用描述
+        appInfo.buildDescription = projectAppDesc;
 
-            debugPrint("大小: ${appInfo.buildFileSize}");
-            debugPrint("版本号: ${appInfo.buildVersion}");
-            debugPrint("编译版本号: ${appInfo.buildVersionNo}");
-            debugPrint("应用包名: ${appInfo.buildIdentifier}");
-            debugPrint("二维码地址: ${appInfo.buildQRCodeURL}");
-            debugPrint("应用更新时间: ${appInfo.buildUpdated}");
-            debugPrint("应用描述: ${appInfo.buildDescription}");
-            debugPrint("更新日志: ${appInfo.buildUpdateDescription}");
-            return OrderExecuteResult(
-              data: appInfo,
-              succeed: true,
-              executeLog: executeRes.res,
-            );
-          } else {
-            return OrderExecuteResult(data: null, succeed: false);
-          }
-        } else {
-          return OrderExecuteResult(data: null, succeed: false);
-        }
-      });
+        debugPrint("大小: ${appInfo.buildFileSize}");
+        debugPrint("版本号: ${appInfo.buildVersion}");
+        debugPrint("编译版本号: ${appInfo.buildVersionNo}");
+        debugPrint("应用包名: ${appInfo.buildIdentifier}");
+        debugPrint("二维码地址: ${appInfo.buildQRCodeURL}");
+        debugPrint("应用更新时间: ${appInfo.buildUpdated}");
+        debugPrint("应用描述: ${appInfo.buildDescription}");
+        debugPrint("更新日志: ${appInfo.buildUpdateDescription}");
+        return OrderExecuteResult(
+          data: appInfo,
+          succeed: true,
+          executeLog: executeRes.res,
+        );
+      } else {
+        return OrderExecuteResult(data: null, succeed: false);
+      }
+    } else {
+      return OrderExecuteResult(data: null, succeed: false);
+    }
+  });
 
   /// 初始化一个激活任务队列
   void initPreCheckTaskList() {
@@ -792,13 +792,13 @@ class WorkShopVm extends ChangeNotifier {
 
   int get maxTimes {
     return int.tryParse(EnvConfigOperator.searchEnvValue(
-            Const.stageTaskExecuteMaxRetryTimes)) ??
+        Const.stageTaskExecuteMaxRetryTimes)) ??
         5;
   }
 
   Future timeOutCounter() async {
     var t = int.tryParse(EnvConfigOperator.searchEnvValue(
-            Const.stageTaskExecuteMaxPeriod)) ??
+        Const.stageTaskExecuteMaxPeriod)) ??
         5;
 
     await Future.delayed(Duration(minutes: t));
@@ -822,10 +822,12 @@ class WorkShopVm extends ChangeNotifier {
 
     addNewLogLine("开始流程...${taskStateList.length}");
 
-    OrderExecuteResult actionRes = OrderExecuteResult(succeed: false);
+    OrderExecuteResult? actionRes; // 本次任务的执行结果
 
     Stopwatch totalWatch = Stopwatch();
     totalWatch.start();
+
+    onProcessChanged?.call(10);
 
     // 开始整体流程
     for (int i = 0; i < taskStateList.length; i++) {
@@ -851,7 +853,7 @@ class WorkShopVm extends ChangeNotifier {
         TaskStage.onStageStartedFunc?.call(i);
 
         var stageResult =
-            await Future.any([taskFuture, timeOutCounter()]); // 计算超时
+        await Future.any([taskFuture, timeOutCounter()]); // 计算超时
 
         stageTimeWatch.stop(); // 停止计时器
 
@@ -866,7 +868,7 @@ class WorkShopVm extends ChangeNotifier {
             addNewLogLine("第${j + 1}次 执行成功: $taskName - $stageResult");
             addNewEmptyLine();
             stage.executeResultData = stageResult; // 保存当前阶段的执行成功的结果
-            actionRes.addChild(stageResult);
+            actionRes = stageResult; // 本次任务的执行结果
             break;
           } else {
             updateStatue(i, StageStatue.error);
@@ -880,7 +882,7 @@ class WorkShopVm extends ChangeNotifier {
               addNewEmptyLine();
 
               stage.executeResultData = stageResult;
-              actionRes.addChild(stageResult);
+              actionRes = stageResult;
               await waitSomeSec();
             }
           }
@@ -891,8 +893,8 @@ class WorkShopVm extends ChangeNotifier {
 
           // 如果到了最后一次
           if (j == maxTimes - 1) {
-            actionRes.addChild(OrderExecuteResult(
-                succeed: false, msg: "第${j + 1}次:$stageResult"));
+            actionRes = OrderExecuteResult(
+                succeed: false, msg: "第${j + 1}次:$stageResult");
             CommandUtil.getInstance().stopAllExec();
             stage.timerController.stop();
             break;
@@ -915,8 +917,8 @@ class WorkShopVm extends ChangeNotifier {
     return OrderExecuteResult(
         succeed: true,
         msg:
-            "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionRes.msg}，任务总共花费时间${formatSeconds(totalWatch.elapsed.inMilliseconds ~/ 1000)} ms ",
-        data: actionRes.data);
+        "${Jiffy.now().format(pattern: "yyyy年MM月dd日 HH:mm:ss ")}\n${actionRes?.msg}，任务总共花费时间${formatSeconds(totalWatch.elapsed.inMilliseconds ~/ 1000)} ms ",
+        data: actionRes?.data);
   }
 
   void _reset() {
@@ -941,7 +943,7 @@ class WorkShopVm extends ChangeNotifier {
 
   // 工程任务队列相关
   final ListQueue<ProjectRecordEntity> _taskQueue =
-      ListQueue<ProjectRecordEntity>();
+  ListQueue<ProjectRecordEntity>();
 
   bool hasTask() => _taskQueue.isNotEmpty;
 
@@ -996,14 +998,7 @@ class WorkShopVm extends ChangeNotifier {
     setProjectPath();
 
     initPreCheckTaskList();
-    OrderExecuteResult orderExecuteResult = await startSchedule();
-    var lastChild = orderExecuteResult.getLastChild();
-    if (lastChild == null) {
-      ToastUtil.showPrettyToast("lastChild is null");
-      return;
-    }
-
-    orderExecuteResult = lastChild;
+    OrderExecuteResult? orderExecuteResult = await startSchedule();
 
     /// 激活失败时
     if (orderExecuteResult.succeed != true ||
@@ -1095,14 +1090,7 @@ class WorkShopVm extends ChangeNotifier {
     selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
     selectedUploadPlatformController.text = selectedUploadPlatform!.name ?? '';
     initPackageTaskList();
-    OrderExecuteResult scheduleRes = await startSchedule();
-    var lastChild = scheduleRes.getLastChild();
-    if (lastChild == null) {
-      ToastUtil.showPrettyToast("lastChild is null");
-      return;
-    }
-    scheduleRes = lastChild;
-
+    var scheduleRes = await startSchedule();
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
       ToastUtil.showPrettyToast(
@@ -1126,14 +1114,7 @@ class WorkShopVm extends ChangeNotifier {
     apkLocationController.text = runningTask!.apkPath!;
 
     initFastUploadTaskList(apkPath);
-    OrderExecuteResult scheduleRes = await startSchedule();
-    var lastChild = scheduleRes.getLastChild();
-    if (lastChild == null) {
-      ToastUtil.showPrettyToast("lastChild is null");
-      return;
-    }
-
-    scheduleRes = lastChild;
+    var scheduleRes = await startSchedule();
     if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
       myAppInfo = scheduleRes.data;
 
