@@ -138,7 +138,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                     DialogUtil.showCustomDialog(
                             context: context,
                             title: "最近作业历史",
-                            maxWidth: 850,
+                            maxWidth: 1200,
                             content:
                                 ListView(children: [...getRecentJobResult()]),
                             showCancel: false,
@@ -692,6 +692,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   _stageListCard(JobHistoryEntity e) {
+    if (e.stageRecordList == null || e.stageRecordList!.isEmpty) {
+      return const SizedBox();
+    }
+
     Color bg(bool? success) {
       return (success ?? false)
           ? Colors.green.withOpacity(.1)
@@ -704,29 +708,48 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...?e.stageRecordList
-              ?.map((stageRecord) => Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8.0),
-                    margin: const EdgeInsets.symmetric(vertical: 5.0),
-                    decoration: BoxDecoration(
-                        color: bg(stageRecord.success),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("${stageRecord.name}", style: _style),
-                        Text(
-                            "执行耗时: ${formatSeconds(stageRecord.costTime ?? 0)}",
-                            style: _style),
-                        Text(
-                          "${stageRecord.resultStr}",
-                          style: _style,
+              ?.map((stageRecord) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: Expander(
+                      headerBackgroundColor: ButtonState.resolveWith(
+                          (states) => bg(stageRecord.success)),
+                      header: RichText(
+                          text: TextSpan(children: [
+                        TextSpan(
+                            text: "${stageRecord.name}     ",
+                            style: _style.copyWith(fontSize: 16)),
+                        TextSpan(
+                            text: formatSeconds(stageRecord.costTime ?? 0),
+                            style: _style.copyWith(color: Colors.blue)),
+                      ])),
+                      content: Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.symmetric(vertical: 5.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Card(
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: TextSelectionTheme(
+                                  data: TextSelectionThemeData(
+                                    selectionColor:
+                                        Colors.green.withOpacity(.3),
+                                    // 修改选中文本的背景颜色
+                                    selectionHandleColor:
+                                        Colors.red, // 修改选中文本的选择手柄颜色
+                                  ),
+                                  child: SelectableText(
+                                      "${stageRecord.resultStr}",
+                                      style: _style),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Text("${stageRecord.fullLog}", style: _style)
+                          ],
                         ),
-                        Text(
-                          "${stageRecord.fullLog}",
-                          style: _style,
-                        )
-                      ],
+                      ),
                     ),
                   ))
               .toList()
