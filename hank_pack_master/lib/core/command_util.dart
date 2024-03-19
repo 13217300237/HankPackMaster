@@ -669,7 +669,7 @@ $sb"""
     _stopExec(process);
 
     String res = """
-cmd: git merge
+cmd: git merge $branchList
 exitCode : $exitCode
 $sb"""
         .trim();

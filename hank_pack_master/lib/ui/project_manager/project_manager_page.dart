@@ -581,7 +581,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         try {
           myAppInfo = MyAppInfo.fromJsonString(e.historyContent!);
         } catch (ex) {
-          myAppInfo = MyAppInfo(errMessage: e.historyContent);
+          myAppInfo = MyAppInfo(errMessage: e.historyContent); // 针对激活成功，这里要做判断
         }
 
         var color = e.success == true

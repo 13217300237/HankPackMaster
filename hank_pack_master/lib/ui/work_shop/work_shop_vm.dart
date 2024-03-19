@@ -214,7 +214,6 @@ class WorkShopVm extends ChangeNotifier {
           );
         }
         var ori = executeRes.res;
-        debugPrint("================找到的原始指令是:\n$ori");
         var orders = findLinesWithKeyword(ori: ori, keyword: "assemble");
         // 排除所有带test的，无论大小写
         orders = findLinesExceptKeyword(lines: orders, keyword: "test");
@@ -228,7 +227,6 @@ class WorkShopVm extends ChangeNotifier {
           }
         }
 
-        debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
         return OrderExecuteResult(
           succeed: true,
           data: _enableAssembleOrders,
@@ -245,7 +243,6 @@ class WorkShopVm extends ChangeNotifier {
               .add("${DateTime.now().millisecond}-${Random().nextInt(10)}");
         }
 
-        debugPrint("可用指令查询 完毕，结果是  $_enableAssembleOrders");
         return OrderExecuteResult(
           succeed: true,
           data: _enableAssembleOrders,
@@ -419,7 +416,6 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get apkCheckTask => TaskStage("apk检测", stageAction: () async {
-        debugPrint("_apkLocation-> $_apkLocation");
         List<File> list = findApkFiles(_apkLocation);
         String directoryPath = '$projectPath/app/build/outputs';
 
@@ -609,9 +605,6 @@ class WorkShopVm extends ChangeNotifier {
 
         obsDownloadUrl = oBSResponse?.url;
 
-        debugPrint(
-            "OBS上传结束.... ${obsDownloadUrl == null || obsDownloadUrl!.isEmpty}");
-
         if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
           return OrderExecuteResult(
               succeed: false,
@@ -632,7 +625,6 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(
               data: "error : apkToUpload is null!", succeed: false);
         }
-        debugPrint("进入构建打包结果...");
         MyAppInfo appInfo = MyAppInfo();
         File apkFile = File(apkToUpload!);
         if (await apkFile.exists()) {
@@ -653,15 +645,6 @@ class WorkShopVm extends ChangeNotifier {
             appInfo.buildUpdateDescription = updateLog;
             // 应用描述
             appInfo.buildDescription = projectAppDesc;
-
-            debugPrint("大小: ${appInfo.buildFileSize}");
-            debugPrint("版本号: ${appInfo.buildVersion}");
-            debugPrint("编译版本号: ${appInfo.buildVersionNo}");
-            debugPrint("应用包名: ${appInfo.buildIdentifier}");
-            debugPrint("二维码地址: ${appInfo.buildQRCodeURL}");
-            debugPrint("应用更新时间: ${appInfo.buildUpdated}");
-            debugPrint("应用描述: ${appInfo.buildDescription}");
-            debugPrint("更新日志: ${appInfo.buildUpdateDescription}");
             return OrderExecuteResult(
               data: appInfo,
               succeed: true,
@@ -1127,6 +1110,16 @@ class WorkShopVm extends ChangeNotifier {
 
     ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 激活成功, 详情查看激活历史");
 
+    var myAppInfo = MyAppInfo();
+    myAppInfo.assembleOrders = _enableAssembleOrders;
+
+    _insertIntoJobHistoryList(
+      success: true,
+      historyContent: myAppInfo.toJsonString(), // 这里要
+      jobSetting: runningTask!.setting!,
+      stageRecordList: orderExecuteResult.stageRecordList ?? [],
+    );
+
     onProjectActiveFinished(orderExecuteResult.data);
     _reset();
     onTaskFinished?.call();
@@ -1152,7 +1145,6 @@ class WorkShopVm extends ChangeNotifier {
         runningTask = _taskQueue.removeFirst();
         setProjectRecordJobRunning(true);
         assert(runningTask != null);
-        debugPrint("准备切入新任务，请稍后... ${runningTask!.projectName}");
         // 如果此工程已经激活成功，那么，直接进行打包
         // 将这些信息填入到 表单中
         gitUrlController.text = runningTask!.gitUrl;
@@ -1173,9 +1165,7 @@ class WorkShopVm extends ChangeNotifier {
         }
       } else {
         if (runningTask != null) {
-          // debugPrint("当前有任务正在执行，请稍后... ${runningTask?.projectName}");
         } else if (_taskQueue.isEmpty) {
-          // debugPrint("任务队列为空...");
         }
       }
     });
@@ -1188,9 +1178,6 @@ class WorkShopVm extends ChangeNotifier {
     apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
     selectedOrder = runningTask!.setting!.selectedOrder ?? '';
     selectedOrderController.text = selectedOrder!;
-
-    debugPrint(
-        "runningTask!.setting!.jdk!-> ${runningTask!.setting!.jdk!.toString()}");
 
     javaHomeController.text = runningTask!.setting!.jdk!.envPath;
     selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;

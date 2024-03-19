@@ -261,7 +261,7 @@ class ProjectEntityDataSource extends DataGridSource {
                 );
 
                 DialogUtil.showCustomDialog(
-                    maxHeight: 600,
+                    maxHeight: 800,
                     maxWidth: 900,
                     context: buildContext,
                     title: "${entity.projectName} 作业历史",

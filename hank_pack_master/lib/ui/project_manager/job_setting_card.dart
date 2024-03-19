@@ -22,7 +22,7 @@ class JobSettingCard extends StatelessWidget {
     return Expander(
       headerBackgroundColor:
           ButtonState.resolveWith((states) => Colors.orange.withOpacity(.1)),
-      header: Text('查看打包配置', style: _style),
+      header: Text('查看作业配置', style: _style),
       initiallyExpanded: true,
       content: Row(
         children: [

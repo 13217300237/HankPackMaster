@@ -96,57 +96,61 @@ class MyAppInfo {
   String? errMessage; // 现在用错误message表示整个错误
   String? errCode; // 错误码，暂未用到
 
-  MyAppInfo(
-      {this.buildKey,
-      this.buildType,
-      this.buildIsFirst,
-      this.buildIsLastest,
-      this.buildFileKey,
-      this.buildFileName,
-      this.buildFileSize,
-      this.buildName,
-      this.buildVersion,
-      this.buildVersionNo,
-      this.buildBuildVersion,
-      this.buildIdentifier,
-      this.buildIcon,
-      this.buildDescription,
-      this.buildUpdateDescription,
-      this.buildScreenshots,
-      this.buildShortcutUrl,
-      this.buildCreated,
-      this.buildUpdated,
-      this.buildQRCodeURL,
-      this.uploadPlatform,
-      this.errCode,
-      this.errMessage});
+  List<String>? assembleOrders;
+
+  MyAppInfo({
+    this.buildKey,
+    this.buildType,
+    this.buildIsFirst,
+    this.buildIsLastest,
+    this.buildFileKey,
+    this.buildFileName,
+    this.buildFileSize,
+    this.buildName,
+    this.buildVersion,
+    this.buildVersionNo,
+    this.buildBuildVersion,
+    this.buildIdentifier,
+    this.buildIcon,
+    this.buildDescription,
+    this.buildUpdateDescription,
+    this.buildScreenshots,
+    this.buildShortcutUrl,
+    this.buildCreated,
+    this.buildUpdated,
+    this.buildQRCodeURL,
+    this.uploadPlatform,
+    this.errCode,
+    this.errMessage,
+    this.assembleOrders,
+  });
 
   factory MyAppInfo.fromJson(Map<String, dynamic> data) {
     return MyAppInfo(
-      buildKey: data['buildKey'],
-      buildType: data['buildType'],
-      buildIsFirst: data['buildIsFirst'],
-      buildIsLastest: data['buildIsLastest'],
-      buildFileKey: data['buildFileKey'],
-      buildFileName: data['buildFileName'],
-      buildFileSize: data['buildFileSize'],
-      buildName: data['buildName'],
-      buildVersion: data['buildVersion'],
-      buildVersionNo: data['buildVersionNo'],
-      buildBuildVersion: data['buildBuildVersion'],
-      buildIdentifier: data['buildIdentifier'],
-      buildIcon: data['buildIcon'],
-      buildDescription: data['buildDescription'],
-      buildUpdateDescription: data['buildUpdateDescription'],
-      buildScreenshots: data['buildScreenshots'],
-      buildShortcutUrl: data['buildShortcutUrl'],
-      buildCreated: data['buildCreated'],
-      buildUpdated: data['buildUpdated'],
-      buildQRCodeURL: data['buildQRCodeURL'],
-      uploadPlatform: data['uploadPlatform'],
-      errCode: data['errCode'],
-      errMessage: data['errMessage'],
-    );
+        buildKey: data['buildKey'],
+        buildType: data['buildType'],
+        buildIsFirst: data['buildIsFirst'],
+        buildIsLastest: data['buildIsLastest'],
+        buildFileKey: data['buildFileKey'],
+        buildFileName: data['buildFileName'],
+        buildFileSize: data['buildFileSize'],
+        buildName: data['buildName'],
+        buildVersion: data['buildVersion'],
+        buildVersionNo: data['buildVersionNo'],
+        buildBuildVersion: data['buildBuildVersion'],
+        buildIdentifier: data['buildIdentifier'],
+        buildIcon: data['buildIcon'],
+        buildDescription: data['buildDescription'],
+        buildUpdateDescription: data['buildUpdateDescription'],
+        buildScreenshots: data['buildScreenshots'],
+        buildShortcutUrl: data['buildShortcutUrl'],
+        buildCreated: data['buildCreated'],
+        buildUpdated: data['buildUpdated'],
+        buildQRCodeURL: data['buildQRCodeURL'],
+        uploadPlatform: data['uploadPlatform'],
+        errCode: data['errCode'],
+        errMessage: data['errMessage'],
+        assembleOrders: data['assembleOrders'].cast<String>());
   }
 
   Map<String, dynamic> toJson() {
@@ -174,6 +178,7 @@ class MyAppInfo {
       'uploadPlatform': uploadPlatform,
       'errCode': errCode,
       'errMessage': errMessage,
+      'assembleOrders': assembleOrders
     };
   }
 
@@ -185,7 +190,6 @@ class MyAppInfo {
     return MyAppInfo.fromJson(jsonDecode(jsonString));
   }
 }
-
 
 class PgyEntity {
   String? endpoint;
