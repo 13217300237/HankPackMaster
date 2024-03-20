@@ -162,10 +162,10 @@ class _HomePageState extends State<HomePage> {
               child: const Text("测试华为OBS上传文件"),
               onPressed: () async {
                 File fileToUpload = File(
-                    "C:\\Users\\zwx1245985\\Desktop\\KBZPay_5.6.3_uat2_google.apk");
+                    "C:\\Users\\Administrator\\Desktop\\app-release-unsigned.apk");
 
                 var oBSResponse = await OBSClient.putFile(
-                    objectName: "test/test20240228.apk", // 支持这样传，增加中间层目录
+                    objectName: "test/app-release-unsigned.apk", // 支持这样传，增加中间层目录
                     file: fileToUpload);
 
                 debugPrint("${oBSResponse?.url}");
