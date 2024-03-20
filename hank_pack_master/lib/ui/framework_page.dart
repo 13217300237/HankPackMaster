@@ -5,6 +5,7 @@ import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../comm/ui/xGate_widget.dart';
 import 'app.dart';
 import 'comm/vm/env_param_vm.dart';
 
@@ -31,6 +32,8 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   final searchFocusNode = FocusNode();
   final searchController = TextEditingController();
   var w600TextStyle = const TextStyle(fontWeight: FontWeight.w600);
+
+  late EnvParamVm envParamVm;
 
   late final List<NavigationPaneItem> originalItems = [
     PaneItem(
@@ -146,6 +149,9 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   @override
   void initState() {
     windowManager.addListener(this);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      envParamVm.startXGateListen();
+    });
     super.initState();
   }
 
@@ -154,6 +160,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     windowManager.removeListener(this);
     searchController.dispose();
     searchFocusNode.dispose();
+    envParamVm.cancelXGateListen();
     super.dispose();
   }
 
@@ -185,8 +192,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
-    final envParamModel = context.watch<EnvParamVm>();
-    final fluentTheme = FluentTheme.of(context);
+    envParamVm = context.watch<EnvParamVm>();
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
@@ -199,32 +205,18 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         ),
         actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
           Expanded(
-            child: Center(
-              child: Text(
-                "工作空间: ${envParamModel.workSpaceRoot}",
-                style:
-                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
-              ),
+              child: Center(
+                  child: Text(
+            "工作空间: ${envParamVm.workSpaceRoot}",
+            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+          ))),
+          const Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(end: 8.0),
+              child: XGateWidget(),
             ),
           ),
-          // TODO 模式切换再说吧
-          // Align(
-          //   alignment: AlignmentDirectional.centerEnd,
-          //   child: Padding(
-          //     padding: const EdgeInsetsDirectional.only(end: 8.0),
-          //     child: ToggleSwitch(
-          //       content: const Text('Dark Mode'),
-          //       checked: fluentTheme.brightness.isDark,
-          //       onChanged: (v) {
-          //         if (v) {
-          //           appTheme.mode = ThemeMode.dark;
-          //         } else {
-          //           appTheme.mode = ThemeMode.light;
-          //         }
-          //       },
-          //     ),
-          //   ),
-          // ),
           const WindowButtons(),
         ]),
       ),

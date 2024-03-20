@@ -2,6 +2,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/comm/gradients.dart';
+import 'package:hank_pack_master/comm/ui/xGate_widget.dart';
 
 class DialogUtil {
   ///
@@ -34,9 +35,16 @@ class DialogUtil {
                 borderRadius: BorderRadius.circular(10),
                 color: const Color(0xFFF6EFE9)),
           ),
-          title: Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+              const XGateWidget()
+            ],
           ),
           constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
           content: content is Widget

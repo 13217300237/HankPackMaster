@@ -2,7 +2,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hank_pack_master/core/command_util.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class NetUtil {
   static NetUtil? _instance;
@@ -21,18 +20,20 @@ class NetUtil {
     return _instance!;
   }
 
-  void checkCodehub() async {
-    try{
+  void checkCodehub({required Function(bool) onXGateConnect}) async {
+    try {
       var response = await _dio.get("https://codehub-g.huawei.com/");
       if (response.statusCode == 200) {
         debugPrint("checkCodehub: 200,已连上xGate");
+        onXGateConnect(true);
       } else {
         debugPrint("checkCodehub: ${response.statusCode}");
+        onXGateConnect(false);
       }
-    }catch(e){
+    } catch (e) {
       debugPrint("${e.toString()}  已失去和xGate的连接");
+      onXGateConnect(false);
     }
-
   }
 
   /// 检查网络状况

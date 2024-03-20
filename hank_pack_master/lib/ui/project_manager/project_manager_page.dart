@@ -220,6 +220,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
 
         DialogUtil.showCustomDialog(
             context: context,
+            maxWidth: 850,
             title: "项目 ${e.projectName} 打包配置",
             content: StartPackageDialogWidget(
               projectRecordEntity: e,

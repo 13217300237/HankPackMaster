@@ -1,8 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/comm/ui/xGate_widget.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
+import 'package:hank_pack_master/ui/comm/vm/env_param_vm.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
 import '../../../comm/text_util.dart';
@@ -198,16 +200,20 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
               must: false,
               toolTip: "注意：多个分支换行为分隔",
               crossAxisAlignment: CrossAxisAlignment.center),
-          choose('打包命令', enableAssembleMap, setSelectedOrder: (order) {
-            // 命令内容形如：assembleGoogleUat
-            // 那就提取出 assemble后面的第一个单词，并将它转化为小写
-            var apkChildFolder = extractFirstWordAfterAssemble(order);
-            // 同时设置默认的apk路径
-            _apkLocationController.text =
-                'app\\build\\outputs\\apk\\$apkChildFolder';
-            _selectedOrder = order;
-            setState(() {});
-          }, selected: _selectedOrder),
+          Row(
+            children: [
+              choose('打包命令', enableAssembleMap, setSelectedOrder: (order) {
+                // 命令内容形如：assembleGoogleUat
+                // 那就提取出 assemble后面的第一个单词，并将它转化为小写
+                var apkChildFolder = extractFirstWordAfterAssemble(order);
+                // 同时设置默认的apk路径
+                _apkLocationController.text =
+                    'app\\build\\outputs\\apk\\$apkChildFolder';
+                _selectedOrder = order;
+                setState(() {});
+              }, selected: _selectedOrder),
+            ],
+          ),
           const SizedBox(height: 5),
           input("apk路径", "程序会根据此路径检测apk文件", _apkLocationController,
               maxLines: 1),

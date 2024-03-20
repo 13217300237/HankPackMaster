@@ -1,7 +1,11 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
 import '../../../comm/hwobs/obs_client.dart';
+import '../../../comm/net/net_util.dart';
 import '../../../comm/str_const.dart';
 import '../../../hive/env_config/env_config_entity.dart';
 import '../../../hive/env_config/env_config_operator.dart';
@@ -365,5 +369,29 @@ class EnvParamVm extends ChangeNotifier {
   void clearEnvGroupBox() {
     EnvGroupOperator.clear();
     notifyListeners();
+  }
+
+  bool get xGateState => _xGateState;
+
+  bool _xGateState = false;
+
+  StreamSubscription? _streamSubscription;
+
+  void startXGateListen() {
+    _streamSubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      debugPrint("网络发生变化 ${result.name}");
+      NetUtil.getInstance().checkCodehub(
+        onXGateConnect: (b) {
+          _xGateState = b;
+          notifyListeners();
+        },
+      );
+    });
+  }
+
+  void cancelXGateListen() {
+    _streamSubscription?.cancel();
   }
 }

@@ -108,28 +108,11 @@ class _HomePageState extends State<HomePage> {
 如果打包过程中出现问题，也在打包历史中能看到失败的记录，
   """;
 
-  StreamSubscription? streamSubscription;
 
-  @override
-  void dispose() {
-    super.dispose();
-    streamSubscription?.cancel();
-  }
 
   @override
   void initState() {
     super.initState();
-
-    streamSubscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) {
-      // Got a new connectivity status!
-      debugPrint("网络发生变化 ${result.name}");
-      NetUtil.getInstance().getNetConnect();
-      NetUtil.getInstance().checkCodehub();
-    });
-
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       // EnvGroupOperator.clear();
       // var list = EnvGroupOperator.list();
