@@ -711,6 +711,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               ?.map((stageRecord) => Padding(
                     padding: const EdgeInsets.only(bottom: 10.0),
                     child: Expander(
+                      initiallyExpanded: false,
                       headerBackgroundColor: ButtonState.resolveWith(
                           (states) => bg(stageRecord.success)),
                       header: RichText(
