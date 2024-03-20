@@ -41,7 +41,7 @@ class AppInfoCard extends StatelessWidget {
                 _line('应用描述', "${appInfo.buildDescription}"),
                 _line('更新日志', "${appInfo.buildUpdateDescription}"),
                 _line('更新时间', "${appInfo.buildUpdated}"),
-                _line('可用变体', "${appInfo.assembleOrders}"),
+                _assembleOrderWidget("${appInfo.assembleOrders}"),
               ],
             ),
             qrCode(),
@@ -83,9 +83,9 @@ class AppInfoCard extends StatelessWidget {
   Widget qrCode() {
     if (appInfo.errMessage != null && appInfo.errMessage!.isNotEmpty) {
       return const SizedBox();
-    } else if(appInfo.buildQRCodeURL.empty()){
+    } else if (appInfo.buildQRCodeURL.empty()) {
       return const SizedBox();
-    }else {
+    } else {
       if (appInfo.uploadPlatform == '${UploadPlatform.pgy.index}') {
         return Center(
           child: CachedNetworkImage(
@@ -112,6 +112,30 @@ class AppInfoCard extends StatelessWidget {
     }
   }
 
+  Widget _assembleOrderWidget(String assembleOrders) {
+    if (assembleOrders == '[]') {
+      return const SizedBox();
+    }
+    return Padding(
+      padding: const EdgeInsets.all(3.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 70, child: Text("可用变体", style: _style)),
+          Text(":", style: _style),
+          const SizedBox(width: 5),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Text(
+              assembleOrders,
+              style: _style.copyWith(color: const Color(0xff24292E)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _line(String title, String value) {
     if (value.empty()) {
       return const SizedBox();
@@ -122,11 +146,16 @@ class AppInfoCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 63, child: Text(title, style: _style)),
+          SizedBox(width: 70, child: Text(title, style: _style)),
           Text(":", style: _style),
           const SizedBox(width: 5),
-          const SizedBox(width: 5),
-          Text(value, style: _style.copyWith(color: Color(0xff24292E))),
+          SizedBox(
+            width: 400,
+            child: Text(
+              value,
+              style: _style.copyWith(color: const Color(0xff24292E)),
+            ),
+          ),
         ],
       ),
     );
@@ -135,7 +164,7 @@ class AppInfoCard extends StatelessWidget {
   final qrCodeSize = 160.0;
 
   final TextStyle _style = const TextStyle(
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.black,
     fontWeight: FontWeight.w600,
     fontFamily: 'STKAITI',
