@@ -595,7 +595,7 @@ class WorkShopVm extends ChangeNotifier {
         File fileToUpload = File(apkToUpload!);
 
         String childFolderName = path.basename(projectPath); // 用项目名称作为分隔
-        String buildUpdated = Jiffy.now().format(pattern: "yyyyMMdd_HHmmss_");
+        String buildUpdated = _nowTime();
 
         var oBSResponse = await OBSClient.putFile(
           objectName:
@@ -1112,6 +1112,7 @@ class WorkShopVm extends ChangeNotifier {
 
     var myAppInfo = MyAppInfo();
     myAppInfo.assembleOrders = _enableAssembleOrders;
+    myAppInfo.buildUpdated = _nowTime2();
 
     _insertIntoJobHistoryList(
       success: true,
@@ -1293,5 +1294,13 @@ class WorkShopVm extends ChangeNotifier {
         hasRead: false,
         jobSetting: jobSetting,
         stageRecordList: stageRecordList));
+  }
+
+  String _nowTime() {
+    return Jiffy.now().format(pattern: "yyyyMMdd_HHmmss_");
+  }
+
+  String _nowTime2() {
+    return Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
   }
 }
