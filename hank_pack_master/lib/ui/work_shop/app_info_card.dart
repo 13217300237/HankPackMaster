@@ -41,7 +41,7 @@ class AppInfoCard extends StatelessWidget {
                 _line('应用描述', "${appInfo.buildDescription}"),
                 _line('更新日志', "${appInfo.buildUpdateDescription}"),
                 _line('更新时间', "${appInfo.buildUpdated}"),
-                _line('可用变体', "${appInfo.assembleOrders}"),
+                _line('可用变体', appInfo.assembleOrders.toString()),
               ],
             ),
             qrCode(),
@@ -83,9 +83,9 @@ class AppInfoCard extends StatelessWidget {
   Widget qrCode() {
     if (appInfo.errMessage != null && appInfo.errMessage!.isNotEmpty) {
       return const SizedBox();
-    } else if(appInfo.buildQRCodeURL.empty()){
+    } else if (appInfo.buildQRCodeURL.empty()) {
       return const SizedBox();
-    }else {
+    } else {
       if (appInfo.uploadPlatform == '${UploadPlatform.pgy.index}') {
         return Center(
           child: CachedNetworkImage(
@@ -113,7 +113,7 @@ class AppInfoCard extends StatelessWidget {
   }
 
   Widget _line(String title, String value) {
-    if (value.empty()) {
+    if (value.empty() || value == '[]') {
       return const SizedBox();
     }
 

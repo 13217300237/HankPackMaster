@@ -21,6 +21,7 @@ class DialogUtil {
     String cancelText = "取消",
     double maxWidth = 500,
     double maxHeight = 700,
+    bool showXGate = false,
   }) {
     return showDialog(
       context: context,
@@ -43,7 +44,7 @@ class DialogUtil {
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
-              const XGateWidget()
+              showXGate ? const XGateWidget() : const SizedBox(),
             ],
           ),
           constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),

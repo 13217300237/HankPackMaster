@@ -206,6 +206,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         DialogUtil.showCustomDialog(
           context: context,
           title: "项目 ${e.projectName} 激活配置",
+          showXGate: true,
           content: ActiveDialogWidget(
             projectRecordEntity: e,
             workShopVm: _workShopVm,
@@ -221,6 +222,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         DialogUtil.showCustomDialog(
             context: context,
             maxWidth: 850,
+            showXGate: true,
             title: "项目 ${e.projectName} 打包配置",
             content: StartPackageDialogWidget(
               projectRecordEntity: e,
@@ -235,6 +237,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       openFastUploadDialogFunc: (e, s) => DialogUtil.showCustomDialog(
           showActions: false,
           context: context,
+          showXGate: true,
           title: "快速上传",
           content: FastUploadDialogWidget(
             projectRecordEntity: e,
