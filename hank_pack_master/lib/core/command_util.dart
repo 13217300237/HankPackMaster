@@ -107,6 +107,27 @@ class CommandUtil {
   }
 
   ///
+  /// 使用ping命令查看 可执行文件的根目录
+  ///
+  /// [order] where后面接的参数
+  /// [workDir] 工作目录
+  /// [action] 输出动作
+  ///
+  Future ping({
+    required String proxy,
+    required Function(String) action,
+  }) async {
+    var process = await execute(
+      cmd: "ping",
+      params: [proxy],
+      workDir: EnvParams.workRoot,
+      action: action,
+    );
+    await process?.exitCode;
+    _stopExec(process);
+  }
+
+  ///
   /// 使用where命令查看 可执行文件的根目录
   ///
   ///

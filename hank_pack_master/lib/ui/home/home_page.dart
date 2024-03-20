@@ -1,14 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hank_pack_master/core/command_util.dart';
-import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 
 import '../../comm/file_operation.dart';
 import '../../comm/gradients.dart';
 import '../../comm/hwobs/obs_client.dart';
+import '../../comm/net/net_util.dart';
 import '../../comm/ui/animation_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -106,9 +108,28 @@ class _HomePageState extends State<HomePage> {
 如果打包过程中出现问题，也在打包历史中能看到失败的记录，
   """;
 
+  StreamSubscription? streamSubscription;
+
+  @override
+  void dispose() {
+    super.dispose();
+    streamSubscription?.cancel();
+  }
+
   @override
   void initState() {
     super.initState();
+
+    streamSubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      // Got a new connectivity status!
+      debugPrint("网络发生变化 ${result.name}");
+      NetUtil.getInstance().getNetConnect();
+      NetUtil.getInstance().checkCodehub();
+    });
+
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       // EnvGroupOperator.clear();
       // var list = EnvGroupOperator.list();
@@ -198,14 +219,13 @@ class _HomePageState extends State<HomePage> {
 
   /// [path] 搜索目录
   /// [ext] 文件后缀
-  void testDepthFirstSearch(){
-    String folderPath = 'E:\\packTest\\EnjoyGradleHank\\app\\build\\outputs'; // 替换为你要遍历的文件夹路径
+  void testDepthFirstSearch() {
+    String folderPath =
+        'E:\\packTest\\EnjoyGradleHank\\app\\build\\outputs'; // 替换为你要遍历的文件夹路径
     List<File> apkFiles = findApkFiles(folderPath);
 
     for (File file in apkFiles) {
       print('APK文件: ${file.path}');
     }
   }
-
-
 }
