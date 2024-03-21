@@ -35,6 +35,7 @@ class _StageTaskCardState extends State<StageTaskCard> {
     var card = AppInfoCard(
       appInfo: s,
       initiallyExpanded: true,
+      maxHeight: 700,
     );
 
     DialogUtil.showCustomDialog(

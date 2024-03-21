@@ -140,7 +140,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                             title: "最近作业历史",
                             maxWidth: 1200,
                             content:
-                                ListView(children: [...getRecentJobResult()]),
+                                ListView(children: [...getRecentJobResult(700)]),
                             showCancel: false,
                             confirmText: '我知道了！')
                         .then((value) {
@@ -576,7 +576,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     fontFamily: 'STKAITI',
   );
 
-  List<Widget> getRecentJobResult() {
+  List<Widget> getRecentJobResult(double maxHeight) {
     var recentJobHistoryList =
         ProjectRecordOperator.getRecentJobHistoryList(recentCount: 10);
 
@@ -625,7 +625,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                           JobSettingCard(e.jobSetting),
                           const SizedBox(height: 10),
                           AppInfoCard(
-                              appInfo: myAppInfo, initiallyExpanded: false),
+                            appInfo: myAppInfo,
+                            initiallyExpanded: false,
+                            maxHeight: maxHeight,
+                          ),
                           const SizedBox(height: 10),
                           _stageListCard(e),
                         ],

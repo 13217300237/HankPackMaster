@@ -178,8 +178,13 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
   }
 
   void showMyAppInfo(MyAppInfo s, BuildContext context) {
-    var card = AppInfoCard(appInfo: s, initiallyExpanded: true);
     double maxHeight = s.errMessage.empty() ? 400 : 900;
+    var card = AppInfoCard(
+      appInfo: s,
+      initiallyExpanded: true,
+      maxHeight: maxHeight,
+    );
+
 
     DialogUtil.showCustomDialog(
       context: context,
@@ -188,7 +193,7 @@ class _JobHistoryCardState extends State<JobHistoryCard> {
       showActions: true,
       showCancel: false,
       confirmText: '我知道了！',
-      maxWidth: 800,
+      maxWidth: 900,
       maxHeight: maxHeight,
     );
   }

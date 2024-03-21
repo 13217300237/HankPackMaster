@@ -10,15 +10,21 @@ import '../../comm/pgy/pgy_entity.dart';
 /// 流水线最终成果展示卡片
 class AppInfoCard extends StatelessWidget {
   final MyAppInfo appInfo;
+  final double maxHeight;
   final bool initiallyExpanded;
 
   const AppInfoCard(
-      {super.key, required this.appInfo, required this.initiallyExpanded});
+      {super.key,
+      required this.appInfo,
+      required this.initiallyExpanded,
+      required this.maxHeight});
 
   @override
   Widget build(BuildContext context) {
     if (!appInfo.errMessage.empty()) {
       return msgWidget();
+    } else if (appInfo.assembleOrders != null) {
+      return _assembleOrderWidget("${appInfo.assembleOrders}");
     } else {
       return Card(
         backgroundColor: Colors.blue.withOpacity(.1),
@@ -41,7 +47,6 @@ class AppInfoCard extends StatelessWidget {
                 _line('应用描述', "${appInfo.buildDescription}"),
                 _line('更新日志', "${appInfo.buildUpdateDescription}"),
                 _line('更新时间', "${appInfo.buildUpdated}"),
-                _assembleOrderWidget("${appInfo.assembleOrders}"),
               ],
             ),
             qrCode(),
@@ -116,22 +121,18 @@ class AppInfoCard extends StatelessWidget {
     if (assembleOrders == '[]') {
       return const SizedBox();
     }
-    return Padding(
-      padding: const EdgeInsets.all(3.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 70, child: Text("可用变体", style: _style)),
-          Text(":", style: _style),
-          const SizedBox(width: 5),
-          Container(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Text(
-              assembleOrders,
-              style: _style.copyWith(color: const Color(0xff24292E)),
-            ),
-          ),
-        ],
+
+    return Expander(
+      initiallyExpanded: initiallyExpanded,
+      headerBackgroundColor:
+          ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
+      header: Text('可用变体', style: _style),
+      content: SizedBox(
+        height: 100,
+        child: Text(
+          assembleOrders,
+          style: _style.copyWith(color: const Color(0xff24292E)),
+        ),
       ),
     );
   }
