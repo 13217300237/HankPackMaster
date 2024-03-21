@@ -84,14 +84,19 @@ class WorkShopVm extends ChangeNotifier {
 
   String get projectPath => projectPathController.text;
 
+  String get projectWorkDir =>
+      projectPathController.text +
+      Platform.pathSeparator +
+      projectName +
+      Platform.pathSeparator;
+
   String get projectAppDesc => projectAppDescController.text;
 
   String get updateLog => updateLogController.text;
 
   String get gitLog => gitLogController.text;
 
-  String get _apkLocation =>
-      "$projectPath${Platform.pathSeparator}${apkLocationController.text}";
+  String get _apkLocation => "$projectWorkDir${apkLocationController.text}";
 
   void setApkLocation(String newPath) => apkLocationController.text = newPath;
 
@@ -133,7 +138,6 @@ class WorkShopVm extends ChangeNotifier {
         if (projectPath.isEmpty) {
           return OrderExecuteResult(msg: "工程根目录 不能为空", succeed: false);
         }
-
         String data = "打包参数正常 工作目录为 \n$projectPath";
 
         return OrderExecuteResult(
@@ -155,9 +159,10 @@ class WorkShopVm extends ChangeNotifier {
         }
 
         ExecuteResult executeRes = await CommandUtil.getInstance().gitClone(
-            clonePath: envWorkspaceRoot,
-            gitUrl: gitUrl,
-            logOutput: addNewLogLine);
+          clonePath: projectPath,
+          gitUrl: gitUrl,
+          logOutput: addNewLogLine,
+        );
 
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(
@@ -174,7 +179,7 @@ class WorkShopVm extends ChangeNotifier {
 
   get branchCheckoutTask => TaskStage("分支切换", stageAction: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance()
-            .gitCheckout(projectPath, gitBranch, addNewLogLine);
+            .gitCheckout(projectWorkDir, gitBranch, addNewLogLine);
 
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(msg: executeRes.res, succeed: false);
@@ -190,7 +195,7 @@ class WorkShopVm extends ChangeNotifier {
         // 工程结构检查
         // 检查目录下是否有 gradlew.bat 文件
         File gradlewFile =
-            File("$projectPath${Platform.pathSeparator}gradlew.bat");
+            File("$projectWorkDir${Platform.pathSeparator}gradlew.bat");
         if (!gradlewFile.existsSync()) {
           String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
           return OrderExecuteResult(msg: er, succeed: false);
@@ -204,7 +209,7 @@ class WorkShopVm extends ChangeNotifier {
 
   get assembleOrdersTask => TaskStage("可用指令查询", stageAction: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance()
-            .gradleAssembleTasks(projectPath, addNewLogLine,
+            .gradleAssembleTasks(projectWorkDir, addNewLogLine,
                 tempLogCacheEntity: tempLog);
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(
@@ -251,8 +256,8 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get gitPullTask => TaskStage("工程同步", stageAction: () async {
-        var executeRes =
-            await CommandUtil.getInstance().gitPull(projectPath, addNewLogLine);
+        var executeRes = await CommandUtil.getInstance()
+            .gitPull(projectWorkDir, addNewLogLine);
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(msg: executeRes.res, succeed: false);
         }
@@ -267,7 +272,7 @@ class WorkShopVm extends ChangeNotifier {
   get gitFetchTask => TaskStage("同步远程仓库", stageAction: () async {
         // 首先必须同步远程仓库的最新改动 git fetch
         var executeRes = await CommandUtil.getInstance().gitFetch(
-          projectPath,
+          projectWorkDir,
           addNewLogLine,
         );
         if (executeRes.exitCode != 0) {
@@ -287,7 +292,7 @@ class WorkShopVm extends ChangeNotifier {
 
   get gitBranchRemote => TaskStage("列出所有分支", stageAction: () async {
         var executeRes = await CommandUtil.getInstance().gitBranchRemote(
-          projectPath,
+          projectWorkDir,
           addNewLogLine,
         );
         if (executeRes.exitCode != 0) {
@@ -315,7 +320,7 @@ class WorkShopVm extends ChangeNotifier {
         }
 
         var executeRes = await CommandUtil.getInstance().mergeBranch(
-          projectPath,
+          projectWorkDir,
           mergeBranchList,
           addNewLogLine,
         );
@@ -334,14 +339,13 @@ class WorkShopVm extends ChangeNotifier {
   get modifyGradlePropertiesFile =>
       TaskStage("修改 gradle.properties文件 以指定Java环境", stageAction: () async {
         // 找到工程位置下的 gradle.properties 文件
-        var gradlePropertiesFile =
-            File("$projectPath${Platform.pathSeparator}gradle.properties");
+        var gradlePropertiesFile = File("${projectWorkDir}gradle.properties");
 
         if (!gradlePropertiesFile.existsSync()) {
           return OrderExecuteResult(
-            msg: "gradle.properties 文件未找到",
+            msg: "$gradlePropertiesFile 文件未找到",
             succeed: false,
-            executeLog: 'gradle.properties 文件未找到',
+            executeLog: '$gradlePropertiesFile 文件未找到',
           );
         }
 
@@ -373,14 +377,13 @@ class WorkShopVm extends ChangeNotifier {
 
   get recoverGradlePropertiesFile =>
       TaskStage("恢复gradle.properties", stageAction: () async {
-        String gradlePropertiesFilePath =
-            "$projectPath${Platform.pathSeparator}gradle.properties";
+        String gradlePropertiesFilePath = "${projectWorkDir}gradle.properties";
 
         ExecuteResult executeRes = await CommandUtil.getInstance()
             .gitCheckoutFile(
-                projectPath, gradlePropertiesFilePath, (s) => null, tempLog);
+                projectWorkDir, gradlePropertiesFilePath, (s) => null, tempLog);
         if (executeRes.exitCode != 0) {
-          String er = "还原失败，详情请看日志}";
+          String er = "还原失败，详情请看日志";
           return OrderExecuteResult(
             msg: er,
             succeed: false,
@@ -397,7 +400,7 @@ class WorkShopVm extends ChangeNotifier {
   get generateApkTask => TaskStage("生成apk", stageAction: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance()
             .gradleAssemble(
-                projectRoot: projectPath + Platform.pathSeparator,
+                projectRoot: projectWorkDir,
                 packageOrder: selectedOrder!,
                 versionCode: versionCode,
                 versionName: versionName,
@@ -460,8 +463,8 @@ class WorkShopVm extends ChangeNotifier {
 
   get gitLogTask => TaskStage("获取git记录", stageAction: () async {
         // 先获取当前git的最新提交记录
-        var executeRes =
-            await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
+        var executeRes = await CommandUtil.getInstance()
+            .gitLog(projectWorkDir, addNewLogLine);
 
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(
@@ -582,8 +585,8 @@ class WorkShopVm extends ChangeNotifier {
 
   get uploadToObsTask => TaskStage("上传到华为obs", stageAction: () async {
         // 先获取当前git的最新提交记录
-        var executeRes =
-            await CommandUtil.getInstance().gitLog(projectPath, addNewLogLine);
+        var executeRes = await CommandUtil.getInstance()
+            .gitLog(projectWorkDir, addNewLogLine);
 
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(
@@ -594,7 +597,7 @@ class WorkShopVm extends ChangeNotifier {
         // 上传到OBS的时候，必须重命名,不然无法区分多版本
         File fileToUpload = File(apkToUpload!);
 
-        String childFolderName = path.basename(projectPath); // 用项目名称作为分隔
+        String childFolderName = path.basename(projectWorkDir); // 用项目名称作为分隔
         String buildUpdated = _nowTime();
 
         var oBSResponse = await OBSClient.putFile(
@@ -1062,17 +1065,24 @@ class WorkShopVm extends ChangeNotifier {
 
   Function? onTaskFinished;
 
-  void setProjectPath() {
+  /// 从gitUrl中提炼出
+  String get projectName {
     var gitText = gitUrlController.text;
-
     var lastSepIndex = gitText.lastIndexOf("/");
     var endIndex = gitText.length - 4;
     assert(endIndex > 0);
     String projectName = gitText.substring(lastSepIndex + 1, endIndex);
+    return projectName;
+  }
+
+  void setProjectPath() {
+    var branchNameText = gitBranchController.text;
     projectPathController.text =
         EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey) +
             Platform.pathSeparator +
-            projectName;
+            projectName +
+            Platform.pathSeparator +
+            branchNameText; // 总目录\项目名\分支名\项目名
   }
 
   /// 开始项目激活
@@ -1166,8 +1176,7 @@ class WorkShopVm extends ChangeNotifier {
         }
       } else {
         if (runningTask != null) {
-        } else if (_taskQueue.isEmpty) {
-        }
+        } else if (_taskQueue.isEmpty) {}
       }
     });
   }
