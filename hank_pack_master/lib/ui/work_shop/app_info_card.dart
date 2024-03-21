@@ -129,12 +129,13 @@ class AppInfoCard extends StatelessWidget {
           ButtonState.resolveWith((states) => Colors.green.withOpacity(.1)),
       header: Text('可用变体', style: _style),
       content: SizedBox(
-        height: maxHeight - 240,
+        height: maxHeight - 229,
         child: SingleChildScrollView(
           child: Wrap(
             children: [
               ...assembleOrders
                   .map((e) => Card(
+                        backgroundColor: Colors.green.withOpacity(.4),
                         margin: const EdgeInsets.symmetric(
                             vertical: 2, horizontal: 3),
                         child: Text(
