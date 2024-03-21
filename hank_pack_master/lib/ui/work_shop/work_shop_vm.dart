@@ -80,7 +80,7 @@ class WorkShopVm extends ChangeNotifier {
 
   String get gitUrl => gitUrlController.text;
 
-  String get gitBranch => gitBranchController.text;
+  String get gitBranch => Uri.encodeComponent(gitBranchController.text);
 
   String get projectPath => projectPathController.text;
 
@@ -178,8 +178,11 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get branchCheckoutTask => TaskStage("分支切换", stageAction: () async {
-        ExecuteResult executeRes = await CommandUtil.getInstance()
-            .gitCheckout(projectWorkDir, gitBranch, addNewLogLine);
+        ExecuteResult executeRes = await CommandUtil.getInstance().gitCheckout(
+          projectWorkDir,
+          runningTask!.branch,
+          addNewLogLine,
+        );
 
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(msg: executeRes.res, succeed: false);
@@ -1076,13 +1079,12 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   void setProjectPath() {
-    var branchNameText = gitBranchController.text;
     projectPathController.text =
         EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey) +
             Platform.pathSeparator +
             projectName +
             Platform.pathSeparator +
-            branchNameText; // 总目录\项目名\分支名\项目名
+            gitBranch; // 总目录\项目名\分支名\项目名
   }
 
   /// 开始项目激活

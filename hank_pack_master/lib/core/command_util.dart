@@ -731,7 +731,7 @@ exitCode : $exitCode
 $sb"""
         .trim();
 
-    return ExecuteResult(res, exitCode!);
+    return ExecuteResult(res, exitCode ?? -1);
   }
 
   /// 获得所有的远程分支

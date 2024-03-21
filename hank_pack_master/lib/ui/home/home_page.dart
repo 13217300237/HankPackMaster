@@ -124,6 +124,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var x = Uri.encodeComponent("daily/dev_5.6.3");
+    debugPrint("x: $x");
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(gradient: mainPanelGradient),
