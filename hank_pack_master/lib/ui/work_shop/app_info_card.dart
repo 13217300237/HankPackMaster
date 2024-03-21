@@ -23,8 +23,9 @@ class AppInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!appInfo.errMessage.empty()) {
       return msgWidget();
-    } else if (appInfo.assembleOrders != null) {
-      return _assembleOrderWidget("${appInfo.assembleOrders}");
+    } else if (appInfo.assembleOrders != null &&
+        appInfo.assembleOrders!.isNotEmpty) {
+      return _assembleOrderWidget(appInfo.assembleOrders);
     } else {
       return Card(
         backgroundColor: Colors.blue.withOpacity(.1),
@@ -117,21 +118,34 @@ class AppInfoCard extends StatelessWidget {
     }
   }
 
-  Widget _assembleOrderWidget(String assembleOrders) {
-    if (assembleOrders == '[]') {
+  Widget _assembleOrderWidget(List<String>? assembleOrders) {
+    if (assembleOrders == null || assembleOrders.isEmpty) {
       return const SizedBox();
     }
 
     return Expander(
       initiallyExpanded: initiallyExpanded,
       headerBackgroundColor:
-          ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
+          ButtonState.resolveWith((states) => Colors.green.withOpacity(.1)),
       header: Text('可用变体', style: _style),
       content: SizedBox(
-        height: 100,
-        child: Text(
-          assembleOrders,
-          style: _style.copyWith(color: const Color(0xff24292E)),
+        height: maxHeight - 240,
+        child: SingleChildScrollView(
+          child: Wrap(
+            children: [
+              ...assembleOrders
+                  .map((e) => Card(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 2, horizontal: 3),
+                        child: Text(
+                          e.replaceAll("assemble", ""),
+                          style:
+                              _style.copyWith(color: const Color(0xff24292E)),
+                        ),
+                      ))
+                  .toList()
+            ],
+          ),
         ),
       ),
     );
