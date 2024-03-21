@@ -375,6 +375,10 @@ class EnvParamVm extends ChangeNotifier {
 
   bool _xGateState = false;
 
+  bool get needShowXGateTag => _needShowXGateTag;
+
+  bool _needShowXGateTag = false;
+
   StreamSubscription? _streamSubscription;
 
   void startXGateListen() {
@@ -385,6 +389,12 @@ class EnvParamVm extends ChangeNotifier {
       NetUtil.getInstance().checkCodehub(
         onXGateConnect: (b) {
           _xGateState = b;
+
+          // 在网络变化过程中，如果出现了脸上内网的情况，就说明此tag有必要显示
+          if (b == true) {
+            _needShowXGateTag = true;
+          }
+
           notifyListeners();
         },
       );

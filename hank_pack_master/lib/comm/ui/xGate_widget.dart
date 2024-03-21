@@ -18,26 +18,24 @@ class _XGateWidgetState extends State<XGateWidget> {
 
   Widget xGateWidget() {
     EnvParamVm envParamVm = context.watch<EnvParamVm>();
-    String t = envParamVm.xGateState ? "XGate已连接" : "XGate未连接";
+    String text = envParamVm.xGateState ? "XGate已连接" : "XGate未连接";
     Color bg = envParamVm.xGateState ? Colors.green : Colors.red;
 
-    String toolTipMsg = envParamVm.xGateState
-        ? '支持从codeHub同步代码，但是不支持上传apk'
-        : '支持上传apk但是不支持从codeHub同步代码';
+    // 如果尝试连接内网成功，就说明此tag需要显示，否则不需要显示
+    if(!envParamVm.needShowXGateTag){
+      return const SizedBox();
+    }
 
-    return Tooltip(
-      message: toolTipMsg,
-      child: Card(
-        borderRadius: BorderRadius.circular(5),
-        backgroundColor: bg,
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-        child: Text(
-          t,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+    return Card(
+      borderRadius: BorderRadius.circular(5),
+      backgroundColor: bg,
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

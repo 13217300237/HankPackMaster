@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
@@ -20,10 +22,13 @@ import 'hive/project_record/project_record_operator.dart';
 import 'hive/project_record/stage_record_entity.dart';
 import 'hive/project_record/upload_platforms.dart';
 import 'ui/app.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  Directory saveDb = await path_provider.getApplicationCacheDirectory();
+  debugPrint("saveDb->$saveDb");
   Hive.registerAdapter(EnvConfigEntityAdapter(), override: true);
   Hive.registerAdapter(PackageSettingAdapter(), override: true);
   Hive.registerAdapter(UploadPlatformAdapter(), override: true);
@@ -33,7 +38,7 @@ void main() async {
   Hive.registerAdapter(JobHistoryEntityAdapter(), override: true); // StageRecordEntityAdapter
   Hive.registerAdapter(StageRecordEntityAdapter(), override: true);
 
-  await Hive.initFlutter();
+  await Hive.initFlutter(saveDb.path);
   await EnvConfigOperator.openBox();
   await ProjectRecordOperator.openBox();
   await EnvGroupOperator.openBox();

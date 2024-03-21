@@ -214,6 +214,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             defaultJavaHome: _envParamVm.javaRoot,
           ),
           showActions: false,
+          maxWidth: 700,
         );
       },
       funcGoPackageAction: (e) {
