@@ -85,3 +85,5 @@ TODO LIST:
 12. 增加未读数角标的显示
 13. 增加打包记录的盖章效果
 14. 增加Widget快速生成截图，或者快速生成pdf报告的功能
+15. https://mirrors.tools.huawei.com/maven/org/glassfish/json/1.0.4/
+    这是一个远程仓库的文件目录，要求，创建 maven/org/glassfish/json/1.0.4/ 这种层级的文件夹到 .m2（mavenLocal）目录，并下载这链接下的所有文件 （TODO）
