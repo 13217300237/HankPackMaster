@@ -7,6 +7,7 @@ import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 
 import '../../comm/dialog_util.dart';
+import '../../comm/ui/text_on_arc.dart';
 import '../work_shop/app_info_card.dart';
 import 'job_setting_card.dart';
 

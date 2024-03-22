@@ -96,6 +96,7 @@ class TextOnArcPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _drawArc(canvas, size);
     _drawTextOnArc(canvas, size);
+    _drawImg(canvas, size);
   }
 
   _drawArc(Canvas canvas, Size size) {
@@ -113,7 +114,7 @@ class TextOnArcPainter extends CustomPainter {
   }
 
   _drawTextOnArc(Canvas canvas, Size size) {
-    var thisRadius = style.radius * 0.75;
+    var thisRadius = style.radius - style.padding;
 
     final paragraphStyle = ui.ParagraphStyle(
         textAlign: TextAlign.center,
@@ -148,6 +149,31 @@ class TextOnArcPainter extends CustomPainter {
     }
 
     canvas.restore();
+  }
+
+  _drawImg(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = style.arcColor
+      ..style = PaintingStyle.fill;
+
+    double centerX = size.width / 2;
+    double centerY = size.height / 2;
+    double radius = size.width / 7;
+
+    double angle = 4 * pi / 5; // 五角星每个角的弧度
+
+    Path path = Path();
+    path.moveTo(centerX, centerY - radius);
+
+    for (int i = 1; i <= 5; i++) {
+      double x = centerX + radius * sin(i * angle);
+      double y = centerY - radius * cos(i * angle);
+      path.lineTo(x, y);
+    }
+
+    path.close(); // 闭合路径
+
+    canvas.drawPath(path, paint);
   }
 
   @override

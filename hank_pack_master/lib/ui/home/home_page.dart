@@ -190,7 +190,14 @@ class _HomePageState extends State<HomePage> {
       ),
       const SizedBox(height: 30),
       TextOnArcWidget(
-          arcStyle: ArcStyle(text: "文字内容啊啊", strokeWidth: 8, radius: 100)),
+        arcStyle: ArcStyle(
+          text: "项目已激活",
+          strokeWidth: 8,
+          radius: 100,
+          textColor: Colors.green,
+          arcColor: Colors.green,
+        ),
+      ),
       const SizedBox(height: 30),
       AnimatedShapeWidget(
         width: 200,

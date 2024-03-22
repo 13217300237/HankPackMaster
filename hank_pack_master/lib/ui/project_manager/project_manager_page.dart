@@ -15,6 +15,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../comm/gradients.dart';
 import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/text_util.dart';
+import '../../comm/ui/text_on_arc.dart';
 import '../../comm/url_check_util.dart';
 import '../../hive/project_record/job_history_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
@@ -139,8 +140,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                             context: context,
                             title: "最近作业历史",
                             maxWidth: 1200,
-                            content:
-                                ListView(children: [...getRecentJobResult(700)]),
+                            content: ListView(
+                                children: [...getRecentJobResult(700)]),
                             showCancel: false,
                             confirmText: '我知道了！')
                         .then((value) {
@@ -578,10 +579,11 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
 
   List<Widget> getRecentJobResult(double maxHeight) {
     var recentJobHistoryList =
-        ProjectRecordOperator.getRecentJobHistoryList(recentCount: 10);
+        ProjectRecordOperator.getRecentJobHistoryList(recentCount: -1);
 
     return [
       ...recentJobHistoryList.map((e) {
+        // TODO 这里要换成 ListView，不然滑动起来会卡
         MyAppInfo myAppInfo;
         try {
           myAppInfo = MyAppInfo.fromJsonString(e.historyContent!);
@@ -599,65 +601,76 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-            child: Column(
+            child: Stack(
               children: [
-                _title(e, color),
-                Card(
-                  borderColor: Colors.transparent,
-                  backgroundColor: color,
-                  borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)),
-                  child: Stack(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _text("git地址", e.gitUrl ?? ''),
-                          _text("分支名", e.branchName ?? ''),
-                          _text(
-                              "构建时间",
-                              Jiffy.parseFromDateTime(
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                          e.buildTime ?? 0))
-                                  .format(pattern: "yyyy-MM-dd HH:mm:ss")),
-                          const SizedBox(height: 10),
-                          JobSettingCard(e.jobSetting),
-                          const SizedBox(height: 10),
-                          AppInfoCard(
-                            appInfo: myAppInfo,
-                            initiallyExpanded: false,
-                            maxHeight: maxHeight,
-                          ),
-                          const SizedBox(height: 10),
-                          _stageListCard(e),
-                        ],
-                      ),
-                      Positioned(
-                        right: 10,
-                        top: 10,
-                        child: Visibility(
-                          visible: e.hasRead != true,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Card(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 5, horizontal: 15),
-                                  backgroundColor: Colors.red,
-                                  borderRadius: BorderRadius.circular(7),
-                                  child: const Text(
-                                    "NEW",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                        color: Colors.white),
-                                  )),
-                            ],
-                          ),
+                Column(children: [
+                  _title(e, color),
+                  Card(
+                      borderColor: Colors.transparent,
+                      backgroundColor: color,
+                      borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10)),
+                      child: Stack(children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _text("git地址", e.gitUrl ?? ''),
+                            _text("分支名", e.branchName ?? ''),
+                            _text(
+                                "构建时间",
+                                Jiffy.parseFromDateTime(
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                            e.buildTime ?? 0))
+                                    .format(pattern: "yyyy-MM-dd HH:mm:ss")),
+                            const SizedBox(height: 10),
+                            JobSettingCard(e.jobSetting),
+                            const SizedBox(height: 10),
+                            AppInfoCard(
+                              appInfo: myAppInfo,
+                              initiallyExpanded: false,
+                              maxHeight: maxHeight,
+                            ),
+                            const SizedBox(height: 10),
+                            _stageListCard(e),
+                          ],
                         ),
-                      ),
-                    ],
+                        Positioned(
+                            right: 10,
+                            top: 10,
+                            child: Visibility(
+                                visible: e.hasRead != true,
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Card(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 5, horizontal: 15),
+                                          backgroundColor: Colors.red,
+                                          borderRadius:
+                                              BorderRadius.circular(7),
+                                          child: const Text(
+                                            "NEW",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                                color: Colors.white),
+                                          )),
+                                    ])))
+                      ]))
+                ]),
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: TextOnArcWidget(
+                    arcStyle: ArcStyle(
+                        text: "项目已激活",
+                        strokeWidth: 4,
+                        radius: 70,
+                        textSize: 20,
+                        textColor: Colors.green.darkest,
+                        arcColor: Colors.green.darkest,
+                        padding: 20),
                   ),
                 ),
               ],
