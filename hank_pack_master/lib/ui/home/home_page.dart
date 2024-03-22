@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -12,6 +13,7 @@ import '../../comm/gradients.dart';
 import '../../comm/hwobs/obs_client.dart';
 import '../../comm/net/net_util.dart';
 import '../../comm/ui/animation_widget.dart';
+import '../../comm/ui/text_on_path.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -108,8 +110,6 @@ class _HomePageState extends State<HomePage> {
 如果打包过程中出现问题，也在打包历史中能看到失败的记录，
   """;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -122,10 +122,21 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  double convertDegreesToRadians(int degrees) {
+    return (degrees * pi) / 180;
+  }
+
   @override
   Widget build(BuildContext context) {
-    var x = Uri.encodeComponent("daily/dev_5.6.3");
-    debugPrint("x: $x");
+    return CustomPaint(
+      size: const Size(500, 500),
+      painter: TextOnArcPainter(
+        text: "项目激活成功",
+        radius: 200,
+        startAngle: convertDegreesToRadians(180),
+        sweepAngle: convertDegreesToRadians(45),
+      ),
+    );
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(gradient: mainPanelGradient),
@@ -167,7 +178,8 @@ class _HomePageState extends State<HomePage> {
                     "C:\\Users\\Administrator\\Desktop\\app-release-unsigned.apk");
 
                 var oBSResponse = await OBSClient.putFile(
-                    objectName: "test/app-release-unsigned.apk", // 支持这样传，增加中间层目录
+                    objectName: "test/app-release-unsigned.apk",
+                    // 支持这样传，增加中间层目录
                     file: fileToUpload);
 
                 debugPrint("${oBSResponse?.url}");
