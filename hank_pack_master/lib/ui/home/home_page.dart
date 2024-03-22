@@ -127,12 +127,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: Size(300, 300),
+      size: Size(500,500),
       painter: TextOnArcPainter(
         text: "Hello Flutter!",
         radius: 100,
         startAngle: 0,
-        sweepAngle: pi,
+        sweepAngle: pi/2,
       ),
     );
     return Container(
