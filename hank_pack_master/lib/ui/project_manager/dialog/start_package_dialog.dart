@@ -19,7 +19,7 @@ class StartPackageDialogWidget extends StatefulWidget {
 
   final List<String> enableAssembleOrders;
   final ProjectRecordEntity projectRecordEntity;
-  final String defaultJavaHome;
+  final EnvCheckResultEntity javaHome;
 
   final Function? goToWorkShop;
 
@@ -29,7 +29,7 @@ class StartPackageDialogWidget extends StatefulWidget {
     required this.workShopVm,
     required this.enableAssembleOrders,
     this.goToWorkShop,
-    required this.defaultJavaHome,
+    required this.javaHome,
   });
 
   @override
@@ -60,7 +60,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
   @override
   void initState() {
     super.initState();
-    _jdk = EnvCheckResultEntity(envPath: widget.defaultJavaHome, envName: '');
+    _jdk = widget.javaHome; // 这里必须使用 激活时使用的jdk
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initSetting(widget.projectRecordEntity.packageSetting);
     });

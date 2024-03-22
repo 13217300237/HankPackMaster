@@ -78,27 +78,6 @@ class HistoryCard extends StatelessWidget {
                         _stageListCard(entity),
                       ],
                     ),
-                    Positioned(
-                        right: 10,
-                        top: 10,
-                        child: Visibility(
-                            visible: entity.hasRead != true,
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Card(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 5, horizontal: 15),
-                                      backgroundColor: Colors.red,
-                                      borderRadius: BorderRadius.circular(7),
-                                      child: const Text(
-                                        "NEW",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                            color: Colors.white),
-                                      )),
-                                ])))
                   ]))
             ]),
             Positioned(right: 20, top: 20, child: _tag()),
@@ -132,18 +111,38 @@ class HistoryCard extends StatelessWidget {
 
   Widget _title(JobHistoryEntity e, Color color) {
     return Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        decoration: BoxDecoration(
-            color: color,
-            borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(10), topLeft: Radius.circular(10))),
-        width: double.infinity,
-        child: Text("${e.projectName}",
-            style: const TextStyle(
-              fontSize: 25,
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-            )));
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(10), topLeft: Radius.circular(10))),
+      width: double.infinity,
+      child: Row(
+        children: [
+          Text("${e.projectName}",
+              style: const TextStyle(
+                fontSize: 25,
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+              )),
+          const SizedBox(width: 15),
+          Visibility(
+              visible: entity.hasRead != true,
+              child: Card(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                  backgroundColor: Colors.red,
+                  borderRadius: BorderRadius.circular(7),
+                  child: const Text(
+                    "NEW",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.white),
+                  )))
+        ],
+      ),
+    );
   }
 
   Widget _text(String title, String content) {

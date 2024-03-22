@@ -231,7 +231,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
               workShopVm: _workShopVm,
               enableAssembleOrders: e.assembleOrderList,
               goToWorkShop: null,
-              defaultJavaHome: _envParamVm.javaRoot,
+              javaHome: e.activeSetting!.jdk!,
             ),
             showActions: false);
       },
