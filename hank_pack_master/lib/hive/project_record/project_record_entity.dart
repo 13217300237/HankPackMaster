@@ -51,23 +51,41 @@ class ProjectRecordEntity {
   @HiveField(13)
   List<JobHistoryEntity>? jobHistoryList; // 换个方式存储作业历史
 
-  List<String> get assembleOrderList {
+  List<String> strArrToList() {
     List<String> list = [];
-    if (assembleOrdersStr == null) return list;
-
     var split = assembleOrdersStr!.split("\n");
     for (var e in split) {
       if (e.isNotEmpty) {
         list.add(e.trim());
       }
     }
+    return list;
+  }
+
+  List<String> get assembleOrderList {
+    if (assembleOrdersStr == null) return [];
+
+    var list = strArrToList();
+
+    debugPrint("初始命令数量为: ${list.length}");
+
+    int oriLength = list.length;
 
     // 这里先判断命令的节数，找出最大节数值
     // 然后遍历所有的命令，仅保留节数值符合最大节数值的命令
     int maxWords = findMaxWords(list);
     list.removeWhere((element) => countUppercaseLetters(element) != maxWords);
+    int afterFilterLength = list.length;
+    debugPrint("按照节数过滤后数量为: ${list.length}");
 
-    return list;
+    // 检查最后剩余的命令数量，和之前数量之差,如果减少过半，那就显示原所有命令
+    if (afterFilterLength < oriLength / 2) {
+      debugPrint("判定过滤有误，使用原数组");
+      return strArrToList();
+    } else {
+      debugPrint("判定过滤无误，使用新数组");
+      return list;
+    }
   }
 
   /// 找出一个字符串数组中，每个单词的大写字母数量的最大值
