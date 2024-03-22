@@ -101,11 +101,7 @@ class HistoryCard extends StatelessWidget {
                                 ])))
                   ]))
             ]),
-            Positioned(
-              right: 10,
-              top: 10,
-              child: _tag(),
-            ),
+            Positioned(right: 20, top: 20, child: _tag()),
           ],
         ),
       ),

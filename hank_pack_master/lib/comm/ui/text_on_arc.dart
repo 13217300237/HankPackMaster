@@ -63,7 +63,7 @@ class ArcStyle {
   ArcStyle({
     required this.text,
     this.radius = 70,
-    this.startDegrees = 175,
+    this.startDegrees = 155,
     this.sweepDegrees = 150,
     this.textColor = Colors.teal,
     this.textFamily = 'STKAITI',
@@ -94,9 +94,24 @@ class TextOnArcPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    _drawArcBg(canvas, size);
     _drawArc(canvas, size);
     _drawTextOnArc(canvas, size);
     _drawImg(canvas, size);
+  }
+
+  _drawArcBg(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = style.arcColor.withOpacity(.1)
+      ..style = PaintingStyle.fill
+      ..strokeWidth = style.strokeWidth;
+
+    Rect rect = Rect.fromCircle(
+      center: Offset(size.width / 2, size.height / 2),
+      radius: style.radius,
+    );
+
+    canvas.drawArc(rect, arcStartAngle, pi * 2, false, paint);
   }
 
   _drawArc(Canvas canvas, Size size) {
