@@ -113,7 +113,7 @@ class HistoryCard extends StatelessWidget {
 
   Widget _title(JobHistoryEntity e, Color color) {
     return Container(
-      height: 30,
+      height: 50,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
           color: color,
@@ -125,6 +125,7 @@ class HistoryCard extends StatelessWidget {
           Visibility(
               visible: entity.hasRead != true,
               child: Card(
+                margin: const EdgeInsets.only(right: 15),
                   padding:
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                   backgroundColor: Colors.red,
@@ -136,7 +137,6 @@ class HistoryCard extends StatelessWidget {
                         fontSize: 16,
                         color: Colors.white),
                   ))),
-          const SizedBox(width: 15),
           showTitle
               ? Text("${e.projectName}",
                   style: const TextStyle(
