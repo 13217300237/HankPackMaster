@@ -451,6 +451,13 @@ class CommandUtil {
 
     String binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
 
+    debugPrint("clonePath->$clonePath");
+
+    Directory dir = Directory(clonePath);
+    if (!dir.existsSync()) {
+      dir.createSync(recursive: true);
+    }
+
     var process = await execute(
       cmd: '"$binRoot"',
       params: ["clone", gitUrl],
@@ -469,7 +476,7 @@ exitCode : $exitCode
 $sb"""
         .trim();
 
-    return ExecuteResult(res, exitCode!);
+    return ExecuteResult(res, exitCode ?? 0);
   }
 
   /// 采集最近一条提交记录
@@ -724,7 +731,7 @@ exitCode : $exitCode
 $sb"""
         .trim();
 
-    return ExecuteResult(res, exitCode!);
+    return ExecuteResult(res, exitCode ?? -1);
   }
 
   /// 获得所有的远程分支
@@ -853,7 +860,7 @@ $sb"""
     $sb
     """;
 
-    return ExecuteResult(res, exitCode!);
+    return ExecuteResult(res, exitCode ?? -1);
   }
 
   /// 停止所有命令的输出
