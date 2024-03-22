@@ -63,7 +63,7 @@ class ArcStyle {
   ArcStyle({
     required this.text,
     this.radius = 70,
-    this.startDegrees = 135,
+    this.startDegrees = 175,
     this.sweepDegrees = 150,
     this.textColor = Colors.teal,
     this.textFamily = 'STKAITI',

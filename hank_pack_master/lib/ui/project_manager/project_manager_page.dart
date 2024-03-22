@@ -3,6 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/comm/ui/history_card.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/active_dialog.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/start_package_dialog.dart';
@@ -140,8 +141,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                             context: context,
                             title: "最近作业历史",
                             maxWidth: 1200,
-                            content: ListView(
-                                children: [...getRecentJobResult(700)]),
+                            content: getRecentJobResult(700),
                             showCancel: false,
                             confirmText: '我知道了！')
                         .then((value) {
@@ -570,217 +570,16 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     }
   }
 
-  final TextStyle _style = const TextStyle(
-    fontSize: 15,
-    color: Colors.black,
-    fontWeight: FontWeight.w600,
-    fontFamily: 'STKAITI',
-  );
-
-  List<Widget> getRecentJobResult(double maxHeight) {
+  Widget getRecentJobResult(double maxHeight) {
     var recentJobHistoryList =
         ProjectRecordOperator.getRecentJobHistoryList(recentCount: -1);
 
-    return [
-      ...recentJobHistoryList.map((e) {
-        // TODO 这里要换成 ListView，不然滑动起来会卡
-        MyAppInfo myAppInfo;
-        try {
-          myAppInfo = MyAppInfo.fromJsonString(e.historyContent!);
-        } catch (ex) {
-          myAppInfo = MyAppInfo(errMessage: e.historyContent); // 针对激活成功，这里要做判断
-        }
-
-        var color = e.success == true
-            ? Colors.green.withOpacity(.1)
-            : Colors.red.withOpacity(.1);
-
-        return MouseRegion(
-          onEnter: (event) {
-            ProjectRecordOperator.setReadV2(jobHistoryEntity: e);
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-            child: Stack(
-              children: [
-                Column(children: [
-                  _title(e, color),
-                  Card(
-                      borderColor: Colors.transparent,
-                      backgroundColor: color,
-                      borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(10)),
-                      child: Stack(children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _text("git地址", e.gitUrl ?? ''),
-                            _text("分支名", e.branchName ?? ''),
-                            _text(
-                                "构建时间",
-                                Jiffy.parseFromDateTime(
-                                        DateTime.fromMillisecondsSinceEpoch(
-                                            e.buildTime ?? 0))
-                                    .format(pattern: "yyyy-MM-dd HH:mm:ss")),
-                            const SizedBox(height: 10),
-                            JobSettingCard(e.jobSetting),
-                            const SizedBox(height: 10),
-                            AppInfoCard(
-                              appInfo: myAppInfo,
-                              initiallyExpanded: false,
-                              maxHeight: maxHeight,
-                            ),
-                            const SizedBox(height: 10),
-                            _stageListCard(e),
-                          ],
-                        ),
-                        Positioned(
-                            right: 10,
-                            top: 10,
-                            child: Visibility(
-                                visible: e.hasRead != true,
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Card(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 5, horizontal: 15),
-                                          backgroundColor: Colors.red,
-                                          borderRadius:
-                                              BorderRadius.circular(7),
-                                          child: const Text(
-                                            "NEW",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 16,
-                                                color: Colors.white),
-                                          )),
-                                    ])))
-                      ]))
-                ]),
-                Positioned(
-                  right: 10,
-                  top: 10,
-                  child: TextOnArcWidget(
-                    arcStyle: ArcStyle(
-                        text: "项目已激活",
-                        strokeWidth: 4,
-                        radius: 70,
-                        textSize: 20,
-                        textColor: Colors.green.darkest,
-                        arcColor: Colors.green.darkest,
-                        padding: 20),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList()
-    ];
-  }
-
-  Widget _title(JobHistoryEntity e, Color color) {
-    return Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        decoration: BoxDecoration(
-            color: color.withBlue(20),
-            borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(10), topLeft: Radius.circular(10))),
-        width: double.infinity,
-        child: Text("${e.projectName}",
-            style: const TextStyle(
-              fontSize: 25,
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-            )));
-  }
-
-  Widget _text(String title, String content) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 5),
-      child: Row(
-        children: [
-          Text("$title : ", style: gridTextStyle2),
-          Text(
-            content,
-            style: gridTextStyle3,
-          )
-        ],
-      ),
-    );
-  }
-
-  _stageListCard(JobHistoryEntity e) {
-    if (e.stageRecordList == null || e.stageRecordList!.isEmpty) {
-      return const SizedBox();
-    }
-
-    Color bg(bool? success) {
-      return (success ?? false)
-          ? Colors.green.withOpacity(.1)
-          : Colors.red.withOpacity(.1);
-    }
-
-    return Expander(
-      initiallyExpanded: !(e.success ?? false),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...?e.stageRecordList
-              ?.map((stageRecord) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Expander(
-                      initiallyExpanded: false,
-                      headerBackgroundColor: ButtonState.resolveWith(
-                          (states) => bg(stageRecord.success)),
-                      header: RichText(
-                          text: TextSpan(children: [
-                        TextSpan(
-                            text: "${stageRecord.name}     ",
-                            style: _style.copyWith(fontSize: 16)),
-                        TextSpan(
-                            text: formatSeconds(stageRecord.costTime ?? 0),
-                            style: _style.copyWith(color: Colors.blue)),
-                      ])),
-                      content: Container(
-                        width: double.infinity,
-                        constraints: const BoxConstraints(maxHeight: 300),
-                        margin: const EdgeInsets.symmetric(vertical: 5.0),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Card(
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: TextSelectionTheme(
-                                    data: TextSelectionThemeData(
-                                      selectionColor:
-                                          Colors.green.withOpacity(.3),
-                                      // 修改选中文本的背景颜色
-                                      selectionHandleColor:
-                                          Colors.red, // 修改选中文本的选择手柄颜色
-                                    ),
-                                    child: SelectableText(
-                                        "${stageRecord.resultStr?.formatJson()}",
-                                        style: _style),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              Text("${stageRecord.fullLog}", style: _style)
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ))
-              .toList()
-        ],
-      ),
-      header: Text("阶段日志详情", style: _style),
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var e = recentJobHistoryList[index];
+        return HistoryCard(entity: e, maxHeight: maxHeight);
+      },
+      itemCount: recentJobHistoryList.length,
     );
   }
 }
