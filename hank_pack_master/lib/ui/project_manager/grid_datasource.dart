@@ -5,7 +5,9 @@ import 'package:hank_pack_master/ui/project_manager/job_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/pgy/pgy_entity.dart';
+import '../../comm/ui/history_card.dart';
 import '../../comm/url_check_util.dart';
+import '../../hive/project_record/job_history_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import 'column_name_const.dart';
@@ -220,56 +222,78 @@ class ProjectEntityDataSource extends DataGridSource {
 
                 his = his.reversed.toList();
 
-                var content = ListView.builder(
-                  itemBuilder: (context, index) {
-                    var jobHistoryEntity = his[index];
-                    // 尝试将打包历史字符串转化为 MyAppInfo 对象
-                    MyAppInfo myAppInfo;
-                    try {
-                      myAppInfo = MyAppInfo.fromJsonString(
-                          jobHistoryEntity.historyContent!);
-                    } catch (ex) {
-                      myAppInfo = MyAppInfo(
-                          errMessage: jobHistoryEntity.historyContent);
-                    }
-
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                              child: JobHistoryCard(
-                            projectRecordEntity: entity,
-                            jobHistoryEntity: jobHistoryEntity,
-                            myAppInfo: myAppInfo,
-                            doFastUpload: (s) =>
-                                openFastUploadDialogFunc?.call(entity, s),
-                            onRead: () {
-                              ProjectRecordOperator.setRead(
-                                projectRecordEntity: entity,
-                                jobHistoryEntity: jobHistoryEntity,
-                              );
-                              notifyListeners(); // 表格刷新
-                              onRead(); // 通知外部刷新
-                            },
-                          )),
-                        ],
-                      ),
-                    );
-                  },
-                  itemCount: his.length,
-                );
+                // var content = ListView.builder(
+                //   itemBuilder: (context, index) {
+                //     var jobHistoryEntity = his[index];
+                //     // 尝试将打包历史字符串转化为 MyAppInfo 对象
+                //     MyAppInfo myAppInfo;
+                //     try {
+                //       myAppInfo = MyAppInfo.fromJsonString(
+                //           jobHistoryEntity.historyContent!);
+                //     } catch (ex) {
+                //       myAppInfo = MyAppInfo(
+                //           errMessage: jobHistoryEntity.historyContent);
+                //     }
+                //
+                //     return Padding(
+                //       padding: const EdgeInsets.only(right: 10.0),
+                //       child: Row(
+                //         children: [
+                //           Expanded(
+                //               child: JobHistoryCard(
+                //             projectRecordEntity: entity,
+                //             jobHistoryEntity: jobHistoryEntity,
+                //             myAppInfo: myAppInfo,
+                //             doFastUpload: (s) =>
+                //                 openFastUploadDialogFunc?.call(entity, s),
+                //             onRead: () {
+                //               ProjectRecordOperator.setRead(
+                //                 projectRecordEntity: entity,
+                //                 jobHistoryEntity: jobHistoryEntity,
+                //               );
+                //               notifyListeners(); // 表格刷新
+                //               onRead(); // 通知外部刷新
+                //             },
+                //           )),
+                //         ],
+                //       ),
+                //     );
+                //   },
+                //   itemCount: his.length,
+                // );
+                // DialogUtil.showCustomDialog(
+                //     maxHeight: 800,
+                //     maxWidth: 900,
+                //     context: buildContext,
+                //     title: "${entity.projectName} 作业历史",
+                //     content: content,
+                //     showCancel: false,
+                //     confirmText: '我知道了!');
 
                 DialogUtil.showCustomDialog(
-                    maxHeight: 800,
-                    maxWidth: 900,
                     context: buildContext,
                     title: "${entity.projectName} 作业历史",
-                    content: content,
+                    maxWidth: 1200,
+                    content: getProjectJobResult(700, his),
                     showCancel: false,
-                    confirmText: '我知道了!');
+                    confirmText: '我知道了！');
               }),
         ));
+  }
+
+  Widget getProjectJobResult(
+      double maxHeight, List<JobHistoryEntity> historyList) {
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var e = historyList[index];
+        return HistoryCard(
+          entity: e,
+          maxHeight: maxHeight,
+          showTitle: false,
+        );
+      },
+      itemCount: historyList.length,
+    );
   }
 
   /// 每行UI的构建逻辑

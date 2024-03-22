@@ -13,11 +13,13 @@ import '../text_util.dart';
 class HistoryCard extends StatelessWidget {
   final JobHistoryEntity entity;
   final double maxHeight;
+  final bool showTitle;
 
   const HistoryCard({
     super.key,
     required this.entity,
     required this.maxHeight,
+    this.showTitle = true,
   });
 
   final TextStyle _style = const TextStyle(
@@ -111,6 +113,7 @@ class HistoryCard extends StatelessWidget {
 
   Widget _title(JobHistoryEntity e, Color color) {
     return Container(
+      height: 30,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
           color: color,
@@ -119,13 +122,6 @@ class HistoryCard extends StatelessWidget {
       width: double.infinity,
       child: Row(
         children: [
-          Text("${e.projectName}",
-              style: const TextStyle(
-                fontSize: 25,
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-              )),
-          const SizedBox(width: 15),
           Visibility(
               visible: entity.hasRead != true,
               child: Card(
@@ -139,7 +135,16 @@ class HistoryCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         color: Colors.white),
-                  )))
+                  ))),
+          const SizedBox(width: 15),
+          showTitle
+              ? Text("${e.projectName}",
+                  style: const TextStyle(
+                    fontSize: 25,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ))
+              : const SizedBox(),
         ],
       ),
     );
@@ -150,7 +155,7 @@ class HistoryCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 5),
       child: Row(
         children: [
-          Text("$title : ", style: gridTextStyle2),
+          Text("$title :   ", style: gridTextStyle2),
           Text(
             content,
             style: gridTextStyle3,
