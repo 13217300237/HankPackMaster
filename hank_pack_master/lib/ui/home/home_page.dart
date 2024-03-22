@@ -13,7 +13,7 @@ import '../../comm/gradients.dart';
 import '../../comm/hwobs/obs_client.dart';
 import '../../comm/net/net_util.dart';
 import '../../comm/ui/animation_widget.dart';
-import '../../comm/ui/text_on_path.dart';
+import '../../comm/ui/text_on_arc.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -122,21 +122,8 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  double convertDegreesToRadians(int degrees) {
-    return (degrees * pi) / 180;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(500, 500),
-      painter: TextOnArcPainter(
-        text: "项目激活成功",
-        radius: 200,
-        startAngle: convertDegreesToRadians(180),
-        sweepAngle: convertDegreesToRadians(45),
-      ),
-    );
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(gradient: mainPanelGradient),
@@ -201,6 +188,9 @@ class _HomePageState extends State<HomePage> {
               }),
         ],
       ),
+      const SizedBox(height: 30),
+      TextOnArcWidget(
+          arcStyle: ArcStyle(text: "文字内容啊啊", strokeWidth: 8, radius: 100)),
       const SizedBox(height: 30),
       AnimatedShapeWidget(
         width: 200,
