@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -12,6 +13,7 @@ import '../../comm/gradients.dart';
 import '../../comm/hwobs/obs_client.dart';
 import '../../comm/net/net_util.dart';
 import '../../comm/ui/animation_widget.dart';
+import '../../comm/ui/text_on_path.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -124,6 +126,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(300, 300),
+      painter: TextOnArcPainter(
+        text: "Hello Flutter!",
+        radius: 100,
+        startAngle: 0,
+        sweepAngle: pi,
+      ),
+    );
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(gradient: mainPanelGradient),
