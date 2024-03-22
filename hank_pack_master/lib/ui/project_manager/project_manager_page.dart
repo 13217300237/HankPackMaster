@@ -8,26 +8,19 @@ import 'package:hank_pack_master/hive/project_record/project_record_operator.dar
 import 'package:hank_pack_master/ui/project_manager/dialog/active_dialog.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/start_package_dialog.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/gradients.dart';
-import '../../comm/pgy/pgy_entity.dart';
-import '../../comm/text_util.dart';
-import '../../comm/ui/text_on_arc.dart';
 import '../../comm/url_check_util.dart';
-import '../../hive/project_record/job_history_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
-import '../work_shop/app_info_card.dart';
 import 'column_name_const.dart';
 import 'dialog/create_project_record_dialog.dart';
 import 'dialog/fast_upload_dialog.dart';
 import 'grid_datasource.dart';
-import 'job_setting_card.dart';
 
 class ProjectManagerPage extends StatefulWidget {
   const ProjectManagerPage({super.key});
@@ -577,7 +570,22 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     return ListView.builder(
       itemBuilder: (context, index) {
         var e = recentJobHistoryList[index];
-        return HistoryCard(entity: e, maxHeight: maxHeight);
+        return HistoryCard(
+          historyEntity: e,
+          maxHeight: maxHeight,
+          openFastUploadDialogFunc: (e, s) => DialogUtil.showCustomDialog(
+              showActions: false,
+              context: context,
+              showXGate: true,
+              title: "快速上传",
+              content: FastUploadDialogWidget(
+                projectRecordEntity: e,
+                workShopVm: _workShopVm,
+                apkPath: s,
+              )),
+          projectRecordEntity:
+              ProjectRecordEntity(e.gitUrl!, e.branchName!, e.projectName!, ''),
+        );
       },
       itemCount: recentJobHistoryList.length,
     );

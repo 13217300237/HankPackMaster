@@ -24,6 +24,9 @@ class JobHistoryEntity {
   @HiveField(6)
   List<StageRecordEntity>? stageRecordList; // 阶段执行日志
 
+  @HiveField(7)
+  String? taskName; // 可能是项目激活，项目打包，以及 产物快速上传
+
   /// 3个临时字段，不必存到数据库
   String? projectName;
   String? gitUrl;
@@ -36,5 +39,6 @@ class JobHistoryEntity {
     required this.hasRead,
     required this.jobSetting,
     this.stageRecordList,
+    this.taskName,
   });
 }

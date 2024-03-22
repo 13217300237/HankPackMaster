@@ -1,5 +1,6 @@
 import 'package:badges/badges.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/ui/project_manager/job_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
@@ -219,62 +220,12 @@ class ProjectEntityDataSource extends DataGridSource {
                   size: iconSize, color: Colors.green.withOpacity(.8)),
               onPressed: () {
                 var his = entity.jobHistoryList ?? [];
-
                 his = his.reversed.toList();
-
-                // var content = ListView.builder(
-                //   itemBuilder: (context, index) {
-                //     var jobHistoryEntity = his[index];
-                //     // 尝试将打包历史字符串转化为 MyAppInfo 对象
-                //     MyAppInfo myAppInfo;
-                //     try {
-                //       myAppInfo = MyAppInfo.fromJsonString(
-                //           jobHistoryEntity.historyContent!);
-                //     } catch (ex) {
-                //       myAppInfo = MyAppInfo(
-                //           errMessage: jobHistoryEntity.historyContent);
-                //     }
-                //
-                //     return Padding(
-                //       padding: const EdgeInsets.only(right: 10.0),
-                //       child: Row(
-                //         children: [
-                //           Expanded(
-                //               child: JobHistoryCard(
-                //             projectRecordEntity: entity,
-                //             jobHistoryEntity: jobHistoryEntity,
-                //             myAppInfo: myAppInfo,
-                //             doFastUpload: (s) =>
-                //                 openFastUploadDialogFunc?.call(entity, s),
-                //             onRead: () {
-                //               ProjectRecordOperator.setRead(
-                //                 projectRecordEntity: entity,
-                //                 jobHistoryEntity: jobHistoryEntity,
-                //               );
-                //               notifyListeners(); // 表格刷新
-                //               onRead(); // 通知外部刷新
-                //             },
-                //           )),
-                //         ],
-                //       ),
-                //     );
-                //   },
-                //   itemCount: his.length,
-                // );
-                // DialogUtil.showCustomDialog(
-                //     maxHeight: 800,
-                //     maxWidth: 900,
-                //     context: buildContext,
-                //     title: "${entity.projectName} 作业历史",
-                //     content: content,
-                //     showCancel: false,
-                //     confirmText: '我知道了!');
-
                 DialogUtil.showCustomDialog(
                     context: buildContext,
                     title: "${entity.projectName} 作业历史",
                     maxWidth: 1200,
-                    content: getProjectJobResult(700, his),
+                    content: getProjectJobResult(700, his, entity),
                     showCancel: false,
                     confirmText: '我知道了！');
               }),
@@ -282,14 +233,23 @@ class ProjectEntityDataSource extends DataGridSource {
   }
 
   Widget getProjectJobResult(
-      double maxHeight, List<JobHistoryEntity> historyList) {
+    double maxHeight,
+    List<JobHistoryEntity> historyList,
+    ProjectRecordEntity projectRecordEntity,
+  ) {
     return ListView.builder(
       itemBuilder: (context, index) {
         var e = historyList[index];
         return HistoryCard(
-          entity: e,
+          historyEntity: e,
+          projectRecordEntity: projectRecordEntity,
           maxHeight: maxHeight,
           showTitle: false,
+          openFastUploadDialogFunc:
+              (ProjectRecordEntity projectRecordEntity, s) {
+            // buildContext.pop();
+            openFastUploadDialogFunc?.call(projectRecordEntity, s);
+          },
         );
       },
       itemCount: historyList.length,

@@ -1089,6 +1089,7 @@ class WorkShopVm extends ChangeNotifier {
 
   /// 开始项目激活
   Future<void> startActive() async {
+    var taskName = "激活";
     gitUrlController.text = runningTask!.gitUrl;
     gitBranchController.text = runningTask!.branch;
     javaHomeController.text = runningTask!.setting!.jdk!.envName;
@@ -1107,11 +1108,11 @@ class WorkShopVm extends ChangeNotifier {
       runningTask!.jobHistory!.add("${orderExecuteResult.msg}");
 
       _insertIntoJobHistoryList(
-        success: false,
-        historyContent: "${orderExecuteResult.msg}",
-        jobSetting: runningTask!.setting!,
-        stageRecordList: orderExecuteResult.stageRecordList ?? [],
-      );
+          success: false,
+          historyContent: "${orderExecuteResult.msg}",
+          jobSetting: runningTask!.setting!,
+          stageRecordList: orderExecuteResult.stageRecordList ?? [],
+          taskName: taskName);
 
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 激活失败, 详情查看激活历史",
           success: false);
@@ -1127,11 +1128,12 @@ class WorkShopVm extends ChangeNotifier {
     myAppInfo.buildUpdated = _nowTime2();
 
     _insertIntoJobHistoryList(
-      success: true,
-      historyContent: myAppInfo.toJsonString(), // 这里要
-      jobSetting: runningTask!.setting!,
-      stageRecordList: orderExecuteResult.stageRecordList ?? [],
-    );
+        success: true,
+        historyContent: myAppInfo.toJsonString(),
+        // 这里要
+        jobSetting: runningTask!.setting!,
+        stageRecordList: orderExecuteResult.stageRecordList ?? [],
+        taskName: taskName);
 
     onProjectActiveFinished(orderExecuteResult.data);
     _reset();
@@ -1186,6 +1188,7 @@ class WorkShopVm extends ChangeNotifier {
   MyAppInfo? myAppInfo;
 
   Future<void> startPackage() async {
+    var taskName = "打包";
     updateLogController.text = runningTask!.setting!.appUpdateLog ?? '';
     apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
     selectedOrder = runningTask!.setting!.selectedOrder ?? '';
@@ -1201,27 +1204,28 @@ class WorkShopVm extends ChangeNotifier {
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
       _insertIntoJobHistoryList(
-        success: true,
-        historyContent: myAppInfo?.toJsonString() ?? "",
-        jobSetting: runningTask!.setting!,
-        stageRecordList: scheduleRes.stageRecordList ?? [],
-      );
+          success: true,
+          historyContent: myAppInfo?.toJsonString() ?? "",
+          jobSetting: runningTask!.setting!,
+          stageRecordList: scheduleRes.stageRecordList ?? [],
+          taskName: taskName);
     } else {
       myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
       _insertIntoJobHistoryList(
-        success: false,
-        historyContent: myAppInfo?.toJsonString() ?? "",
-        jobSetting: runningTask!.setting!,
-        stageRecordList: scheduleRes.stageRecordList ?? [],
-      );
+          success: false,
+          historyContent: myAppInfo?.toJsonString() ?? "",
+          jobSetting: runningTask!.setting!,
+          stageRecordList: scheduleRes.stageRecordList ?? [],
+          taskName: taskName);
     }
 
     onProjectPackageFinished(myAppInfo!);
   }
 
   Future<void> startFastUpload(String apkPath) async {
+    var taskName = "上传";
     selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
     selectedUploadPlatformController.text = selectedUploadPlatform!.name ?? '';
     apkLocationController.text = runningTask!.apkPath!;
@@ -1232,11 +1236,11 @@ class WorkShopVm extends ChangeNotifier {
       myAppInfo = scheduleRes.data;
 
       _insertIntoJobHistoryList(
-        success: true,
-        historyContent: myAppInfo?.toJsonString() ?? '',
-        jobSetting: runningTask!.setting!,
-        stageRecordList: scheduleRes.stageRecordList ?? [],
-      );
+          success: true,
+          historyContent: myAppInfo?.toJsonString() ?? '',
+          jobSetting: runningTask!.setting!,
+          stageRecordList: scheduleRes.stageRecordList ?? [],
+          taskName: taskName);
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
     } else {
@@ -1244,11 +1248,11 @@ class WorkShopVm extends ChangeNotifier {
           success: false);
       myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
       _insertIntoJobHistoryList(
-        success: false,
-        historyContent: "${scheduleRes.msg}",
-        jobSetting: runningTask!.setting!,
-        stageRecordList: scheduleRes.stageRecordList ?? [],
-      );
+          success: false,
+          historyContent: "${scheduleRes.msg}",
+          jobSetting: runningTask!.setting!,
+          stageRecordList: scheduleRes.stageRecordList ?? [],
+          taskName: taskName);
     }
 
     onProjectPackageFinished(myAppInfo!);
@@ -1295,6 +1299,7 @@ class WorkShopVm extends ChangeNotifier {
     required String historyContent,
     required PackageSetting jobSetting,
     required List<StageRecordEntity> stageRecordList,
+    required String taskName,
   }) {
     var hisList = runningTask!.jobHistoryList;
     hisList ??= runningTask!.jobHistoryList = [];
@@ -1304,7 +1309,8 @@ class WorkShopVm extends ChangeNotifier {
         historyContent: historyContent,
         hasRead: false,
         jobSetting: jobSetting,
-        stageRecordList: stageRecordList));
+        stageRecordList: stageRecordList,
+        taskName: taskName));
   }
 
   String _nowTime() {

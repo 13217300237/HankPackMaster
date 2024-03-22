@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/ui/text_on_arc.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../../hive/project_record/job_history_entity.dart';
+import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import '../../ui/project_manager/grid_datasource.dart';
 import '../../ui/project_manager/job_setting_card.dart';
@@ -11,15 +14,19 @@ import '../pgy/pgy_entity.dart';
 import '../text_util.dart';
 
 class HistoryCard extends StatelessWidget {
-  final JobHistoryEntity entity;
+  final ProjectRecordEntity projectRecordEntity;
+  final JobHistoryEntity historyEntity;
   final double maxHeight;
   final bool showTitle;
+  final Function(ProjectRecordEntity, String)? openFastUploadDialogFunc;
 
   const HistoryCard({
     super.key,
-    required this.entity,
+    required this.historyEntity,
     required this.maxHeight,
     this.showTitle = true,
+    this.openFastUploadDialogFunc,
+    required this.projectRecordEntity,
   });
 
   final TextStyle _style = const TextStyle(
@@ -29,30 +36,34 @@ class HistoryCard extends StatelessWidget {
     fontFamily: 'STKAITI',
   );
 
-  @override
-  Widget build(BuildContext context) {
+  MyAppInfo get myAppInfo {
     MyAppInfo myAppInfo;
     try {
-      myAppInfo = MyAppInfo.fromJsonString(entity.historyContent!);
+      myAppInfo = MyAppInfo.fromJsonString(historyEntity.historyContent!);
     } catch (ex) {
-      myAppInfo = MyAppInfo(errMessage: entity.historyContent); // 针对激活成功，这里要做判断
+      myAppInfo =
+          MyAppInfo(errMessage: historyEntity.historyContent); // 针对激活成功，这里要做判断
     }
+    return myAppInfo;
+  }
 
-    var color = const Color(0xffe0e0e0);
+  final bgColor = const Color(0xffe0e0e0);
 
+  @override
+  Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (event) {
-        ProjectRecordOperator.setReadV2(jobHistoryEntity: entity);
+        ProjectRecordOperator.setReadV2(jobHistoryEntity: historyEntity);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
         child: Stack(
           children: [
             Column(children: [
-              _title(entity, color),
+              _title(historyEntity, bgColor),
               Card(
                   borderColor: Colors.transparent,
-                  backgroundColor: color,
+                  backgroundColor: bgColor,
                   borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(10),
                       bottomRight: Radius.circular(10)),
@@ -60,16 +71,16 @@ class HistoryCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _text("git地址", entity.gitUrl ?? ''),
-                        _text("分支名", entity.branchName ?? ''),
+                        _text("git地址", historyEntity.gitUrl ?? ''),
+                        _text("分支名", historyEntity.branchName ?? ''),
                         _text(
                             "构建时间",
                             Jiffy.parseFromDateTime(
                                     DateTime.fromMillisecondsSinceEpoch(
-                                        entity.buildTime ?? 0))
+                                        historyEntity.buildTime ?? 0))
                                 .format(pattern: "yyyy-MM-dd HH:mm:ss")),
                         const SizedBox(height: 10),
-                        JobSettingCard(entity.jobSetting),
+                        JobSettingCard(historyEntity.jobSetting),
                         const SizedBox(height: 10),
                         AppInfoCard(
                           appInfo: myAppInfo,
@@ -77,7 +88,11 @@ class HistoryCard extends StatelessWidget {
                           maxHeight: maxHeight,
                         ),
                         const SizedBox(height: 10),
-                        _stageListCard(entity),
+                        _stageListCard(historyEntity),
+                        const SizedBox(height: 20),
+                        Align(
+                            alignment: Alignment.bottomRight,
+                            child: _fastUploadWidget()),
                       ],
                     ),
                   ]))
@@ -89,14 +104,61 @@ class HistoryCard extends StatelessWidget {
     );
   }
 
+  bool _needFastUpload() {
+    return myAppInfo.errMessage != null &&
+        myAppInfo.errMessage!.contains("[") &&
+        myAppInfo.errMessage!.contains("]");
+  }
+
+  String? getApkPath() {
+    var path = myAppInfo.errMessage!.substring(
+        myAppInfo.errMessage!.indexOf("[") + 1,
+        myAppInfo.errMessage!.indexOf("]"));
+
+    File f = File(path);
+    if (f.existsSync()) {
+      return path;
+    } else {
+      return null;
+    }
+  }
+
+  _fastUploadWidget() {
+    Widget fastUploadBtn;
+    // 如果显示的内容里包含了 []，那就提取出[]中的内容，并且启用强制上传策略
+    if (_needFastUpload()) {
+      // 那就提炼出中括号中的内容
+      var apkPath = getApkPath();
+
+      return apkPath == null
+          ? const SizedBox()
+          : FilledButton(
+              child: const Text("快速上传",
+                  style: TextStyle(fontWeight: FontWeight.w600)),
+              onPressed: () {
+                debugPrint("点击了快速上传");
+                openFastUploadDialogFunc?.call(projectRecordEntity, apkPath);
+              },
+            );
+    } else {
+      fastUploadBtn = const SizedBox();
+    }
+
+    return fastUploadBtn;
+  }
+
   /// 要根据任务的成功和失败来确定印章的内容
   Widget _tag() {
     String text() {
-      return entity.success == true ? "执行成功" : "执行失败";
+      return historyEntity.success == true
+          ? "${historyEntity.taskName ?? ''}执行成功"
+          : "${historyEntity.taskName ?? ''}执行失败";
     }
 
     Color color() {
-      return entity.success == true ? Colors.green.darkest : Colors.red.darkest;
+      return historyEntity.success == true
+          ? Colors.green.darkest
+          : Colors.red.darkest;
     }
 
     return TextOnArcWidget(
@@ -105,6 +167,7 @@ class HistoryCard extends StatelessWidget {
           strokeWidth: 4,
           radius: 60,
           textSize: 20,
+          sweepDegrees: 180,
           textColor: color(),
           arcColor: color(),
           padding: 18),
@@ -123,9 +186,9 @@ class HistoryCard extends StatelessWidget {
       child: Row(
         children: [
           Visibility(
-              visible: entity.hasRead != true,
+              visible: historyEntity.hasRead != true,
               child: Card(
-                margin: const EdgeInsets.only(right: 15),
+                  margin: const EdgeInsets.only(right: 15),
                   padding:
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                   backgroundColor: Colors.red,
