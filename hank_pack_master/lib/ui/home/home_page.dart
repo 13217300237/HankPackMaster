@@ -110,8 +110,6 @@ class _HomePageState extends State<HomePage> {
 如果打包过程中出现问题，也在打包历史中能看到失败的记录，
   """;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -124,15 +122,19 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  double convertDegreesToRadians(int degrees) {
+    return (degrees * pi) / 180;
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: Size(500,500),
+      size: const Size(500, 500),
       painter: TextOnArcPainter(
-        text: "Hello Flutter!",
-        radius: 100,
-        startAngle: 0,
-        sweepAngle: pi/2,
+        text: "项目激活成功",
+        radius: 200,
+        startAngle: convertDegreesToRadians(180),
+        sweepAngle: convertDegreesToRadians(45),
       ),
     );
     return Container(
@@ -176,7 +178,8 @@ class _HomePageState extends State<HomePage> {
                     "C:\\Users\\Administrator\\Desktop\\app-release-unsigned.apk");
 
                 var oBSResponse = await OBSClient.putFile(
-                    objectName: "test/app-release-unsigned.apk", // 支持这样传，增加中间层目录
+                    objectName: "test/app-release-unsigned.apk",
+                    // 支持这样传，增加中间层目录
                     file: fileToUpload);
 
                 debugPrint("${oBSResponse?.url}");
