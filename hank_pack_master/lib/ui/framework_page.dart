@@ -62,7 +62,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     ),
     PaneItem(
       key: const ValueKey('/cash_files'),
-      icon: const Icon(FluentIcons.a_t_p_logo),
+      icon: const Icon(FluentIcons.temporary_access_pass),
       title: Text('缓存文件管理', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),

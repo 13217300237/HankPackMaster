@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 
 class DownloadButtonController extends ChangeNotifier {
   DownloadState downloadState = DownloadState.idle;
@@ -55,6 +55,8 @@ class DownloadButtonState extends State<DownloadButton>
     with TickerProviderStateMixin {
   late final double _btnWidth;
 
+  double borderRadius = 6;
+
   /// 按钮状态
   DownloadState get _downloadState =>
       widget.downloadButtonController.downloadState;
@@ -65,6 +67,13 @@ class DownloadButtonState extends State<DownloadButton>
   /// 当前的下载进度
   int get _downloadProgressValue =>
       widget.downloadButtonController.progressValue;
+
+  double get overlayWidth {
+    if (_downloadState == DownloadState.downloading) {
+      return _btnWidth * (_downloadProgressValue / 100);
+    }
+    return 0;
+  }
 
   @override
   void initState() {
@@ -86,7 +95,7 @@ class DownloadButtonState extends State<DownloadButton>
   /// 主要布局
   Widget _mainLayout() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(borderRadius),
       child: Container(
         width: _btnWidth,
         height: 50,
@@ -102,9 +111,9 @@ class DownloadButtonState extends State<DownloadButton>
         left: 0,
         top: 0,
         height: 50,
-        width: _btnWidth * (_downloadProgressValue / 100),
+        width: overlayWidth,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(borderRadius),
           child: Container(
             color: Colors.white.withOpacity(.4),
           ),
@@ -127,7 +136,10 @@ class DownloadButtonState extends State<DownloadButton>
           w = Text('$_downloadProgressValue%', style: _textStyle);
           break;
         case DownloadState.completed:
-          w = Text('已完成', style: _textStyle);
+          w = Icon(
+            FluentIcons.completed_solid,
+            color: Colors.green.darkest,
+          );
           break;
       }
       return w;
