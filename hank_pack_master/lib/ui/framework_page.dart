@@ -214,7 +214,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
             alignment: AlignmentDirectional.centerStart,
             child: Padding(
               padding: EdgeInsetsDirectional.only(end: 8.0),
-              child: XGateWidget(),
+              child: NetworkStateWidget(),
             ),
           ),
           const WindowButtons(),

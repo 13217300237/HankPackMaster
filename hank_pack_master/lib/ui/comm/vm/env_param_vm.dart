@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
@@ -377,17 +378,57 @@ class EnvParamVm extends ChangeNotifier {
 
   bool _xGateState = false;
 
+  String _networkName = '';
+  Color _networkColor = Colors.teal;
+
+  Color get networkColor => _networkColor;
+
+  String get networkName => _networkName;
+
   bool get needShowXGateTag => _needShowXGateTag;
 
   bool _needShowXGateTag = false;
 
   StreamSubscription? _streamSubscription;
 
+  void setNetState(ConnectivityResult result) {
+    switch (result) {
+      case ConnectivityResult.bluetooth:
+        _networkName = '蓝牙';
+        _networkColor = Colors.blue;
+        break;
+      case ConnectivityResult.wifi:
+        _networkName = 'Wifi';
+        _networkColor = Colors.orange;
+        break;
+      case ConnectivityResult.ethernet:
+        _networkName = '以太网';
+        _networkColor = Colors.green;
+        break;
+      case ConnectivityResult.mobile:
+        _networkName = '手机网络';
+        _networkColor = Colors.teal;
+        break;
+      case ConnectivityResult.none:
+        _networkName = '无网络';
+        _networkColor = Colors.red;
+        break;
+      case ConnectivityResult.vpn:
+        _networkName = 'VPN';
+        _networkColor = Colors.magenta;
+        break;
+      case ConnectivityResult.other:
+        _networkName = '其他';
+        _networkColor = Colors.orange.normal;
+        break;
+    }
+  }
+
   void startXGateListen() {
     _streamSubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
-      // debugPrint("网络发生变化 ${result.name}");
+      setNetState(result);
       NetUtil.getInstance().checkCodehub(
         onXGateConnect: (b) {
           _xGateState = b;
