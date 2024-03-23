@@ -360,6 +360,8 @@ class EnvParamVm extends ChangeNotifier {
 
     initTextController(obsBucketNameController, () => obsBucketName,
         (String s) => obsBucketName = s);
+
+    notifyListeners();
   }
 
   // 用combox替换输入框

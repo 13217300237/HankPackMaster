@@ -636,7 +636,7 @@ class WorkShopVm extends ChangeNotifier {
         if (await apkFile.exists()) {
           String fileSize = "${await apkFile.length()}"; // 文件大小
           var executeRes = await CommandUtil.getInstance().aapt(apkToUpload!);
-          var data = executeRes.data;
+          var data = executeRes.data; // aapt分析的结果
           if (data is ApkParserResult) {
             appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
             appInfo.buildName = data.appName;
@@ -654,7 +654,7 @@ class WorkShopVm extends ChangeNotifier {
             return OrderExecuteResult(
               data: appInfo,
               succeed: true,
-              executeLog: executeRes.res,
+              executeLog: appInfo.toJsonString(),
             );
           } else {
             return OrderExecuteResult(
