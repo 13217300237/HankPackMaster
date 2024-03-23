@@ -67,19 +67,21 @@ class _CashFilesPageState extends State<CashFilesPage> {
             Expanded(
                 child: ListView.builder(
               itemBuilder: (c, i) {
-                String fileName = _cacheFilesVm.listFile[i];
+                String fileName = _cacheFilesVm.listFileMap.keys.toList()[i];
+                DownloadButtonController controller =
+                    _cacheFilesVm.listFileMap.values.toList()[i];
 
                 return Padding(
                   padding: const EdgeInsets.only(right: 30.0, bottom: 15),
                   child: DownloadButton(
                     fileName: fileName,
-                    mainColor: Colors.orange,
-                    btnWidth: double.infinity,
-                    controller: _cacheFilesVm.downloadButtonController,
+                    mainColor: Colors.teal.darkest,
+                    btnWidth: 500,
+                    downloadButtonController: controller,
                   ),
                 );
               },
-              itemCount: _cacheFilesVm.listFile.length,
+              itemCount: _cacheFilesVm.listFileMap.length,
             ))
           ],
         ),

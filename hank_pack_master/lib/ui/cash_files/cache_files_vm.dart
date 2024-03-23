@@ -7,14 +7,12 @@ import '../../comm/ui/download_button.dart';
 
 class CacheFilesVm extends ChangeNotifier {
   // 给定一个依赖下载地址：https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.0/ (maven的案例)
+  // 换一个：           https://repo1.maven.org/maven2/org/apache/spark/spark-hive_2.13/3.5.1/
   String host = "https://repo1.maven.org/maven2/";
-  String path = "org/apache/logging/log4j/log4j-core/2.17.0/";
+  String path = "org/apache/spark/spark-hive_2.13/3.5.1/";
   String saveFolder = "E:/fileCache/";
 
-  List<String> listFile = [];
-
-  DownloadButtonController downloadButtonController =
-      DownloadButtonController();
+  Map<String, DownloadButtonController> listFileMap = {};
 
   bool loading = true;
 
@@ -59,32 +57,42 @@ class CacheFilesVm extends ChangeNotifier {
     Response response = await dio.get(host + path);
 
     if (response.statusCode == 200) {
-      listFile = _parseHtmlString(response.data);
+      List<String> listFile = _parseHtmlString(response.data);
+
+      for (var s in listFile) {
+        listFileMap[s] = DownloadButtonController(); // 给每一条下载任务都创建一个下载按钮控制器
+      }
+
       loading = false;
       notifyListeners();
+
+      if (listFileMap.isNotEmpty) {
+        downloadFile();
+      }
     } else {
       debugPrint("Failed to fetch files list");
     }
   }
 
-  void downloadFile(String fileName) async {
-    Directory directory = Directory(saveFolder + path);
-    if (!directory.existsSync()) {
-      directory.create(recursive: true);
-    }
-
-    String fileUrl = host + path + fileName;
-    String savePath = saveFolder + path + fileName; // 文件保存的本地路径
-
+  void downloadFile() async {
     Dio dio = Dio();
+    listFileMap.forEach((fileName, controller) async {
+      Directory directory = Directory(saveFolder + path);
+      if (!directory.existsSync()) {
+        directory.create(recursive: true);
+      }
 
-    try {
-      await dio.download(fileUrl, savePath, onReceiveProgress: (c, t) {
-        debugPrint("$fileUrl ${(100 * c / t).round()}");
-      });
-      debugPrint('$fileUrl 下载成功，保存在 $savePath');
-    } on DioError catch (e) {
-      debugPrint('下载失败: $fileUrl, 错误信息: ${e.message}');
-    }
+      String fileUrl = host + path + fileName;
+      String savePath = saveFolder + path + fileName; // 文件保存的本地路径
+      controller.startDownload();
+      try {
+        await dio.download(fileUrl, savePath, onReceiveProgress: (c, t) {
+          controller.setProgressValue((100 * c / t).round());
+        });
+        debugPrint('$fileUrl 下载成功，保存在 $savePath');
+      } on DioError catch (e) {
+        debugPrint('下载失败: $fileUrl, 错误信息: ${e.message}');
+      }
+    });
   }
 }
