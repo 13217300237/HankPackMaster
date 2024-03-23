@@ -21,9 +21,7 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _cacheFilesVm.init();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) => _cacheFilesVm.init());
   }
 
   @override
@@ -67,9 +65,12 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                           _cacheFilesVm.enableDownload
                               ? Colors.blue
                               : Colors.grey)),
-                  child: const Text("开始批量下载",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 22)),
+                  child: Text(
+                      (_cacheFilesVm.fileListDownloading ?? false)
+                          ? "下载中"
+                          : "开始批量下载",
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 22)),
                   onPressed: () {
                     if (_cacheFilesVm.enableDownload) {
                       _cacheFilesVm.fetchFilesList();
@@ -132,44 +133,45 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(children: [
         Expanded(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-              SizedBox(
-                  width: 250,
-                  child: Row(
-                    children: [
-                      Text(label, style: _style),
-                      toolTipIcon(msg: toolTip, iconColor: Colors.teal),
-                    ],
-                  )),
-              const Spacer(),
-              Expanded(
-                child: TextBox(
-                  style: _style,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: dataCorrect ? Colors.white : Colors.red,
-                          width: 1)),
-                  unfocusedColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  controller: controller,
-                  textAlign: TextAlign.end,
-                  suffix: needFolderChoose
-                      ? IconButton(
-                          icon: const Icon(FluentIcons.folder_open, size: 18),
-                          onPressed: () async {
-                            String? selectedDirectory =
-                                await FilePicker.platform.getDirectoryPath();
-                            if (selectedDirectory != null) {
-                              controller.text = selectedDirectory;
-                            }
-                          })
-                      : const SizedBox(),
-                ),
-              )
-            ])),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                    width: 220,
+                    child: Row(
+                      children: [
+                        Text(label, style: _style),
+                        toolTipIcon(msg: toolTip, iconColor: Colors.teal),
+                      ],
+                    )),
+                Expanded(
+                  child: TextBox(
+                    enabled: !(_cacheFilesVm.fileListDownloading ?? false)  && !needFolderChoose,
+                    style: _style,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: dataCorrect ? Colors.white : Colors.red,
+                            width: 1)),
+                    unfocusedColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    controller: controller,
+                    textAlign: TextAlign.end,
+                    suffix: needFolderChoose
+                        ? IconButton(
+                            icon: const Icon(FluentIcons.folder_open, size: 18),
+                            onPressed: () async {
+                              String? selectedDirectory =
+                                  await FilePicker.platform.getDirectoryPath();
+                              if (selectedDirectory != null) {
+                                controller.text = selectedDirectory;
+                              }
+                            })
+                        : const SizedBox(),
+                  ),
+                )
+              ]),
+        ),
       ]),
     );
   }

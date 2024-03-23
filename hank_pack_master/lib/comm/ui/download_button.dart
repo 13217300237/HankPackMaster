@@ -80,7 +80,9 @@ class DownloadButtonState extends State<DownloadButton>
     super.initState();
     _btnWidth = widget.btnWidth;
     widget.downloadButtonController.addListener(() {
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 

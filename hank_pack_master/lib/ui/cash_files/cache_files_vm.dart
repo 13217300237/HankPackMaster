@@ -2,37 +2,46 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-
 import '../../comm/ui/download_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CacheFilesVm extends ChangeNotifier {
   // 给定一个依赖下载地址：https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.0/ (maven的案例)
   // 换一个：           https://repo1.maven.org/maven2/org/apache/spark/spark-hive_2.13/3.5.1/
   String get host =>
-      hostInputController.text; //"https://repo1.maven.org/maven2/";
+      hostInputController.text; // "https://repo1.maven.org/maven2/";
   String get path =>
-      pathInputController.text; //"org/apache/spark/spark-hive_2.13/3.5.1/";
-  String get saveFolder => saveFolderInputController.text; //"E:/fileCache/";
+      pathInputController.text; // "org/apache/spark/spark-hive_2.13/3.5.1/";
+  String get saveFolder => saveFolderInputController.text; // "E:/fileCache/";
 
   Map<String, DownloadButtonController> listFileMap = {};
 
   bool? loadingFileList;
-  bool? downloading;
+  bool? fileListDownloading;
 
   TextEditingController hostInputController = TextEditingController();
   TextEditingController pathInputController = TextEditingController();
   TextEditingController saveFolderInputController = TextEditingController();
 
-  init() {
+  init() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     hostInputController.addListener(() {
+      prefs.setString("hostInput", hostInputController.text);
       notifyListeners();
     });
+    hostInputController.text = prefs.getString("hostInput") ?? '';
+
     pathInputController.addListener(() {
+      prefs.setString("pathInput", pathInputController.text);
       notifyListeners();
     });
+    pathInputController.text = prefs.getString("pathInput") ?? '';
+
     saveFolderInputController.addListener(() {
+      prefs.setString("saveFolder", saveFolderInputController.text);
       notifyListeners();
     });
+    saveFolderInputController.text = prefs.getString("saveFolder") ?? '';
   }
 
   bool get enableDownload {
@@ -85,6 +94,7 @@ class CacheFilesVm extends ChangeNotifier {
   }
 
   Future fetchFilesList() async {
+    fileListDownloading = true;
     loadingFileList = true;
     notifyListeners();
 
@@ -111,8 +121,11 @@ class CacheFilesVm extends ChangeNotifier {
 
   void downloadFile() async {
     Dio dio = Dio();
-    downloading = true;
+
+    Map<String, bool> downloadTagList = {};
+
     listFileMap.forEach((fileName, controller) async {
+      downloadTagList[fileName] = false;
       Directory directory =
           Directory(saveFolder + Platform.pathSeparator + path);
       if (!directory.existsSync()) {
@@ -125,7 +138,22 @@ class CacheFilesVm extends ChangeNotifier {
       try {
         await dio.download(fileUrl, savePath, onReceiveProgress: (c, t) {
           controller.setProgressValue((100 * c / t).round());
+          if (c == t) {
+            downloadTagList[fileName] = true;
+          }
         });
+
+        /// 先检查数量是不是相等
+        bool hasAllTask = downloadTagList.length == listFileMap.length;
+        if (hasAllTask) {
+          bool hasUncompletedTask = downloadTagList.values
+              .toList()
+              .where((element) => false)
+              .isNotEmpty; // 未完成的任务数量大于0
+          fileListDownloading = hasUncompletedTask; // 未完成的任务数量大于0，则认为正在下载
+          notifyListeners();
+        }
+
         debugPrint('$fileUrl 下载成功，保存在 $savePath');
       } on DioError catch (e) {
         debugPrint('下载失败: $fileUrl, 错误信息: ${e.message}');
