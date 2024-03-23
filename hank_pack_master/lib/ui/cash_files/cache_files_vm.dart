@@ -93,7 +93,10 @@ class CacheFilesVm extends ChangeNotifier {
     return list;
   }
 
+  Map<String, bool> downloadTagList = {};
+
   Future fetchFilesList() async {
+    downloadTagList.clear();
     fileListDownloading = true;
     loadingFileList = true;
     notifyListeners();
@@ -106,26 +109,25 @@ class CacheFilesVm extends ChangeNotifier {
 
       for (var s in listFile) {
         listFileMap[s] = DownloadButtonController(); // 给每一条下载任务都创建一个下载按钮控制器
+        downloadTagList[s] = false;
       }
 
       loadingFileList = false;
       notifyListeners();
 
       if (listFileMap.isNotEmpty) {
-        downloadFile();
+        downloadEachFile();
       }
     } else {
       debugPrint("Failed to fetch files list");
     }
   }
 
-  void downloadFile() async {
+  void downloadEachFile() async {
     Dio dio = Dio();
 
-    Map<String, bool> downloadTagList = {};
-
     listFileMap.forEach((fileName, controller) async {
-      downloadTagList[fileName] = false;
+
       Directory directory =
           Directory(saveFolder + Platform.pathSeparator + path);
       if (!directory.existsSync()) {
