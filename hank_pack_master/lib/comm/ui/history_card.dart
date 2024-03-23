@@ -136,7 +136,6 @@ class HistoryCard extends StatelessWidget {
               child: const Text("快速上传",
                   style: TextStyle(fontWeight: FontWeight.w600)),
               onPressed: () {
-                debugPrint("点击了快速上传");
                 openFastUploadDialogFunc?.call(projectRecordEntity, apkPath);
               },
             );

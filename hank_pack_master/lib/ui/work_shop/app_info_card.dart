@@ -48,6 +48,7 @@ class AppInfoCard extends StatelessWidget {
                 _line('应用描述', "${appInfo.buildDescription}"),
                 _line('更新日志', "${appInfo.buildUpdateDescription}"),
                 _line('更新时间', "${appInfo.buildUpdated}"),
+                _line('下载地址', "${appInfo.buildQRCodeURL}"),
               ],
             ),
             qrCode(),
