@@ -60,12 +60,12 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       title: Text('作业工坊', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
-    // PaneItem( // TODO
-    //   key: const ValueKey('/files'),
-    //   icon: const Icon(FluentIcons.a_t_p_logo),
-    //   title: Text('缓存文件迁移', style: w600TextStyle),
-    //   body: const SizedBox.shrink(),
-    // ),
+    PaneItem(
+      key: const ValueKey('/cash_files'),
+      icon: const Icon(FluentIcons.a_t_p_logo),
+      title: Text('缓存文件管理', style: w600TextStyle),
+      body: const SizedBox.shrink(),
+    ),
     // PaneItem(
     //   key: const ValueKey('/trace'),
     //   icon: const Icon(FluentIcons.app_icon_secure),

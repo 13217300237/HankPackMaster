@@ -387,7 +387,7 @@ class EnvParamVm extends ChangeNotifier {
     _streamSubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
-      debugPrint("网络发生变化 ${result.name}");
+      // debugPrint("网络发生变化 ${result.name}");
       NetUtil.getInstance().checkCodehub(
         onXGateConnect: (b) {
           _xGateState = b;

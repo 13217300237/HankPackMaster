@@ -80,10 +80,11 @@ TODO LIST:
 7. 工程管理模块，合并其他分支的操作，要求自动获取当前分支列表，然后通过选择的方式确定要合并的一个或多个分支，而不是手动填写。（不太重要的东西，往后放）
 8. 项目激活也应该能够查看历史（DONE）
 9. 每执行完一个任务，都要弹窗提醒 (DONE)
-10. 进入app之后，首先检查环境是否齐全，如果不齐全，不能进行任何作业操作。
+10. 进入app之后，首先检查环境是否齐全，如果不齐全，不能进行任何作业操作。(TODO)
 11. 确定可用变体时，先确定最大节数（assembleGoogleUat 为 3节），最后仅保留最大节数的变体。(DONE)
 12. 增加未读数角标的显示 (DONE)
 13. 增加打包记录的盖章效果 (DONE)
 14. 增加Widget快速生成截图，或者快速生成pdf报告的功能
 15. https://mirrors.tools.huawei.com/maven/org/glassfish/json/1.0.4/
+    类似的谷歌上也有：https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.0/
     这是一个远程仓库的文件目录，要求，创建 maven/org/glassfish/json/1.0.4/ 这种层级的文件夹到 .m2（mavenLocal）目录，并下载这链接下的所有文件 （TODO）

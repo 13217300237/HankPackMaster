@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:hank_pack_master/ui/cash_files/cache_files_vm.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
 import 'package:hank_pack_master/ui/comm/vm/env_param_vm.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
@@ -15,6 +16,7 @@ import '../routes/route.dart';
 
 final _appTheme = AppTheme();
 final _envParamModel = EnvParamVm();
+final _cacheFilesVm = CacheFilesVm();
 final _workShopVm = WorkShopVm();
 const String appTitle = '安小助';
 
@@ -33,6 +35,7 @@ class _AppState extends State<App> {
           ChangeNotifierProvider(create: (context) => _appTheme),
           ChangeNotifierProvider(create: (context) => _envParamModel),
           ChangeNotifierProvider(create: (context) => _workShopVm),
+          ChangeNotifierProvider(create: (context) => _cacheFilesVm),
         ],
         builder: (context, child) {
           return FluentApp(

@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../ui/cash_files/cash_files_page.dart';
 import '../ui/env/env_page.dart';
 import '../ui/framework_page.dart';
 import '../ui/home/home_page.dart';
@@ -17,7 +18,8 @@ final statefulRouter = GoRouter(
   initialLocation: '/',
   routes: <RouteBase>[
     StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => FrameworkPage(navigationShell),
+        builder: (context, state, navigationShell) =>
+            FrameworkPage(navigationShell),
         branches: [
           StatefulShellBranch(navigatorKey: _homeKey, routes: <RouteBase>[
             GoRoute(path: '/', builder: (context, state) => const HomePage()),
@@ -34,6 +36,11 @@ final statefulRouter = GoRouter(
             GoRoute(
                 path: '/work_shop',
                 builder: (context, state) => const WorkShopPage()),
+          ]),
+          StatefulShellBranch(routes: <RouteBase>[
+            GoRoute(
+                path: '/cash_files',
+                builder: (context, state) => const CashFilesPage()),
           ])
         ]),
   ],

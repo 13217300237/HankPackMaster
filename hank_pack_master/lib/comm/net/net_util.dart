@@ -31,7 +31,7 @@ class NetUtil {
         onXGateConnect(false);
       }
     } catch (e) {
-      debugPrint("${e.toString()}  已失去和xGate的连接");
+      // debugPrint("${e.toString()}  已失去和xGate的连接");
       onXGateConnect(false);
     }
   }
