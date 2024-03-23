@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import '../../comm/ui/download_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -110,6 +111,7 @@ class CacheFilesVm extends ChangeNotifier {
   }
 
   Future fetchFilesList() async {
+
     downloadTagList.clear();
     notifyListeners();
 
@@ -137,6 +139,18 @@ class CacheFilesVm extends ChangeNotifier {
   void downloadEachFile() async {
     Dio dio = Dio();
 
+    dio.interceptors.add(RetryInterceptor(
+      dio: dio,
+      logPrint: print, // specify log function (optional)
+      retries: 3, // retry count (optional)
+      retryDelays: const [
+        // set delays between retries (optional)
+        Duration(seconds: 15), // wait 1 sec before first retry
+        Duration(seconds: 15), // wait 2 sec before second retry
+        Duration(seconds: 15), // wait 3 sec before third retry
+      ],
+    ));
+
     listFileMap.forEach((fileName, controller) async {
       Directory directory =
           Directory(saveFolder + Platform.pathSeparator + path);
@@ -154,12 +168,12 @@ class CacheFilesVm extends ChangeNotifier {
             downloadTagList[fileName] = true;
           }
         });
-
         notifyListeners();
-
         debugPrint('$fileUrl 下载成功，保存在 $savePath');
       } on DioError catch (e) {
-        debugPrint('下载失败: $fileUrl, 错误信息: ${e.message}');
+        debugPrint('下载失败: $fileUrl, 错误信息: ${e.message}'); // 下载失败咋办呢？
+        downloadTagList[fileName] = true;
+        notifyListeners();
       }
     });
   }

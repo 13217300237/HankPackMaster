@@ -68,6 +68,8 @@ dependencies:
   badges: 3.1.2
   connectivity_plus: 5.0.2
   html: 0.15.4
+  dio_smart_retry: 6.0.0
+  flutter_progress_hud: 2.0.2
 
 dev_dependencies:
   flutter_test:

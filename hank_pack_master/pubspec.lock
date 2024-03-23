@@ -257,6 +257,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "5.4.0"
+  dio_smart_retry:
+    dependency: "direct main"
+    description:
+      name: dio_smart_retry
+      sha256: "3d71450c19b4d91ef4c7d726a55a284bfc11eb3634f1f25006cdfab3f8595653"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "6.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -363,6 +371,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.17"
+  flutter_progress_hud:
+    dependency: "direct main"
+    description:
+      name: flutter_progress_hud
+      sha256: "19a4889460b7482c5026a936b768996dade4daad8570e8c0493e292d57121dbb"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.2"
   flutter_spinkit:
     dependency: transitive
     description:

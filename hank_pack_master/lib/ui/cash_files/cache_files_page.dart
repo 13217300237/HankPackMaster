@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:hank_pack_master/ui/cash_files/cache_files_vm.dart';
 import 'package:hank_pack_master/ui/project_manager/grid_datasource.dart';
 import 'package:provider/provider.dart';
@@ -28,61 +29,72 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
   @override
   Widget build(BuildContext context) {
     _cacheFilesVm = context.watch<CacheFilesVm>();
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const Text('缓存文件管理模块',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 12),
-          Card(
-            backgroundColor: Colors.successPrimaryColor.withOpacity(.2),
+    return ProgressHUD(
+      child: Builder(
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(15.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _textInput(
-                  toolTip: '输入仓库的host',
-                  label: 'Host',
-                  controller: _cacheFilesVm.hostInputController,
-                ),
-                _textInput(
-                  toolTip: '输入仓库的path',
-                  label: 'Path',
-                  controller: _cacheFilesVm.pathInputController,
-                ),
-                _textInput(
-                  toolTip: '选择文件的保存路径',
-                  label: '文件保存路径',
-                  controller: _cacheFilesVm.saveFolderInputController,
-                  needFolderChoose: true,
+                const Text('缓存文件管理模块',
+                    style:
+                        TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                Card(
+                  backgroundColor: Colors.successPrimaryColor.withOpacity(.2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _textInput(
+                        toolTip: '输入仓库的host',
+                        label: 'Host',
+                        controller: _cacheFilesVm.hostInputController,
+                      ),
+                      _textInput(
+                        toolTip: '输入仓库的path',
+                        label: 'Path',
+                        controller: _cacheFilesVm.pathInputController,
+                      ),
+                      _textInput(
+                        toolTip: '选择文件的保存路径',
+                        label: '文件保存路径',
+                        controller: _cacheFilesVm.saveFolderInputController,
+                        needFolderChoose: true,
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        style: ButtonStyle(
+                            backgroundColor: ButtonState.resolveWith((states) =>
+                                _cacheFilesVm.enableDownload
+                                    ? Colors.blue
+                                    : Colors.grey)),
+                        child: Text(
+                            (_cacheFilesVm.downloading)
+                                ? "下载中 ${_cacheFilesVm.uncompletedCount}/${_cacheFilesVm.totalCount}"
+                                : "开始批量下载",
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 22)),
+                        onPressed: () {
+                          if (_cacheFilesVm.enableDownload && !_cacheFilesVm.downloading) {
+                            var progress = ProgressHUD.of(context);
+                            progress!.showWithText("正在获取文件列表");
+                            _cacheFilesVm.fetchFilesList().then((value) {
+                              progress.dismiss();
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
-                FilledButton(
-                  style: ButtonStyle(
-                      backgroundColor: ButtonState.resolveWith((states) =>
-                          _cacheFilesVm.enableDownload
-                              ? Colors.blue
-                              : Colors.grey)),
-                  child: Text(
-                      (_cacheFilesVm.downloading)
-                          ? "下载中 ${_cacheFilesVm.uncompletedCount}/${_cacheFilesVm.totalCount}"
-                          : "开始批量下载",
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 22)),
-                  onPressed: () {
-                    if (_cacheFilesVm.enableDownload) {
-                      _cacheFilesVm.fetchFilesList();
-                    }
-                  },
-                ),
+                _listFileWidget(),
               ],
             ),
-          ),
-          const SizedBox(height: 12),
-          _listFileWidget(),
-        ],
+          );
+        },
       ),
     );
   }
