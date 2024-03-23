@@ -16,9 +16,6 @@ class CacheFilesVm extends ChangeNotifier {
 
   Map<String, DownloadButtonController> listFileMap = {};
 
-  bool? loadingFileList;
-  bool? fileListDownloading;
-
   TextEditingController hostInputController = TextEditingController();
   TextEditingController pathInputController = TextEditingController();
   TextEditingController saveFolderInputController = TextEditingController();
@@ -95,10 +92,25 @@ class CacheFilesVm extends ChangeNotifier {
 
   Map<String, bool> downloadTagList = {};
 
+  bool get downloading {
+    if (downloadTagList.isEmpty) {
+      return false;
+    } else {
+      var x = downloadTagList.values.where((e) => e == false).isNotEmpty;
+      return x;
+    }
+  }
+
+  int get uncompletedCount {
+    return downloadTagList.values.where((e) => true == e).length;
+  }
+
+  int get totalCount {
+    return downloadTagList.length;
+  }
+
   Future fetchFilesList() async {
     downloadTagList.clear();
-    fileListDownloading = true;
-    loadingFileList = true;
     notifyListeners();
 
     Dio dio = Dio();
@@ -112,7 +124,6 @@ class CacheFilesVm extends ChangeNotifier {
         downloadTagList[s] = false;
       }
 
-      loadingFileList = false;
       notifyListeners();
 
       if (listFileMap.isNotEmpty) {
@@ -127,7 +138,6 @@ class CacheFilesVm extends ChangeNotifier {
     Dio dio = Dio();
 
     listFileMap.forEach((fileName, controller) async {
-
       Directory directory =
           Directory(saveFolder + Platform.pathSeparator + path);
       if (!directory.existsSync()) {
@@ -145,16 +155,7 @@ class CacheFilesVm extends ChangeNotifier {
           }
         });
 
-        /// 先检查数量是不是相等
-        bool hasAllTask = downloadTagList.length == listFileMap.length;
-        if (hasAllTask) {
-          bool hasUncompletedTask = downloadTagList.values
-              .toList()
-              .where((element) => false)
-              .isNotEmpty; // 未完成的任务数量大于0
-          fileListDownloading = hasUncompletedTask; // 未完成的任务数量大于0，则认为正在下载
-          notifyListeners();
-        }
+        notifyListeners();
 
         debugPrint('$fileUrl 下载成功，保存在 $savePath');
       } on DioError catch (e) {

@@ -102,7 +102,11 @@ class DownloadButtonState extends State<DownloadButton>
         width: _btnWidth,
         height: 50,
         color: widget.mainColor.withOpacity(.7),
-        child: _textActionButton(),
+        child: Row(
+          children: [
+            _textActionButton(),
+          ],
+        ),
       ),
     );
   }

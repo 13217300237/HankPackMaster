@@ -21,13 +21,13 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) => _cacheFilesVm.init());
+    WidgetsBinding.instance
+        .addPostFrameCallback((timeStamp) => _cacheFilesVm.init());
   }
 
   @override
   Widget build(BuildContext context) {
     _cacheFilesVm = context.watch<CacheFilesVm>();
-
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
@@ -66,8 +66,8 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                               ? Colors.blue
                               : Colors.grey)),
                   child: Text(
-                      (_cacheFilesVm.fileListDownloading ?? false)
-                          ? "下载中"
+                      (_cacheFilesVm.downloading)
+                          ? "下载中 ${_cacheFilesVm.uncompletedCount}/${_cacheFilesVm.totalCount}"
                           : "开始批量下载",
                       style: const TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 22)),
@@ -88,36 +88,24 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
   }
 
   Widget _listFileWidget() {
-    if (_cacheFilesVm.loadingFileList == true) {
-      return const Expanded(
-        child: Center(
-          child: SizedBox(
-            width: 100,
-            height: 100,
-            child: m.CircularProgressIndicator(),
+    return Expanded(
+        child: ListView.builder(
+      itemBuilder: (c, i) {
+        String fileName = _cacheFilesVm.listFileMap.keys.toList()[i];
+        DownloadButtonController controller =
+            _cacheFilesVm.listFileMap.values.toList()[i];
+        return Padding(
+          padding: const EdgeInsets.only(right: 30.0, bottom: 15),
+          child: DownloadButton(
+            fileName: fileName,
+            mainColor: Colors.teal.darkest,
+            btnWidth: 700,
+            downloadButtonController: controller,
           ),
-        ),
-      );
-    } else {
-      return Expanded(
-          child: ListView.builder(
-        itemBuilder: (c, i) {
-          String fileName = _cacheFilesVm.listFileMap.keys.toList()[i];
-          DownloadButtonController controller =
-              _cacheFilesVm.listFileMap.values.toList()[i];
-          return Padding(
-            padding: const EdgeInsets.only(right: 30.0, bottom: 15),
-            child: DownloadButton(
-              fileName: fileName,
-              mainColor: Colors.teal.darkest,
-              btnWidth: 500,
-              downloadButtonController: controller,
-            ),
-          );
-        },
-        itemCount: _cacheFilesVm.listFileMap.length,
-      ));
-    }
+        );
+      },
+      itemCount: _cacheFilesVm.listFileMap.length,
+    ));
   }
 
   final _style = const TextStyle(fontSize: 22, fontWeight: FontWeight.w600);
@@ -147,7 +135,7 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                     )),
                 Expanded(
                   child: TextBox(
-                    enabled: !(_cacheFilesVm.fileListDownloading ?? false)  && !needFolderChoose,
+                    enabled: !_cacheFilesVm.downloading && !needFolderChoose,
                     style: _style,
                     decoration: BoxDecoration(
                         border: Border.all(
