@@ -8,13 +8,45 @@ import '../../comm/ui/download_button.dart';
 class CacheFilesVm extends ChangeNotifier {
   // 给定一个依赖下载地址：https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.0/ (maven的案例)
   // 换一个：           https://repo1.maven.org/maven2/org/apache/spark/spark-hive_2.13/3.5.1/
-  String host = "https://repo1.maven.org/maven2/";
-  String path = "org/apache/spark/spark-hive_2.13/3.5.1/";
-  String saveFolder = "E:/fileCache/";
+  String get host =>
+      hostInputController.text; //"https://repo1.maven.org/maven2/";
+  String get path =>
+      pathInputController.text; //"org/apache/spark/spark-hive_2.13/3.5.1/";
+  String get saveFolder => saveFolderInputController.text; //"E:/fileCache/";
 
   Map<String, DownloadButtonController> listFileMap = {};
 
-  bool loading = true;
+  bool? loadingFileList;
+  bool? downloading;
+
+  TextEditingController hostInputController = TextEditingController();
+  TextEditingController pathInputController = TextEditingController();
+  TextEditingController saveFolderInputController = TextEditingController();
+
+  init() {
+    hostInputController.addListener(() {
+      notifyListeners();
+    });
+    pathInputController.addListener(() {
+      notifyListeners();
+    });
+    saveFolderInputController.addListener(() {
+      notifyListeners();
+    });
+  }
+
+  bool get enableDownload {
+    if (host.isEmpty) {
+      return false;
+    }
+    if (path.isEmpty) {
+      return false;
+    }
+    if (saveFolder.isEmpty) {
+      return false;
+    }
+    return true;
+  }
 
   List<String> _parseHtmlString(String htmlString) {
     List<String> list = [];
@@ -53,6 +85,9 @@ class CacheFilesVm extends ChangeNotifier {
   }
 
   Future fetchFilesList() async {
+    loadingFileList = true;
+    notifyListeners();
+
     Dio dio = Dio();
     Response response = await dio.get(host + path);
 
@@ -63,7 +98,7 @@ class CacheFilesVm extends ChangeNotifier {
         listFileMap[s] = DownloadButtonController(); // 给每一条下载任务都创建一个下载按钮控制器
       }
 
-      loading = false;
+      loadingFileList = false;
       notifyListeners();
 
       if (listFileMap.isNotEmpty) {
@@ -76,8 +111,10 @@ class CacheFilesVm extends ChangeNotifier {
 
   void downloadFile() async {
     Dio dio = Dio();
+    downloading = true;
     listFileMap.forEach((fileName, controller) async {
-      Directory directory = Directory(saveFolder + path);
+      Directory directory =
+          Directory(saveFolder + Platform.pathSeparator + path);
       if (!directory.existsSync()) {
         directory.create(recursive: true);
       }

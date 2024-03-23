@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../ui/cash_files/cash_files_page.dart';
+import '../ui/cash_files/cache_files_page.dart';
 import '../ui/env/env_page.dart';
 import '../ui/framework_page.dart';
 import '../ui/home/home_page.dart';
@@ -40,7 +40,7 @@ final statefulRouter = GoRouter(
           StatefulShellBranch(routes: <RouteBase>[
             GoRoute(
                 path: '/cash_files',
-                builder: (context, state) => const CashFilesPage()),
+                builder: (context, state) => const CacheFilesPage()),
           ])
         ]),
   ],
