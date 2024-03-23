@@ -110,13 +110,16 @@ class CacheFilesVm extends ChangeNotifier {
     return downloadTagList.length;
   }
 
-  Future fetchFilesList() async {
+  Future fetchFilesList(Function(bool loading) progressUtil) async {
 
+    progressUtil(true);
     downloadTagList.clear();
     notifyListeners();
 
     Dio dio = Dio();
     Response response = await dio.get(host + path);
+
+    progressUtil(false);
 
     if (response.statusCode == 200) {
       List<String> listFile = _parseHtmlString(response.data);
@@ -129,14 +132,15 @@ class CacheFilesVm extends ChangeNotifier {
       notifyListeners();
 
       if (listFileMap.isNotEmpty) {
-        downloadEachFile();
+        await downloadEachFile();
       }
+
     } else {
       debugPrint("Failed to fetch files list");
     }
   }
 
-  void downloadEachFile() async {
+  Future downloadEachFile() async {
     Dio dio = Dio();
 
     dio.interceptors.add(RetryInterceptor(
@@ -151,7 +155,7 @@ class CacheFilesVm extends ChangeNotifier {
       ],
     ));
 
-    listFileMap.forEach((fileName, controller) async {
+   listFileMap.forEach((fileName, controller) async {
       Directory directory =
           Directory(saveFolder + Platform.pathSeparator + path);
       if (!directory.existsSync()) {

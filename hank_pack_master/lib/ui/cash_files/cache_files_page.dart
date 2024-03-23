@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/ui/cash_files/cache_files_vm.dart';
 import 'package:hank_pack_master/ui/project_manager/grid_datasource.dart';
 import 'package:provider/provider.dart';
@@ -76,13 +77,17 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                                 : "开始批量下载",
                             style: const TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 22)),
-                        onPressed: () {
+                        onPressed: () async {
                           if (_cacheFilesVm.enableDownload && !_cacheFilesVm.downloading) {
                             var progress = ProgressHUD.of(context);
-                            progress!.showWithText("正在获取文件列表");
-                            _cacheFilesVm.fetchFilesList().then((value) {
-                              progress.dismiss();
-                            });
+
+                            await _cacheFilesVm.fetchFilesList((loading){
+                              if(loading){
+                                progress!.showWithText("正在获取文件列表");
+                              } else {
+                                progress!.dismiss();
+                              }
+                            }).then((value) => ToastUtil.showPrettyToast("下载完成！"));
                           }
                         },
                       ),
