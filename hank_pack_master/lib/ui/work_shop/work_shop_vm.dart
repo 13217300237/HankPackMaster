@@ -21,13 +21,13 @@ import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/str_const.dart';
 import '../../comm/text_util.dart';
 import '../../comm/upload_platforms.dart';
-import '../../hive/project_record/stage_record_entity.dart';
-import '../../hive/project_record/upload_platforms.dart';
 import '../../comm/wait_util.dart';
 import '../../core/command_util.dart';
 import '../../hive/env_config/env_config_operator.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
+import '../../hive/project_record/stage_record_entity.dart';
+import '../../hive/project_record/upload_platforms.dart';
 
 class WorkShopVm extends ChangeNotifier {
   /// 所有的输入框控制器

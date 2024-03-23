@@ -1,7 +1,6 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/comm/ui/xGate_widget.dart';
 
 class DialogUtil {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as m;
 import 'package:provider/provider.dart';
 
 import '../../../comm/dialog_util.dart';
@@ -9,7 +10,6 @@ import '../../../comm/pgy/pgy_entity.dart';
 import '../../../comm/text_util.dart';
 import '../app_info_card.dart';
 import '../task_stage.dart';
-import 'package:flutter/material.dart' as m;
 
 /// 每个阶段任务的卡片
 class StageTaskCard extends StatefulWidget {

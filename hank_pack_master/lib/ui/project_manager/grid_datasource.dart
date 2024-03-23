@@ -1,11 +1,8 @@
 import 'package:badges/badges.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
-import 'package:hank_pack_master/ui/project_manager/job_history_card.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-import '../../comm/pgy/pgy_entity.dart';
 import '../../comm/ui/history_card.dart';
 import '../../comm/url_check_util.dart';
 import '../../hive/project_record/job_history_entity.dart';

@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 
-import 'upload_platforms.dart';
 import '../env_group/env_check_result_entity.dart';
+import 'upload_platforms.dart';
 
 part 'package_setting_entity.g.dart';
 

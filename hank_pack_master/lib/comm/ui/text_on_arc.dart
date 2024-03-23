@@ -1,8 +1,8 @@
+import 'dart:math' as math;
 import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class TextOnArcWidget extends StatelessWidget {
   final ArcStyle arcStyle;

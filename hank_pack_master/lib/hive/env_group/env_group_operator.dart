@@ -1,6 +1,5 @@
 import 'package:hive/hive.dart';
 
-import 'env_check_result_entity.dart';
 import 'env_group_entity.dart';
 
 class EnvGroupOperator {

@@ -1,6 +1,7 @@
 import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hank_pack_master/hive/project_record/stage_record_entity.dart';
 import 'package:hive/hive.dart';
+
 part 'job_history_entity.g.dart';
 
 /// 打包作业配置

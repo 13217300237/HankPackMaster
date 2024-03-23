@@ -1,10 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
-import 'package:hank_pack_master/comm/ui/xGate_widget.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
-import 'package:hank_pack_master/ui/comm/vm/env_param_vm.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
 import '../../../comm/text_util.dart';
