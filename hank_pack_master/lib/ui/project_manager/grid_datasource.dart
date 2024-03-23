@@ -65,6 +65,7 @@ class ProjectEntityDataSource extends DataGridSource {
   Function(ProjectRecordEntity)? funConfirmToActive;
   Function(ProjectRecordEntity)? funcGoPackageAction;
   Function()? funJumpToWorkShop;
+  Function()? refreshMainPage;
 
   ProjectRecordStatue Function(ProjectRecordEntity)
       funJudgeProjectStatue; // 设定一个函数，判断 工程实体的状态
@@ -141,6 +142,7 @@ class ProjectEntityDataSource extends DataGridSource {
     required this.buildContext,
     required this.openFastUploadDialogFunc,
     required this.funJudgeProjectStatue,
+    required this.refreshMainPage,
   }) {
     _buildRows();
   }
@@ -219,12 +221,17 @@ class ProjectEntityDataSource extends DataGridSource {
                 var his = entity.jobHistoryList ?? [];
                 his = his.reversed.toList();
                 DialogUtil.showCustomDialog(
-                    context: buildContext,
-                    title: "${entity.projectName} 作业历史",
-                    maxWidth: 1200,
-                    content: getProjectJobResult(700, his, entity),
-                    showCancel: false,
-                    confirmText: '我知道了！');
+                        context: buildContext,
+                        title: "${entity.projectName} 作业历史",
+                        maxWidth: 1200,
+                        content: getProjectJobResult(700, his, entity),
+                        showCancel: false,
+                        confirmText: '我知道了！')
+                    .then((value) {
+                  refreshMainPage?.call();
+                  notifyListeners();
+                  // 最近作业历史那个呢
+                });
               }),
         ));
   }

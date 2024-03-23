@@ -149,10 +149,11 @@ class HistoryCard extends StatelessWidget {
 
   /// 要根据任务的成功和失败来确定印章的内容
   Widget _tag() {
+    String taskName =
+        historyEntity.taskName == null ? "执行" : historyEntity.taskName!;
+
     String text() {
-      return historyEntity.success == true
-          ? "${historyEntity.taskName ?? ''}执行成功"
-          : "${historyEntity.taskName ?? ''}执行失败";
+      return historyEntity.success == true ? "$taskName成功" : "$taskName失败";
     }
 
     Color color() {

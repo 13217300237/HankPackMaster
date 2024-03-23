@@ -789,7 +789,7 @@ exitCode : $exitCode
 $sb"""
         .trim();
 
-    return ExecuteResult(res, exitCode!);
+    return ExecuteResult(res, exitCode ?? 0);
   }
 
   Future<ExecuteResult> gradleAssembleTasks(

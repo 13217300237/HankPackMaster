@@ -109,6 +109,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       size = 1;
     }
 
+    String recentTitle = "最近作业历史";
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
       decoration: BoxDecoration(gradient: mainPanelGradient),
@@ -132,11 +134,10 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                   onTap: () {
                     DialogUtil.showCustomDialog(
                             context: context,
-                            title: "最近作业历史",
+                            title: recentTitle,
                             maxWidth: 1200,
                             content: getRecentJobResult(700),
-                            showCancel: false,
-                            confirmText: '我知道了！')
+                            showCancel: false)
                         .then((value) {
                       setState(() {});
                       _dataSource.notifyListeners();
@@ -144,8 +145,8 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                   },
                   child: Row(
                     children: [
-                      const Text('最近作业历史',
-                          style: TextStyle(
+                      Text(recentTitle,
+                          style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 20,
                               color: Colors.white)),
@@ -253,6 +254,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         }
       },
       onRead: () => setState(() {}),
+      refreshMainPage: () => setState(() {}),
     );
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {

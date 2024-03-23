@@ -16,7 +16,7 @@ class DialogUtil {
     required dynamic content,
     bool showCancel = true,
     bool showActions = true,
-    String confirmText = "是",
+    String confirmText = "我知道了!",
     String cancelText = "取消",
     double maxWidth = 500,
     double maxHeight = 700,
