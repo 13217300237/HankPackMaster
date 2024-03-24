@@ -320,6 +320,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
         context: context,
         onConfirm: () => windowManager.destroy(),
         title: "提示",
+        confirmText: '确定',
         content: "关闭应用吗？",
       );
     }

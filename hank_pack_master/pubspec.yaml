@@ -93,3 +93,17 @@ flutter:
       fonts:
        - asset: fonts/STKAITI.TTF
        - asset: fonts/STXIHEI.TTF
+
+flutter_native_splash:
+  color: "#000000"
+  image: assets/logo.png
+
+flutter_icons:
+  image_path: "assets/logo.png"
+  windows:
+    generate: true
+    image_path: "assets/logo.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/logo.png"
