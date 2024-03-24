@@ -65,6 +65,7 @@ class _NetworkStateWidgetState extends State<NetworkStateWidget> {
     return Row(
       children: [
         _netNameWidget(),
+        const SizedBox(width: 10),
         xGateWidget(),
       ],
     );

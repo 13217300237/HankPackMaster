@@ -16,6 +16,7 @@ class CacheFilesVm extends ChangeNotifier {
   String get saveFolder => saveFolderInputController.text; // "E:/fileCache/";
 
   Map<String, DownloadButtonController> listFileMap = {};
+  Map<String, bool> downloadTagList = {};
 
   TextEditingController hostInputController = TextEditingController();
   TextEditingController pathInputController = TextEditingController();
@@ -91,8 +92,6 @@ class CacheFilesVm extends ChangeNotifier {
     return list;
   }
 
-  Map<String, bool> downloadTagList = {};
-
   bool get downloading {
     if (downloadTagList.isEmpty) {
       return false;
@@ -113,6 +112,7 @@ class CacheFilesVm extends ChangeNotifier {
   Future fetchFilesList(Function(bool loading) progressUtil) async {
 
     progressUtil(true);
+    listFileMap.clear();
     downloadTagList.clear();
     notifyListeners();
 

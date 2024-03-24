@@ -67,10 +67,11 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                       const SizedBox(height: 12),
                       FilledButton(
                         style: ButtonStyle(
-                            backgroundColor: ButtonState.resolveWith((states) =>
-                                _cacheFilesVm.enableDownload
-                                    ? Colors.blue
-                                    : Colors.grey)),
+                          backgroundColor: ButtonState.resolveWith((states) =>
+                              _cacheFilesVm.enableDownload
+                                  ? Colors.blue
+                                  : Colors.grey),
+                        ),
                         child: Text(
                             (_cacheFilesVm.downloading)
                                 ? "下载中 ${_cacheFilesVm.uncompletedCount}/${_cacheFilesVm.totalCount}"
@@ -78,16 +79,17 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                             style: const TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 22)),
                         onPressed: () async {
-                          if (_cacheFilesVm.enableDownload && !_cacheFilesVm.downloading) {
+                          if (_cacheFilesVm.enableDownload &&
+                              !_cacheFilesVm.downloading) {
                             var progress = ProgressHUD.of(context);
 
-                            await _cacheFilesVm.fetchFilesList((loading){
-                              if(loading){
+                            await _cacheFilesVm.fetchFilesList((loading) {
+                              if (loading) {
                                 progress!.showWithText("正在获取文件列表");
                               } else {
                                 progress!.dismiss();
                               }
-                            }).then((value) => ToastUtil.showPrettyToast("下载完成！"));
+                            });
                           }
                         },
                       ),
