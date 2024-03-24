@@ -22,3 +22,8 @@ dart run build_runner build
 更换应用图标：
 需要先在iconfont上找到一个好看的图标，然后下载png下来，最后在这个网站上去进行格式转化：https://www.zamzar.com/
 
+windows打包的工具叫做：Inno Setup
+
+下载地址为：https://jrsoftware.org/isdl.php#stable
+
+它可以将应用包打成一整个exe,在windows上打开该文件时会按照win应用的安装方式来进行解压，并且在桌面上生成快捷图标
