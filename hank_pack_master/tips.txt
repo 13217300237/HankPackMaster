@@ -18,3 +18,7 @@ kbzpay-apppackage
 
 更新HIVE生成文件的命令：
 dart run build_runner build
+
+更换应用图标：
+需要先在iconfont上找到一个好看的图标，然后下载png下来，最后在这个网站上去进行格式转化：https://www.zamzar.com/
+
