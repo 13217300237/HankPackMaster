@@ -70,6 +70,7 @@ dependencies:
   html: 0.15.4
   dio_smart_retry: 6.0.0
   flutter_progress_hud: 2.0.2
+  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:
@@ -94,16 +95,5 @@ flutter:
        - asset: fonts/STKAITI.TTF
        - asset: fonts/STXIHEI.TTF
 
-flutter_native_splash:
-  color: "#000000"
-  image: assets/logo.png
-
-flutter_icons:
-  image_path: "assets/logo.png"
-  windows:
-    generate: true
-    image_path: "assets/logo.png"
-    icon_size: 48 # min:48, max:256, default: 48
-  macos:
-    generate: true
-    image_path: "assets/logo.png"
+  assets:
+    - images/
