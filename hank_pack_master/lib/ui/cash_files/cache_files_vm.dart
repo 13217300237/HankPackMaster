@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
-import '../../comm/ui/download_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../comm/ui/download_button.dart';
 
 class CacheFilesVm extends ChangeNotifier {
   // 给定一个依赖下载地址：https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.0/ (maven的案例)
@@ -24,25 +24,38 @@ class CacheFilesVm extends ChangeNotifier {
   TextEditingController pathInputController = TextEditingController();
   TextEditingController saveFolderInputController = TextEditingController();
 
+  String spTagHostInput = "hostInput";
+  String spTagPathInput = "pathInput";
+  String spTagSaveFolder = "saveFolder";
+
   init() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     hostInputController.addListener(() {
-      prefs.setString("hostInput", hostInputController.text);
+      prefs.setString(spTagHostInput, hostInputController.text);
       notifyListeners();
     });
-    hostInputController.text = prefs.getString("hostInput") ?? '';
+    hostInputController.text = prefs.getString(spTagHostInput) ?? '';
 
     pathInputController.addListener(() {
-      prefs.setString("pathInput", pathInputController.text);
+      prefs.setString(spTagPathInput, pathInputController.text);
       notifyListeners();
     });
-    pathInputController.text = prefs.getString("pathInput") ?? '';
+    pathInputController.text = prefs.getString(spTagPathInput) ?? '';
 
     saveFolderInputController.addListener(() {
-      prefs.setString("saveFolder", saveFolderInputController.text);
+      prefs.setString(spTagSaveFolder, saveFolderInputController.text);
       notifyListeners();
     });
-    saveFolderInputController.text = prefs.getString("saveFolder") ?? '';
+
+    saveFolderInputController.text =
+        prefs.getString(spTagSaveFolder) ?? defaultMavenLocalPath;
+  }
+
+  String get defaultMavenLocalPath {
+    String? username = Platform.environment['USERNAME'];
+    String defaultSaveFolder = "C:\\Users\\$username\\.m2\\repository";
+
+    return defaultSaveFolder;
   }
 
   bool get enableDownload {
