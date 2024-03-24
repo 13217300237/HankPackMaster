@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import '../../comm/ui/download_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -109,34 +111,41 @@ class CacheFilesVm extends ChangeNotifier {
     return downloadTagList.length;
   }
 
-  Future fetchFilesList(Function(bool loading) progressUtil) async {
-
+  Future fetchFilesList({
+    required Function(bool loading) progressUtil,
+    required Function(String) showErrorDialogFunc,
+  }) async {
     progressUtil(true);
     listFileMap.clear();
     downloadTagList.clear();
     notifyListeners();
 
     Dio dio = Dio();
-    Response response = await dio.get(host + path);
 
-    progressUtil(false);
+    try {
+      Response response = await dio.get(host + path);
+      progressUtil(false);
 
-    if (response.statusCode == 200) {
-      List<String> listFile = _parseHtmlString(response.data);
+      if (response.statusCode == 200) {
+        List<String> listFile = _parseHtmlString(response.data);
 
-      for (var s in listFile) {
-        listFileMap[s] = DownloadButtonController(); // 给每一条下载任务都创建一个下载按钮控制器
-        downloadTagList[s] = false;
+        for (var s in listFile) {
+          listFileMap[s] = DownloadButtonController(); // 给每一条下载任务都创建一个下载按钮控制器
+          downloadTagList[s] = false;
+        }
+
+        notifyListeners();
+
+        if (listFileMap.isNotEmpty) {
+          await downloadEachFile();
+        }
+      } else {
+        ToastUtil.showPrettyToast("没有找到任何可下载的文件 ${response.statusCode}");
+        progressUtil.call(false);
       }
-
-      notifyListeners();
-
-      if (listFileMap.isNotEmpty) {
-        await downloadEachFile();
-      }
-
-    } else {
-      debugPrint("Failed to fetch files list");
+    } catch (e) {
+      showErrorDialogFunc("$e");
+      progressUtil.call(false);
     }
   }
 
@@ -155,15 +164,10 @@ class CacheFilesVm extends ChangeNotifier {
       ],
     ));
 
-   listFileMap.forEach((fileName, controller) async {
-      Directory directory =
-          Directory(saveFolder + Platform.pathSeparator + path);
-      if (!directory.existsSync()) {
-        directory.create(recursive: true);
-      }
-
+    listFileMap.forEach((fileName, controller) async {
       String fileUrl = host + path + fileName;
-      String savePath = saveFolder + path + fileName; // 文件保存的本地路径
+      String savePath =
+          saveFolder + Platform.pathSeparator + path + fileName; // 文件保存的本地路径
       controller.startDownload();
       try {
         await dio.download(fileUrl, savePath, onReceiveProgress: (c, t) {
@@ -174,7 +178,7 @@ class CacheFilesVm extends ChangeNotifier {
         });
         notifyListeners();
         debugPrint('$fileUrl 下载成功，保存在 $savePath');
-      } on DioError catch (e) {
+      } on DioException catch (e) {
         debugPrint('下载失败: $fileUrl, 错误信息: ${e.message}'); // 下载失败咋办呢？
         downloadTagList[fileName] = true;
         notifyListeners();

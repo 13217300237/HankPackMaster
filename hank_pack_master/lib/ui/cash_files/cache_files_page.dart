@@ -2,10 +2,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/ui/cash_files/cache_files_vm.dart';
 import 'package:hank_pack_master/ui/project_manager/grid_datasource.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../comm/ui/download_button.dart';
 import '../../comm/ui/my_tool_tip_icon.dart';
@@ -52,18 +54,29 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                         toolTip: '输入仓库的host',
                         label: 'Host',
                         controller: _cacheFilesVm.hostInputController,
+                        iconColor: Colors.teal,
                       ),
                       _textInput(
                         toolTip: '输入仓库的path',
                         label: 'Path',
                         controller: _cacheFilesVm.pathInputController,
+                        iconColor: Colors.teal,
                       ),
                       _textInput(
-                        toolTip: '选择文件的保存路径',
-                        label: '文件保存路径',
-                        controller: _cacheFilesVm.saveFolderInputController,
-                        needFolderChoose: true,
-                      ),
+                          toolTip: '点击打开目录',
+                          label: '文件保存路径',
+                          iconColor: Colors.blue,
+                          controller: _cacheFilesVm.saveFolderInputController,
+                          needFolderChoose: true,
+                          onTitleTab: () async {
+                            String dir =
+                                _cacheFilesVm.saveFolderInputController.text;
+                            try {
+                              await launchUrl(Uri.parse(dir)); // 通过资源管理器打开该目录
+                            } catch (e) {
+                              _showErr();
+                            }
+                          }),
                       const SizedBox(height: 12),
                       FilledButton(
                         style: ButtonStyle(
@@ -73,7 +86,7 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                                   : Colors.grey),
                         ),
                         child: Text(
-                            (_cacheFilesVm.downloading)
+                            _cacheFilesVm.downloading
                                 ? "下载中 ${_cacheFilesVm.uncompletedCount}/${_cacheFilesVm.totalCount}"
                                 : "开始批量下载",
                             style: const TextStyle(
@@ -83,12 +96,16 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                               !_cacheFilesVm.downloading) {
                             var progress = ProgressHUD.of(context);
 
-                            await _cacheFilesVm.fetchFilesList((loading) {
+                            await _cacheFilesVm.fetchFilesList(
+                                progressUtil: (loading) {
                               if (loading) {
                                 progress!.showWithText("正在获取文件列表");
                               } else {
                                 progress!.dismiss();
                               }
+                            }, showErrorDialogFunc: (String err) {
+                              DialogUtil.showCustomDialog(
+                                  context: context, title: "提示", content: err);
                             });
                           }
                         },
@@ -106,7 +123,17 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
     );
   }
 
+  _showErr() {
+    DialogUtil.showInfo(
+        context: context,
+        content: "打开资源浏览器失败，目录可能不存在...",
+        severity: InfoBarSeverity.error);
+  }
+
   Widget _listFileWidget() {
+    if (!_cacheFilesVm.downloading) {
+      return const SizedBox();
+    }
     return Expanded(
         child: ListView.builder(
       itemBuilder: (c, i) {
@@ -134,8 +161,23 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
     required String label,
     required TextEditingController controller,
     bool needFolderChoose = false,
+    Function? onTitleTab,
+    required Color iconColor,
   }) {
     var dataCorrect = true;
+
+    var titleStyle = _style;
+
+    if (onTitleTab != null) {
+      titleStyle = _style.copyWith(
+          decoration: TextDecoration.underline, color: Colors.blue);
+    }
+
+    var titleWidget = GestureDetector(
+      child: Text(label, style: titleStyle),
+      onTap: () => onTitleTab?.call(),
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(children: [
@@ -148,8 +190,8 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                     width: 220,
                     child: Row(
                       children: [
-                        Text(label, style: _style),
-                        toolTipIcon(msg: toolTip, iconColor: Colors.teal),
+                        titleWidget,
+                        toolTipIcon(msg: toolTip, iconColor: iconColor),
                       ],
                     )),
                 Expanded(
@@ -164,8 +206,12 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                     highlightColor: Colors.transparent,
                     controller: controller,
                     textAlign: TextAlign.end,
-                    suffix: needFolderChoose
-                        ? IconButton(
+                  ),
+                ),
+                needFolderChoose
+                    ? Tooltip(
+                        message: '选择存放目录',
+                        child: IconButton(
                             icon: const Icon(FluentIcons.folder_open, size: 18),
                             onPressed: () async {
                               String? selectedDirectory =
@@ -173,10 +219,9 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                               if (selectedDirectory != null) {
                                 controller.text = selectedDirectory;
                               }
-                            })
-                        : const SizedBox(),
-                  ),
-                )
+                            }),
+                      )
+                    : const SizedBox(),
               ]),
         ),
       ]),
