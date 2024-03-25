@@ -492,7 +492,7 @@ class WorkShopVm extends ChangeNotifier {
         );
 
         if (pgyToken == null) {
-          var fastUploadEntity = FastUploadEntity(
+          var fastUploadEntity = UploadResultEntity(
             apkPath: apkToUpload!,
             errMsg: 'pgy token获取失败... ',
           );
@@ -530,7 +530,7 @@ class WorkShopVm extends ChangeNotifier {
             uploadProgressAction: addNewLogLine);
 
         if (res != null) {
-          var fastUploadEntity = FastUploadEntity(
+          var fastUploadEntity = UploadResultEntity(
             apkPath: apkToUpload!,
             errMsg: res,
           );
@@ -551,7 +551,7 @@ class WorkShopVm extends ChangeNotifier {
 
         // 发布失败，流程终止
         if (s == null || s.code == 1216) {
-          var fastUploadEntity = FastUploadEntity(
+          var fastUploadEntity = UploadResultEntity(
             apkPath: apkToUpload!,
             errMsg: 'pgy发布失败，流程终止!',
           );
@@ -586,7 +586,7 @@ class WorkShopVm extends ChangeNotifier {
                 data: appInfo,
                 executeLog: appInfo.toJsonString());
           } else {
-            var fastUploadEntity = FastUploadEntity(
+            var fastUploadEntity = UploadResultEntity(
               apkPath: apkToUpload!,
               errMsg: 'pgy发布失败，流程终止!',
             );
@@ -606,7 +606,7 @@ class WorkShopVm extends ChangeNotifier {
         if (executeRes.exitCode != 0) {
           String gitLogFailed = '获取git最近提交记录失败...';
           var fastUploadEntity =
-              FastUploadEntity(apkPath: apkToUpload!, errMsg: gitLogFailed);
+              UploadResultEntity(apkPath: apkToUpload!, errMsg: gitLogFailed);
           return OrderExecuteResult(
               succeed: false,
               msg: fastUploadEntity.toJsonString(),
@@ -629,7 +629,7 @@ class WorkShopVm extends ChangeNotifier {
         if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
           // 在这里构建一个json，FastUploadEntity
 
-          var fastUploadEntity = FastUploadEntity(
+          var fastUploadEntity = UploadResultEntity(
             apkPath: apkToUpload!,
             errMsg: '${oBSResponse?.errMsg}',
           );
@@ -1207,7 +1207,7 @@ class WorkShopVm extends ChangeNotifier {
     });
   }
 
-  JobResultEntity? myAppInfo;
+  JobResultEntity? jobResult;
 
   Future<void> startPackage() async {
     var taskName = "打包";
@@ -1222,28 +1222,31 @@ class WorkShopVm extends ChangeNotifier {
     initPackageTaskList();
     var scheduleRes = await startSchedule();
     if (scheduleRes.succeed == true && scheduleRes.data is JobResultEntity) {
-      myAppInfo = scheduleRes.data;
+      jobResult = scheduleRes.data;
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
       _insertIntoJobHistoryList(
           success: true,
-          historyContent: myAppInfo?.toJsonString() ?? "",
+          historyContent: jobResult?.toJsonString() ?? "",
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
+      onProjectPackageSucceed(jobResult!);
     } else {
-      myAppInfo = JobResultEntity(errMessage: scheduleRes.msg);
+      var uploadEntity =
+          UploadResultEntity(apkPath: apkToUpload!, errMsg: scheduleRes.msg ?? '');
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
       _insertIntoJobHistoryList(
           success: false,
-          historyContent: myAppInfo?.toJsonString() ?? "",
+          historyContent: uploadEntity.toJsonString(),
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
+      onProjectPackageFailed(uploadEntity);
     }
 
-    onProjectPackageFinished(myAppInfo!);
+
   }
 
   Future<void> startFastUpload(String apkPath) async {
@@ -1255,11 +1258,11 @@ class WorkShopVm extends ChangeNotifier {
     initFastUploadTaskList(apkPath);
     var scheduleRes = await startSchedule();
     if (scheduleRes.succeed == true && scheduleRes.data is JobResultEntity) {
-      myAppInfo = scheduleRes.data;
+      jobResult = scheduleRes.data;
 
       _insertIntoJobHistoryList(
           success: true,
-          historyContent: myAppInfo?.toJsonString() ?? '',
+          historyContent: jobResult?.toJsonString() ?? '',
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
@@ -1268,7 +1271,7 @@ class WorkShopVm extends ChangeNotifier {
     } else {
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
-      myAppInfo = JobResultEntity(errMessage: scheduleRes.msg);
+      jobResult = JobResultEntity(errMessage: scheduleRes.msg);
       _insertIntoJobHistoryList(
           success: false,
           historyContent: "${scheduleRes.msg}",
@@ -1277,7 +1280,7 @@ class WorkShopVm extends ChangeNotifier {
           taskName: taskName);
     }
 
-    onProjectPackageFinished(myAppInfo!);
+    onProjectPackageSucceed(jobResult!);
   }
 
   /// 项目激活成功之后
@@ -1297,13 +1300,22 @@ class WorkShopVm extends ChangeNotifier {
     _reset();
   }
 
-  /// 流程结束时，无论成功或者失败
-  void onProjectPackageFinished(JobResultEntity myAppInfo) {
+  void onProjectPackageSucceed(JobResultEntity jobResult) {
     var his = runningTask!.jobHistory;
     if (his == null) {
       runningTask!.jobHistory = [];
     }
-    runningTask!.jobHistory!.add(myAppInfo.toJsonString());
+    runningTask!.jobHistory!.add(jobResult.toJsonString());
+    setProjectRecordJobRunning(false);
+    _reset();
+  }
+
+  void onProjectPackageFailed(UploadResultEntity uploadResultEntity) {
+    var his = runningTask!.jobHistory;
+    if (his == null) {
+      runningTask!.jobHistory = [];
+    }
+    runningTask!.jobHistory!.add(uploadResultEntity.toJsonString());
     setProjectRecordJobRunning(false);
     _reset();
   }

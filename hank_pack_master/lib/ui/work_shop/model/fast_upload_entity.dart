@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-class FastUploadEntity {
+class UploadResultEntity {
   String apkPath;
   String errMsg;
 
-  FastUploadEntity({
+  UploadResultEntity({
     required this.apkPath,
     required this.errMsg,
   });
@@ -20,14 +20,14 @@ class FastUploadEntity {
     return jsonEncode(toJson());
   }
 
-  factory FastUploadEntity.fromJson(Map<String, dynamic> data) {
-    return FastUploadEntity(
+  factory UploadResultEntity.fromJson(Map<String, dynamic> data) {
+    return UploadResultEntity(
       apkPath: data['apkPath'],
       errMsg: data['errMsg'],
     );
   }
 
-  factory FastUploadEntity.fromJsonString(String jsonString) {
-    return FastUploadEntity.fromJson(jsonDecode(jsonString));
+  factory UploadResultEntity.fromJsonString(String jsonString) {
+    return UploadResultEntity.fromJson(jsonDecode(jsonString));
   }
 }

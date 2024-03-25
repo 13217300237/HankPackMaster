@@ -266,8 +266,8 @@ class ProjectRecordOperator {
   static bool needFastUpload(JobHistoryEntity historyEntity) {
     // 尝试把 错误码
     try {
-      FastUploadEntity fastUploadEntity =
-          FastUploadEntity.fromJsonString(historyEntity.historyContent!);
+      UploadResultEntity fastUploadEntity =
+          UploadResultEntity.fromJsonString(historyEntity.historyContent!);
 
       var f = File(fastUploadEntity.apkPath);
       if (f.existsSync()) {
