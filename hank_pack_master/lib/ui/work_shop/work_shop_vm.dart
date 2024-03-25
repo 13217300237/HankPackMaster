@@ -1233,8 +1233,8 @@ class WorkShopVm extends ChangeNotifier {
           taskName: taskName);
       onProjectPackageSucceed(jobResult!);
     } else {
-      var uploadEntity =
-          UploadResultEntity(apkPath: apkToUpload!, errMsg: scheduleRes.msg ?? '');
+      var uploadEntity = UploadResultEntity(
+          apkPath: apkToUpload!, errMsg: scheduleRes.msg ?? '');
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
       _insertIntoJobHistoryList(
@@ -1245,8 +1245,6 @@ class WorkShopVm extends ChangeNotifier {
           taskName: taskName);
       onProjectPackageFailed(uploadEntity);
     }
-
-
   }
 
   Future<void> startFastUpload(String apkPath) async {
@@ -1268,19 +1266,20 @@ class WorkShopVm extends ChangeNotifier {
           taskName: taskName);
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
+      onProjectPackageSucceed(jobResult!);
     } else {
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
-      jobResult = JobResultEntity(errMessage: scheduleRes.msg);
+      var jobResult = UploadResultEntity(
+          apkPath: apkToUpload!, errMsg: scheduleRes.msg ?? '');
       _insertIntoJobHistoryList(
           success: false,
           historyContent: "${scheduleRes.msg}",
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
+      onProjectPackageFailed(jobResult);
     }
-
-    onProjectPackageSucceed(jobResult!);
   }
 
   /// 项目激活成功之后

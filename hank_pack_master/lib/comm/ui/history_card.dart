@@ -18,14 +18,12 @@ class HistoryCard extends StatelessWidget {
   final JobHistoryEntity historyEntity;
   final double maxHeight;
   final bool showTitle;
-  final Function(ProjectRecordEntity, String)? openFastUploadDialogFunc;
 
   const HistoryCard({
     super.key,
     required this.historyEntity,
     required this.maxHeight,
     this.showTitle = true,
-    this.openFastUploadDialogFunc,
     required this.projectRecordEntity,
   });
 
@@ -89,10 +87,6 @@ class HistoryCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         _stageListCard(historyEntity),
-                        const SizedBox(height: 20),
-                        Align(
-                            alignment: Alignment.bottomRight,
-                            child: _fastUploadWidget()),
                       ],
                     ),
                   ]))
@@ -121,29 +115,6 @@ class HistoryCard extends StatelessWidget {
     } else {
       return null;
     }
-  }
-
-  _fastUploadWidget() {
-    Widget fastUploadBtn;
-    // 如果显示的内容里包含了 []，那就提取出[]中的内容，并且启用强制上传策略
-    if (_needFastUpload()) {
-      // 那就提炼出中括号中的内容
-      var apkPath = getApkPath();
-
-      return apkPath == null
-          ? const SizedBox()
-          : FilledButton(
-              child: const Text("快速上传",
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-              onPressed: () {
-                openFastUploadDialogFunc?.call(projectRecordEntity, apkPath);
-              },
-            );
-    } else {
-      fastUploadBtn = const SizedBox();
-    }
-
-    return fastUploadBtn;
   }
 
   /// 要根据任务的成功和失败来确定印章的内容

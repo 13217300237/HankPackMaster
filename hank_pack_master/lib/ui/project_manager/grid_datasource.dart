@@ -70,8 +70,6 @@ class ProjectEntityDataSource extends DataGridSource {
   ProjectRecordStatue Function(ProjectRecordEntity)
       funJudgeProjectStatue; // 设定一个函数，判断 工程实体的状态
 
-  Function(ProjectRecordEntity, String)? openFastUploadDialogFunc;
-
   double runningProcessValue = 0;
 
   void deleteProjectRecord(ProjectRecordEntity? entity) {
@@ -140,7 +138,6 @@ class ProjectEntityDataSource extends DataGridSource {
     required this.funcGoPackageAction,
     required this.funJumpToWorkShop,
     required this.buildContext,
-    required this.openFastUploadDialogFunc,
     required this.funJudgeProjectStatue,
     required this.refreshMainPage,
   }) {
@@ -249,11 +246,6 @@ class ProjectEntityDataSource extends DataGridSource {
           projectRecordEntity: projectRecordEntity,
           maxHeight: maxHeight,
           showTitle: false,
-          openFastUploadDialogFunc:
-              (ProjectRecordEntity projectRecordEntity, s) {
-            // buildContext.pop();
-            openFastUploadDialogFunc?.call(projectRecordEntity, s);
-          },
         );
       },
       itemCount: historyList.length,

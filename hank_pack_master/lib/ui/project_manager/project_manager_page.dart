@@ -298,16 +298,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
             showActions: false);
       },
       funJumpToWorkShop: confirmGoToWorkShop,
-      openFastUploadDialogFunc: (e, s) => DialogUtil.showCustomDialog(
-          showActions: false,
-          context: context,
-          showXGate: true,
-          title: "快速上传",
-          content: FastUploadDialogWidget(
-            projectRecordEntity: e,
-            workShopVm: _workShopVm,
-            apkPath: s,
-          )),
       funJudgeProjectStatue: (ProjectRecordEntity entity) {
         // 判断当前工程的状态
         if (_workShopVm.runningTask != null &&
@@ -643,16 +633,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         return HistoryCard(
           historyEntity: e,
           maxHeight: maxHeight,
-          openFastUploadDialogFunc: (e, s) => DialogUtil.showCustomDialog(
-              showActions: false,
-              context: context,
-              showXGate: true,
-              title: "快速上传",
-              content: FastUploadDialogWidget(
-                projectRecordEntity: e,
-                workShopVm: _workShopVm,
-                apkPath: s,
-              )),
           projectRecordEntity:
               ProjectRecordEntity(e.gitUrl!, e.branchName!, e.projectName!, ''),
         );
@@ -670,16 +650,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         return HistoryCard(
           historyEntity: e,
           maxHeight: maxHeight,
-          openFastUploadDialogFunc: (e, s) => DialogUtil.showCustomDialog(
-              showActions: false,
-              context: context,
-              showXGate: true,
-              title: "快速上传",
-              content: FastUploadDialogWidget(
-                projectRecordEntity: e,
-                workShopVm: _workShopVm,
-                apkPath: s,
-              )),
           projectRecordEntity:
               ProjectRecordEntity(e.gitUrl!, e.branchName!, e.projectName!, ''),
         );
