@@ -9,7 +9,7 @@ import '../../comm/pgy/pgy_entity.dart';
 
 /// 流水线最终成果展示卡片
 class AppInfoCard extends StatelessWidget {
-  final MyAppInfo appInfo;
+  final JobResultEntity appInfo;
   final double maxHeight;
   final bool initiallyExpanded;
 

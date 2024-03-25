@@ -28,6 +28,7 @@ import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import '../../hive/project_record/stage_record_entity.dart';
 import '../../hive/project_record/upload_platforms.dart';
+import 'model/fast_upload_entity.dart';
 
 class WorkShopVm extends ChangeNotifier {
   /// 所有的输入框控制器
@@ -491,8 +492,12 @@ class WorkShopVm extends ChangeNotifier {
         );
 
         if (pgyToken == null) {
+          var fastUploadEntity = FastUploadEntity(
+            apkPath: apkToUpload!,
+            errMsg: 'pgy token获取失败... ',
+          );
           return OrderExecuteResult(
-              msg: "pgy token获取失败... [$apkToUpload]",
+              msg: fastUploadEntity.toJsonString(),
               succeed: false,
               executeLog: 'pgy token获取失败... [$apkToUpload]');
         }
@@ -525,8 +530,12 @@ class WorkShopVm extends ChangeNotifier {
             uploadProgressAction: addNewLogLine);
 
         if (res != null) {
+          var fastUploadEntity = FastUploadEntity(
+            apkPath: apkToUpload!,
+            errMsg: res,
+          );
           return OrderExecuteResult(
-            msg: "上传失败,$res \n [$apkToUpload] \n",
+            msg: fastUploadEntity.toJsonString(),
             succeed: false,
             executeLog: '上传失败,$res \n [$apkToUpload] \n',
           );
@@ -540,23 +549,22 @@ class WorkShopVm extends ChangeNotifier {
         var s = await PgyUploadUtil.getInstance()
             .checkUploadRelease(_pgyEntity!, onReleaseCheck: addNewLogLine);
 
-        if (s == null) {
-          return OrderExecuteResult(
-              succeed: false, msg: " \n [$apkToUpload] \n");
-        }
-
-        if (s.code == 1216) {
-          // 发布失败，流程终止
+        // 发布失败，流程终止
+        if (s == null || s.code == 1216) {
+          var fastUploadEntity = FastUploadEntity(
+            apkPath: apkToUpload!,
+            errMsg: 'pgy发布失败，流程终止!',
+          );
           return OrderExecuteResult(
               succeed: false,
-              msg: "发布失败，流程终止, \n [$apkToUpload] \n",
+              msg: fastUploadEntity.toJsonString(),
               executeLog: '发布失败，流程终止, \n [$apkToUpload] \n');
         } else {
           // 发布成功，打印结果
           // 开始解析发布结果,
           if (s.data is Map<String, dynamic>) {
-            MyAppInfo appInfo =
-                MyAppInfo.fromJson(s.data as Map<String, dynamic>);
+            JobResultEntity appInfo =
+                JobResultEntity.fromJson(s.data as Map<String, dynamic>);
             appInfo.buildDescription = projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
             appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
 
@@ -578,10 +586,14 @@ class WorkShopVm extends ChangeNotifier {
                 data: appInfo,
                 executeLog: appInfo.toJsonString());
           } else {
+            var fastUploadEntity = FastUploadEntity(
+              apkPath: apkToUpload!,
+              errMsg: 'pgy发布失败，流程终止!',
+            );
             return OrderExecuteResult(
                 succeed: false,
-                data: "发布结果解析失败,  \n [$apkToUpload] \n ",
-                executeLog: '发布结果解析失败,  \n [$apkToUpload] \n');
+                msg: fastUploadEntity.toJsonString(),
+                executeLog: '发布失败，流程终止, \n [$apkToUpload] \n');
           }
         }
       });
@@ -592,10 +604,13 @@ class WorkShopVm extends ChangeNotifier {
             .gitLog(projectWorkDir, addNewLogLine);
 
         if (executeRes.exitCode != 0) {
+          String gitLogFailed = '获取git最近提交记录失败...';
+          var fastUploadEntity =
+              FastUploadEntity(apkPath: apkToUpload!, errMsg: gitLogFailed);
           return OrderExecuteResult(
-              data: "获取git最近提交记录失败...",
               succeed: false,
-              executeLog: '获取git最近提交记录失败...');
+              msg: fastUploadEntity.toJsonString(),
+              executeLog: gitLogFailed);
         }
         // 上传到OBS的时候，必须重命名,不然无法区分多版本
         File fileToUpload = File(apkToUpload!);
@@ -612,9 +627,16 @@ class WorkShopVm extends ChangeNotifier {
         obsDownloadUrl = oBSResponse?.url;
 
         if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
+          // 在这里构建一个json，FastUploadEntity
+
+          var fastUploadEntity = FastUploadEntity(
+            apkPath: apkToUpload!,
+            errMsg: '${oBSResponse?.errMsg}',
+          );
+
           return OrderExecuteResult(
               succeed: false,
-              msg: "OBS上传失败, \n [$apkToUpload]  \n ${oBSResponse?.errMsg}",
+              msg: fastUploadEntity.toJsonString(),
               executeLog:
                   'OBS上传失败, \n [$apkToUpload]  \n ${oBSResponse?.errMsg}');
         } else {
@@ -631,7 +653,7 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(
               data: "error : apkToUpload is null!", succeed: false);
         }
-        MyAppInfo appInfo = MyAppInfo();
+        JobResultEntity appInfo = JobResultEntity();
         File apkFile = File(apkToUpload!);
         if (await apkFile.exists()) {
           String fileSize = "${await apkFile.length()}"; // 文件大小
@@ -1123,13 +1145,13 @@ class WorkShopVm extends ChangeNotifier {
 
     ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 激活成功, 详情查看激活历史");
 
-    var myAppInfo = MyAppInfo();
-    myAppInfo.assembleOrders = _enableAssembleOrders;
-    myAppInfo.buildUpdated = _nowTime2();
+    var jobResult = JobResultEntity();
+    jobResult.assembleOrders = _enableAssembleOrders;
+    jobResult.buildUpdated = _nowTime2();
 
     _insertIntoJobHistoryList(
         success: true,
-        historyContent: myAppInfo.toJsonString(),
+        historyContent: jobResult.toJsonString(),
         // 这里要
         jobSetting: runningTask!.setting!,
         stageRecordList: orderExecuteResult.stageRecordList ?? [],
@@ -1185,7 +1207,7 @@ class WorkShopVm extends ChangeNotifier {
     });
   }
 
-  MyAppInfo? myAppInfo;
+  JobResultEntity? myAppInfo;
 
   Future<void> startPackage() async {
     var taskName = "打包";
@@ -1199,7 +1221,7 @@ class WorkShopVm extends ChangeNotifier {
     selectedUploadPlatformController.text = selectedUploadPlatform!.name ?? '';
     initPackageTaskList();
     var scheduleRes = await startSchedule();
-    if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
+    if (scheduleRes.succeed == true && scheduleRes.data is JobResultEntity) {
       myAppInfo = scheduleRes.data;
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
@@ -1210,7 +1232,7 @@ class WorkShopVm extends ChangeNotifier {
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
     } else {
-      myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
+      myAppInfo = JobResultEntity(errMessage: scheduleRes.msg);
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
       _insertIntoJobHistoryList(
@@ -1232,7 +1254,7 @@ class WorkShopVm extends ChangeNotifier {
 
     initFastUploadTaskList(apkPath);
     var scheduleRes = await startSchedule();
-    if (scheduleRes.succeed == true && scheduleRes.data is MyAppInfo) {
+    if (scheduleRes.succeed == true && scheduleRes.data is JobResultEntity) {
       myAppInfo = scheduleRes.data;
 
       _insertIntoJobHistoryList(
@@ -1246,7 +1268,7 @@ class WorkShopVm extends ChangeNotifier {
     } else {
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
-      myAppInfo = MyAppInfo(errMessage: scheduleRes.msg);
+      myAppInfo = JobResultEntity(errMessage: scheduleRes.msg);
       _insertIntoJobHistoryList(
           success: false,
           historyContent: "${scheduleRes.msg}",
@@ -1276,7 +1298,7 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   /// 流程结束时，无论成功或者失败
-  void onProjectPackageFinished(MyAppInfo myAppInfo) {
+  void onProjectPackageFinished(JobResultEntity myAppInfo) {
     var his = runningTask!.jobHistory;
     if (his == null) {
       runningTask!.jobHistory = [];

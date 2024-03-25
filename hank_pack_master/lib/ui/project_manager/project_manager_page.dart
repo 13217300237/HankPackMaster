@@ -109,8 +109,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       size = 1;
     }
 
-    String recentTitle = "最近作业历史";
-
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
       decoration: BoxDecoration(gradient: mainPanelGradient),
@@ -123,71 +121,141 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                 child: CommandBar(
                     overflowBehavior: CommandBarOverflowBehavior.noWrap,
                     primaryItems: [...simpleCommandBarItems])),
-            Padding(
-              padding: const EdgeInsets.only(right: 15.0),
-              child: Card(
-                borderRadius: BorderRadius.circular(10),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                backgroundColor: Colors.teal,
-                child: GestureDetector(
-                  onTap: () {
-                    DialogUtil.showCustomDialog(
-                            context: context,
-                            title: recentTitle,
-                            maxWidth: 1200,
-                            content: getRecentJobResult(700),
-                            showCancel: false)
-                        .then((value) {
-                      setState(() {});
-                      _dataSource.notifyListeners();
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Text(recentTitle,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 20,
-                              color: Colors.white)),
-                      Visibility(
-                        visible: unreadHisCount > 0,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: badges.Badge(
-                            ignorePointer: false,
-                            badgeContent: Text('$unreadHisCount',
-                                style: const TextStyle(color: Colors.white)),
-                            badgeStyle: badges.BadgeStyle(
-                              shape: badges.BadgeShape.square,
-                              badgeColor: Colors.red,
-                              padding: const EdgeInsets.all(5),
-                              borderRadius: BorderRadius.circular(4),
-                              borderSide: const BorderSide(
-                                  color: Colors.black, width: 1),
-                              elevation: 0,
-                            ),
-                            badgeAnimation: const badges.BadgeAnimation.fade(
-                              animationDuration: Duration(seconds: 1),
-                              colorChangeAnimationDuration:
-                                  Duration(seconds: 1),
-                              loopAnimation: false,
-                              curve: Curves.fastOutSlowIn,
-                              colorChangeAnimationCurve: Curves.easeInCubic,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
+            Row(
+              children: [
+                fastUploadTodoWidget(),
+                recentHisWidget(),
+              ],
+            ),
           ],
         ),
         grid,
         _buildDataPager()
       ]),
+    );
+  }
+
+  Widget fastUploadTodoWidget() {
+    String recentTitle = "待上传";
+    return Padding(
+      padding: const EdgeInsets.only(right: 15.0),
+      child: Card(
+        borderRadius: BorderRadius.circular(10),
+        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        backgroundColor: Colors.red.withOpacity(.4),
+        child: GestureDetector(
+          onTap: () {
+            DialogUtil.showCustomDialog(
+                    context: context,
+                    title: recentTitle,
+                    maxWidth: 1200,
+                    content: getFastUploadHisList(maxHeight: 700),
+                    showCancel: false)
+                .then((value) {
+              setState(() {});
+              _dataSource.notifyListeners();
+            });
+          },
+          child: Row(
+            children: [
+              Text(recentTitle,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                      color: Colors.white)),
+              Visibility(
+                visible: unreadHisCount > 0,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: badges.Badge(
+                    ignorePointer: false,
+                    badgeContent: Text('$unreadHisCount',
+                        style: const TextStyle(color: Colors.white)),
+                    badgeStyle: badges.BadgeStyle(
+                      shape: badges.BadgeShape.square,
+                      badgeColor: Colors.red,
+                      padding: const EdgeInsets.all(5),
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 1),
+                      elevation: 0,
+                    ),
+                    badgeAnimation: const badges.BadgeAnimation.fade(
+                      animationDuration: Duration(seconds: 1),
+                      colorChangeAnimationDuration: Duration(seconds: 1),
+                      loopAnimation: false,
+                      curve: Curves.fastOutSlowIn,
+                      colorChangeAnimationCurve: Curves.easeInCubic,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget recentHisWidget() {
+    String recentTitle = "最近作业历史";
+    return Padding(
+      padding: const EdgeInsets.only(right: 15.0),
+      child: Card(
+        borderRadius: BorderRadius.circular(10),
+        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        backgroundColor: Colors.teal,
+        child: GestureDetector(
+          onTap: () {
+            DialogUtil.showCustomDialog(
+                    context: context,
+                    title: recentTitle,
+                    maxWidth: 1200,
+                    content: getRecentJobResult(maxHeight: 700),
+                    showCancel: false)
+                .then((value) {
+              setState(() {});
+              _dataSource.notifyListeners();
+            });
+          },
+          child: Row(
+            children: [
+              Text(recentTitle,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                      color: Colors.white)),
+              Visibility(
+                visible: unreadHisCount > 0,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: badges.Badge(
+                    ignorePointer: false,
+                    badgeContent: Text('$unreadHisCount',
+                        style: const TextStyle(color: Colors.white)),
+                    badgeStyle: badges.BadgeStyle(
+                      shape: badges.BadgeShape.square,
+                      badgeColor: Colors.red,
+                      padding: const EdgeInsets.all(5),
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide:
+                          const BorderSide(color: Colors.black, width: 1),
+                      elevation: 0,
+                    ),
+                    badgeAnimation: const badges.BadgeAnimation.fade(
+                      animationDuration: Duration(seconds: 1),
+                      colorChangeAnimationDuration: Duration(seconds: 1),
+                      loopAnimation: false,
+                      curve: Curves.fastOutSlowIn,
+                      colorChangeAnimationCurve: Curves.easeInCubic,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -565,7 +633,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     }
   }
 
-  Widget getRecentJobResult(double maxHeight) {
+  Widget getRecentJobResult({required double maxHeight}) {
     var recentJobHistoryList =
         ProjectRecordOperator.getRecentJobHistoryList(recentCount: -1);
 
@@ -590,6 +658,33 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         );
       },
       itemCount: recentJobHistoryList.length,
+    );
+  }
+
+  Widget getFastUploadHisList({required double maxHeight}) {
+    var list = ProjectRecordOperator.findFastUploadTaskList();
+
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var e = list[index];
+        return HistoryCard(
+          historyEntity: e,
+          maxHeight: maxHeight,
+          openFastUploadDialogFunc: (e, s) => DialogUtil.showCustomDialog(
+              showActions: false,
+              context: context,
+              showXGate: true,
+              title: "快速上传",
+              content: FastUploadDialogWidget(
+                projectRecordEntity: e,
+                workShopVm: _workShopVm,
+                apkPath: s,
+              )),
+          projectRecordEntity:
+              ProjectRecordEntity(e.gitUrl!, e.branchName!, e.projectName!, ''),
+        );
+      },
+      itemCount: list.length,
     );
   }
 }

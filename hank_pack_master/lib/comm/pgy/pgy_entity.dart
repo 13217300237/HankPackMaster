@@ -68,8 +68,8 @@ class ReleaseResultEntity {
   }
 }
 
-/// 打包成功，则返回appInfo
-class MyAppInfo {
+/// 作业结果实体类
+class JobResultEntity {
   String? uploadPlatform;
 
   String? buildKey;
@@ -98,7 +98,7 @@ class MyAppInfo {
 
   List<String>? assembleOrders;
 
-  MyAppInfo({
+  JobResultEntity({
     this.buildKey,
     this.buildType,
     this.buildIsFirst,
@@ -125,8 +125,8 @@ class MyAppInfo {
     this.assembleOrders,
   });
 
-  factory MyAppInfo.fromJson(Map<String, dynamic> data) {
-    return MyAppInfo(
+  factory JobResultEntity.fromJson(Map<String, dynamic> data) {
+    return JobResultEntity(
       buildKey: data['buildKey'],
       buildType: data['buildType'],
       buildIsFirst: data['buildIsFirst'],
@@ -187,8 +187,8 @@ class MyAppInfo {
     return jsonEncode(toJson());
   }
 
-  factory MyAppInfo.fromJsonString(String jsonString) {
-    return MyAppInfo.fromJson(jsonDecode(jsonString));
+  factory JobResultEntity.fromJsonString(String jsonString) {
+    return JobResultEntity.fromJson(jsonDecode(jsonString));
   }
 }
 

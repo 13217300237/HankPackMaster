@@ -36,13 +36,13 @@ class HistoryCard extends StatelessWidget {
     fontFamily: 'STKAITI',
   );
 
-  MyAppInfo get myAppInfo {
-    MyAppInfo myAppInfo;
+  JobResultEntity get myAppInfo {
+    JobResultEntity myAppInfo;
     try {
-      myAppInfo = MyAppInfo.fromJsonString(historyEntity.historyContent!);
+      myAppInfo = JobResultEntity.fromJsonString(historyEntity.historyContent!);
     } catch (ex) {
       myAppInfo =
-          MyAppInfo(errMessage: historyEntity.historyContent); // 针对激活成功，这里要做判断
+          JobResultEntity(errMessage: historyEntity.historyContent); // 针对激活成功，这里要做判断
     }
     return myAppInfo;
   }

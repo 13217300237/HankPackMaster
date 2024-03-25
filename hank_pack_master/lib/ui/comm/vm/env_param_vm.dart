@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
 import '../../../comm/hwobs/obs_client.dart';
@@ -11,6 +10,8 @@ import '../../../comm/str_const.dart';
 import '../../../hive/env_config/env_config_entity.dart';
 import '../../../hive/env_config/env_config_operator.dart';
 import '../../../hive/env_group/env_group_operator.dart';
+import '../../../hive/project_record/job_history_entity.dart';
+import '../../../hive/project_record/project_record_operator.dart';
 
 class EnvParamVm extends ChangeNotifier {
   /// 环境有问题时的错误提示

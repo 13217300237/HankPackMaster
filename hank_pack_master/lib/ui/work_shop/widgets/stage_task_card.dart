@@ -31,7 +31,7 @@ class StageTaskCard extends StatefulWidget {
 }
 
 class _StageTaskCardState extends State<StageTaskCard> {
-  void _showMyAppInfo(MyAppInfo s) {
+  void _showMyAppInfo(JobResultEntity s) {
     var card = AppInfoCard(
       appInfo: s,
       initiallyExpanded: true,
@@ -104,7 +104,7 @@ class _StageTaskCardState extends State<StageTaskCard> {
             if (result is OrderExecuteResult) {
               debugPrint("执行日志：${result.executeLog}");
               var data = result.data;
-              if (data is MyAppInfo) {
+              if (data is JobResultEntity) {
                 // 最后阶段上传成功之后
                 _showMyAppInfo(data);
               } else {

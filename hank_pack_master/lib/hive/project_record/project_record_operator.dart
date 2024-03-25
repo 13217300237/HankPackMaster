@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
+import 'package:hank_pack_master/ui/work_shop/model/fast_upload_entity.dart';
 import 'package:hive/hive.dart';
+
+import '../../comm/pgy/pgy_entity.dart';
 
 class ProjectRecordOperator {
   /// 盒子名称
@@ -131,11 +136,8 @@ class ProjectRecordOperator {
     }
   }
 
-  /// 找出所有未读的作业历史
-  /// 获取最近10条打包记录
-  /// [recentCount] 正数，表示取最大多少条, 为-1时，将会返回所有的打包记录
-  static List<JobHistoryEntity> findAllUnreadJobHistoryEntity() {
-    List<JobHistoryEntity> recent = [];
+  static List<JobHistoryEntity> findALlHis() {
+    List<JobHistoryEntity> list = [];
 
     var allProject = findAll();
 
@@ -148,9 +150,16 @@ class ProjectRecordOperator {
       });
 
       if (temp != null) {
-        recent.addAll(temp);
+        list.addAll(temp);
       }
     }
+
+    return list;
+  }
+
+  /// 找出所有未读的作业历史
+  static List<JobHistoryEntity> findAllUnreadJobHistoryEntity() {
+    var recent = findALlHis();
 
     recent.removeWhere((e) => e.hasRead == true);
 
@@ -201,7 +210,8 @@ class ProjectRecordOperator {
   static void setReadV2({required JobHistoryEntity jobHistoryEntity}) {
     _initBox();
 
-    if (jobHistoryEntity.hasRead == true) { // 已经阅读过的，不再入库
+    if (jobHistoryEntity.hasRead == true) {
+      // 已经阅读过的，不再入库
       return;
     }
 
@@ -240,5 +250,33 @@ class ProjectRecordOperator {
     _box!.putAt(projectRecordIndex, projectRecordEntity!);
 
     debugShowAll();
+  }
+
+  /// 找出所有需要快速上传的失败历史
+  static List<JobHistoryEntity> findFastUploadTaskList() {
+    List<JobHistoryEntity> list = findALlHis();
+    list.removeWhere((e) => e.success == true); // 先删除所有成功的
+    // 再找出所有支持快速上传的 历史记录
+    list.removeWhere((e) => !needFastUpload(e)); // 再把不需要快速上传的失败记录去掉
+    // 现在就只剩下了需要快速上传的记录了...
+    return list;
+  }
+
+  /// 判断是否需要快速上传
+  static bool needFastUpload(JobHistoryEntity historyEntity) {
+    // 尝试把 错误码
+    try {
+      FastUploadEntity fastUploadEntity =
+          FastUploadEntity.fromJsonString(historyEntity.historyContent!);
+
+      var f = File(fastUploadEntity.apkPath);
+      if (f.existsSync()) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
   }
 }
