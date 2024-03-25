@@ -191,7 +191,7 @@ class _HomePageState extends State<HomePage> {
           width: width,
           height: successHeight,
           decoration: BoxDecoration(
-              color: Colors.blue, borderRadius: BorderRadius.circular(radius)),
+              color: Colors.green, borderRadius: BorderRadius.circular(radius)),
           child: Center(
               child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -292,6 +292,7 @@ class _HomePageState extends State<HomePage> {
     return MultipleStatusWidget(
       loadingSize: WrapperSize(height: 200, width: 200),
       successSize: WrapperSize(height: 300, width: 300),
+      needFadeInAnimation: true,
       stateController: _stateController,
       // 异步任务
       asyncTask: _getFutureData,
@@ -335,7 +336,7 @@ class _HomePageState extends State<HomePage> {
                   dataWrapper: dataWrapper);
             },
             child: const Text('模拟加载成功')),
-        const SizedBox(width: 10),
+        const SizedBox(height: 20),
         m.ElevatedButton(
             onPressed: () async {
               _stateController.changeState(Status.loading);
@@ -344,7 +345,7 @@ class _HomePageState extends State<HomePage> {
                   dataWrapper: dataWrapper);
             },
             child: const Text('模拟加载失败')),
-        const SizedBox(width: 10),
+        const SizedBox(height: 20),
         m.ElevatedButton(
             onPressed: () async {
               _stateController.changeState(Status.loading);
