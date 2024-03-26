@@ -22,33 +22,25 @@ class ProjectRecordEntity {
   @HiveField(4)
   late bool preCheckOk; // 是否已预检成功
 
-  /// [已废弃]
   @HiveField(5)
-  List<String>? assembleOrders; // TODO  listString的存储方式存在bug
-
-  @HiveField(6)
-  List<String>? jobHistory;
-
-  /// 是否处在工作中...
-  @HiveField(7)
   bool? jobRunning;
 
-  @HiveField(8)
+  @HiveField(6)
   String? projectDesc;
 
-  @HiveField(9)
+  @HiveField(7)
   PackageSetting? activeSetting; // 激活阶段的配置
 
-  @HiveField(10)
+  @HiveField(8)
   PackageSetting? packageSetting; // 打包阶段的配置
 
-  @HiveField(11)
+  @HiveField(9)
   PackageSetting? fastUploadSetting; // 快速上传阶段的配置
 
-  @HiveField(12)
-  String? assembleOrdersStr; // 换个方式存储可用变体
+  @HiveField(10)
+  String? assembleOrdersStr; // 换个方式存储可用变体 原来用listString会出现问题
 
-  @HiveField(13)
+  @HiveField(11)
   List<JobHistoryEntity>? jobHistoryList; // 换个方式存储作业历史
 
   List<String> strArrToList() {
@@ -64,11 +56,7 @@ class ProjectRecordEntity {
 
   List<String> get assembleOrderList {
     if (assembleOrdersStr == null) return [];
-
     var list = strArrToList();
-
-    debugPrint("初始命令数量为: ${list.length}");
-
     int oriLength = list.length;
 
     // 这里先判断命令的节数，找出最大节数值
@@ -76,14 +64,11 @@ class ProjectRecordEntity {
     int maxWords = findMaxWords(list);
     list.removeWhere((element) => countUppercaseLetters(element) != maxWords);
     int afterFilterLength = list.length;
-    debugPrint("按照节数过滤后数量为: ${list.length}");
 
     // 检查最后剩余的命令数量，和之前数量之差,如果减少过半，那就显示原所有命令
     if (afterFilterLength < oriLength / 2) {
-      debugPrint("判定过滤有误，使用原数组");
       return strArrToList();
     } else {
-      debugPrint("判定过滤无误，使用新数组");
       return list;
     }
   }
@@ -132,8 +117,6 @@ class ProjectRecordEntity {
     this.projectDesc, {
     this.preCheckOk = false,
     this.jobRunning = false,
-    this.assembleOrders,
-    this.jobHistory,
   });
 
   @override

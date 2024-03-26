@@ -1151,11 +1151,6 @@ class WorkShopVm extends ChangeNotifier {
     /// 激活失败时
     if (orderExecuteResult.succeed != true ||
         orderExecuteResult.data is! List<String>) {
-      var his = runningTask!.jobHistory;
-      if (his == null) {
-        runningTask!.jobHistory = [];
-      }
-      runningTask!.jobHistory!.add("${orderExecuteResult.msg}");
 
       _insertIntoJobHistoryList(
           success: false,
@@ -1328,21 +1323,11 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   void onProjectPackageSucceed(JobResultEntity jobResult) {
-    var his = runningTask!.jobHistory;
-    if (his == null) {
-      runningTask!.jobHistory = [];
-    }
-    runningTask!.jobHistory!.add(jobResult.toJsonString());
     setProjectRecordJobRunning(false);
     _reset();
   }
 
   void onProjectPackageFailed(UploadResultEntity uploadResultEntity) {
-    var his = runningTask!.jobHistory;
-    if (his == null) {
-      runningTask!.jobHistory = [];
-    }
-    runningTask!.jobHistory!.add(uploadResultEntity.toJsonString());
     setProjectRecordJobRunning(false);
     _reset();
   }

@@ -578,7 +578,6 @@ class ProjectEntityDataSource extends DataGridSource {
   void _resetProjectRecord(ProjectRecordEntity e) {
     e.preCheckOk = false;
     e.assembleOrdersStr = null;
-    e.jobHistory = [];
     bool updateRes = ProjectRecordOperator.update(e);
     debugPrint("_resetProjectRecord -> $updateRes");
     _refresh();
