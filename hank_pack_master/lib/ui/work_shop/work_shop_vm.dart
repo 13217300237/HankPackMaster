@@ -1249,25 +1249,24 @@ class WorkShopVm extends ChangeNotifier {
     if (scheduleRes.succeed == true && scheduleRes.data is JobResultEntity) {
       jobResult = scheduleRes.data;
       ToastUtil.showPrettyToast(
-          "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
+          "任务 ${runningTask!.projectName} 打包成功, 详情查看打包历史");
       _insertIntoJobHistoryList(
           success: true,
           jobResultEntity: jobResult!,
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
-      onProjectPackageSucceed();
     } else {
-      ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
+      ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 打包失败, 详情查看打包历史",
           success: false);
       _insertIntoJobHistoryList(
           success: false,
-          jobResultEntity: jobResult!,
+          jobResultEntity: JobResultEntity(errMessage: '${scheduleRes.msg}'),
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
-      onProjectPackageFailed();
     }
+    onProjectPackageFinished();
   }
 
   Future<void> startFastUpload(String apkPath) async {
@@ -1289,19 +1288,19 @@ class WorkShopVm extends ChangeNotifier {
           taskName: taskName);
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 快速上传成功, 详情查看打包历史");
-      onProjectPackageSucceed();
     } else {
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 快速上传失败, 详情查看打包历史",
           success: false);
       _insertIntoJobHistoryList(
           success: false,
-          jobResultEntity: JobResultEntity(apkPath: apkToUpload!,errMessage: scheduleRes.msg ?? ''),
+          jobResultEntity: JobResultEntity(
+              apkPath: apkToUpload!, errMessage: scheduleRes.msg ?? ''),
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
-      onProjectPackageFailed();
     }
+    onProjectPackageFinished();
   }
 
   /// 项目激活成功之后
@@ -1321,12 +1320,7 @@ class WorkShopVm extends ChangeNotifier {
     _reset();
   }
 
-  void onProjectPackageSucceed() {
-    setProjectRecordJobRunning(false);
-    _reset();
-  }
-
-  void onProjectPackageFailed() {
+  void onProjectPackageFinished() {
     setProjectRecordJobRunning(false);
     _reset();
   }

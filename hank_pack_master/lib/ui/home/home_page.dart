@@ -10,6 +10,7 @@ import 'package:hank_pack_master/ui/home/ui/other.dart';
 import '../../comm/file_operation.dart';
 import '../../comm/gradients.dart';
 import '../../comm/ui/animation_widget.dart';
+import '../../hive/project_record/job_result_entity.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -110,11 +111,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      // EnvGroupOperator.clear();
-      // var list = EnvGroupOperator.list();
-      // for (var e in list) {
-      //   debugPrint(e.toString());
-      // }
+      var jobResultEntity = JobResultEntity(errMessage: 'sss');
+      debugPrint("jobResultEntity->${jobResultEntity.errMessage}");
     });
   }
 
