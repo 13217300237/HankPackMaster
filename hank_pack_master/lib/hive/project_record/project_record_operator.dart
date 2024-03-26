@@ -4,6 +4,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hive/hive.dart';
+import 'package:hank_pack_master/comm/text_util.dart';
 
 import 'job_result_entity.dart';
 
@@ -279,7 +280,9 @@ class ProjectRecordOperator {
     try {
       JobResultEntity jobResultEntity = historyEntity.jobResultEntity;
 
-      if (jobResultEntity.apkPath == null) {
+      debugPrint('jobResultEntity.apkPath-> ${jobResultEntity.apkPath}');
+
+      if (jobResultEntity.apkPath.empty()) {
         return false;
       }
 

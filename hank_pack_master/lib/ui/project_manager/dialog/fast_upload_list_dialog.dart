@@ -4,7 +4,6 @@ import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import '../../../comm/ui/history_card.dart';
 import '../../../hive/project_record/project_record_entity.dart';
 import '../../../hive/project_record/project_record_operator.dart';
-import '../../work_shop/model/fast_upload_entity.dart';
 
 /// 快速上传列表弹窗
 class FastUploadListDialog extends StatelessWidget {
@@ -57,7 +56,8 @@ class FastUploadListDialog extends StatelessWidget {
                             jobHistory.projectName!,
                             jobHistory.projectDesc);
                         projectRecordEntity.setting = jobHistory.jobSetting;
-
+                        projectRecordEntity.apkPath = jobHistory.jobResultEntity.apkPath; // 这里没有赋值
+                        workShopVm.enqueue(projectRecordEntity);
                       }
                     }),
               ),

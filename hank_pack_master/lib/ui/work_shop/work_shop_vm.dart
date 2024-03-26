@@ -113,6 +113,9 @@ class WorkShopVm extends ChangeNotifier {
 
   bool _workThreadRunning = false;
 
+  String? apkToUpload; // 即将上传的文件地址
+  String? obsDownloadUrl; // obs上传后的下载路径
+
   final List<String> _enableAssembleOrders = [];
 
   Map<String, String> get enableAssembleOrders {
@@ -734,8 +737,6 @@ class WorkShopVm extends ChangeNotifier {
     // taskStateList.add(assembleOrdersTestTask);
   }
 
-  String? apkToUpload; // 即将上传的文件地址
-  String? obsDownloadUrl; // obs上传后的下载路径
 
   /// 初始化一个打包任务队列
   void initPackageTaskList() {
@@ -1261,7 +1262,7 @@ class WorkShopVm extends ChangeNotifier {
           success: false);
       _insertIntoJobHistoryList(
           success: false,
-          jobResultEntity: JobResultEntity(errMessage: '${scheduleRes.msg}'),
+          jobResultEntity: JobResultEntity(errMessage: '${scheduleRes.msg}',apkPath: apkToUpload),
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);

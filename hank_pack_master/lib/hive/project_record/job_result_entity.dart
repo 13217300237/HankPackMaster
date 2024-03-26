@@ -59,7 +59,7 @@ class JobResultEntity {
   List<String>? assembleOrders;
 
   @HiveField(25)
-  String? apkPath; // 错误码，暂未用到
+  String? apkPath; // apk产物所在位置
 
   JobResultEntity({
     this.buildKey,
