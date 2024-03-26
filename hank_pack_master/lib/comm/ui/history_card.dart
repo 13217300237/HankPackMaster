@@ -98,25 +98,6 @@ class HistoryCard extends StatelessWidget {
     );
   }
 
-  bool _needFastUpload() {
-    return myAppInfo.errMessage != null &&
-        myAppInfo.errMessage!.contains("[") &&
-        myAppInfo.errMessage!.contains("]");
-  }
-
-  String? getApkPath() {
-    var path = myAppInfo.errMessage!.substring(
-        myAppInfo.errMessage!.indexOf("[") + 1,
-        myAppInfo.errMessage!.indexOf("]"));
-
-    File f = File(path);
-    if (f.existsSync()) {
-      return path;
-    } else {
-      return null;
-    }
-  }
-
   /// 要根据任务的成功和失败来确定印章的内容
   Widget _tag() {
     String taskName =
