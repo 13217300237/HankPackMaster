@@ -98,7 +98,7 @@ class _EditProjectDialogWidgetState extends State<EditProjectDialogWidget> {
           unfocusedColor: Colors.transparent,
           highlightColor: Colors.transparent,
           expands: false,
-          maxLines: 2,
+          maxLines: 1,
           style: textStyle,
           enabled: false,
           controller: widget.gitUrlTextController),

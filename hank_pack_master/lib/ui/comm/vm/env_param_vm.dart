@@ -224,7 +224,7 @@ class EnvParamVm extends ChangeNotifier {
     }
 
     if (pgyApiKey.isEmpty) {
-      return 'pgy未设置';
+      return 'pgy key 未设置';
     }
 
     return '';

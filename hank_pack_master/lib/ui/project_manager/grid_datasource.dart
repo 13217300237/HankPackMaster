@@ -493,6 +493,7 @@ class ProjectEntityDataSource extends DataGridSource {
 
     DialogUtil.showCustomDialog(
         context: buildContext,
+        maxWidth: 700,
         title: '编辑工程',
         content: contentWidget,
         showActions: true,

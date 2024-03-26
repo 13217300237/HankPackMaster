@@ -51,7 +51,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
           child: _mainLayout());
     } else {
       return Center(
-          child: Text("请先准备好环境参数",
+          child: Text(missingParametersStr,
               style: TextStyle(color: Colors.red, fontSize: 45)));
     }
   }
