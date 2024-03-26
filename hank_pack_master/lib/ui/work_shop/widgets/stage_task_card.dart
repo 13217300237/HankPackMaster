@@ -8,7 +8,7 @@ import '../../../comm/dialog_util.dart';
 import '../../../comm/order_execute_result.dart';
 import '../../../comm/pgy/pgy_entity.dart';
 import '../../../comm/text_util.dart';
-import '../app_info_card.dart';
+import '../job_result_card.dart';
 import '../task_stage.dart';
 
 /// 每个阶段任务的卡片
@@ -31,9 +31,9 @@ class StageTaskCard extends StatefulWidget {
 }
 
 class _StageTaskCardState extends State<StageTaskCard> {
-  void _showMyAppInfo(JobResultEntity s) {
-    var card = AppInfoCard(
-      appInfo: s,
+  void _showJobResultInfo(JobResultEntity s) {
+    var card = JobResultCard(
+      jobResult: s,
       initiallyExpanded: true,
       maxHeight: 700,
     );
@@ -106,7 +106,7 @@ class _StageTaskCardState extends State<StageTaskCard> {
               var data = result.data;
               if (data is JobResultEntity) {
                 // 最后阶段上传成功之后
-                _showMyAppInfo(data);
+                _showJobResultInfo(data);
               } else {
                 // 其他阶段
                 _showInfoDialog(

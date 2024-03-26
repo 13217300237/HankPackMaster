@@ -505,7 +505,7 @@ $sb"""
 
   /// 方法内部还可以定义方法，这是dart的特色
   Map<String, dynamic> _parseAapt2Output(String output) {
-    Map<String, dynamic> appInfo = {};
+    Map<String, dynamic> jobResult = {};
 
     List<String> split = output.split("\n");
     var targetStr = "package:";
@@ -525,7 +525,7 @@ $sb"""
       packageMap[key] = value;
     }
 
-    appInfo.addAll(packageMap);
+    jobResult.addAll(packageMap);
 
     var targetStr2 = "application-label:";
     var applicationLabel =
@@ -535,9 +535,9 @@ $sb"""
         .trim()
         .replaceAll('\'', '');
 
-    appInfo['appName'] = appName;
+    jobResult['appName'] = appName;
 
-    return appInfo;
+    return jobResult;
   }
 
   int _parseVersionPart(String part) {
@@ -593,13 +593,13 @@ $sb"""
       String output = result.stdout as String;
 
       // 解析应用信息
-      Map<String, dynamic> appInfo = _parseAapt2Output(output);
+      Map<String, dynamic> jobResult = _parseAapt2Output(output);
 
       // 获取包名、版本号和版本名
-      String? appName = appInfo['appName'];
-      String? packageName = appInfo['name'];
-      String? versionCode = appInfo['versionCode'];
-      String? versionName = appInfo['versionName'];
+      String? appName = jobResult['appName'];
+      String? packageName = jobResult['name'];
+      String? versionCode = jobResult['versionCode'];
+      String? versionName = jobResult['versionName'];
 
       // 打印包名、版本号和版本名
       debugPrint('app Name: $appName');

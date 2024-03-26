@@ -9,7 +9,7 @@ import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import '../../ui/project_manager/grid_datasource.dart';
 import '../../ui/project_manager/job_setting_card.dart';
-import '../../ui/work_shop/app_info_card.dart';
+import '../../ui/work_shop/job_result_card.dart';
 import '../pgy/pgy_entity.dart';
 import '../text_util.dart';
 
@@ -34,15 +34,15 @@ class HistoryCard extends StatelessWidget {
     fontFamily: 'STKAITI',
   );
 
-  JobResultEntity get myAppInfo {
-    JobResultEntity myAppInfo;
+  JobResultEntity get myJobResult {
+    JobResultEntity jobResult;
     try {
-      myAppInfo = JobResultEntity.fromJsonString(historyEntity.historyContent!);
+      jobResult = JobResultEntity.fromJsonString(historyEntity.historyContent!);
     } catch (ex) {
-      myAppInfo =
+      jobResult =
           JobResultEntity(errMessage: historyEntity.historyContent); // 针对激活成功，这里要做判断
     }
-    return myAppInfo;
+    return jobResult;
   }
 
   final bgColor = const Color(0xffe0e0e0);
@@ -80,8 +80,8 @@ class HistoryCard extends StatelessWidget {
                         const SizedBox(height: 10),
                         JobSettingCard(historyEntity.jobSetting),
                         const SizedBox(height: 10),
-                        AppInfoCard(
-                          appInfo: myAppInfo,
+                        JobResultCard(
+                          jobResult: myJobResult,
                           initiallyExpanded: false,
                           maxHeight: maxHeight,
                         ),

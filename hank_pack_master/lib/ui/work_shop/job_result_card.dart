@@ -8,24 +8,24 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../comm/pgy/pgy_entity.dart';
 
 /// 流水线最终成果展示卡片
-class AppInfoCard extends StatelessWidget {
-  final JobResultEntity appInfo;
+class JobResultCard extends StatelessWidget {
+  final JobResultEntity jobResult;
   final double maxHeight;
   final bool initiallyExpanded;
 
-  const AppInfoCard(
+  const JobResultCard(
       {super.key,
-      required this.appInfo,
+      required this.jobResult,
       required this.initiallyExpanded,
       required this.maxHeight});
 
   @override
   Widget build(BuildContext context) {
-    if (!appInfo.errMessage.empty()) {
+    if (!jobResult.errMessage.empty()) { // 这里有问题，上传失败时，这个errMessage是空的.
       return msgWidget();
-    } else if (appInfo.assembleOrders != null &&
-        appInfo.assembleOrders!.isNotEmpty) {
-      return _assembleOrderWidget(appInfo.assembleOrders);
+    } else if (jobResult.assembleOrders != null &&
+        jobResult.assembleOrders!.isNotEmpty) {
+      return _assembleOrderWidget(jobResult.assembleOrders);
     } else {
       return Card(
         backgroundColor: Colors.blue.withOpacity(.1),
@@ -40,15 +40,15 @@ class AppInfoCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _line('App名称', "${appInfo.buildName}"),
-                _line('App版本', "${appInfo.buildVersion}"),
-                _line('编译版本', "${appInfo.buildVersionNo}"),
-                _line('上传批次', "${appInfo.buildBuildVersion}"),
-                _line('App包名', "${appInfo.buildIdentifier}"),
-                _line('应用描述', "${appInfo.buildDescription}"),
-                _line('更新日志', "${appInfo.buildUpdateDescription}"),
-                _line('更新时间', "${appInfo.buildUpdated}"),
-                _line('下载地址', "${appInfo.buildQRCodeURL}"),
+                _line('App名称', "${jobResult.buildName}"),
+                _line('App版本', "${jobResult.buildVersion}"),
+                _line('编译版本', "${jobResult.buildVersionNo}"),
+                _line('上传批次', "${jobResult.buildBuildVersion}"),
+                _line('App包名', "${jobResult.buildIdentifier}"),
+                _line('应用描述', "${jobResult.buildDescription}"),
+                _line('更新日志', "${jobResult.buildUpdateDescription}"),
+                _line('更新时间', "${jobResult.buildUpdated}"),
+                _line('下载地址', "${jobResult.buildQRCodeURL}"),
               ],
             ),
             qrCode(),
@@ -59,8 +59,8 @@ class AppInfoCard extends StatelessWidget {
   }
 
   Widget msgWidget() {
-    if (appInfo.errMessage != null && appInfo.errMessage!.isNotEmpty) {
-      List<String> listString = appInfo.errMessage!.split("\n");
+    if (jobResult.errMessage != null && jobResult.errMessage!.isNotEmpty) {
+      List<String> listString = jobResult.errMessage!.split("\n");
       var ex = ListView.builder(
         itemBuilder: (context, index) {
           return Padding(
@@ -84,21 +84,21 @@ class AppInfoCard extends StatelessWidget {
         ),
       );
     }
-    return const SizedBox();
+    return const SizedBox(child: Text('错误详情'),);
   }
 
   Widget qrCode() {
-    if (appInfo.errMessage != null && appInfo.errMessage!.isNotEmpty) {
+    if (jobResult.errMessage != null && jobResult.errMessage!.isNotEmpty) {
       return const SizedBox();
-    } else if (appInfo.buildQRCodeURL.empty()) {
+    } else if (jobResult.buildQRCodeURL.empty()) {
       return const SizedBox();
     } else {
-      if (appInfo.uploadPlatform == '${UploadPlatform.pgy.index}') {
+      if (jobResult.uploadPlatform == '${UploadPlatform.pgy.index}') {
         return Center(
           child: CachedNetworkImage(
             width: qrCodeSize,
             height: qrCodeSize,
-            imageUrl: "${appInfo.buildQRCodeURL}",
+            imageUrl: "${jobResult.buildQRCodeURL}",
             placeholder: (context, url) => const Center(
                 child: m.CircularProgressIndicator(
               strokeWidth: 2,
@@ -110,7 +110,7 @@ class AppInfoCard extends StatelessWidget {
       } else {
         return Center(
           child: QrImageView(
-            data: '${appInfo.buildQRCodeURL}',
+            data: '${jobResult.buildQRCodeURL}',
             size: qrCodeSize,
             version: QrVersions.auto,
           ),

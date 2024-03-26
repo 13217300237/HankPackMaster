@@ -590,28 +590,28 @@ class WorkShopVm extends ChangeNotifier {
           // 发布成功，打印结果
           // 开始解析发布结果,
           if (s.data is Map<String, dynamic>) {
-            JobResultEntity appInfo =
+            JobResultEntity jobResult =
                 JobResultEntity.fromJson(s.data as Map<String, dynamic>);
-            appInfo.buildDescription = projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
-            appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
+            jobResult.buildDescription = projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
+            jobResult.uploadPlatform = '${selectedUploadPlatform?.index}';
 
-            addNewLogLine("应用名称: ${appInfo.buildName}");
-            addNewLogLine("大小: ${appInfo.buildFileSize}");
-            addNewLogLine("版本号: ${appInfo.buildVersion}");
-            addNewLogLine("上传批次: ${appInfo.buildBuildVersion}");
-            addNewLogLine("应用描述: ${appInfo.buildDescription}");
-            addNewLogLine("更新日志: ${appInfo.buildUpdateDescription}");
-            addNewLogLine("应用包名: ${appInfo.buildIdentifier}");
+            addNewLogLine("应用名称: ${jobResult.buildName}");
+            addNewLogLine("大小: ${jobResult.buildFileSize}");
+            addNewLogLine("版本号: ${jobResult.buildVersion}");
+            addNewLogLine("上传批次: ${jobResult.buildBuildVersion}");
+            addNewLogLine("应用描述: ${jobResult.buildDescription}");
+            addNewLogLine("更新日志: ${jobResult.buildUpdateDescription}");
+            addNewLogLine("应用包名: ${jobResult.buildIdentifier}");
             addNewLogLine(
-                "图标地址: https://www.pgyer.com/image/view/app_icons/${appInfo.buildIcon}");
-            addNewLogLine("下载短链接: ${appInfo.buildShortcutUrl}");
-            addNewLogLine("二维码地址: ${appInfo.buildQRCodeURL}");
-            addNewLogLine("应用更新时间: ${appInfo.buildUpdated}");
+                "图标地址: https://www.pgyer.com/image/view/app_icons/${jobResult.buildIcon}");
+            addNewLogLine("下载短链接: ${jobResult.buildShortcutUrl}");
+            addNewLogLine("二维码地址: ${jobResult.buildQRCodeURL}");
+            addNewLogLine("应用更新时间: ${jobResult.buildUpdated}");
 
             return OrderExecuteResult(
                 succeed: true,
-                data: appInfo,
-                executeLog: appInfo.toJsonString());
+                data: jobResult,
+                executeLog: jobResult.toJsonString());
           } else {
             var fastUploadEntity = UploadResultEntity(
               apkPath: apkToUpload!,
@@ -680,30 +680,30 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(
               data: "error : apkToUpload is null!", succeed: false);
         }
-        JobResultEntity appInfo = JobResultEntity();
+        JobResultEntity jobResult = JobResultEntity();
         File apkFile = File(apkToUpload!);
         if (await apkFile.exists()) {
           String fileSize = "${await apkFile.length()}"; // 文件大小
           var executeRes = await CommandUtil.getInstance().aapt(apkToUpload!);
           var data = executeRes.data; // aapt分析的结果
           if (data is ApkParserResult) {
-            appInfo.uploadPlatform = '${selectedUploadPlatform?.index}';
-            appInfo.buildName = data.appName;
-            appInfo.buildVersion = data.versionName;
-            appInfo.buildVersionNo = data.versioncode;
-            appInfo.buildIdentifier = data.packageName;
-            appInfo.buildFileSize = fileSize;
-            appInfo.buildQRCodeURL = obsDownloadUrl;
-            appInfo.buildUpdated =
+            jobResult.uploadPlatform = '${selectedUploadPlatform?.index}';
+            jobResult.buildName = data.appName;
+            jobResult.buildVersion = data.versionName;
+            jobResult.buildVersionNo = data.versioncode;
+            jobResult.buildIdentifier = data.packageName;
+            jobResult.buildFileSize = fileSize;
+            jobResult.buildQRCodeURL = obsDownloadUrl;
+            jobResult.buildUpdated =
                 Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
             // 更新日志
-            appInfo.buildUpdateDescription = updateLog;
+            jobResult.buildUpdateDescription = updateLog;
             // 应用描述
-            appInfo.buildDescription = projectAppDesc;
+            jobResult.buildDescription = projectAppDesc;
             return OrderExecuteResult(
-              data: appInfo,
+              data: jobResult,
               succeed: true,
-              executeLog: appInfo.toJsonString(),
+              executeLog: jobResult.toJsonString(),
             );
           } else {
             return OrderExecuteResult(
