@@ -820,6 +820,49 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
+  Future<ExecuteResult> gradleClean({
+    required String projectRoot,
+    required String packageOrder,
+    required String versionName,
+    required String versionCode,
+    required Function(String s) logOutput,
+    TempLogCacheEntity? tempLogCacheEntity,
+  }) async {
+    StringBuffer sb = StringBuffer();
+
+    List<String> params = [];
+    params.add("clean");
+    params.add("--stacktrace");
+
+    debugPrint("$params");
+    tempLogCacheEntity?.clear();
+
+    var process = await execute(
+      cmd: "gradlew.bat",
+      params: params,
+      workDir: projectRoot,
+      binRoot: projectRoot + Platform.pathSeparator,
+      action: (res) {
+        logOutput.call(res);
+        sb.writeln(res);
+        tempLogCacheEntity?.append(res);
+        debugCmdPrint(res);
+      },
+    );
+    var exitCode = await process?.exitCode;
+    _stopExec(process);
+
+    String res = """
+    cmd: gradle clean
+    
+    exitCode : $exitCode
+    
+    $sb
+    """;
+
+    return ExecuteResult(res, exitCode ?? -1);
+  }
+
   Future<ExecuteResult> gradleAssemble({
     required String projectRoot,
     required String packageOrder,

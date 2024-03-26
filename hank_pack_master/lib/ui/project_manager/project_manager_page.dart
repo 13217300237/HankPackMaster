@@ -137,7 +137,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
       child: Card(
         borderRadius: BorderRadius.circular(10),
         padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        backgroundColor: Colors.red.withOpacity(.4),
+        backgroundColor: Colors.orange.withOpacity(.8),
         child: GestureDetector(
           onTap: () {
             DialogUtil.showCustomDialog(

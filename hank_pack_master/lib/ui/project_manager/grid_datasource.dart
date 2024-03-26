@@ -224,11 +224,13 @@ class ProjectEntityDataSource extends DataGridSource {
                         content: getProjectJobResult(700, his, entity),
                         showCancel: false,
                         confirmText: '我知道了！')
-                    .then((value) {
-                  refreshMainPage?.call();
-                  notifyListeners();
-                  // 最近作业历史那个呢
-                });
+                    .then(
+                  (value) {
+                    refreshMainPage?.call();
+                    notifyListeners();
+                    // 最近作业历史那个呢
+                  },
+                );
               }),
         ));
   }
@@ -404,6 +406,7 @@ class ProjectEntityDataSource extends DataGridSource {
                           DialogUtil.showCustomDialog(
                               context: buildContext,
                               title: "确定删除吗?",
+                              confirmText: '确定',
                               content: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -424,6 +427,7 @@ class ProjectEntityDataSource extends DataGridSource {
                               ),
                               onConfirm: () {
                                 deleteProjectRecord(cellValue.value);
+                                refreshMainPage?.call();
                               });
                         }
                       },

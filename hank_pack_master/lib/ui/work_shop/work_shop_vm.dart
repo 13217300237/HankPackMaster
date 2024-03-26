@@ -407,6 +407,27 @@ class WorkShopVm extends ChangeNotifier {
             executeLog: 'gradle.properties还原成功 \n${executeRes.res}');
       });
 
+  get cleanProject => TaskStage("工程clean", stageAction: () async {
+    ExecuteResult executeRes = await CommandUtil.getInstance()
+        .gradleClean(
+        projectRoot: projectWorkDir,
+        packageOrder: selectedOrder!,
+        versionCode: versionCode,
+        versionName: versionName,
+        logOutput: addNewLogLine,
+        tempLogCacheEntity: tempLog);
+
+    if (executeRes.exitCode != 0) {
+      String er = "clean失败，详情请看日志 \n ${tempLog.get()}";
+      return OrderExecuteResult(msg: er, succeed: false, executeLog: er);
+    }
+    return OrderExecuteResult(
+      succeed: true,
+      data: "clean成功",
+      executeLog: executeRes.res,
+    );
+  });
+
   get generateApkTask => TaskStage("生成apk", stageAction: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance()
             .gradleAssemble(
@@ -719,6 +740,7 @@ class WorkShopVm extends ChangeNotifier {
   void initPackageTaskList() {
     taskStateList.clear();
 
+    taskStateList.add(cleanProject);
     taskStateList.add(recoverGradlePropertiesFile);
     taskStateList.add(gitBranchRemote);
     taskStateList.add(gitPullTask);
