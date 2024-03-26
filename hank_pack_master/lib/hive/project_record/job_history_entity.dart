@@ -2,6 +2,8 @@ import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart
 import 'package:hank_pack_master/hive/project_record/stage_record_entity.dart';
 import 'package:hive/hive.dart';
 
+import 'job_result_entity.dart';
+
 part 'job_history_entity.g.dart';
 
 /// 打包作业配置
@@ -12,10 +14,6 @@ class JobHistoryEntity {
 
   @HiveField(3)
   int? buildTime; // 构建时间
-
-  // 作业历史内容,保存的是json，可能是 JobResultEntity 的json串，也有可能是不规律的错误日志
-  @HiveField(2)
-  String? historyContent;
 
   @HiveField(4)
   bool? hasRead; // 是否已读
@@ -29,6 +27,10 @@ class JobHistoryEntity {
   @HiveField(7)
   String? taskName; // 可能是项目激活，项目打包，以及 产物快速上传
 
+  // 作业历史内容,保存的是json，可能是 JobResultEntity 的json串，也有可能是不规律的错误日志
+  @HiveField(8)
+  JobResultEntity jobResultEntity;
+
   /// 临时字段，不必存到数据库
   String? projectName;
   String? gitUrl;
@@ -38,11 +40,11 @@ class JobHistoryEntity {
   JobHistoryEntity({
     required this.buildTime,
     required this.success,
-    required this.historyContent,
     required this.hasRead,
     required this.jobSetting,
     this.stageRecordList,
     this.taskName,
+    required this.jobResultEntity,
   });
 
   @override

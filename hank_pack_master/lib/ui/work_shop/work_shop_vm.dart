@@ -1153,11 +1153,13 @@ class WorkShopVm extends ChangeNotifier {
     if (orderExecuteResult.succeed != true ||
         orderExecuteResult.data is! List<String>) {
       _insertIntoJobHistoryList(
-          success: false,
-          historyContent: "${orderExecuteResult.msg}",
-          jobSetting: runningTask!.setting!,
-          stageRecordList: orderExecuteResult.stageRecordList ?? [],
-          taskName: taskName);
+        success: false,
+        jobSetting: runningTask!.setting!,
+        stageRecordList: orderExecuteResult.stageRecordList ?? [],
+        taskName: taskName,
+        jobResultEntity:
+            JobResultEntity(errMessage: '${orderExecuteResult.msg}'),
+      );
 
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 激活失败, 详情查看激活历史",
           success: false);
@@ -1174,11 +1176,11 @@ class WorkShopVm extends ChangeNotifier {
 
     _insertIntoJobHistoryList(
         success: true,
-        historyContent: jobResult.toJsonString(),
         // 这里要
         jobSetting: runningTask!.setting!,
         stageRecordList: orderExecuteResult.stageRecordList ?? [],
-        taskName: taskName);
+        taskName: taskName,
+        jobResultEntity: jobResult);
 
     onProjectActiveFinished(orderExecuteResult.data);
     _reset();
@@ -1250,23 +1252,21 @@ class WorkShopVm extends ChangeNotifier {
           "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
       _insertIntoJobHistoryList(
           success: true,
-          historyContent: jobResult?.toJsonString() ?? "",
+          jobResultEntity: jobResult!,
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
-      onProjectPackageSucceed(jobResult!);
+      onProjectPackageSucceed();
     } else {
-      var uploadEntity = UploadResultEntity(
-          apkPath: apkToUpload!, errMsg: scheduleRes.msg ?? '');
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
           success: false);
       _insertIntoJobHistoryList(
           success: false,
-          historyContent: uploadEntity.toJsonString(),
+          jobResultEntity: jobResult!,
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
-      onProjectPackageFailed(uploadEntity);
+      onProjectPackageFailed();
     }
   }
 
@@ -1283,26 +1283,24 @@ class WorkShopVm extends ChangeNotifier {
 
       _insertIntoJobHistoryList(
           success: true,
-          historyContent: jobResult?.toJsonString() ?? '',
+          jobResultEntity: jobResult!,
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 快速上传成功, 详情查看打包历史");
-      onProjectPackageSucceed(jobResult!);
+      onProjectPackageSucceed();
     } else {
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 快速上传失败, 详情查看打包历史",
           success: false);
-      var jobResult = UploadResultEntity(
-          apkPath: apkToUpload!, errMsg: scheduleRes.msg ?? '');
       _insertIntoJobHistoryList(
           success: false,
-          historyContent: "${scheduleRes.msg}",
+          jobResultEntity: JobResultEntity(apkPath: apkToUpload!,errMessage: scheduleRes.msg ?? ''),
           jobSetting: runningTask!.setting!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
-      onProjectPackageFailed(jobResult);
+      onProjectPackageFailed();
     }
   }
 
@@ -1323,12 +1321,12 @@ class WorkShopVm extends ChangeNotifier {
     _reset();
   }
 
-  void onProjectPackageSucceed(JobResultEntity jobResult) {
+  void onProjectPackageSucceed() {
     setProjectRecordJobRunning(false);
     _reset();
   }
 
-  void onProjectPackageFailed(UploadResultEntity uploadResultEntity) {
+  void onProjectPackageFailed() {
     setProjectRecordJobRunning(false);
     _reset();
   }
@@ -1343,21 +1341,21 @@ class WorkShopVm extends ChangeNotifier {
 
   void _insertIntoJobHistoryList({
     required bool success,
-    required String historyContent,
     required PackageSetting jobSetting,
     required List<StageRecordEntity> stageRecordList,
     required String taskName,
+    required JobResultEntity jobResultEntity,
   }) {
     var hisList = runningTask!.jobHistoryList;
     hisList ??= runningTask!.jobHistoryList = [];
     hisList.add(JobHistoryEntity(
         buildTime: DateTime.now().millisecondsSinceEpoch,
         success: success,
-        historyContent: historyContent,
         hasRead: false,
         jobSetting: jobSetting,
         stageRecordList: stageRecordList,
-        taskName: taskName));
+        taskName: taskName,
+        jobResultEntity: jobResultEntity));
   }
 
   String _nowTime() {

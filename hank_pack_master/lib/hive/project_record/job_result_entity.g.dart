@@ -41,13 +41,14 @@ class JobResultEntityAdapter extends TypeAdapter<JobResultEntity> {
       errCode: fields[23] as String?,
       errMessage: fields[22] as String?,
       assembleOrders: (fields[24] as List?)?.cast<String>(),
+      apkPath: fields[25] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, JobResultEntity obj) {
     writer
-      ..writeByte(24)
+      ..writeByte(25)
       ..writeByte(1)
       ..write(obj.uploadPlatform)
       ..writeByte(2)
@@ -95,7 +96,9 @@ class JobResultEntityAdapter extends TypeAdapter<JobResultEntity> {
       ..writeByte(23)
       ..write(obj.errCode)
       ..writeByte(24)
-      ..write(obj.assembleOrders);
+      ..write(obj.assembleOrders)
+      ..writeByte(25)
+      ..write(obj.apkPath);
   }
 
   @override

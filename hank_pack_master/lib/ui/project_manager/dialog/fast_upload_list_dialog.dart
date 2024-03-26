@@ -58,10 +58,6 @@ class FastUploadListDialog extends StatelessWidget {
                             jobHistory.projectDesc);
                         projectRecordEntity.setting = jobHistory.jobSetting;
 
-                        var uploadResult = UploadResultEntity.fromJsonString(
-                            jobHistory.historyContent!);
-                        projectRecordEntity.apkPath = uploadResult.apkPath;
-                        workShopVm.enqueue(projectRecordEntity);
                       }
                     }),
               ),

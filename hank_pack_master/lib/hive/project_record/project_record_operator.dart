@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
-import 'package:hank_pack_master/ui/work_shop/model/fast_upload_entity.dart';
 import 'package:hive/hive.dart';
+
+import 'job_result_entity.dart';
 
 class ProjectRecordOperator {
   /// 盒子名称
@@ -193,7 +194,7 @@ class ProjectRecordOperator {
 
     var hisIndex = find.jobHistoryList!.indexWhere((e) =>
         e.buildTime == jobHistoryEntity.buildTime &&
-        e.historyContent == jobHistoryEntity.historyContent); // 尝试找到这一条历史记录
+        e.jobResultEntity == jobHistoryEntity.jobResultEntity); // 尝试找到这一条历史记录
 
     if (hisIndex == -1) {
       // 没找到
@@ -239,7 +240,7 @@ class ProjectRecordOperator {
 
     var hisIndex = findRes.jobHistoryList!.indexWhere((e) =>
         e.buildTime == jobHistoryEntity.buildTime &&
-        e.historyContent == jobHistoryEntity.historyContent); // 尝试找到这一条历史记录
+        e.jobResultEntity == jobHistoryEntity.jobResultEntity); // 尝试找到这一条历史记录
 
     if (hisIndex == -1) {
       // 没找到
@@ -276,10 +277,13 @@ class ProjectRecordOperator {
   static bool needFastUpload(JobHistoryEntity historyEntity) {
     // 尝试把 错误码
     try {
-      UploadResultEntity fastUploadEntity =
-          UploadResultEntity.fromJsonString(historyEntity.historyContent!);
+      JobResultEntity jobResultEntity = historyEntity.jobResultEntity;
 
-      var f = File(fastUploadEntity.apkPath);
+      if (jobResultEntity.apkPath == null) {
+        return false;
+      }
+
+      var f = File(jobResultEntity.apkPath!);
       if (f.existsSync()) {
         return true;
       } else {

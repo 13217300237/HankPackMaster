@@ -36,28 +36,6 @@ class HistoryCard extends StatelessWidget {
     fontFamily: 'STKAITI',
   );
 
-  JobResultEntity get myJobResult {
-    JobResultEntity jobResult;
-    try {
-      // 尝试将 historyContent转化成FastUploadEntity对象
-      var uploadEntity =
-          UploadResultEntity.fromJsonString(historyEntity.historyContent!);
-
-      if (uploadEntity.correct()) {
-        jobResult = JobResultEntity(errMessage: uploadEntity.errMsg);
-      } else {
-        jobResult = JobResultEntity.fromJsonString(
-          historyEntity.historyContent!,
-        );
-      }
-    } catch (ex) {
-      debugPrint('ex:$ex');
-      jobResult = JobResultEntity(
-        errMessage: historyEntity.historyContent,
-      ); // 针对激活成功，这里要做判断
-    }
-    return jobResult;
-  }
 
   final bgColor = const Color(0xffe0e0e0);
 
@@ -94,11 +72,11 @@ class HistoryCard extends StatelessWidget {
                         const SizedBox(height: 10),
                         JobSettingCard(historyEntity.jobSetting),
                         const SizedBox(height: 10),
-                        JobResultCard(
-                          jobResult: myJobResult,
-                          initiallyExpanded: false,
-                          maxHeight: maxHeight,
-                        ),
+                        // JobResultCard(
+                        //   jobResult: myJobResult,
+                        //   initiallyExpanded: false,
+                        //   maxHeight: maxHeight,
+                        // ),
                         const SizedBox(height: 10),
                         _stageListCard(historyEntity),
                       ],

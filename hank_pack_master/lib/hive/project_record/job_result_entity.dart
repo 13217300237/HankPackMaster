@@ -58,6 +58,9 @@ class JobResultEntity {
   @HiveField(24)
   List<String>? assembleOrders;
 
+  @HiveField(25)
+  String? apkPath; // 错误码，暂未用到
+
   JobResultEntity({
     this.buildKey,
     this.buildType,
@@ -83,6 +86,7 @@ class JobResultEntity {
     this.errCode,
     this.errMessage,
     this.assembleOrders,
+    this.apkPath,
   });
 
   factory JobResultEntity.fromJson(Map<String, dynamic> data) {
@@ -111,6 +115,7 @@ class JobResultEntity {
       errCode: data['errCode'],
       errMessage: data['errMessage'],
       assembleOrders: (data['assembleOrders'] ?? []).cast<String>(),
+      apkPath: data['apkPath'],
     );
   }
 
@@ -139,7 +144,8 @@ class JobResultEntity {
       'uploadPlatform': uploadPlatform,
       'errCode': errCode,
       'errMessage': errMessage,
-      'assembleOrders': assembleOrders
+      'assembleOrders': assembleOrders,
+      'apkPath': apkPath,
     };
   }
 
