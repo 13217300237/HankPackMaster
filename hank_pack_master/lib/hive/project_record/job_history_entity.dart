@@ -14,7 +14,8 @@ class JobHistoryEntity {
   int? buildTime; // 构建时间
 
   @HiveField(2)
-  String? historyContent; // 作业历史内容,保存的是json，可能是 JobResultEntity 的json串，也有可能是不规律的错误日志
+  String?
+      historyContent; // 作业历史内容,保存的是json，可能是 JobResultEntity 的json串，也有可能是不规律的错误日志
 
   @HiveField(4)
   bool? hasRead; // 是否已读
@@ -43,4 +44,15 @@ class JobHistoryEntity {
     this.stageRecordList,
     this.taskName,
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is JobHistoryEntity &&
+        other.gitUrl == gitUrl &&
+        other.branchName == branchName;
+  }
+
+  @override
+  int get hashCode => branchName.hashCode ^ gitUrl.hashCode;
 }

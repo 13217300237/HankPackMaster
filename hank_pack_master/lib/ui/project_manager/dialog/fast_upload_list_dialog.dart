@@ -21,6 +21,8 @@ class FastUploadListDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     var jobHistoryList = ProjectRecordOperator.findFastUploadTaskList();
 
+    // 待上传列表中，相同的项目只保留最新的那条记录 TODO
+
     return Column(
       children: [
         Expanded(
@@ -42,27 +44,30 @@ class FastUploadListDialog extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              FilledButton(
-                  child: Text("一键上传", style: _textStyle),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    for (var jobHistory in jobHistoryList) {
-                      var projectRecordEntity = ProjectRecordEntity(
-                          jobHistory.gitUrl!,
-                          jobHistory.branchName!,
-                          jobHistory.projectName!,
-                          jobHistory.projectDesc);
-                      projectRecordEntity.setting = jobHistory.jobSetting;
+              Visibility(
+                visible: jobHistoryList.isNotEmpty,
+                child: FilledButton(
+                    child: Text("一键上传", style: _textStyle),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      for (var jobHistory in jobHistoryList) {
+                        var projectRecordEntity = ProjectRecordEntity(
+                            jobHistory.gitUrl!,
+                            jobHistory.branchName!,
+                            jobHistory.projectName!,
+                            jobHistory.projectDesc);
+                        projectRecordEntity.setting = jobHistory.jobSetting;
 
-                      var uploadResult = UploadResultEntity.fromJsonString(
-                          jobHistory.historyContent!);
-                      projectRecordEntity.apkPath = uploadResult.apkPath;
-                      workShopVm.enqueue(projectRecordEntity);
-                    }
-                  }),
+                        var uploadResult = UploadResultEntity.fromJsonString(
+                            jobHistory.historyContent!);
+                        projectRecordEntity.apkPath = uploadResult.apkPath;
+                        workShopVm.enqueue(projectRecordEntity);
+                      }
+                    }),
+              ),
               const SizedBox(width: 20),
               OutlinedButton(
-                  child: Text("取消", style: _textStyle),
+                  child: Text("关闭", style: _textStyle),
                   onPressed: () {
                     Navigator.pop(context);
                   }),

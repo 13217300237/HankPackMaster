@@ -106,8 +106,11 @@ class ProjectRecordOperator {
 
     var allProject = findAll();
 
+    debugPrint("allProject.length-> ${allProject.length}");
+
     for (var e in allProject) {
       var temp = e.jobHistoryList;
+      debugPrint("for.e.jobHistoryList-> ${e.jobHistoryList}");
       temp?.forEach((j) {
         j.projectName = e.projectName;
         j.gitUrl = e.gitUrl;
@@ -256,12 +259,19 @@ class ProjectRecordOperator {
 
   /// 找出所有需要快速上传的失败历史
   static List<JobHistoryEntity> findFastUploadTaskList() {
-    List<JobHistoryEntity> list = findALlHis();
+    List<JobHistoryEntity> list = findALlHis().reversed.toList();
     list.removeWhere((e) => e.success == true); // 先删除所有成功的
     // 再找出所有支持快速上传的 历史记录
     list.removeWhere((e) => !needFastUpload(e)); // 再把不需要快速上传的失败记录去掉
     // 现在就只剩下了需要快速上传的记录了...
-    return list;
+    List<JobHistoryEntity> newList = [];
+    for (var e in list) {
+      if (!newList.contains(e)) {
+        newList.add(e);
+      }
+    }
+
+    return newList;
   }
 
   /// 判断是否需要快速上传
