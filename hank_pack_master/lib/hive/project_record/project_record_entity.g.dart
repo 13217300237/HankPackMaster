@@ -20,15 +20,15 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       fields[2] as String,
       fields[3] as String,
       fields[1] as String,
-      fields[8] as String?,
+      fields[6] as String?,
       preCheckOk: fields[4] as bool,
-      jobRunning: fields[7] as bool?,
+      jobRunning: fields[5] as bool?,
     )
-      ..activeSetting = fields[9] as PackageSetting?
-      ..packageSetting = fields[10] as PackageSetting?
-      ..fastUploadSetting = fields[11] as PackageSetting?
-      ..assembleOrdersStr = fields[12] as String?
-      ..jobHistoryList = (fields[13] as List?)?.cast<JobHistoryEntity>();
+      ..activeSetting = fields[7] as PackageSetting?
+      ..packageSetting = fields[8] as PackageSetting?
+      ..fastUploadSetting = fields[9] as PackageSetting?
+      ..assembleOrdersStr = fields[10] as String?
+      ..jobHistoryList = (fields[11] as List?)?.cast<JobHistoryEntity>();
   }
 
   @override
@@ -43,19 +43,19 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       ..write(obj.branch)
       ..writeByte(4)
       ..write(obj.preCheckOk)
-      ..writeByte(7)
+      ..writeByte(5)
       ..write(obj.jobRunning)
-      ..writeByte(8)
+      ..writeByte(6)
       ..write(obj.projectDesc)
-      ..writeByte(9)
+      ..writeByte(7)
       ..write(obj.activeSetting)
-      ..writeByte(10)
+      ..writeByte(8)
       ..write(obj.packageSetting)
-      ..writeByte(11)
+      ..writeByte(9)
       ..write(obj.fastUploadSetting)
-      ..writeByte(12)
+      ..writeByte(10)
       ..write(obj.assembleOrdersStr)
-      ..writeByte(13)
+      ..writeByte(11)
       ..write(obj.jobHistoryList);
   }
 

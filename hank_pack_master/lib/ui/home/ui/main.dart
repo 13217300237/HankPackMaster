@@ -58,10 +58,10 @@ class MyApp extends StatelessWidget {
   ///
   Widget _buildMultipleStateWidgetSimpleDemo(
       {required double width,
-        required double loadingHeight,
-        required double successHeight,
-        required double radius,
-        required Duration overtimeDuration}) {
+      required double loadingHeight,
+      required double successHeight,
+      required double radius,
+      required Duration overtimeDuration}) {
     successLayoutBuilder(data) {
       return Container(
           width: width,
@@ -70,17 +70,17 @@ class MyApp extends StatelessWidget {
               color: Colors.blue, borderRadius: BorderRadius.circular(radius)),
           child: Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset('images/cat.png', width: 100, height: 100),
-                  const SizedBox(height: 20),
-                  Text('$data',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold))
-                ],
-              )));
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset('images/cat.png', width: 100, height: 100),
+              const SizedBox(height: 20),
+              Text('$data',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold))
+            ],
+          )));
     }
 
     Widget initLayout() {
@@ -189,35 +189,35 @@ class MyApp extends StatelessWidget {
   Widget _buildButtons() {
     return SingleChildScrollView(
         child: Center(
-          child: Column(children: [
-            ElevatedButton(
-                onPressed: () async {
-                  _stateController.changeState(Status.loading);
-                  DataWrapper dataWrapper = await _getFutureData();
-                  debugPrint("控制器改变数据 ${dataWrapper.data}");
-                  _stateController.changeState(Status.success,
-                      dataWrapper: dataWrapper);
-                },
-                child: const Text('模拟加载成功')),
-            const SizedBox(width: 10),
-            ElevatedButton(
-                onPressed: () async {
-                  _stateController.changeState(Status.loading);
-                  var dataWrapper = await _getFutureFailed();
-                  _stateController.changeState(Status.error,
-                      dataWrapper: dataWrapper);
-                },
-                child: const Text('模拟加载失败')),
-            const SizedBox(width: 10),
-            ElevatedButton(
-                onPressed: () async {
-                  _stateController.changeState(Status.loading);
-                  await Future.delayed(const Duration(milliseconds: 1800));
+      child: Column(children: [
+        ElevatedButton(
+            onPressed: () async {
+              _stateController.changeState(Status.loading);
+              DataWrapper dataWrapper = await _getFutureData();
+              debugPrint("控制器改变数据 ${dataWrapper.data}");
+              _stateController.changeState(Status.success,
+                  dataWrapper: dataWrapper);
+            },
+            child: const Text('模拟加载成功')),
+        const SizedBox(width: 10),
+        ElevatedButton(
+            onPressed: () async {
+              _stateController.changeState(Status.loading);
+              var dataWrapper = await _getFutureFailed();
+              _stateController.changeState(Status.error,
+                  dataWrapper: dataWrapper);
+            },
+            child: const Text('模拟加载失败')),
+        const SizedBox(width: 10),
+        ElevatedButton(
+            onPressed: () async {
+              _stateController.changeState(Status.loading);
+              await Future.delayed(const Duration(milliseconds: 1800));
 
-                  _stateController.changeState(Status.timeout);
-                },
-                child: const Text('模拟加载超时')),
-          ]),
-        ));
+              _stateController.changeState(Status.timeout);
+            },
+            child: const Text('模拟加载超时')),
+      ]),
+    ));
   }
 }

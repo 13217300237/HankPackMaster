@@ -6,8 +6,6 @@ import 'package:hank_pack_master/hive/project_record/project_record_entity.dart'
 import 'package:hank_pack_master/ui/work_shop/model/fast_upload_entity.dart';
 import 'package:hive/hive.dart';
 
-import '../../comm/pgy/pgy_entity.dart';
-
 class ProjectRecordOperator {
   /// 盒子名称
   static const String _boxName = "projectRecordDbV2"; // 每一次更新

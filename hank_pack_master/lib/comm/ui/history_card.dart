@@ -5,6 +5,7 @@ import 'package:hank_pack_master/comm/ui/text_on_arc.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../../hive/project_record/job_history_entity.dart';
+import '../../hive/project_record/job_result_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import '../../ui/project_manager/grid_datasource.dart';
@@ -50,6 +51,7 @@ class HistoryCard extends StatelessWidget {
         );
       }
     } catch (ex) {
+      debugPrint('ex:$ex');
       jobResult = JobResultEntity(
         errMessage: historyEntity.historyContent,
       ); // 针对激活成功，这里要做判断

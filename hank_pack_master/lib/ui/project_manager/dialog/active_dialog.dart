@@ -41,7 +41,6 @@ class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initSetting(widget.projectRecordEntity.activeSetting);
     });
-
   }
 
   void initSetting(PackageSetting? activeSetting) {

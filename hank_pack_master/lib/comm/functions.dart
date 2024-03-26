@@ -9,5 +9,3 @@ bool get isDesktop {
     TargetPlatform.macOS,
   ].contains(defaultTargetPlatform);
 }
-
-

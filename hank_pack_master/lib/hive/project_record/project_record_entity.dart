@@ -1,4 +1,3 @@
-import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hive/hive.dart';
 

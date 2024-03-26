@@ -33,5 +33,4 @@ class EnvCheckResultEntity {
 
   @override
   int get hashCode => envPath.hashCode;
-
 }

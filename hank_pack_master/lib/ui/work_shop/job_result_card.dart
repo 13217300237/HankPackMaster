@@ -5,7 +5,7 @@ import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import '../../comm/pgy/pgy_entity.dart';
+import '../../hive/project_record/job_result_entity.dart';
 
 /// 流水线最终成果展示卡片
 class JobResultCard extends StatelessWidget {
@@ -21,7 +21,8 @@ class JobResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!jobResult.errMessage.empty()) { // 这里有问题，上传失败时，这个errMessage是空的.
+    if (!jobResult.errMessage.empty()) {
+      // 这里有问题，上传失败时，这个errMessage是空的.
       return msgWidget();
     } else if (jobResult.assembleOrders != null &&
         jobResult.assembleOrders!.isNotEmpty) {
@@ -84,7 +85,9 @@ class JobResultCard extends StatelessWidget {
         ),
       );
     }
-    return const SizedBox(child: Text('错误详情'),);
+    return const SizedBox(
+      child: Text('错误详情'),
+    );
   }
 
   Widget qrCode() {

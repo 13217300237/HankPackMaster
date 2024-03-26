@@ -24,6 +24,7 @@ import '../../comm/upload_platforms.dart';
 import '../../comm/wait_util.dart';
 import '../../core/command_util.dart';
 import '../../hive/env_config/env_config_operator.dart';
+import '../../hive/project_record/job_result_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import '../../hive/project_record/stage_record_entity.dart';
@@ -408,25 +409,24 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get cleanProject => TaskStage("工程clean", stageAction: () async {
-    ExecuteResult executeRes = await CommandUtil.getInstance()
-        .gradleClean(
-        projectRoot: projectWorkDir,
-        packageOrder: selectedOrder!,
-        versionCode: versionCode,
-        versionName: versionName,
-        logOutput: addNewLogLine,
-        tempLogCacheEntity: tempLog);
+        ExecuteResult executeRes = await CommandUtil.getInstance().gradleClean(
+            projectRoot: projectWorkDir,
+            packageOrder: selectedOrder!,
+            versionCode: versionCode,
+            versionName: versionName,
+            logOutput: addNewLogLine,
+            tempLogCacheEntity: tempLog);
 
-    if (executeRes.exitCode != 0) {
-      String er = "clean失败，详情请看日志 \n ${tempLog.get()}";
-      return OrderExecuteResult(msg: er, succeed: false, executeLog: er);
-    }
-    return OrderExecuteResult(
-      succeed: true,
-      data: "clean成功",
-      executeLog: executeRes.res,
-    );
-  });
+        if (executeRes.exitCode != 0) {
+          String er = "clean失败，详情请看日志 \n ${tempLog.get()}";
+          return OrderExecuteResult(msg: er, succeed: false, executeLog: er);
+        }
+        return OrderExecuteResult(
+          succeed: true,
+          data: "clean成功",
+          executeLog: executeRes.res,
+        );
+      });
 
   get generateApkTask => TaskStage("生成apk", stageAction: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance()
@@ -592,7 +592,8 @@ class WorkShopVm extends ChangeNotifier {
           if (s.data is Map<String, dynamic>) {
             JobResultEntity jobResult =
                 JobResultEntity.fromJson(s.data as Map<String, dynamic>);
-            jobResult.buildDescription = projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
+            jobResult.buildDescription =
+                projectAppDesc; // 应用描述，PGY数据有误，所以直接自己生成
             jobResult.uploadPlatform = '${selectedUploadPlatform?.index}';
 
             addNewLogLine("应用名称: ${jobResult.buildName}");
@@ -1151,7 +1152,6 @@ class WorkShopVm extends ChangeNotifier {
     /// 激活失败时
     if (orderExecuteResult.succeed != true ||
         orderExecuteResult.data is! List<String>) {
-
       _insertIntoJobHistoryList(
           success: false,
           historyContent: "${orderExecuteResult.msg}",
@@ -1288,10 +1288,11 @@ class WorkShopVm extends ChangeNotifier {
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
       ToastUtil.showPrettyToast(
-          "任务 ${runningTask!.projectName} 执行成功, 详情查看打包历史");
+          "任务 ${runningTask!.projectName} 快速上传成功, 详情查看打包历史");
       onProjectPackageSucceed(jobResult!);
     } else {
-      ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 执行失败, 详情查看打包历史",
+      ToastUtil.showPrettyToast(
+          "任务 ${runningTask!.projectName} 快速上传失败, 详情查看打包历史",
           success: false);
       var jobResult = UploadResultEntity(
           apkPath: apkToUpload!, errMsg: scheduleRes.msg ?? '');

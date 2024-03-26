@@ -10,8 +10,6 @@ import '../../../comm/str_const.dart';
 import '../../../hive/env_config/env_config_entity.dart';
 import '../../../hive/env_config/env_config_operator.dart';
 import '../../../hive/env_group/env_group_operator.dart';
-import '../../../hive/project_record/job_history_entity.dart';
-import '../../../hive/project_record/project_record_operator.dart';
 
 class EnvParamVm extends ChangeNotifier {
   /// 环境有问题时的错误提示

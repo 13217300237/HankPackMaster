@@ -92,8 +92,8 @@ flutter:
   fonts:
     - family: STKAITI
       fonts:
-       - asset: fonts/STKAITI.TTF
-       - asset: fonts/STXIHEI.TTF
+        - asset: fonts/STKAITI.TTF
+        - asset: fonts/STXIHEI.TTF
 
   assets:
     - images/

@@ -8,6 +8,6 @@ class ApkParserResult {
     required this.appName,
     required this.packageName,
     required this.versioncode,
-    required this.versionName,}
-  );
+    required this.versionName,
+  });
 }

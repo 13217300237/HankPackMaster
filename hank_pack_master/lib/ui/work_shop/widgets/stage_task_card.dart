@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 
 import '../../../comm/dialog_util.dart';
 import '../../../comm/order_execute_result.dart';
-import '../../../comm/pgy/pgy_entity.dart';
 import '../../../comm/text_util.dart';
+import '../../../hive/project_record/job_result_entity.dart';
 import '../job_result_card.dart';
 import '../task_stage.dart';
 

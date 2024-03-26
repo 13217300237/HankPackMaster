@@ -13,9 +13,9 @@ class JobHistoryEntity {
   @HiveField(3)
   int? buildTime; // 构建时间
 
+  // 作业历史内容,保存的是json，可能是 JobResultEntity 的json串，也有可能是不规律的错误日志
   @HiveField(2)
-  String?
-      historyContent; // 作业历史内容,保存的是json，可能是 JobResultEntity 的json串，也有可能是不规律的错误日志
+  String? historyContent;
 
   @HiveField(4)
   bool? hasRead; // 是否已读

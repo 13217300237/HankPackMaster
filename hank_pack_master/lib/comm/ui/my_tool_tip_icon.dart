@@ -6,7 +6,7 @@ Widget toolTipIcon({
   double marginLeft = 10,
 }) {
   return Tooltip(
-    excludeFromSemantics:true,
+    excludeFromSemantics: true,
     message: msg,
     child: Padding(
       padding: EdgeInsets.only(left: marginLeft),

@@ -17,6 +17,7 @@ import 'hive/env_group/env_check_result_entity.dart';
 import 'hive/env_group/env_group_entity.dart';
 import 'hive/env_group/env_group_operator.dart';
 import 'hive/project_record/job_history_entity.dart';
+import 'hive/project_record/job_result_entity.dart';
 import 'hive/project_record/package_setting_entity.dart';
 import 'hive/project_record/project_record_entity.dart';
 import 'hive/project_record/project_record_operator.dart';
@@ -35,8 +36,10 @@ void main() async {
   Hive.registerAdapter(ProjectRecordEntityAdapter(), override: true);
   Hive.registerAdapter(EnvGroupEntityAdapter(), override: true);
   Hive.registerAdapter(EnvCheckResultEntityAdapter(), override: true);
-  Hive.registerAdapter(JobHistoryEntityAdapter(), override: true); // StageRecordEntityAdapter
+  Hive.registerAdapter(JobHistoryEntityAdapter(),
+      override: true); // StageRecordEntityAdapter
   Hive.registerAdapter(StageRecordEntityAdapter(), override: true);
+  Hive.registerAdapter(JobResultEntityAdapter(), override: true);
 
   await Hive.initFlutter(saveDb.path);
   await EnvConfigOperator.openBox();

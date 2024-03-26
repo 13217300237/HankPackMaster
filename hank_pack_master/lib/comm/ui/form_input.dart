@@ -61,10 +61,9 @@ Widget input(
         Expanded(
           child: TextBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: mainPanelGradient,
-                border: Border.all(color: Colors.white,width: .35)
-              ),
+                  borderRadius: BorderRadius.circular(8),
+                  gradient: mainPanelGradient,
+                  border: Border.all(color: Colors.white, width: .35)),
               unfocusedColor: Colors.transparent,
               highlightColor: Colors.transparent,
               style: textStyle,
@@ -75,7 +74,6 @@ Widget input(
               maxLines: maxLines,
               maxLength: maxLength,
               enabled: enable,
-
               controller: controller),
         ),
         if (suffix != null) ...[suffix],

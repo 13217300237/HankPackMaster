@@ -1,4 +1,3 @@
-
 import 'order_execute_result.dart';
 
 typedef ActionFunc = Future<OrderExecuteResult> Function();
