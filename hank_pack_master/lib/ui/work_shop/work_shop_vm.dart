@@ -132,6 +132,12 @@ class WorkShopVm extends ChangeNotifier {
     }
   }
 
+  String get unreadHisCount =>
+      ProjectRecordOperator.findAllUnreadJobHistoryEntity().length.max99();
+
+  String get getToUploadCount =>
+      ProjectRecordOperator.findFastUploadTaskList().length.max99();
+
   get prepareParamTask => TaskStage("参数准备", stageAction: () async {
         if (gitUrl.isEmpty) {
           return OrderExecuteResult(msg: "git仓库地址 不能为空", succeed: false);

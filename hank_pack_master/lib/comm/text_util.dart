@@ -104,3 +104,15 @@ String cloneFailedSolution = '''
 在资源监视器的 “CPU” 标签页中，找到 “关联的句柄” 部分，并输入文件名或路径以筛选关联的句柄。
 根据结果，你可以看到哪个进程正在使用特定的文件。关闭该进程再次尝试clone即可。
         ''';
+
+extension Max on int {
+  String max99() {
+    if (this > 99) {
+      return "99+";
+    } else if (this == 0) {
+      return "";
+    } else {
+      return "$this";
+    }
+  }
+}

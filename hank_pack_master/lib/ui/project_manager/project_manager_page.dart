@@ -46,11 +46,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   late EnvParamVm _envParamVm;
   late AppTheme _appTheme;
 
-  int get unreadHisCount {
-    var unreadHisList = ProjectRecordOperator.findAllUnreadJobHistoryEntity();
-    return unreadHisList.length;
-  }
-
   @override
   Widget build(BuildContext context) {
     _envParamVm = context.watch<EnvParamVm>();
@@ -136,7 +131,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   Widget fastUploadTodoWidget() {
-    String recentTitle = "待上传";
+    String recentTitle = "待上传列表";
     return Padding(
       padding: const EdgeInsets.only(right: 15.0),
       child: Card(
@@ -164,16 +159,19 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                       fontSize: 20,
                       color: Colors.white)),
               Visibility(
-                visible: unreadHisCount > 0,
+                visible: _workShopVm.getToUploadCount.isNotEmpty,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 10.0),
                   child: badges.Badge(
                     ignorePointer: false,
-                    badgeContent: Text('$unreadHisCount',
-                        style: const TextStyle(color: Colors.white)),
+                    badgeContent: Text(_workShopVm.getToUploadCount,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        )),
                     badgeStyle: badges.BadgeStyle(
                       shape: badges.BadgeShape.square,
-                      badgeColor: Colors.red,
+                      badgeColor: Colors.yellow,
                       padding: const EdgeInsets.all(5),
                       borderRadius: BorderRadius.circular(4),
                       borderSide:
@@ -226,12 +224,12 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
                       fontSize: 20,
                       color: Colors.white)),
               Visibility(
-                visible: unreadHisCount > 0,
+                visible: _workShopVm.unreadHisCount.isNotEmpty,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 10.0),
                   child: badges.Badge(
                     ignorePointer: false,
-                    badgeContent: Text('$unreadHisCount',
+                    badgeContent: Text(_workShopVm.unreadHisCount,
                         style: const TextStyle(color: Colors.white)),
                     badgeStyle: badges.BadgeStyle(
                       shape: badges.BadgeShape.square,
