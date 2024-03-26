@@ -112,6 +112,7 @@ class ProjectRecordOperator {
         j.projectName = e.projectName;
         j.gitUrl = e.gitUrl;
         j.branchName = e.branch;
+        j.projectDesc = e.projectDesc;
       });
 
       if (temp != null) {
@@ -147,6 +148,7 @@ class ProjectRecordOperator {
         j.projectName = e.projectName;
         j.gitUrl = e.gitUrl;
         j.branchName = e.branch;
+        j.projectDesc = e.projectDesc;
       });
 
       if (temp != null) {

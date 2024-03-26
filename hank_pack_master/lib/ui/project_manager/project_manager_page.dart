@@ -20,6 +20,7 @@ import '../comm/vm/env_param_vm.dart';
 import 'column_name_const.dart';
 import 'dialog/create_project_record_dialog.dart';
 import 'dialog/fast_upload_dialog.dart';
+import 'dialog/fast_upload_list_dialog.dart';
 import 'grid_datasource.dart';
 
 class ProjectManagerPage extends StatefulWidget {
@@ -131,7 +132,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   Widget fastUploadTodoWidget() {
-    String recentTitle = "待上传列表";
+    String title = "待上传列表";
     return Padding(
       padding: const EdgeInsets.only(right: 15.0),
       child: Card(
@@ -141,19 +142,22 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         child: GestureDetector(
           onTap: () {
             DialogUtil.showCustomDialog(
-                    context: context,
-                    title: recentTitle,
-                    maxWidth: 1200,
-                    content: getFastUploadHisList(maxHeight: 700),
-                    showCancel: false)
-                .then((value) {
+              context: context,
+              title: title,
+              maxWidth: 1200,
+              content: FastUploadListDialog(
+                maxHeight: 700,
+                workShopVm: _workShopVm,
+              ),
+              showActions: false,
+            ).then((value) {
               setState(() {});
               _dataSource.notifyListeners();
             });
           },
           child: Row(
             children: [
-              Text(recentTitle,
+              Text(title,
                   style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 20,
@@ -636,23 +640,6 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         );
       },
       itemCount: recentJobHistoryList.length,
-    );
-  }
-
-  Widget getFastUploadHisList({required double maxHeight}) {
-    var list = ProjectRecordOperator.findFastUploadTaskList();
-
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        var e = list[index];
-        return HistoryCard(
-          historyEntity: e,
-          maxHeight: maxHeight,
-          projectRecordEntity:
-              ProjectRecordEntity(e.gitUrl!, e.branchName!, e.projectName!, ''),
-        );
-      },
-      itemCount: list.length,
     );
   }
 }

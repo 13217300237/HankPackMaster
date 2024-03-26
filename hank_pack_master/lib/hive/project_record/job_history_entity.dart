@@ -28,10 +28,11 @@ class JobHistoryEntity {
   @HiveField(7)
   String? taskName; // 可能是项目激活，项目打包，以及 产物快速上传
 
-  /// 3个临时字段，不必存到数据库
+  /// 临时字段，不必存到数据库
   String? projectName;
   String? gitUrl;
   String? branchName;
+  String? projectDesc;
 
   JobHistoryEntity({
     required this.buildTime,
