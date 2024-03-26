@@ -10,6 +10,7 @@ import '../../hive/project_record/project_record_operator.dart';
 import '../../ui/project_manager/grid_datasource.dart';
 import '../../ui/project_manager/job_setting_card.dart';
 import '../../ui/work_shop/job_result_card.dart';
+import '../../ui/work_shop/model/fast_upload_entity.dart';
 import '../pgy/pgy_entity.dart';
 import '../text_util.dart';
 
@@ -37,10 +38,21 @@ class HistoryCard extends StatelessWidget {
   JobResultEntity get myJobResult {
     JobResultEntity jobResult;
     try {
-      jobResult = JobResultEntity.fromJsonString(historyEntity.historyContent!);
+      // 尝试将 historyContent转化成FastUploadEntity对象
+      var uploadEntity =
+          UploadResultEntity.fromJsonString(historyEntity.historyContent!);
+
+      if (uploadEntity.correct()) {
+        jobResult = JobResultEntity(errMessage: uploadEntity.errMsg);
+      } else {
+        jobResult = JobResultEntity.fromJsonString(
+          historyEntity.historyContent!,
+        );
+      }
     } catch (ex) {
-      jobResult =
-          JobResultEntity(errMessage: historyEntity.historyContent); // 针对激活成功，这里要做判断
+      jobResult = JobResultEntity(
+        errMessage: historyEntity.historyContent,
+      ); // 针对激活成功，这里要做判断
     }
     return jobResult;
   }
