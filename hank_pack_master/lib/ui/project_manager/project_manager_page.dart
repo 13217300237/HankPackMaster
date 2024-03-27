@@ -634,8 +634,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
         return HistoryCard(
           historyEntity: e,
           maxHeight: maxHeight,
-          projectRecordEntity:
-              ProjectRecordEntity(e.gitUrl!, e.branchName!, e.projectName!, ''),
+          projectRecordEntity: e.parentRecord,
         );
       },
       itemCount: recentJobHistoryList.length,

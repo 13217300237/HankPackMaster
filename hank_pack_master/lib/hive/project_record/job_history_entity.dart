@@ -1,4 +1,5 @@
 import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/hive/project_record/stage_record_entity.dart';
 import 'package:hive/hive.dart';
 
@@ -27,15 +28,11 @@ class JobHistoryEntity {
   @HiveField(7)
   String? taskName; // 可能是项目激活，项目打包，以及 产物快速上传
 
-  // 作业历史内容,保存的是json，可能是 JobResultEntity 的json串，也有可能是不规律的错误日志
   @HiveField(8)
-  JobResultEntity jobResultEntity;
+  JobResultEntity jobResultEntity; // 作业结果封装
 
-  /// 临时字段，不必存到数据库
-  String? projectName;
-  String? gitUrl;
-  String? branchName;
-  String? projectDesc;
+  @HiveField(9)
+  ProjectRecordEntity parentRecord; // 工程实体的副本
 
   JobHistoryEntity({
     required this.buildTime,
@@ -45,16 +42,16 @@ class JobHistoryEntity {
     this.stageRecordList,
     this.taskName,
     required this.jobResultEntity,
+    required this.parentRecord,
   });
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is JobHistoryEntity &&
-        other.gitUrl == gitUrl &&
-        other.branchName == branchName;
+        other.parentRecord == parentRecord;
   }
 
   @override
-  int get hashCode => branchName.hashCode ^ gitUrl.hashCode;
+  int get hashCode => parentRecord.hashCode;
 }

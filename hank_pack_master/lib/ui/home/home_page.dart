@@ -111,8 +111,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      var jobResultEntity = JobResultEntity(errMessage: 'sss');
-      debugPrint("jobResultEntity->${jobResultEntity.errMessage}");
     });
   }
 

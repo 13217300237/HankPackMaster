@@ -62,11 +62,11 @@ class _ActiveDialogWidgetState extends State<ActiveDialogWidget> {
         onPressed: () {
           // 将此任务添加到队列中去
           widget.projectRecordEntity.activeSetting =
-              widget.projectRecordEntity.setting = PackageSetting(jdk: _jdk);
+              widget.projectRecordEntity.settingToWorkshop = PackageSetting(jdk: _jdk);
 
           ProjectRecordOperator.update(widget.projectRecordEntity);
 
-          String errMsg = widget.projectRecordEntity.setting!.readyToActive();
+          String errMsg = widget.projectRecordEntity.settingToWorkshop!.readyToActive();
           if (errMsg.isNotEmpty) {
             setState(() => _errMsg = errMsg);
             return;

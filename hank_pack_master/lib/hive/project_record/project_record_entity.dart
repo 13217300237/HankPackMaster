@@ -102,7 +102,7 @@ class ProjectRecordEntity {
 
   /// 临时字段，不用存数据库
   /// 传递给工坊的对象，包含了打包所需的所有参数
-  PackageSetting? setting;
+  PackageSetting? settingToWorkshop;
 
   double processValue = 0;
 
@@ -117,6 +117,15 @@ class ProjectRecordEntity {
     this.preCheckOk = false,
     this.jobRunning = false,
   });
+
+  ProjectRecordEntity clone() {
+    var cloneOne =
+        ProjectRecordEntity(gitUrl, branch, projectName, projectDesc);
+    cloneOne.preCheckOk = preCheckOk;
+    cloneOne.jobRunning = jobRunning;
+    cloneOne.assembleOrdersStr = assembleOrdersStr;
+    return cloneOne;
+  }
 
   @override
   String toString() {

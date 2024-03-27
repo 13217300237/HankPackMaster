@@ -325,7 +325,7 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get mergeBranchListTask => TaskStage("合并其他分支", stageAction: () async {
-        var mergeBranchList = runningTask!.setting!.mergeBranchList;
+        var mergeBranchList = runningTask!.settingToWorkshop!.mergeBranchList;
         if (mergeBranchList == null || mergeBranchList.isEmpty) {
           return OrderExecuteResult(
               data: "没有发现需要合并的其它分支",
@@ -364,7 +364,7 @@ class WorkShopVm extends ChangeNotifier {
         }
 
         // 在文件中写入 org.gradle.java.home变量，值为
-        var javaHomeValue = runningTask!.setting!.jdk!.envPath;
+        var javaHomeValue = runningTask!.settingToWorkshop!.jdk!.envPath;
         File fx = File(javaHomeValue);
         if (!fx.existsSync()) {
           return OrderExecuteResult(
@@ -736,7 +736,6 @@ class WorkShopVm extends ChangeNotifier {
 
     // taskStateList.add(assembleOrdersTestTask);
   }
-
 
   /// 初始化一个打包任务队列
   void initPackageTaskList() {
@@ -1144,7 +1143,7 @@ class WorkShopVm extends ChangeNotifier {
     var taskName = "激活";
     gitUrlController.text = runningTask!.gitUrl;
     gitBranchController.text = runningTask!.branch;
-    javaHomeController.text = runningTask!.setting!.jdk!.envName;
+    javaHomeController.text = runningTask!.settingToWorkshop!.jdk!.envName;
     setProjectPath();
 
     initPreCheckTaskList();
@@ -1155,7 +1154,7 @@ class WorkShopVm extends ChangeNotifier {
         orderExecuteResult.data is! List<String>) {
       _insertIntoJobHistoryList(
         success: false,
-        jobSetting: runningTask!.setting!,
+        jobSetting: runningTask!.settingToWorkshop!,
         stageRecordList: orderExecuteResult.stageRecordList ?? [],
         taskName: taskName,
         jobResultEntity:
@@ -1178,7 +1177,7 @@ class WorkShopVm extends ChangeNotifier {
     _insertIntoJobHistoryList(
         success: true,
         // 这里要
-        jobSetting: runningTask!.setting!,
+        jobSetting: runningTask!.settingToWorkshop!,
         stageRecordList: orderExecuteResult.stageRecordList ?? [],
         taskName: taskName,
         jobResultEntity: jobResult);
@@ -1237,13 +1236,16 @@ class WorkShopVm extends ChangeNotifier {
 
   Future<void> startPackage() async {
     var taskName = "打包";
-    updateLogController.text = runningTask!.setting!.appUpdateLog ?? '';
-    apkLocationController.text = runningTask!.setting!.apkLocation ?? '';
-    selectedOrder = runningTask!.setting!.selectedOrder ?? '';
+    updateLogController.text =
+        runningTask!.settingToWorkshop!.appUpdateLog ?? '';
+    apkLocationController.text =
+        runningTask!.settingToWorkshop!.apkLocation ?? '';
+    selectedOrder = runningTask!.settingToWorkshop!.selectedOrder ?? '';
     selectedOrderController.text = selectedOrder!;
 
-    javaHomeController.text = runningTask!.setting!.jdk!.envPath;
-    selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
+    javaHomeController.text = runningTask!.settingToWorkshop!.jdk!.envPath;
+    selectedUploadPlatform =
+        runningTask!.settingToWorkshop!.selectedUploadPlatform;
     selectedUploadPlatformController.text = selectedUploadPlatform!.name ?? '';
     initPackageTaskList();
     var scheduleRes = await startSchedule();
@@ -1254,7 +1256,7 @@ class WorkShopVm extends ChangeNotifier {
       _insertIntoJobHistoryList(
           success: true,
           jobResultEntity: jobResult!,
-          jobSetting: runningTask!.setting!,
+          jobSetting: runningTask!.settingToWorkshop!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
     } else {
@@ -1262,8 +1264,9 @@ class WorkShopVm extends ChangeNotifier {
           success: false);
       _insertIntoJobHistoryList(
           success: false,
-          jobResultEntity: JobResultEntity(errMessage: '${scheduleRes.msg}',apkPath: apkToUpload),
-          jobSetting: runningTask!.setting!,
+          jobResultEntity: JobResultEntity(
+              errMessage: '${scheduleRes.msg}', apkPath: apkToUpload),
+          jobSetting: runningTask!.settingToWorkshop!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
     }
@@ -1272,7 +1275,8 @@ class WorkShopVm extends ChangeNotifier {
 
   Future<void> startFastUpload(String apkPath) async {
     var taskName = "上传";
-    selectedUploadPlatform = runningTask!.setting!.selectedUploadPlatform;
+    selectedUploadPlatform =
+        runningTask!.settingToWorkshop!.selectedUploadPlatform;
     selectedUploadPlatformController.text = selectedUploadPlatform!.name ?? '';
     apkLocationController.text = runningTask!.apkPath!;
 
@@ -1284,7 +1288,7 @@ class WorkShopVm extends ChangeNotifier {
       _insertIntoJobHistoryList(
           success: true,
           jobResultEntity: jobResult!,
-          jobSetting: runningTask!.setting!,
+          jobSetting: runningTask!.settingToWorkshop!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
       ToastUtil.showPrettyToast(
@@ -1297,7 +1301,7 @@ class WorkShopVm extends ChangeNotifier {
           success: false,
           jobResultEntity: JobResultEntity(
               apkPath: apkToUpload!, errMessage: scheduleRes.msg ?? ''),
-          jobSetting: runningTask!.setting!,
+          jobSetting: runningTask!.settingToWorkshop!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
     }
@@ -1346,13 +1350,15 @@ class WorkShopVm extends ChangeNotifier {
     }
 
     runningTask!.jobHistoryList!.add(JobHistoryEntity(
-        buildTime: DateTime.now().millisecondsSinceEpoch,
-        success: success,
-        hasRead: false,
-        jobSetting: jobSetting,
-        stageRecordList: stageRecordList,
-        taskName: taskName,
-        jobResultEntity: jobResultEntity));
+      buildTime: DateTime.now().millisecondsSinceEpoch,
+      success: success,
+      hasRead: false,
+      jobSetting: jobSetting,
+      stageRecordList: stageRecordList,
+      taskName: taskName,
+      jobResultEntity: jobResultEntity,
+      parentRecord: runningTask!.clone(),
+    ));
   }
 
   String _nowTime() {

@@ -156,7 +156,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
           // 将此任务添加到队列中去
           widget.projectRecordEntity.packageSetting =
-              widget.projectRecordEntity.setting = PackageSetting(
+              widget.projectRecordEntity.settingToWorkshop = PackageSetting(
             appUpdateLog: appUpdateStr,
             apkLocation: apkLocation,
             selectedOrder: selectedOrder,
@@ -166,7 +166,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
           );
           ProjectRecordOperator.update(widget.projectRecordEntity);
 
-          String errMsg = widget.projectRecordEntity.setting!.readyToPackage();
+          String errMsg = widget.projectRecordEntity.settingToWorkshop!.readyToPackage();
           if (errMsg.isNotEmpty) {
             setState(() => _errMsg = errMsg);
             return;

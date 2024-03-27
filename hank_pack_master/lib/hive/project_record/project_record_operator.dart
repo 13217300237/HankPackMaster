@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/hive/project_record/job_history_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hive/hive.dart';
-import 'package:hank_pack_master/comm/text_util.dart';
 
 import 'job_result_entity.dart';
 
@@ -55,7 +55,7 @@ class ProjectRecordOperator {
     for (int i = 0; i < findAllResult.length; i++) {
       var e = findAllResult[i];
       debugPrint(
-          ">>>index=$i>>>>>>\n ${e.projectName} - ${e.assembleOrdersStr?.trim()}    \n<<<<<<<<<");
+          ">>>index=$i>>>>>>\n projectName:${e.projectName} \n - assembleOrdersStr:${e.assembleOrdersStr?.trim()}    \n<<<<<<<<<");
     }
 
     debugPrint("show end=============\n\n\n");
@@ -105,17 +105,10 @@ class ProjectRecordOperator {
     List<JobHistoryEntity> recent = [];
 
     var allProject = findAll();
-
-    debugPrint("allProject.length-> ${allProject.length}");
-
-    for (var e in allProject) {
-      var temp = e.jobHistoryList;
-      debugPrint("for.e.jobHistoryList-> ${e.jobHistoryList}");
+    for (var projectRecordEntity in allProject) {
+      var temp = projectRecordEntity.jobHistoryList;
       temp?.forEach((j) {
-        j.projectName = e.projectName;
-        j.gitUrl = e.gitUrl;
-        j.branchName = e.branch;
-        j.projectDesc = e.projectDesc;
+        j.parentRecord = projectRecordEntity;
       });
 
       if (temp != null) {
@@ -145,13 +138,10 @@ class ProjectRecordOperator {
 
     var allProject = findAll();
 
-    for (var e in allProject) {
-      var temp = e.jobHistoryList;
+    for (var projectRecordEntity in allProject) {
+      var temp = projectRecordEntity.jobHistoryList;
       temp?.forEach((j) {
-        j.projectName = e.projectName;
-        j.gitUrl = e.gitUrl;
-        j.branchName = e.branch;
-        j.projectDesc = e.projectDesc;
+        j.parentRecord = projectRecordEntity;
       });
 
       if (temp != null) {
@@ -222,8 +212,8 @@ class ProjectRecordOperator {
 
     jobHistoryEntity.hasRead = true;
     int projectRecordIndex = _box!.values.toList().indexWhere((p) =>
-        p.gitUrl == jobHistoryEntity.gitUrl &&
-        p.branch == jobHistoryEntity.branchName);
+        p.gitUrl == jobHistoryEntity.parentRecord.gitUrl &&
+        p.branch == jobHistoryEntity.parentRecord.branch);
 
     if (projectRecordIndex == -1) {
       // 没找到该条工程记录，拒绝执行setRead
@@ -231,7 +221,7 @@ class ProjectRecordOperator {
     }
 
     var projectRecordEntity =
-        find(jobHistoryEntity.gitUrl!, jobHistoryEntity.branchName!);
+        find(jobHistoryEntity.parentRecord.gitUrl, jobHistoryEntity.parentRecord.branch);
 
     var findRes = _box!.values.toList()[projectRecordIndex]; // 找到这条工程记录
     if (findRes.jobHistoryList == null) {

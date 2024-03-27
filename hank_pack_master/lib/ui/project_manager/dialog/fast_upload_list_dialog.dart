@@ -31,8 +31,7 @@ class FastUploadListDialog extends StatelessWidget {
               return HistoryCard(
                 historyEntity: e,
                 maxHeight: maxHeight,
-                projectRecordEntity: ProjectRecordEntity(
-                    e.gitUrl!, e.branchName!, e.projectName!, ''),
+                projectRecordEntity: e.parentRecord,
               );
             },
             itemCount: jobHistoryList.length,
@@ -50,14 +49,10 @@ class FastUploadListDialog extends StatelessWidget {
                     onPressed: () {
                       Navigator.pop(context);
                       for (var jobHistory in jobHistoryList) {
-                        var projectRecordEntity = ProjectRecordEntity(
-                            jobHistory.gitUrl!,
-                            jobHistory.branchName!,
-                            jobHistory.projectName!,
-                            jobHistory.projectDesc);
-                        projectRecordEntity.setting = jobHistory.jobSetting;
+                        var projectRecordEntity = jobHistory.parentRecord; // 这里不能这么拼接
+                        projectRecordEntity.settingToWorkshop = jobHistory.jobSetting;
                         projectRecordEntity.apkPath = jobHistory.jobResultEntity.apkPath; // 这里没有赋值
-                        workShopVm.enqueue(projectRecordEntity);
+                        workShopVm.enqueue(projectRecordEntity); // 这里入列如的有问题
                       }
                     }),
               ),

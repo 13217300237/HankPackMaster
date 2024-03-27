@@ -61,8 +61,8 @@ class HistoryCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _text("git地址", historyEntity.gitUrl ?? ''),
-                        _text("分支名", historyEntity.branchName ?? ''),
+                        _text("git地址", historyEntity.parentRecord.gitUrl ?? ''),
+                        _text("分支名", historyEntity.parentRecord.branch ?? ''),
                         _text(
                             "构建时间",
                             Jiffy.parseFromDateTime(
@@ -145,7 +145,7 @@ class HistoryCard extends StatelessWidget {
                         color: Colors.white),
                   ))),
           showTitle
-              ? Text("${e.projectName}",
+              ? Text(e.parentRecord.projectName,
                   style: const TextStyle(
                     fontSize: 25,
                     color: Colors.black,
