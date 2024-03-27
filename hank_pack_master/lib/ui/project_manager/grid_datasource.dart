@@ -342,7 +342,7 @@ class ProjectEntityDataSource extends DataGridSource {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Tooltip(
-                      message: "重置激活状态",
+                      message: "重置",
                       child: IconButton(
                         icon: Icon(FluentIcons.reset,
                             size: iconSize,
@@ -355,7 +355,7 @@ class ProjectEntityDataSource extends DataGridSource {
                               onConfirm: () {
                                 var e = cellValue.entity!;
                                 _resetProjectRecord(e);
-                              });
+                              }).then((value) => refreshMainPage?.call());
                         },
                       ),
                     ),
@@ -579,6 +579,7 @@ class ProjectEntityDataSource extends DataGridSource {
   void _resetProjectRecord(ProjectRecordEntity e) {
     e.preCheckOk = false;
     e.assembleOrdersStr = null;
+    e.jobHistoryList?.clear();
     bool updateRes = ProjectRecordOperator.update(e);
     debugPrint("_resetProjectRecord -> $updateRes");
     _refresh();

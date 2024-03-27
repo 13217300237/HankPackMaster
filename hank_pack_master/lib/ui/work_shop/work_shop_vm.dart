@@ -1341,9 +1341,11 @@ class WorkShopVm extends ChangeNotifier {
     required String taskName,
     required JobResultEntity jobResultEntity,
   }) {
-    var hisList = runningTask!.jobHistoryList;
-    hisList ??= runningTask!.jobHistoryList = [];
-    hisList.add(JobHistoryEntity(
+    if (runningTask!.jobHistoryList == null) {
+      runningTask!.jobHistoryList = [];
+    }
+
+    runningTask!.jobHistoryList!.add(JobHistoryEntity(
         buildTime: DateTime.now().millisecondsSinceEpoch,
         success: success,
         hasRead: false,
