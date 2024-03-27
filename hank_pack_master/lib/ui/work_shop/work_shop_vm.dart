@@ -612,6 +612,12 @@ class WorkShopVm extends ChangeNotifier {
             addNewLogLine("二维码地址: ${jobResult.buildQRCodeURL}");
             addNewLogLine("应用更新时间: ${jobResult.buildUpdated}");
 
+            try {
+              File(apkToUpload!).delete();
+            } catch (e) {
+              addNewLogLine("文件删除失败");
+            }
+
             return OrderExecuteResult(
                 succeed: true,
                 data: jobResult,
@@ -671,6 +677,9 @@ class WorkShopVm extends ChangeNotifier {
               executeLog:
                   'OBS上传失败, \n [$apkToUpload]  \n ${oBSResponse?.errMsg}');
         } else {
+
+          fileToUpload.delete();
+
           return OrderExecuteResult(
             data: "OBS上传成功,下载地址为 $obsDownloadUrl",
             succeed: true,
