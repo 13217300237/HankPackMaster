@@ -43,7 +43,7 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Text('缓存文件管理模块',
+                  const Text('MavenLocal手动下载',
                       style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w600,

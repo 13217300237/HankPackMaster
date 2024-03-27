@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 
 import '../../../comm/hwobs/obs_client.dart';
 import '../../../comm/net/net_util.dart';
@@ -423,24 +424,40 @@ class EnvParamVm extends ChangeNotifier {
     }
   }
 
-  void startXGateListen() {
+  void startXGateListen({required Function showFastUploadDialogFunc}) {
     _streamSubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
       setNetState(result);
-      NetUtil.getInstance().checkCodehub(
-        onXGateConnect: (b) {
-          _xGateState = b;
-
-          // 在网络变化过程中，如果出现了脸上内网的情况，就说明此tag有必要显示
-          if (b == true) {
-            _needShowXGateTag = true;
-          }
-
-          notifyListeners();
-        },
-      );
+      checkCodehub(showFastUploadDialogFunc: showFastUploadDialogFunc);
     });
+  }
+
+  void checkCodehub({required Function showFastUploadDialogFunc}) {
+    NetUtil.getInstance().checkCodehub(
+      onXGateConnect: (b) {
+        _xGateState = b;
+
+        // 只有在xGate断开的情况下才弹出
+        if (_xGateState == false) {
+          showFastUploadDialogFunc();
+        }
+        // 在网络变化过程中，如果出现了脸上内网的情况，就说明此tag有必要显示
+        if (b == true) {
+          _needShowXGateTag = true;
+        }
+
+        notifyListeners();
+      },
+    );
+  }
+
+  void checkFastUploadTaskExists({required Function showFastUploadDialogFunc}) {
+    bool s = ProjectRecordOperator.findFastUploadTaskList().isNotEmpty;
+
+    if (s == true) {
+      showFastUploadDialogFunc.call();
+    }
   }
 
   void cancelXGateListen() {

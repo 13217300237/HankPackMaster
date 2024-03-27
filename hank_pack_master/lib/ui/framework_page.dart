@@ -2,6 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
+import 'package:hank_pack_master/ui/project_manager/dialog/fast_upload_list_dialog.dart';
+import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -33,7 +35,9 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   final searchController = TextEditingController();
   var w600TextStyle = const TextStyle(fontWeight: FontWeight.w600);
 
-  late EnvParamVm envParamVm;
+  late EnvParamVm _envParamVm;
+
+  late WorkShopVm _workShopVm;
 
   late final List<NavigationPaneItem> originalItems = [
     PaneItem(
@@ -150,7 +154,28 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   void initState() {
     windowManager.addListener(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      envParamVm.startXGateListen();
+      showFastUploadDialogFunc() {
+        DialogUtil.showCustomDialog(
+            context: context,
+            title: '待上传任务提示',
+            content: '存在待上传任务，是否查看',
+            confirmText: '去看看',
+            onConfirm: () {
+              DialogUtil.showCustomDialog(
+                context: context,
+                title: '待上传任务',
+                maxWidth: 1200,
+                content: FastUploadListDialog(
+                  maxHeight: 700,
+                  workShopVm: _workShopVm,
+                ),
+                showActions: false,
+              );
+            });
+      }
+
+      _envParamVm.startXGateListen(
+          showFastUploadDialogFunc: showFastUploadDialogFunc);
     });
     super.initState();
   }
@@ -160,7 +185,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     windowManager.removeListener(this);
     searchController.dispose();
     searchFocusNode.dispose();
-    envParamVm.cancelXGateListen();
+    _envParamVm.cancelXGateListen();
     super.dispose();
   }
 
@@ -192,7 +217,8 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
-    envParamVm = context.watch<EnvParamVm>();
+    _envParamVm = context.watch<EnvParamVm>();
+    _workShopVm = context.watch<WorkShopVm>();
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
@@ -207,7 +233,7 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
           Expanded(
               child: Center(
                   child: Text(
-            "工作空间: ${envParamVm.workSpaceRoot}",
+            "工作空间: ${_envParamVm.workSpaceRoot}",
             style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
           ))),
           const Align(
