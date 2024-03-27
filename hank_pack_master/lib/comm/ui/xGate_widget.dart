@@ -43,6 +43,9 @@ class _NetworkStateWidgetState extends State<NetworkStateWidget> {
   }
 
   Widget _netNameWidget() {
+    if (envParamVm.networkName.isEmpty) {
+      return const SizedBox();
+    }
     return Card(
       borderRadius: BorderRadius.circular(5),
       backgroundColor: envParamVm.networkColor,

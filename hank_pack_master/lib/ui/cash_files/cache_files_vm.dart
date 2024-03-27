@@ -11,10 +11,21 @@ import '../../comm/ui/download_button.dart';
 class CacheFilesVm extends ChangeNotifier {
   // 给定一个依赖下载地址：https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.0/ (maven的案例)
   // 换一个：           https://repo1.maven.org/maven2/org/apache/spark/spark-hive_2.13/3.5.1/
-  String get host =>
-      hostInputController.text; // "https://repo1.maven.org/maven2/";
-  String get path =>
-      pathInputController.text; // "org/apache/spark/spark-hive_2.13/3.5.1/";
+  String get host {
+    var ori = hostInputController.text;
+    if (ori.endsWith("/") || ori.endsWith("\\")) {
+      return ori;
+    }
+    return ori + Platform.pathSeparator;
+  } // "https://repo1.maven.org/maven2/";
+  String get path {
+    var ori = pathInputController.text;
+    if (ori.endsWith("/") || ori.endsWith("\\")) {
+      return ori;
+    }
+    return ori + Platform.pathSeparator; // 这里需要补充一个 /
+  } // "org/apache/spark/spark-hive_2.13/3.5.1/";
+
   String get saveFolder => saveFolderInputController.text; // "E:/fileCache/";
 
   Map<String, DownloadButtonController> listFileMap = {};
