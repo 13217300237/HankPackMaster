@@ -677,9 +677,6 @@ class WorkShopVm extends ChangeNotifier {
               executeLog:
                   'OBS上传失败, \n [$apkToUpload]  \n ${oBSResponse?.errMsg}');
         } else {
-
-          fileToUpload.delete();
-
           return OrderExecuteResult(
             data: "OBS上传成功,下载地址为 $obsDownloadUrl",
             succeed: true,
@@ -713,6 +710,13 @@ class WorkShopVm extends ChangeNotifier {
             jobResult.buildUpdateDescription = updateLog;
             // 应用描述
             jobResult.buildDescription = projectAppDesc;
+
+            try {
+              File(apkToUpload!).delete();
+            } catch (e) {
+              addNewLogLine("文件删除失败");
+            }
+
             return OrderExecuteResult(
               data: jobResult,
               succeed: true,
