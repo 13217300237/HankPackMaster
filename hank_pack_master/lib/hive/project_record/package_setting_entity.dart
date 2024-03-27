@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:hive/hive.dart';
 
 import '../env_group/env_check_result_entity.dart';
@@ -34,6 +36,18 @@ class PackageSetting {
     this.jdk,
     this.mergeBranchList,
   });
+
+  @override
+  String toString() {
+    return jsonEncode({
+      "appUpdateLog": "$appUpdateLog",
+      "apkLocation": "$apkLocation",
+      "selectedOrder": "$selectedOrder",
+      "selectedUploadPlatform": "$selectedUploadPlatform",
+      "mergeBranchList": "$mergeBranchList",
+      "jdk": "$jdk",
+    });
+  }
 
   String get mergedList {
     StringBuffer sb = StringBuffer();

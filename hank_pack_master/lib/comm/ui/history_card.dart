@@ -43,7 +43,7 @@ class HistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (event) {
-        ProjectRecordOperator.setReadV2(jobHistoryEntity: historyEntity);
+        ProjectRecordOperator.setRead(jobHistoryEntity: historyEntity);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),

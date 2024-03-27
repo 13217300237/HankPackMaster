@@ -50,12 +50,21 @@ class ProjectRecordOperator {
 
   static void debugShowAll() {
     var findAllResult = findAll();
-    debugPrint("============show start");
+    debugPrint("============项目总数为：${findAllResult.length}==================");
 
     for (int i = 0; i < findAllResult.length; i++) {
       var e = findAllResult[i];
-      debugPrint(
-          ">>>index=$i>>>>>>\n projectName:${e.projectName} \n - assembleOrdersStr:${e.assembleOrdersStr?.trim()}    \n<<<<<<<<<");
+      debugPrint('''
+      ------------index= $i-----------------------
+      projectName=  ${e.projectName}
+      assembleOrdersStr=  ${e.assembleOrdersStr}
+      projectDesc=  ${e.projectDesc}
+      gitUrl=  ${e.gitUrl}
+      branch=  ${e.branch}
+      jobHistoryList=  ${e.jobHistoryList}
+      apkPath=  ${e.apkPath}
+      preCheckOk=  ${e.preCheckOk}
+      ''');
     }
 
     debugPrint("show end=============\n\n\n");
@@ -102,6 +111,7 @@ class ProjectRecordOperator {
   /// [recentCount] 正数，表示取最大多少条, 为-1时，将会返回所有的打包记录
   static List<JobHistoryEntity> getRecentJobHistoryList(
       {int recentCount = 10}) {
+    debugShowAll();
     List<JobHistoryEntity> recent = [];
 
     var allProject = findAll();
@@ -162,47 +172,7 @@ class ProjectRecordOperator {
   }
 
   /// 将指定工程的某一条历史记录设置为已读并入库
-  static void setRead({
-    required ProjectRecordEntity projectRecordEntity,
-    required JobHistoryEntity jobHistoryEntity,
-  }) {
-    _initBox();
-    jobHistoryEntity.hasRead = true;
-    int projectRecordIndex = _box!.values.toList().indexWhere((p) =>
-        p.gitUrl == projectRecordEntity.gitUrl &&
-        p.branch == projectRecordEntity.branch);
-
-    if (projectRecordIndex == -1) {
-      // 没找到该条工程记录，拒绝执行setRead
-      return;
-    }
-
-    var find = _box!.values.toList()[projectRecordIndex]; // 找到这条工程记录
-    if (find.jobHistoryList == null) {
-      // 如果这条记录没有历史，那就没办法更新历史记录
-      return;
-    }
-
-    var hisIndex = find.jobHistoryList!.indexWhere((e) =>
-        e.buildTime == jobHistoryEntity.buildTime &&
-        e.jobResultEntity == jobHistoryEntity.jobResultEntity); // 尝试找到这一条历史记录
-
-    if (hisIndex == -1) {
-      // 没找到
-      return;
-    }
-
-    var findHis = find.jobHistoryList![hisIndex]; // 再找到这条历史记录
-    findHis.hasRead = true;
-
-    debugPrint("setRead $projectRecordIndex");
-    _box!.putAt(projectRecordIndex, projectRecordEntity);
-
-    debugShowAll();
-  }
-
-  /// 将指定工程的某一条历史记录设置为已读并入库
-  static void setReadV2({required JobHistoryEntity jobHistoryEntity}) {
+  static void setRead({required JobHistoryEntity jobHistoryEntity}) {
     _initBox();
 
     if (jobHistoryEntity.hasRead == true) {
@@ -269,8 +239,6 @@ class ProjectRecordOperator {
     // 尝试把 错误码
     try {
       JobResultEntity jobResultEntity = historyEntity.jobResultEntity;
-
-      debugPrint('jobResultEntity.apkPath-> ${jobResultEntity.apkPath}');
 
       if (jobResultEntity.apkPath.empty()) {
         return false;

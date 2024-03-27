@@ -1362,7 +1362,7 @@ class WorkShopVm extends ChangeNotifier {
       runningTask!.jobHistoryList = [];
     }
 
-    runningTask!.jobHistoryList!.add(JobHistoryEntity(
+    var j = JobHistoryEntity(
       buildTime: DateTime.now().millisecondsSinceEpoch,
       success: success,
       hasRead: false,
@@ -1370,8 +1370,10 @@ class WorkShopVm extends ChangeNotifier {
       stageRecordList: stageRecordList,
       taskName: taskName,
       jobResultEntity: jobResultEntity,
-      parentRecord: runningTask!.clone(),
-    ));
+    );
+    j.parentRecord =  runningTask!.clone();
+
+    runningTask!.jobHistoryList!.add(j);
   }
 
   String _nowTime() {

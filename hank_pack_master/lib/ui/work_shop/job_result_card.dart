@@ -21,7 +21,6 @@ class JobResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("jobResult.errMessage->${jobResult.toJsonString()}");
     if (!jobResult.errMessage.empty()) {
       // 这里有问题，上传失败时，这个errMessage是空的.
       return msgWidget();

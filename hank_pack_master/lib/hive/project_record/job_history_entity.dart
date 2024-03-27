@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:hank_pack_master/hive/project_record/package_setting_entity.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/hive/project_record/stage_record_entity.dart';
@@ -31,8 +33,21 @@ class JobHistoryEntity {
   @HiveField(8)
   JobResultEntity jobResultEntity; // 作业结果封装
 
-  @HiveField(9)
-  ProjectRecordEntity parentRecord; // 工程实体的副本
+  late ProjectRecordEntity parentRecord; // 工程实体的副本，果然不能用这个副本,至少不能保存到数据库
+
+  @override
+  String toString() {
+    return jsonEncode({
+      "success": "$success",
+      "buildTime": "$buildTime",
+      "hasRead": "$hasRead",
+      "jobSetting": "$jobSetting",
+      "stageRecordList": "$stageRecordList",
+      "taskName": "$taskName",
+      "jobResultEntity": "$jobResultEntity",
+      "parentRecord": "$parentRecord",
+    });
+  }
 
   JobHistoryEntity({
     required this.buildTime,
@@ -42,14 +57,12 @@ class JobHistoryEntity {
     this.stageRecordList,
     this.taskName,
     required this.jobResultEntity,
-    required this.parentRecord,
   });
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is JobHistoryEntity &&
-        other.parentRecord == parentRecord;
+    return other is JobHistoryEntity && other.parentRecord == parentRecord;
   }
 
   @override
