@@ -155,7 +155,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                   FilePickerResult? result =
                       await FilePicker.platform.pickFiles(
                     type: FileType.custom,
-                    allowedExtensions: ['exe', 'bat'],
+                    allowedExtensions: ['*'],
                   );
 
                   if (result != null) {
