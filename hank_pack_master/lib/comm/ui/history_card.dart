@@ -1,18 +1,13 @@
-import 'dart:io';
-
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/ui/text_on_arc.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../../hive/project_record/job_history_entity.dart';
-import '../../hive/project_record/job_result_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../../hive/project_record/project_record_operator.dart';
 import '../../ui/project_manager/grid_datasource.dart';
 import '../../ui/project_manager/job_setting_card.dart';
 import '../../ui/work_shop/job_result_card.dart';
-import '../../ui/work_shop/model/fast_upload_entity.dart';
-import '../pgy/pgy_entity.dart';
 import '../text_util.dart';
 
 class HistoryCard extends StatelessWidget {

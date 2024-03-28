@@ -81,7 +81,7 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                                 _showErr();
                               }
                             }),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         FilledButton(
                           style: ButtonStyle(
                             backgroundColor: ButtonState.resolveWith((states) =>
@@ -93,7 +93,7 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                               _cacheFilesVm.downloading
                                   ? "下载中 ${_cacheFilesVm.uncompletedCount}/${_cacheFilesVm.totalCount}"
                                   : "开始批量下载",
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontWeight: FontWeight.w600, fontSize: 22)),
                           onPressed: () async {
                             if (_cacheFilesVm.enableDownload &&

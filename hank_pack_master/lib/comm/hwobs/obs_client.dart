@@ -24,6 +24,8 @@ class OBSClient {
   static String? bucketName;
   static String? domain;
 
+  static var commonUploadFolder = 'anxiaozhu';
+
   static void init({
     required String ak,
     required String sk,
@@ -42,6 +44,8 @@ class OBSClient {
         requestHeader: true, requestBody: true, responseHeader: true));
     return dio;
   }
+
+
 
   static Future<OBSResponse?> putObject(
       {required String objectName,

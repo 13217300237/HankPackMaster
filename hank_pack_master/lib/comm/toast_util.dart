@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:oktoast/oktoast.dart';
 
@@ -25,15 +25,17 @@ class CustomToast extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            success ? Icons.message : Icons.warning,
+            success ? FluentIcons.message : FluentIcons.warning,
             color: success ? Colors.green : Colors.red,
           ),
           const SizedBox(width: 10.0),
           Text(
             message,
             style: const TextStyle(
+              fontSize: 20,
               color: Colors.black,
               fontWeight: FontWeight.w600,
+              fontFamily: 'STKAITI'
             ),
             overflow: TextOverflow.ellipsis,
           ),

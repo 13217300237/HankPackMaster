@@ -657,7 +657,7 @@ class WorkShopVm extends ChangeNotifier {
 
         var oBSResponse = await OBSClient.putFile(
           objectName:
-              "anxiaozhu/$childFolderName/$buildUpdated${path.basename(apkToUpload!)}",
+              "${OBSClient.commonUploadFolder}/$childFolderName/$buildUpdated${path.basename(apkToUpload!)}",
           file: fileToUpload,
         );
 
