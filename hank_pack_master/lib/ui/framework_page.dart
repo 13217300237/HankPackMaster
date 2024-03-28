@@ -70,6 +70,12 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       title: Text('缓存文件管理', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
+    PaneItem(
+      key: const ValueKey('/obs_fast_upload'),
+      icon: const Icon(FluentIcons.upload),
+      title: Text('OBS快传', style: w600TextStyle),
+      body: const SizedBox.shrink(),
+    ),
     // PaneItem(
     //   key: const ValueKey('/trace'),
     //   icon: const Icon(FluentIcons.app_icon_secure),

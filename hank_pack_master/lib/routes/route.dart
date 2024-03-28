@@ -6,6 +6,7 @@ import '../ui/cash_files/cache_files_page.dart';
 import '../ui/env/env_page.dart';
 import '../ui/framework_page.dart';
 import '../ui/home/home_page.dart';
+import '../ui/obs_fast_upload/obs_fast_upload_page.dart';
 import '../ui/project_manager/project_manager_page.dart';
 import '../ui/work_shop/work_shop_page.dart';
 
@@ -41,6 +42,11 @@ final statefulRouter = GoRouter(
             GoRoute(
                 path: '/cash_files',
                 builder: (context, state) => const CacheFilesPage()),
+          ]),
+          StatefulShellBranch(routes: <RouteBase>[
+            GoRoute(
+                path: '/obs_fast_upload',
+                builder: (context, state) => const ObsFastUploadPage()),
           ])
         ]),
   ],
