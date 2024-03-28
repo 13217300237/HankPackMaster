@@ -2,13 +2,16 @@ import 'dart:io';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
+import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:path/path.dart' as path;
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../comm/ui/info_bar.dart';
@@ -136,7 +139,38 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
   // 每次仅仅支持一个文件
   Widget fileSelectorWidget() {
     var text = _selectedFile == null
-        ? Center(child: Text("拖拽文件放置到这里", style: _textStyle2))
+        ? Center(
+            child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("拖拽文件放置到这里", style: _textStyle2),
+              Text('或者', style: _textStyle2.copyWith(fontSize: 17)),
+              GestureDetector(
+                child: Text(
+                  '浏览文件来选择',
+                  style: _textStyle2.copyWith(
+                      decoration: TextDecoration.underline),
+                ),
+                onTap: () async {
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['exe', 'bat'],
+                  );
+
+                  if (result != null) {
+                    var f = result.files.single;
+                    debugPrint('选择了 $f');
+                    if (!f.path.empty()) {
+                      _selectedFile = XFile(f.path!,
+                          name: path.basename(f.path!), length: f.size);
+                      setState(() {});
+                    }
+                  }
+                },
+              )
+            ],
+          ))
         : FutureBuilder(
             future: _selectedFile?.detail(),
             builder: (context, snapshot) {
@@ -147,20 +181,53 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                   return const SizedBox();
                 }
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                return Row(
                   children: [
-                    ...snapshot.data!
-                        .map((e) => Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 2.0),
-                              child: Text(
-                                e,
-                                style: _textStyle1,
+                    Expanded(
+                      flex: 8,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ...snapshot.data!
+                                .map((e) => Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 2.0),
+                                      child: Text(
+                                        e,
+                                        style: _textStyle1,
+                                      ),
+                                    ))
+                                .toList(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                        onTap: () {
+                          _selectedFile = null;
+                          setState(() {});
+                        },
+                        child: Tooltip(
+                          message: '重新选择',
+                          child: Card(
+                            backgroundColor: Colors.red.withOpacity(.5),
+                            child: const SizedBox(
+                              height: double.infinity,
+                              child: Icon(
+                                FluentIcons.cancel,
+                                size: 50,
+                                color: Colors.white,
                               ),
-                            ))
-                        .toList(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 );
               }
@@ -232,7 +299,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
       version: QrVersions.auto,
     );
     DialogUtil.showCustomDialog(
-      maxHeight: 550,
+        maxHeight: 550,
         context: context,
         title: '上传成功',
         showCancel: false,
@@ -245,9 +312,14 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
               '下载地址(可拷贝)：',
               style: _textStyle1.copyWith(fontSize: 18),
             ),
-            SelectableText(obsDownloadUrl,style: _textStyle1.copyWith(fontSize: 18,decoration:m.TextDecoration.underline)),
+            SelectableText(obsDownloadUrl,
+                style: _textStyle1.copyWith(
+                    fontSize: 18, decoration: m.TextDecoration.underline)),
             const SizedBox(height: 12),
-            Align(alignment: Alignment.center,child: qrCode,),
+            Align(
+              alignment: Alignment.center,
+              child: qrCode,
+            ),
           ],
         ));
   }
@@ -257,7 +329,7 @@ extension XFileExt on XFile {
   Future<List<String>> detail() async {
     List<String> res = [];
 
-    res.add('文件路径： $path ');
+    res.add('文件路径： ${this.path} ');
     res.add('文件名：$name');
     res.add('文件大小：${(await length() / 1024 / 1024).toStringAsFixed(2)} MB');
     res.add(
