@@ -210,14 +210,18 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
   void showFailedDialog(String errMsg) {
     DialogUtil.showCustomDialog(
         context: context,
+        maxHeight: 550,
         title: '上传失败',
-        content: Column(
-          children: [
-            Text(
-              errMsg,
-              style: _textStyle1,
-            )
-          ],
+        showCancel: false,
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              SelectableText(
+                errMsg,
+                style: _textStyle1.copyWith(fontSize: 18),
+              )
+            ],
+          ),
         ));
   }
 
