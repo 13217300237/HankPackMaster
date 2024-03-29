@@ -130,8 +130,15 @@ class OBSClient {
     // 参考链接 https://support.huaweicloud.com/api-obs/obs_04_0080.html#section26
     // https://obs-community.obs.cn-north-1.myhuaweicloud.com/sign/header_signature.html
     // https://obs-community.obs.cn-north-1.myhuaweicloud.com/sign/query_signature.html
-    headers["Authorization"] = _sign("PUT", contentMD5, contentType, date,
-        "x-obs-acl:$xObsAcl", "/$bucketName/$objectName");
+    headers["Authorization"] = _sign(
+      "PUT",
+      contentMD5,
+      contentType,
+      date,
+      "x-obs-acl:$xObsAcl",
+      "x-obs-expires:$expiresDays",
+      "/$bucketName/$objectName",
+    );
 
     Options options = Options(headers: headers, contentType: contentType);
 
@@ -170,12 +177,19 @@ class OBSClient {
   }
 
   static String _sign(String httpMethod, String contentMd5, String contentType,
-      String date, String acl, String res) {
+      String date, String acl, String expired, String res) {
     if (ak == null || sk == null) {
       throw "ak or sk is null";
     }
-    String signContent =
-        "$httpMethod\n$contentMd5\n$contentType\n$date\n$acl\n$res";
+    String signContent = '''$httpMethod
+$contentMd5
+$contentType
+$date
+$acl
+$expired
+$res
+    '''.trim();
+        // "$httpMethod\n$contentMd5\n$contentType\n$date\n$acl\n$expired\n$res";
 
     return "OBS $ak:${signContent.toHmacSha1Base64(sk!)}";
   }
