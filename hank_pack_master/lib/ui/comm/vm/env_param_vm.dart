@@ -440,7 +440,9 @@ class EnvParamVm extends ChangeNotifier {
 
         // 只有在xGate断开的情况下才弹出
         if (_xGateState == false) {
-          showFastUploadDialogFunc();
+          if (ProjectRecordOperator.findFastUploadTaskList().isNotEmpty) {
+            showFastUploadDialogFunc();
+          }
         }
         // 在网络变化过程中，如果出现了脸上内网的情况，就说明此tag有必要显示
         if (b == true) {
