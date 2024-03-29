@@ -127,6 +127,9 @@ class OBSClient {
     headers["Date"] = date;
     headers["x-obs-acl"] = xObsAcl;
     headers["x-obs-expires"] = expiresDays; // 找到一个设置过期时间的方法,但是貌似会使得 上传失败，待查
+    // 参考链接 https://support.huaweicloud.com/api-obs/obs_04_0080.html#section26
+    // https://obs-community.obs.cn-north-1.myhuaweicloud.com/sign/header_signature.html
+    // https://obs-community.obs.cn-north-1.myhuaweicloud.com/sign/query_signature.html
     headers["Authorization"] = _sign("PUT", contentMD5, contentType, date,
         "x-obs-acl:$xObsAcl", "/$bucketName/$objectName");
 
