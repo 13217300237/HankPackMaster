@@ -45,40 +45,64 @@ class OBSClient {
     return dio;
   }
 
-
-
-  static Future<OBSResponse?> putObject(
-      {required String objectName,
-      required List<int> data,
-      String xObsAcl = "public-read"}) async {
+  static Future<OBSResponse?> putObject({
+    required String objectName,
+    required List<int> data,
+    String xObsAcl = "public-read",
+    required int expiresDays,
+  }) async {
     String contentMD5 = data.toMD5Base64();
     int size = data.length;
     var stream = Stream.fromIterable(data.map((e) => [e]));
-    OBSResponse? obsResponse =
-        await put(objectName, stream, contentMD5, size, xObsAcl: xObsAcl);
+    OBSResponse? obsResponse = await put(
+      objectName,
+      stream,
+      contentMD5,
+      size,
+      xObsAcl: xObsAcl,
+      expiresDays: expiresDays,
+    );
     return obsResponse;
   }
 
-  static Future<OBSResponse?> putString(String objectName, String content,
-      {String xObsAcl = "public-read"}) async {
+  static Future<OBSResponse?> putString(
+    String objectName,
+    String content, {
+    String xObsAcl = "public-read",
+    required int expiresDays,
+  }) async {
     var contentMD5 = content.toMD5Base64();
     var size = content.length;
-    OBSResponse? obsResponse =
-        await put(objectName, content, contentMD5, size, xObsAcl: xObsAcl);
+    OBSResponse? obsResponse = await put(
+      objectName,
+      content,
+      contentMD5,
+      size,
+      xObsAcl: xObsAcl,
+      expiresDays: expiresDays,
+    );
     return obsResponse;
   }
 
-  static Future<OBSResponse?> putFile(
-      {required String objectName,
-      required File file,
-      String xObsAcl = "public-read"}) async {
+  /// 目前仅用来这个方法
+  static Future<OBSResponse?> putFile({
+    required String objectName,
+    required File file,
+    String xObsAcl = "public-read",
+    required int expiresDays,
+  }) async {
     OBSResponse? obsResponse;
     try {
       var contentMD5 = await getFileMd5Base64(file);
       var stream = file.openRead();
       obsResponse = await put(
-          objectName, stream, contentMD5, await file.length(),
-          xObsAcl: xObsAcl);
+        objectName,
+        stream,
+        contentMD5,
+        await file.length(),
+        xObsAcl: xObsAcl,
+        expiresDays: expiresDays,
+      );
       return obsResponse;
     } catch (e) {
       obsResponse = OBSResponse();
@@ -88,7 +112,7 @@ class OBSClient {
   }
 
   static Future<OBSResponse?> put(String objectName, data, String md5, int size,
-      {String xObsAcl = "public-read"}) async {
+      {String xObsAcl = "public-read", required int expiresDays}) async {
     if (objectName.startsWith("/")) {
       objectName = objectName.substring(1);
     }
@@ -98,10 +122,11 @@ class OBSClient {
     var date = HttpDate.format(DateTime.now());
     var contentType = "application/octet-stream";
 
-    Map<String, String> headers = {};
+    Map<String, dynamic> headers = {};
     headers["Content-MD5"] = contentMD5;
     headers["Date"] = date;
     headers["x-obs-acl"] = xObsAcl;
+    headers["x-obs-expires"] = expiresDays; // 找到一个设置过期时间的方法,但是貌似会使得 上传失败，待查
     headers["Authorization"] = _sign("PUT", contentMD5, contentType, date,
         "x-obs-acl:$xObsAcl", "/$bucketName/$objectName");
 
@@ -120,6 +145,7 @@ class OBSClient {
         debugPrint("============ 下载中... $count/$total");
       },
     );
+
     OBSResponse obsResponse = OBSResponse();
     obsResponse.md5 = contentMD5;
     obsResponse.objectName = objectName;
@@ -132,8 +158,12 @@ class OBSClient {
 
   static Future<OBSResponse?> putFileWithPath(
       String objectName, String filePath,
-      {String xObsAcl = "public-read"}) async {
-    return putFile(objectName: objectName, file: File(filePath));
+      {String xObsAcl = "public-read", required int expiresDays}) async {
+    return putFile(
+      objectName: objectName,
+      file: File(filePath),
+      expiresDays: expiresDays,
+    );
   }
 
   static String _sign(String httpMethod, String contentMd5, String contentType,

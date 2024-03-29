@@ -243,7 +243,8 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
   }
 
   _toolTip() {
-    return expandedInfoBar('支持任意单个文件上传到OBS平台，前提是 OBS设置必须正确');
+    return expandedInfoBar('''支持任意单个文件上传到OBS平台，前提是 OBS设置必须正确
+目前不支持带中文的文件名，待优化''');
   }
 
   bool _uploading = false;
@@ -257,6 +258,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
       objectName:
           "${OBSClient.commonUploadFolder}/fastUpload/${Jiffy.now().format(pattern: "yyyyMMdd_HHmmss")}/${_selectedFile!.name}",
       file: File(_selectedFile!.path),
+      expiresDays: 1, // 设置过期时间(天)，超过了之后会被自动删除
     );
 
     setState(() {

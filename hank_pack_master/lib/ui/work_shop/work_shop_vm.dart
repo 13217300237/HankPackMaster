@@ -659,6 +659,7 @@ class WorkShopVm extends ChangeNotifier {
           objectName:
               "${OBSClient.commonUploadFolder}/$childFolderName/$buildUpdated${path.basename(apkToUpload!)}",
           file: fileToUpload,
+          expiresDays: 1,// 设置过期时间(天)，超过了之后会被自动删除
         );
 
         obsDownloadUrl = oBSResponse?.url;
