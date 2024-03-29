@@ -162,8 +162,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                     var f = result.files.single;
                     debugPrint('选择了 $f');
                     if (!f.path.empty()) {
-                      _selectedFile = XFile(f.path!,
-                          name: path.basename(f.path!), length: f.size);
+                      _selectedFile = XFile(f.path!);
                       setState(() {});
                     }
                   }
