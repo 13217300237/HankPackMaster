@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -9,9 +8,10 @@ import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
-import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_operator.dart';
+import 'package:hank_pack_master/ui/obs_fast_upload/vm/obs_fast_upload_vm.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:path/path.dart' as path;
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../comm/ui/info_bar.dart';
@@ -25,111 +25,51 @@ class ObsFastUploadPage extends StatefulWidget {
 }
 
 class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
-  XFile? _selectedFile;
-
-  bool _dragging = false;
-
-  final _textStyle1 = const TextStyle(
-      fontSize: 22, fontWeight: FontWeight.w600, fontFamily: 'STKAITI');
-
-  final _textStyle2 = const TextStyle(
-    fontSize: 30,
-    fontWeight: FontWeight.w600,
-    fontFamily: 'STKAITI',
-  );
-
   @override
   Widget build(BuildContext context) {
-    return DropTarget(
-      onDragDone: (detail) {
-        setState(() {
-          if (detail.files.isEmpty) {
-            ToastUtil.showPrettyToast('没有选择任何文件', success: false);
-          } else if (detail.files.length > 1) {
-            ToastUtil.showPrettyToast('仅支持选择单个文件', success: false);
-          } else {
-            _selectedFile = detail.files[0];
-          }
-        });
-      },
-      onDragEntered: (detail) {
-        setState(() {
-          _dragging = true;
-        });
-      },
-      onDragExited: (detail) {
-        setState(() {
-          _dragging = false;
-        });
-      },
-      child: Container(
-          decoration: BoxDecoration(gradient: mainPanelGradient),
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('OBS文件直传', style: _textStyle2),
-              const SizedBox(height: 12),
-              _toolTip(),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(flex: 5, child: fileSelectorWidget()),
-                  Expanded(flex: 1, child: actionBtnWidget())
-                ],
-              )
-            ],
-          )),
+    return ChangeNotifierProvider(
+      child: _mainBox(),
+      create: (BuildContext context) => FastObsUploadVm(),
     );
   }
 
-  Color _btnColor = Colors.orange;
-
-  Widget actionBtnWidget() {
+  Widget actionBtnWidget(FastObsUploadVm vm) {
     return MouseRegion(
-      onExit: (e) {
-        setState(() {
-          _btnColor = Colors.orange;
-        });
-      },
-      onEnter: (e) {
-        setState(() {
-          _btnColor = m.Colors.orange.shade400;
-        });
-      },
+      onExit: (e) => vm.onMouseExit(),
+      onEnter: (e) => vm.onMouseEnter(),
       child: GestureDetector(
         onTap: () async {
-          if (_selectedFile == null) {
+          if (vm.selectedFile == null) {
             return;
           }
-          if (_uploading) {
+          if (vm.uploading) {
             return;
           }
-          _doUpload();
+          _doUpload(vm);
         },
         child: m.Card(
-            color: _btnColor,
+            color: vm.btnColor,
             child: Container(
               padding: const EdgeInsets.all(15),
               height: 200,
-              child: Center(child: uploadBtnContent()),
+              child: Center(child: uploadBtnContent(vm)),
             )),
       ),
     );
   }
 
-  Widget uploadBtnContent() {
-    if (_uploading) {
+  Widget uploadBtnContent(FastObsUploadVm vm) {
+    if (vm.uploading) {
       return const ProgressRing();
     } else {
-      return Text("开始上传", style: _textStyle2);
+      return Text("开始上传", style: vm.textStyle2);
     }
   }
 
   // 每次仅仅支持一个文件
-  Widget fileSelectorWidget() {
+  Widget fileSelectorWidget(FastObsUploadVm vm) {
     var toChooseWidget = GestureDetector(
-      onTap: () async => _doFileChoose(),
+      onTap: () async => _doFileChoose(vm),
       child: Container(
         color: Colors.transparent,
         width: double.infinity,
@@ -138,16 +78,16 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("拖拽文件放置到这里", style: _textStyle2),
-            Text('或者', style: _textStyle2.copyWith(fontSize: 17)),
-            Text('浏览文件来选择', style: _textStyle2)
+            Text("拖拽文件放置到这里", style: vm.textStyle2),
+            Text('或者', style: vm.textStyle2.copyWith(fontSize: 17)),
+            Text('浏览文件来选择', style: vm.textStyle2)
           ],
         )),
       ),
     );
 
     var choseWidget = FutureBuilder(
-        future: _selectedFile?.detail(),
+        future: vm.selectedFile?.detail(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Text('读取xFile错误');
@@ -173,7 +113,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                             vertical: 2.0),
                                         child: Text(
                                           e,
-                                          style: _textStyle1,
+                                          style: vm.textStyle1,
                                         ),
                                       ))
                                   .toList()
@@ -182,10 +122,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                     Expanded(
                         flex: 1,
                         child: GestureDetector(
-                            onTap: () {
-                              _selectedFile = null;
-                              setState(() {});
-                            },
+                            onTap: () => vm.clearFile(),
                             child: Tooltip(
                                 message: '重新选择',
                                 child: Card(
@@ -202,49 +139,42 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
           }
         });
 
-    var text = _selectedFile == null ? toChooseWidget : choseWidget;
+    var text = vm.selectedFile == null ? toChooseWidget : choseWidget;
 
     return m.Card(
-      color: _dragging ? Colors.teal : Colors.teal.withOpacity(.2),
+      color: vm.dragging ? Colors.teal : Colors.teal.withOpacity(.2),
       child: SizedBox(
           width: double.infinity, height: 200, child: Center(child: text)),
     );
   }
 
   _toolTip() {
-    return expandedInfoBar('''支持任意单个文件上传到OBS平台，前提是 OBS设置必须正确
-目前不支持带中文的文件名，待优化''');
+    return expandedInfoBar('''支持任意单个文件上传到OBS平台，前提是 OBS设置必须正确''');
   }
 
-  bool _uploading = false;
-
-  void _doUpload() async {
-    setState(() {
-      _uploading = true;
-    });
+  void _doUpload(FastObsUploadVm vm) async {
+    vm.showLoading();
     // 执行上传动作
     OBSResponse? oBSResponse = await OBSClient.putFile(
       objectName:
-          "${OBSClient.commonUploadFolder}/fastUpload/${Jiffy.now().format(pattern: "yyyyMMdd_HHmmss")}/${Uri.encodeComponent(_selectedFile!.name)}",
-      file: File(_selectedFile!.path),
+          "${OBSClient.commonUploadFolder}/fastUpload/${Jiffy.now().format(pattern: "yyyyMMdd_HHmmss")}/${Uri.encodeComponent(vm.selectedFile!.name)}",
+      file: File(vm.selectedFile!.path),
       expiresDays: 1, // 设置过期时间(天)，超过了之后会被自动删除
     );
 
-    setState(() {
-      _uploading = false;
-    });
+    vm.hideLoading();
 
     String? obsDownloadUrl = oBSResponse?.url;
 
     if (obsDownloadUrl == null || obsDownloadUrl.isEmpty) {
-      showFailedDialog('${oBSResponse!.errMsg}');
+      showFailedDialog('${oBSResponse!.errMsg}', vm);
     } else {
       // 弹窗，显示上传结果的二维码
-      showSuccessDialog(obsDownloadUrl);
+      showSuccessDialog(obsDownloadUrl, vm);
     }
   }
 
-  void showFailedDialog(String errMsg) {
+  void showFailedDialog(String errMsg, FastObsUploadVm vm) {
     DialogUtil.showCustomDialog(
         context: context,
         maxHeight: 550,
@@ -255,14 +185,14 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
             children: [
               SelectableText(
                 errMsg,
-                style: _textStyle1.copyWith(fontSize: 18),
+                style: vm.textStyle1.copyWith(fontSize: 18),
               )
             ],
           ),
         ));
   }
 
-  void showSuccessDialog(String obsDownloadUrl) {
+  void showSuccessDialog(String obsDownloadUrl, FastObsUploadVm vm) {
     var qrCode = QrImageView(
       data: obsDownloadUrl,
       size: 260,
@@ -280,10 +210,10 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
           children: [
             Text(
               '下载地址(可拷贝)：',
-              style: _textStyle1.copyWith(fontSize: 18),
+              style: vm.textStyle1.copyWith(fontSize: 18),
             ),
             SelectableText(obsDownloadUrl,
-                style: _textStyle1.copyWith(
+                style: vm.textStyle1.copyWith(
                     fontSize: 18, decoration: m.TextDecoration.underline)),
             const SizedBox(height: 12),
             Align(
@@ -294,7 +224,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
         ));
   }
 
-  void _doFileChoose() async {
+  void _doFileChoose(FastObsUploadVm vm) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['*'],
@@ -304,23 +234,45 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
       var f = result.files.single;
       debugPrint('选择了 $f');
       if (!f.path.empty()) {
-        _selectedFile = XFile(f.path!);
-        setState(() {});
+        vm.onFileSelected(f);
       }
     }
   }
-}
 
-extension XFileExt on XFile {
-  Future<List<String>> detail() async {
-    List<String> res = [];
-
-    res.add('文件路径： ${this.path} ');
-    res.add('文件名：$name');
-    res.add('文件大小：${(await length() / 1024 / 1024).toStringAsPrecision(2)} MB');
-    res.add(
-        '最后修改时间：${Jiffy.parseFromDateTime(await lastModified()).format(pattern: 'yyyy-MM-dd HH:mm:ss')}');
-
-    return res;
+  Widget _mainBox() {
+    return Consumer<FastObsUploadVm>(
+      builder: (context, vm, child) {
+        return DropTarget(
+          onDragDone: vm.onDragDone,
+          onDragEntered: vm.onDragEntered,
+          onDragExited: vm.onDragExited,
+          child: Container(
+              decoration: BoxDecoration(gradient: mainPanelGradient),
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('OBS文件直传', style: vm.textStyle2),
+                  const SizedBox(height: 12),
+                  _toolTip(),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(flex: 5, child: fileSelectorWidget(vm)),
+                      Expanded(flex: 1, child: actionBtnWidget(vm))
+                    ],
+                  ),
+                  Expanded(
+                      child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            var cur = FastObsUploadOperator.findAll()[index];
+                            return Text('${cur.fileName}');
+                          },
+                          itemCount: FastObsUploadOperator.findAll().length)),
+                ],
+              )),
+        );
+      },
+    );
   }
 }

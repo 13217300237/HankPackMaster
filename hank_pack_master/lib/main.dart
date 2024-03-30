@@ -16,6 +16,7 @@ import 'hive/env_config/env_config_operator.dart';
 import 'hive/env_group/env_check_result_entity.dart';
 import 'hive/env_group/env_group_entity.dart';
 import 'hive/env_group/env_group_operator.dart';
+import 'hive/fast_obs_upload/fast_obs_upload_operator.dart';
 import 'hive/project_record/job_history_entity.dart';
 import 'hive/project_record/job_result_entity.dart';
 import 'hive/project_record/package_setting_entity.dart';
@@ -45,6 +46,7 @@ void main() async {
   await EnvConfigOperator.openBox();
   await ProjectRecordOperator.openBox();
   await EnvGroupOperator.openBox();
+  await FastObsUploadOperator.openBox();
 
   OBSClient.init(
     ak: EnvConfigOperator.searchEnvValue(Const.obsAccessKey),
