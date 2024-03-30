@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:jiffy/jiffy.dart';
+
 extension StringEmpty on String? {
   bool empty() {
     if (this == null) return true;
@@ -114,5 +116,18 @@ extension Max on int {
     } else {
       return "$this";
     }
+  }
+}
+
+// 文件size转换，将bytes单位转化成MB
+extension Bytes2Mb on int {
+  String toMb() {
+    return '${(this / 1024 / 1024).toStringAsPrecision(2)} MB';
+  }
+}
+
+extension DateTimeFormatter on DateTime {
+  String formatYYYMMDDHHmmSS() {
+    return Jiffy.parseFromDateTime(this).format(pattern: 'yyyy-MM-dd HH:mm:ss');
   }
 }

@@ -1,5 +1,4 @@
 import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_entity.dart';
-import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hive/hive.dart';
 
 
@@ -8,7 +7,7 @@ class FastObsUploadOperator {
   static const String _boxName = "fastObsUploadDb"; // 每一次更新
 
   static Future<void> openBox() async {
-    await Hive.openBox<ProjectRecordEntity>(_boxName);
+    await Hive.openBox<FastObsUploadEntity>(_boxName);
   }
 
   static Box<FastObsUploadEntity>? _box;

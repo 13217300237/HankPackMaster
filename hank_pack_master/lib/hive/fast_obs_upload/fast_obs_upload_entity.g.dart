@@ -19,17 +19,19 @@ class FastObsUploadEntityAdapter extends TypeAdapter<FastObsUploadEntity> {
     return FastObsUploadEntity(
       fields[1] as String,
       fields[2] as String,
-      fields[3] as String,
+      fields[3] as int,
       fields[4] as DateTime,
       fields[5] as DateTime,
       fields[6] as int,
+      fields[7] as String,
+      fields[8] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, FastObsUploadEntity obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(1)
       ..write(obj.filePath)
       ..writeByte(2)
@@ -41,7 +43,11 @@ class FastObsUploadEntityAdapter extends TypeAdapter<FastObsUploadEntity> {
       ..writeByte(5)
       ..write(obj.uploadTime)
       ..writeByte(6)
-      ..write(obj.expiredDays);
+      ..write(obj.expiredDays)
+      ..writeByte(7)
+      ..write(obj.downloadUrl)
+      ..writeByte(8)
+      ..write(obj.expiredTime);
   }
 
   @override

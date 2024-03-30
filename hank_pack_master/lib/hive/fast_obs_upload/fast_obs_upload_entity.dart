@@ -13,7 +13,7 @@ class FastObsUploadEntity {
   String fileName;
 
   @HiveField(3)
-  String fileSize;
+  int fileSize;
 
   @HiveField(4)
   DateTime fileLastModify;
@@ -24,6 +24,12 @@ class FastObsUploadEntity {
   @HiveField(6)
   int expiredDays;
 
+  @HiveField(7)
+  String downloadUrl;
+
+  @HiveField(8)
+  DateTime expiredTime;
+
   FastObsUploadEntity(
     this.filePath,
     this.fileName,
@@ -31,5 +37,7 @@ class FastObsUploadEntity {
     this.fileLastModify,
     this.uploadTime,
     this.expiredDays,
+    this.downloadUrl,
+    this.expiredTime,
   );
 }
