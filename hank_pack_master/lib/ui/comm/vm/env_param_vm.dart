@@ -245,10 +245,10 @@ class EnvParamVm extends ChangeNotifier {
   TextEditingController stageTaskExecuteMaxRetryTimesController =
       TextEditingController();
 
-  String get stageTaskExecuteMaxRetryTimes =>
+  String get stageTaskExecuteMaxRetryCount =>
       EnvConfigOperator.searchEnvValue(Const.stageTaskExecuteMaxRetryTimes);
 
-  set stageTaskExecuteMaxRetryTimes(String max) {
+  set stageTaskExecuteMaxRetryCount(String max) {
     EnvConfigOperator.insertOrUpdate(
         EnvConfigEntity(Const.stageTaskExecuteMaxRetryTimes, max));
     notifyListeners();
@@ -362,12 +362,52 @@ class EnvParamVm extends ChangeNotifier {
     initTextController(obsBucketNameController, () => obsBucketName,
         (String s) => obsBucketName = s);
 
+    if (obsExpiredDays.isEmpty) {
+      obsExpiredDays = obsExpiredDaysValues[0].toString();
+    }
+    if (stageTaskExecuteMaxRetryCount.isEmpty) {
+      stageTaskExecuteMaxRetryCount = stageTaskExecuteMaxRetryCountValues[0];
+    }
+    if (stageTaskExecuteMaxPeriod.isEmpty) {
+      stageTaskExecuteMaxPeriod = stageTaskExecuteMaxPeriodValues[0];
+    }
+
     notifyListeners();
   }
 
   // 用combox替换输入框
-  List<String> executePeriodList = ["10", "20", "30", "40"]; // 每次最大可执行时间
-  List<String> executeTimes = ["2", "3", "4", "5", "6", "7"]; // 每次最大可执行时间
+  List<String> stageTaskExecuteMaxPeriodValues = [
+    "10",
+    "20",
+    "30",
+    "40"
+  ]; // 每次最大可执行时间
+  List<String> stageTaskExecuteMaxRetryCountValues = [
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7"
+  ]; // 每次最大可执行时间
+
+  List<int> obsExpiredDaysValues = [
+    7,
+    30,
+    60,
+    90,
+    360,
+    3600,
+  ]; // obs文件保存天数
+  String get obsExpiredDays {
+    return EnvConfigOperator.searchEnvValue(Const.obsExpiredDays);
+  }
+
+  set obsExpiredDays(String days) {
+    EnvConfigOperator.insertOrUpdate(
+        EnvConfigEntity(Const.obsExpiredDays, days));
+    notifyListeners();
+  }
 
   void clearEnvGroupBox() {
     EnvGroupOperator.clear();

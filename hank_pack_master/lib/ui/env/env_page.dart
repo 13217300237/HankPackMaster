@@ -398,7 +398,7 @@ class _EnvPageState extends State<EnvPage> {
                   const Spacer(),
                   ComboBox<String>(
                     value: _envParamModel.stageTaskExecuteMaxPeriod,
-                    items: _envParamModel.executePeriodList
+                    items: _envParamModel.stageTaskExecuteMaxPeriodValues
                         .map<ComboBoxItem<String>>((e) {
                       return ComboBoxItem<String>(
                           value: e, child: Text(e, style: _cTextStyle));
@@ -426,14 +426,14 @@ class _EnvPageState extends State<EnvPage> {
                   ),
                   const Spacer(),
                   ComboBox<String>(
-                    value: _envParamModel.stageTaskExecuteMaxRetryTimes,
-                    items: _envParamModel.executeTimes
+                    value: _envParamModel.stageTaskExecuteMaxRetryCount,
+                    items: _envParamModel.stageTaskExecuteMaxRetryCountValues
                         .map<ComboBoxItem<String>>((e) {
                       return ComboBoxItem<String>(
                           value: e, child: Text(e, style: _cTextStyle));
                     }).toList(),
                     onChanged: (c) => setState(() =>
-                        _envParamModel.stageTaskExecuteMaxRetryTimes = c!),
+                        _envParamModel.stageTaskExecuteMaxRetryCount = c!),
                   ),
                   const SizedBox(width: 20),
                   Text("次", style: _cTextStyle),
@@ -480,14 +480,13 @@ class _EnvPageState extends State<EnvPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
             SizedBox(
-                width: 150,
+                width: 250,
                 child: Row(
                   children: [
                     Text(label, style: _cTextStyle),
                     toolTipIcon(msg: toolTip, iconColor: _appTheme.accentColor),
                   ],
                 )),
-            const Spacer(),
             Expanded(
               child: TextBox(
                 decoration: BoxDecoration(
@@ -517,6 +516,8 @@ class _EnvPageState extends State<EnvPage> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("华为OBS平台设置", style: _cTextStyle),
           const SizedBox(height: 20),
+          _expiredDaysWidget(),
+          const SizedBox(height: 20),
           _textInput('end point ', _envParamModel.obsEndPointController,
               judgeHttpsReg: true, toolTip: "华为OBS的终端地址"),
           const SizedBox(height: 10),
@@ -535,4 +536,34 @@ class _EnvPageState extends State<EnvPage> {
 
   final _cTextStyle =
       const TextStyle(fontSize: 19, fontWeight: FontWeight.w600);
+
+  _expiredDaysWidget() {
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Text("文件默认保存天数", style: _cTextStyle),
+              toolTipIcon(
+                msg: "阶段任务执行超时或执行失败时会尝试重试,超过设定的最大重试次数则会被认为阶段任务执行失败",
+                iconColor: _appTheme.accentColor,
+              ),
+            ],
+          ),
+          const Spacer(),
+          ComboBox<String>(
+            value: _envParamModel.obsExpiredDays,
+            items: _envParamModel.obsExpiredDaysValues.map<ComboBoxItem<String>>((e) {
+              return ComboBoxItem<String>(
+                  value: e.toString(),
+                  child: Text(e.toString(), style: _cTextStyle));
+            }).toList(),
+            onChanged: (c) => setState(
+                () => _envParamModel.obsExpiredDays = c!),
+          ),
+          const SizedBox(width: 20),
+          Text("天", style: _cTextStyle),
+        ]);
+  }
 }
