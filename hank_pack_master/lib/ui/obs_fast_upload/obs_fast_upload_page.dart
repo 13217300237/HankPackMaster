@@ -11,6 +11,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../comm/ui/info_bar.dart';
 import '../../comm/ui/text_on_arc.dart';
+import '../../comm/file_ext.dart';
 
 /// 文件快传，选中一个文件，并且
 class ObsFastUploadPage extends StatefulWidget {

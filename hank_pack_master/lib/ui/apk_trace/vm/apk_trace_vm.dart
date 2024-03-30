@@ -12,7 +12,7 @@ import 'package:jiffy/jiffy.dart';
 import '../../../comm/hwobs/obs_client.dart';
 import '../../../comm/toast_util.dart';
 
-class FastObsUploadVm extends ChangeNotifier {
+class ApkTraceVm extends ChangeNotifier {
   XFile? selectedFile;
   bool dragging = false;
   bool uploading = false;
@@ -117,7 +117,7 @@ class FastObsUploadVm extends ChangeNotifier {
   void doFileChoose() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['*'],
+      allowedExtensions: ['apk'],
     );
 
     if (result != null) {
@@ -129,3 +129,5 @@ class FastObsUploadVm extends ChangeNotifier {
     }
   }
 }
+
+

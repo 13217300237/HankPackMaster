@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../ui/apk_trace/apk_trace_page.dart';
 import '../ui/cash_files/cache_files_page.dart';
 import '../ui/env/env_page.dart';
 import '../ui/framework_page.dart';
@@ -47,6 +48,11 @@ final statefulRouter = GoRouter(
             GoRoute(
                 path: '/obs_fast_upload',
                 builder: (context, state) => const ObsFastUploadPage()),
+          ]),
+          StatefulShellBranch(routes: <RouteBase>[
+            GoRoute(
+                path: '/trace',
+                builder: (context, state) => const ApkTracePage()),
           ])
         ]),
   ],
