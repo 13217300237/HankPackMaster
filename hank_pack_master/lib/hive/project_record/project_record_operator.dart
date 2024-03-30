@@ -49,25 +49,25 @@ class ProjectRecordOperator {
   }
 
   static void debugShowAll() {
-    var findAllResult = findAll();
-    debugPrint("============项目总数为：${findAllResult.length}==================");
-
-    for (int i = 0; i < findAllResult.length; i++) {
-      var e = findAllResult[i];
-      debugPrint('''
-      ------------index= $i-----------------------
-      projectName=  ${e.projectName}
-      assembleOrdersStr=  ${e.assembleOrdersStr}
-      projectDesc=  ${e.projectDesc}
-      gitUrl=  ${e.gitUrl}
-      branch=  ${e.branch}
-      jobHistoryList=  ${e.jobHistoryList}
-      apkPath=  ${e.apkPath}
-      preCheckOk=  ${e.preCheckOk}
-      ''');
-    }
-
-    debugPrint("show end=============\n\n\n");
+    // var findAllResult = findAll();
+    // debugPrint("============项目总数为：${findAllResult.length}==================");
+    //
+    // for (int i = 0; i < findAllResult.length; i++) {
+    //   var e = findAllResult[i];
+    //   debugPrint('''
+    //   ------------index= $i-----------------------
+    //   projectName=  ${e.projectName}
+    //   assembleOrdersStr=  ${e.assembleOrdersStr}
+    //   projectDesc=  ${e.projectDesc}
+    //   gitUrl=  ${e.gitUrl}
+    //   branch=  ${e.branch}
+    //   jobHistoryList=  ${e.jobHistoryList}
+    //   apkPath=  ${e.apkPath}
+    //   preCheckOk=  ${e.preCheckOk}
+    //   ''');
+    // }
+    //
+    // debugPrint("show end=============\n\n\n");
   }
 
   static List<ProjectRecordEntity> findAll() {

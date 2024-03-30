@@ -42,6 +42,9 @@ class ProjectRecordEntity {
   @HiveField(11)
   List<JobHistoryEntity>? jobHistoryList; // 换个方式存储作业历史
 
+  @HiveField(12)
+  String? gradlewWorkDir;
+
   List<String> strArrToList() {
     List<String> list = [];
     var split = assembleOrdersStr!.split("\n");
@@ -116,6 +119,7 @@ class ProjectRecordEntity {
     this.projectDesc, {
     this.preCheckOk = false,
     this.jobRunning = false,
+    this.gradlewWorkDir,
   });
 
   ProjectRecordEntity clone() {

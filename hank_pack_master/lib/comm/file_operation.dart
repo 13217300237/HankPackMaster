@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluent_ui/fluent_ui.dart';
+
 ///
 /// [path] 指定路径
 /// [outputList] 输入数组
@@ -15,6 +17,38 @@ void searchForAPKFiles(String path, List<String> apkFilePaths) {
       searchForAPKFiles(fileSystemEntity.path, apkFilePaths);
     }
   });
+}
+
+/// 找到所有的 gradlew.bat 文件
+List<File> findGradlewBat(String folderPath) {
+  List<File> files = [];
+  Directory directory = Directory(folderPath);
+
+  if (directory.existsSync()) {
+    _exploreByFullName(directory, files, fileFullName: 'gradlew.bat');
+  } else {
+    debugPrint('文件夹不存在: $folderPath');
+  }
+
+  return files;
+}
+
+void _exploreByFullName(
+  Directory directory,
+  List<File> files, {
+  required String fileFullName,
+}) {
+  List<FileSystemEntity> entities = directory.listSync();
+
+  for (FileSystemEntity entity in entities) {
+    if (entity is File) {
+      if (entity.path.endsWith(fileFullName)) {
+        files.add(entity);
+      }
+    } else if (entity is Directory) {
+      _exploreByFullName(entity, files, fileFullName: fileFullName);
+    }
+  }
 }
 
 List<File> findApkFiles(String folderPath) {

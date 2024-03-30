@@ -23,6 +23,7 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       fields[6] as String?,
       preCheckOk: fields[4] as bool,
       jobRunning: fields[5] as bool?,
+      gradlewWorkDir: fields[12] as String?,
     )
       ..activeSetting = fields[7] as PackageSetting?
       ..packageSetting = fields[8] as PackageSetting?
@@ -34,7 +35,7 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
   @override
   void write(BinaryWriter writer, ProjectRecordEntity obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(1)
       ..write(obj.projectName)
       ..writeByte(2)
@@ -56,7 +57,9 @@ class ProjectRecordEntityAdapter extends TypeAdapter<ProjectRecordEntity> {
       ..writeByte(10)
       ..write(obj.assembleOrdersStr)
       ..writeByte(11)
-      ..write(obj.jobHistoryList);
+      ..write(obj.jobHistoryList)
+      ..writeByte(12)
+      ..write(obj.gradlewWorkDir);
   }
 
   @override

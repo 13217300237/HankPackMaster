@@ -452,8 +452,6 @@ class CommandUtil {
 
     String binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
 
-    debugPrint("clonePath->$clonePath");
-
     Directory dir = Directory(clonePath);
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);

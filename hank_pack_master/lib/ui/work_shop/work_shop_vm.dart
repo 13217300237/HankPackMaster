@@ -98,7 +98,8 @@ class WorkShopVm extends ChangeNotifier {
 
   String get gitLog => gitLogController.text;
 
-  String get _apkLocation => "$projectWorkDir${apkLocationController.text}";
+  String get _apkLocation =>
+      "${runningTask!.gradlewWorkDir!}${apkLocationController.text}";
 
   void setApkLocation(String newPath) => apkLocationController.text = newPath;
 
@@ -201,29 +202,36 @@ class WorkShopVm extends ChangeNotifier {
         return OrderExecuteResult(
           succeed: true,
           data: '分支 $gitBranch 切换成功',
-          executeLog: executeRes.res,
+          executeLog: "分支 $gitBranch 切换成功 \n ${executeRes.res}",
         );
       });
 
   get projectStructCheckTask => TaskStage("工程结构检测", stageAction: () async {
         // 工程结构检查
         // 检查目录下是否有 gradlew.bat 文件
-        File gradlewFile =
-            File("$projectWorkDir${Platform.pathSeparator}gradlew.bat");
-        if (!gradlewFile.existsSync()) {
-          String er = "工程目录下没找到 gradlew 命令文件，流程终止! ${gradlewFile.path}";
-          return OrderExecuteResult(msg: er, succeed: false);
+        // 循环遍历工作目录下第一个存在 gradlew.bat 文件的子目录，将它作为工作目录
+        List<File> findGradlewBatRes = findGradlewBat(projectWorkDir);
+        if (findGradlewBatRes.isEmpty) {
+          return OrderExecuteResult(
+              succeed: false, executeLog: '没找到任何gradlew.bat文件');
         }
+        if (findGradlewBatRes.length > 1) {
+          return OrderExecuteResult(
+              executeLog: '找到多个gradlew.bat文件', succeed: false);
+        }
+
+        runningTask!.gradlewWorkDir = findGradlewBatRes[0].parent.path;
         return OrderExecuteResult(
           succeed: true,
-          data: '这是一个正常的安卓工程',
-          executeLog: "这是一个正常的安卓工程",
+          data: '这是一个正常的安卓工程 gradlew 工作目录为:->${runningTask!.gradlewWorkDir}',
+          executeLog:
+              "这是一个正常的安卓工程  gradlew 工作目录为:->${runningTask!.gradlewWorkDir}",
         );
       });
 
   get assembleOrdersTask => TaskStage("可用指令查询", stageAction: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance()
-            .gradleAssembleTasks(projectWorkDir, addNewLogLine,
+            .gradleAssembleTasks(runningTask!.gradlewWorkDir!, addNewLogLine,
                 tempLogCacheEntity: tempLog);
         if (executeRes.exitCode != 0) {
           return OrderExecuteResult(
@@ -353,7 +361,8 @@ class WorkShopVm extends ChangeNotifier {
   get modifyGradlePropertiesFile =>
       TaskStage("修改 gradle.properties文件 以指定Java环境", stageAction: () async {
         // 找到工程位置下的 gradle.properties 文件
-        var gradlePropertiesFile = File("${projectWorkDir}gradle.properties");
+        var gradlePropertiesFile = File(
+            "${runningTask!.gradlewWorkDir!}${Platform.pathSeparator}gradle.properties");
 
         if (!gradlePropertiesFile.existsSync()) {
           return OrderExecuteResult(
@@ -391,7 +400,7 @@ class WorkShopVm extends ChangeNotifier {
 
   get recoverGradlePropertiesFile =>
       TaskStage("恢复gradle.properties", stageAction: () async {
-        String gradlePropertiesFilePath = "${projectWorkDir}gradle.properties";
+        String gradlePropertiesFilePath = "${runningTask!.gradlewWorkDir}${Platform.pathSeparator}gradle.properties";
 
         ExecuteResult executeRes = await CommandUtil.getInstance()
             .gitCheckoutFile(
@@ -411,9 +420,9 @@ class WorkShopVm extends ChangeNotifier {
             executeLog: 'gradle.properties还原成功 \n${executeRes.res}');
       });
 
-  get cleanProject => TaskStage("工程clean", stageAction: () async {
+  get cleanProjectTask => TaskStage("工程clean", stageAction: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance().gradleClean(
-            projectRoot: projectWorkDir,
+            projectRoot: runningTask!.gradlewWorkDir!,
             packageOrder: selectedOrder!,
             versionCode: versionCode,
             versionName: versionName,
@@ -434,7 +443,7 @@ class WorkShopVm extends ChangeNotifier {
   get generateApkTask => TaskStage("生成apk", stageAction: () async {
         ExecuteResult executeRes = await CommandUtil.getInstance()
             .gradleAssemble(
-                projectRoot: projectWorkDir,
+                projectRoot: runningTask!.gradlewWorkDir!,
                 packageOrder: selectedOrder!,
                 versionCode: versionCode,
                 versionName: versionName,
@@ -454,7 +463,7 @@ class WorkShopVm extends ChangeNotifier {
 
   get apkCheckTask => TaskStage("apk检测", stageAction: () async {
         List<File> list = findApkFiles(_apkLocation);
-        String directoryPath = '$projectPath/app/build/outputs';
+        String directoryPath = '${runningTask!.gradlewWorkDir}/app/build/outputs';
 
         if (list.isEmpty) {
           addNewLogLine(
@@ -659,7 +668,7 @@ class WorkShopVm extends ChangeNotifier {
           objectName:
               "${OBSClient.commonUploadFolder}/$childFolderName/$buildUpdated${path.basename(apkToUpload!)}",
           file: fileToUpload,
-          expiresDays: 1,// 设置过期时间(天)，超过了之后会被自动删除
+          expiresDays: 1, // 设置过期时间(天)，超过了之后会被自动删除
         );
 
         obsDownloadUrl = oBSResponse?.url;
@@ -755,7 +764,7 @@ class WorkShopVm extends ChangeNotifier {
   void initPackageTaskList() {
     taskStateList.clear();
 
-    taskStateList.add(cleanProject);
+    taskStateList.add(cleanProjectTask);
     taskStateList.add(recoverGradlePropertiesFile);
     taskStateList.add(gitBranchRemote);
     taskStateList.add(gitPullTask);
@@ -1335,6 +1344,8 @@ class WorkShopVm extends ChangeNotifier {
       }
       runningTask!.assembleOrdersStr = sb.toString();
     }
+
+    debugPrint('激活完成,现在更新DB : gradlewWorkDir->${runningTask!.gradlewWorkDir}');
     setProjectRecordJobRunning(false);
     _reset();
   }
@@ -1372,7 +1383,7 @@ class WorkShopVm extends ChangeNotifier {
       taskName: taskName,
       jobResultEntity: jobResultEntity,
     );
-    j.parentRecord =  runningTask!.clone();
+    j.parentRecord = runningTask!.clone();
 
     runningTask!.jobHistoryList!.add(j);
   }
