@@ -124,7 +124,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                         ],
                                       ),
                                       Visibility(
-                                        visible: true,
+                                        visible: hasExpired,
                                         child: Positioned(
                                           right: 120,
                                           top: 0,
