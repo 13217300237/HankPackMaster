@@ -78,7 +78,6 @@ class WorkShopVm extends ChangeNotifier {
     notifyListeners();
   }
 
-
   int obsExpiresDays = 7;
 
   List<String> get cmdExecLog => _cmdExecLog;
@@ -117,8 +116,9 @@ class WorkShopVm extends ChangeNotifier {
 
   bool _workThreadRunning = false;
 
-  String? apkToUpload; // 即将上传的文件地址
-  String? obsDownloadUrl; // obs上传后的下载路径
+  String? _apkToUpload; // 即将上传的文件地址
+  String? _apkToUploadMd5; // 删除文件之前，先计算出它的md5
+  String? _obsDownloadUrl; // obs上传后的下载路径
 
   final List<String> _enableAssembleOrders = [];
 
@@ -403,7 +403,8 @@ class WorkShopVm extends ChangeNotifier {
 
   get recoverGradlePropertiesFile =>
       TaskStage("恢复gradle.properties", stageAction: () async {
-        String gradlePropertiesFilePath = "${runningTask!.gradlewWorkDir}${Platform.pathSeparator}gradle.properties";
+        String gradlePropertiesFilePath =
+            "${runningTask!.gradlewWorkDir}${Platform.pathSeparator}gradle.properties";
 
         ExecuteResult executeRes = await CommandUtil.getInstance()
             .gitCheckoutFile(
@@ -466,7 +467,8 @@ class WorkShopVm extends ChangeNotifier {
 
   get apkCheckTask => TaskStage("apk检测", stageAction: () async {
         List<File> list = findApkFiles(_apkLocation);
-        String directoryPath = '${runningTask!.gradlewWorkDir}/app/build/outputs';
+        String directoryPath =
+            '${runningTask!.gradlewWorkDir}/app/build/outputs';
 
         if (list.isEmpty) {
           addNewLogLine(
@@ -491,19 +493,19 @@ class WorkShopVm extends ChangeNotifier {
           );
         }
 
-        apkToUpload = list[0].path;
+        _apkToUpload = list[0].path;
 
-        if (await File(apkToUpload!).exists()) {
+        if (await File(_apkToUpload!).exists()) {
           return OrderExecuteResult(
             succeed: true,
-            data: "打包产物的位置在: $apkToUpload",
-            executeLog: '打包产物的位置在: $apkToUpload',
+            data: "打包产物的位置在: $_apkToUpload",
+            executeLog: '打包产物的位置在: $_apkToUpload',
           );
         } else {
           return OrderExecuteResult(
               succeed: false,
-              msg: "查找打包产物 失败: $apkToUpload，文件不存在",
-              executeLog: "查找打包产物 失败: $apkToUpload，文件不存在");
+              msg: "查找打包产物 失败: $_apkToUpload，文件不存在",
+              executeLog: "查找打包产物 失败: $_apkToUpload，文件不存在");
         }
       });
 
@@ -535,13 +537,13 @@ class WorkShopVm extends ChangeNotifier {
 
         if (pgyToken == null) {
           var fastUploadEntity = UploadResultEntity(
-            apkPath: apkToUpload!,
+            apkPath: _apkToUpload!,
             errMsg: 'pgy token获取失败... ',
           );
           return OrderExecuteResult(
               msg: fastUploadEntity.toJsonString(),
               succeed: false,
-              executeLog: 'pgy token获取失败... [$apkToUpload]');
+              executeLog: 'pgy token获取失败... [$_apkToUpload]');
         }
 
         _pgyEntity = PgyEntity(
@@ -561,25 +563,25 @@ class WorkShopVm extends ChangeNotifier {
   get uploadToPgyTask => TaskStage("上传pgy", stageAction: () async {
         if (!_pgyEntity!.isOk()) {
           return OrderExecuteResult(
-              msg: "上传参数为空，流程终止!  [$apkToUpload]", succeed: false);
+              msg: "上传参数为空，流程终止!  [$_apkToUpload]", succeed: false);
         }
 
-        String oriFileName = path.basename(File(apkToUpload!).path);
+        String oriFileName = path.basename(File(_apkToUpload!).path);
 
         var res = await PgyUploadUtil.getInstance().doUpload(_pgyEntity!,
-            filePath: apkToUpload!,
+            filePath: _apkToUpload!,
             oriFileName: oriFileName,
             uploadProgressAction: addNewLogLine);
 
         if (res != null) {
           var fastUploadEntity = UploadResultEntity(
-            apkPath: apkToUpload!,
+            apkPath: _apkToUpload!,
             errMsg: res,
           );
           return OrderExecuteResult(
             msg: fastUploadEntity.toJsonString(),
             succeed: false,
-            executeLog: '上传失败,$res \n [$apkToUpload] \n',
+            executeLog: '上传失败,$res \n [$_apkToUpload] \n',
           );
         } else {
           return OrderExecuteResult(
@@ -594,13 +596,13 @@ class WorkShopVm extends ChangeNotifier {
         // 发布失败，流程终止
         if (s == null || s.code == 1216) {
           var fastUploadEntity = UploadResultEntity(
-            apkPath: apkToUpload!,
+            apkPath: _apkToUpload!,
             errMsg: 'pgy发布失败，流程终止!',
           );
           return OrderExecuteResult(
               succeed: false,
               msg: fastUploadEntity.toJsonString(),
-              executeLog: '发布失败，流程终止, \n [$apkToUpload] \n');
+              executeLog: '发布失败，流程终止, \n [$_apkToUpload] \n');
         } else {
           // 发布成功，打印结果
           // 开始解析发布结果,
@@ -624,11 +626,7 @@ class WorkShopVm extends ChangeNotifier {
             addNewLogLine("二维码地址: ${jobResult.buildQRCodeURL}");
             addNewLogLine("应用更新时间: ${jobResult.buildUpdated}");
 
-            try {
-              File(apkToUpload!).delete();
-            } catch (e) {
-              addNewLogLine("文件删除失败");
-            }
+            await _deleteApkToUpload();
 
             return OrderExecuteResult(
                 succeed: true,
@@ -636,13 +634,13 @@ class WorkShopVm extends ChangeNotifier {
                 executeLog: jobResult.toJsonString());
           } else {
             var fastUploadEntity = UploadResultEntity(
-              apkPath: apkToUpload!,
+              apkPath: _apkToUpload!,
               errMsg: 'pgy发布失败，流程终止!',
             );
             return OrderExecuteResult(
                 succeed: false,
                 msg: fastUploadEntity.toJsonString(),
-                executeLog: '发布失败，流程终止, \n [$apkToUpload] \n');
+                executeLog: '发布失败，流程终止, \n [$_apkToUpload] \n');
           }
         }
       });
@@ -655,32 +653,32 @@ class WorkShopVm extends ChangeNotifier {
         if (executeRes.exitCode != 0) {
           String gitLogFailed = '获取git最近提交记录失败...';
           var fastUploadEntity =
-              UploadResultEntity(apkPath: apkToUpload!, errMsg: gitLogFailed);
+              UploadResultEntity(apkPath: _apkToUpload!, errMsg: gitLogFailed);
           return OrderExecuteResult(
               succeed: false,
               msg: fastUploadEntity.toJsonString(),
               executeLog: gitLogFailed);
         }
         // 上传到OBS的时候，必须重命名,不然无法区分多版本
-        File fileToUpload = File(apkToUpload!);
+        File fileToUpload = File(_apkToUpload!);
 
         String childFolderName = path.basename(projectWorkDir); // 用项目名称作为分隔
         String buildUpdated = _nowTime();
 
         var oBSResponse = await OBSClient.putFile(
           objectName:
-              "${OBSClient.commonUploadFolder}/$childFolderName/$buildUpdated${path.basename(apkToUpload!)}",
+              "${OBSClient.commonUploadFolder}/$childFolderName/$buildUpdated${path.basename(_apkToUpload!)}",
           file: fileToUpload,
           expiresDays: 1, // 设置过期时间(天)，超过了之后会被自动删除
         );
 
-        obsDownloadUrl = oBSResponse?.url;
+        _obsDownloadUrl = oBSResponse?.url;
 
-        if (obsDownloadUrl == null || obsDownloadUrl!.isEmpty) {
+        if (_obsDownloadUrl == null || _obsDownloadUrl!.isEmpty) {
           // 在这里构建一个json，FastUploadEntity
 
           var fastUploadEntity = UploadResultEntity(
-            apkPath: apkToUpload!,
+            apkPath: _apkToUpload!,
             errMsg: '${oBSResponse?.errMsg}',
           );
 
@@ -688,10 +686,10 @@ class WorkShopVm extends ChangeNotifier {
               succeed: false,
               msg: fastUploadEntity.toJsonString(),
               executeLog:
-                  'OBS上传失败, \n [$apkToUpload]  \n ${oBSResponse?.errMsg}');
+                  'OBS上传失败, \n [$_apkToUpload]  \n ${oBSResponse?.errMsg}');
         } else {
           return OrderExecuteResult(
-            data: "OBS上传成功,下载地址为 $obsDownloadUrl",
+            data: "OBS上传成功,下载地址为 $_obsDownloadUrl",
             succeed: true,
             executeLog: executeRes.res,
           );
@@ -699,15 +697,15 @@ class WorkShopVm extends ChangeNotifier {
       });
 
   get generateObsUploadResTask => TaskStage("构建打包结果", stageAction: () async {
-        if (apkToUpload == null) {
+        if (_apkToUpload == null) {
           return OrderExecuteResult(
               data: "error : apkToUpload is null!", succeed: false);
         }
         JobResultEntity jobResult = JobResultEntity();
-        File apkFile = File(apkToUpload!);
+        File apkFile = File(_apkToUpload!);
         if (await apkFile.exists()) {
           String fileSize = "${await apkFile.length()}"; // 文件大小
-          var executeRes = await CommandUtil.getInstance().aapt(apkToUpload!);
+          var executeRes = await CommandUtil.getInstance().aapt(_apkToUpload!);
           var data = executeRes.data; // aapt分析的结果
           if (data is ApkParserResult) {
             jobResult.uploadPlatform = '${selectedUploadPlatform?.index}';
@@ -716,20 +714,17 @@ class WorkShopVm extends ChangeNotifier {
             jobResult.buildVersionNo = data.versioncode;
             jobResult.buildIdentifier = data.packageName;
             jobResult.buildFileSize = fileSize;
-            jobResult.buildQRCodeURL = obsDownloadUrl;
+            jobResult.buildQRCodeURL = _obsDownloadUrl;
             jobResult.buildUpdated =
                 Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
             // 更新日志
             jobResult.buildUpdateDescription = updateLog;
             // 应用描述
             jobResult.buildDescription = projectAppDesc;
-            jobResult.expiredTime = DateTime.now().add(Duration(days: obsExpiresDays));
+            jobResult.expiredTime =
+                DateTime.now().add(Duration(days: obsExpiresDays));
 
-            try {
-              File(apkToUpload!).delete();
-            } catch (e) {
-              addNewLogLine("文件删除失败");
-            }
+            await _deleteApkToUpload();
 
             return OrderExecuteResult(
               data: jobResult,
@@ -794,7 +789,7 @@ class WorkShopVm extends ChangeNotifier {
 
   /// 初始化一个快速上传的任务队列
   void initFastUploadTaskList(String apkPath) {
-    apkToUpload = apkPath;
+    _apkToUpload = apkPath;
     if (selectedUploadPlatform!.index == 0) {
       // 0 pgy
       taskStateList.add(pgyTokenFetchTask);
@@ -1107,6 +1102,8 @@ class WorkShopVm extends ChangeNotifier {
     selectedUploadPlatform = null;
     selectedUploadPlatformController.text = '';
     runningTask = null;
+    _apkToUpload = null;
+    _apkToUploadMd5 = null;
     notifyListeners();
   }
 
@@ -1202,12 +1199,12 @@ class WorkShopVm extends ChangeNotifier {
     jobResult.buildUpdated = _nowTime2();
 
     _insertIntoJobHistoryList(
-        success: true,
-        // 这里要
-        jobSetting: runningTask!.settingToWorkshop!,
-        stageRecordList: orderExecuteResult.stageRecordList ?? [],
-        taskName: taskName,
-        jobResultEntity: jobResult);
+      success: true,
+      jobSetting: runningTask!.settingToWorkshop!,
+      stageRecordList: orderExecuteResult.stageRecordList ?? [],
+      taskName: taskName,
+      jobResultEntity: jobResult,
+    );
 
     onProjectActiveFinished(orderExecuteResult.data);
     _reset();
@@ -1281,18 +1278,20 @@ class WorkShopVm extends ChangeNotifier {
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 打包成功, 详情查看打包历史");
       _insertIntoJobHistoryList(
-          success: true,
-          jobResultEntity: jobResult!,
-          jobSetting: runningTask!.settingToWorkshop!,
-          stageRecordList: scheduleRes.stageRecordList ?? [],
-          taskName: taskName);
+        success: true,
+        jobResultEntity: jobResult!,
+        jobSetting: runningTask!.settingToWorkshop!,
+        stageRecordList: scheduleRes.stageRecordList ?? [],
+        taskName: taskName,
+        md5: _apkToUploadMd5,
+      );
     } else {
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 打包失败, 详情查看打包历史",
           success: false);
       _insertIntoJobHistoryList(
           success: false,
           jobResultEntity: JobResultEntity(
-              errMessage: '${scheduleRes.msg}', apkPath: apkToUpload),
+              errMessage: '${scheduleRes.msg}', apkPath: _apkToUpload),
           jobSetting: runningTask!.settingToWorkshop!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
@@ -1313,11 +1312,13 @@ class WorkShopVm extends ChangeNotifier {
       jobResult = scheduleRes.data;
 
       _insertIntoJobHistoryList(
-          success: true,
-          jobResultEntity: jobResult!,
-          jobSetting: runningTask!.settingToWorkshop!,
-          stageRecordList: scheduleRes.stageRecordList ?? [],
-          taskName: taskName);
+        success: true,
+        jobResultEntity: jobResult!,
+        jobSetting: runningTask!.settingToWorkshop!,
+        stageRecordList: scheduleRes.stageRecordList ?? [],
+        taskName: taskName,
+        md5: _apkToUploadMd5,
+      );
       ToastUtil.showPrettyToast(
           "任务 ${runningTask!.projectName} 快速上传成功, 详情查看打包历史");
     } else {
@@ -1327,7 +1328,7 @@ class WorkShopVm extends ChangeNotifier {
       _insertIntoJobHistoryList(
           success: false,
           jobResultEntity: JobResultEntity(
-              apkPath: apkToUpload!, errMessage: scheduleRes.msg ?? ''),
+              apkPath: _apkToUpload!, errMessage: scheduleRes.msg ?? ''),
           jobSetting: runningTask!.settingToWorkshop!,
           stageRecordList: scheduleRes.stageRecordList ?? [],
           taskName: taskName);
@@ -1373,6 +1374,7 @@ class WorkShopVm extends ChangeNotifier {
     required List<StageRecordEntity> stageRecordList,
     required String taskName,
     required JobResultEntity jobResultEntity,
+    String? md5,
   }) {
     if (runningTask!.jobHistoryList == null) {
       runningTask!.jobHistoryList = [];
@@ -1386,6 +1388,7 @@ class WorkShopVm extends ChangeNotifier {
       stageRecordList: stageRecordList,
       taskName: taskName,
       jobResultEntity: jobResultEntity,
+      md5: md5,
     );
     j.parentRecord = runningTask!.clone();
 
@@ -1398,5 +1401,14 @@ class WorkShopVm extends ChangeNotifier {
 
   String _nowTime2() {
     return Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
+  }
+
+  Future<void> _deleteApkToUpload() async {
+    try {
+      File(_apkToUpload!).delete();
+      _apkToUploadMd5 = await getFileMd5Base64(File(_apkToUpload!));
+    } catch (e) {
+      addNewLogLine("文件删除失败");
+    }
   }
 }

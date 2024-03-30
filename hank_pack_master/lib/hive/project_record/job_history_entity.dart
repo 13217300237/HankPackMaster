@@ -33,6 +33,9 @@ class JobHistoryEntity {
   @HiveField(8)
   JobResultEntity jobResultEntity; // 作业结果封装
 
+  @HiveField(9)
+  String? md5; // 上传apk文件的MD5
+
   late ProjectRecordEntity parentRecord; // 工程实体的副本，果然不能用这个副本,至少不能保存到数据库
 
   @override
@@ -46,6 +49,7 @@ class JobHistoryEntity {
       "taskName": "$taskName",
       "jobResultEntity": "$jobResultEntity",
       "parentRecord": "$parentRecord",
+      "md5":"$md5"
     });
   }
 
@@ -57,6 +61,7 @@ class JobHistoryEntity {
     this.stageRecordList,
     this.taskName,
     required this.jobResultEntity,
+    this.md5,
   });
 
   @override
