@@ -5,6 +5,7 @@ import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../comm/ui/text_on_arc.dart';
 import '../../hive/project_record/job_result_entity.dart';
 
 /// 流水线最终成果展示卡片
@@ -28,31 +29,55 @@ class JobResultCard extends StatelessWidget {
         jobResult.assembleOrders!.isNotEmpty) {
       return _assembleOrderWidget(jobResult.assembleOrders);
     } else {
+      bool hasExpired = jobResult.expiredTime?.isBefore(DateTime.now()) ?? false;
       return Card(
         backgroundColor: Colors.blue.withOpacity(.1),
         borderRadius: BorderRadius.circular(10),
         margin: const EdgeInsets.symmetric(vertical: 10),
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Stack(
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _line('App名称', "${jobResult.buildName}"),
-                _line('App版本', "${jobResult.buildVersion}"),
-                _line('编译版本', "${jobResult.buildVersionNo}"),
-                _line('上传批次', "${jobResult.buildBuildVersion}"),
-                _line('App包名', "${jobResult.buildIdentifier}"),
-                _line('应用描述', "${jobResult.buildDescription}"),
-                _line('更新日志', "${jobResult.buildUpdateDescription}"),
-                _line('更新时间', "${jobResult.buildUpdated}"),
-                _line('下载地址', "${jobResult.buildQRCodeURL}"),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _line('App名称', "${jobResult.buildName}"),
+                    _line('App版本', "${jobResult.buildVersion}"),
+                    _line('编译版本', "${jobResult.buildVersionNo}"),
+                    _line('上传批次', "${jobResult.buildBuildVersion}"),
+                    _line('App包名', "${jobResult.buildIdentifier}"),
+                    _line('应用描述', "${jobResult.buildDescription}"),
+                    _line('更新日志', "${jobResult.buildUpdateDescription}"),
+                    _line('更新时间', "${jobResult.buildUpdated}"),
+                    _line('下载地址', "${jobResult.buildQRCodeURL}"),
+                    _line('过期时间', "${jobResult.expiredTime?.formatYYYMMDDHHmmSS()}"),
+                  ],
+                ),
+                qrCode(),
               ],
             ),
-            qrCode(),
+            Visibility(
+              visible: hasExpired,
+              child: Positioned(
+                right: 40,
+                top: 10,
+                child: TextOnArcWidget(
+                  arcStyle: ArcStyle(
+                      text: '文件已过期',
+                      strokeWidth: 4,
+                      radius: 80,
+                      textSize: 20,
+                      sweepDegrees: 190,
+                      textColor: Colors.red,
+                      arcColor: Colors.red,
+                      padding: 18),
+                ),
+              ),
+            )
           ],
         ),
       );

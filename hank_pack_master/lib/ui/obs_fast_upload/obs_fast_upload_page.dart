@@ -118,7 +118,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                           ),
                                           QrImageView(
                                             data: cur.downloadUrl,
-                                            size: 200,
+                                            size: 160,
                                             version: QrVersions.auto,
                                           )
                                         ],
@@ -126,8 +126,8 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                       Visibility(
                                         visible: true,
                                         child: Positioned(
-                                          right: 240,
-                                          top: 10,
+                                          right: 120,
+                                          top: 0,
                                           child: TextOnArcWidget(
                                             arcStyle: ArcStyle(
                                                 text: '文件已过期',

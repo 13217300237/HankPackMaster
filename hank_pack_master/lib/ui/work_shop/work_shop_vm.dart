@@ -78,6 +78,9 @@ class WorkShopVm extends ChangeNotifier {
     notifyListeners();
   }
 
+
+  int obsExpiresDays = 7;
+
   List<String> get cmdExecLog => _cmdExecLog;
 
   String get gitUrl => gitUrlController.text;
@@ -720,6 +723,7 @@ class WorkShopVm extends ChangeNotifier {
             jobResult.buildUpdateDescription = updateLog;
             // 应用描述
             jobResult.buildDescription = projectAppDesc;
+            jobResult.expiredTime = DateTime.now().add(Duration(days: obsExpiresDays));
 
             try {
               File(apkToUpload!).delete();

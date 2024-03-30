@@ -42,13 +42,13 @@ class JobResultEntityAdapter extends TypeAdapter<JobResultEntity> {
       errMessage: fields[22] as String?,
       assembleOrders: (fields[24] as List?)?.cast<String>(),
       apkPath: fields[25] as String?,
-    );
+    )..expiredTime = fields[26] as DateTime?;
   }
 
   @override
   void write(BinaryWriter writer, JobResultEntity obj) {
     writer
-      ..writeByte(25)
+      ..writeByte(26)
       ..writeByte(1)
       ..write(obj.uploadPlatform)
       ..writeByte(2)
@@ -98,7 +98,9 @@ class JobResultEntityAdapter extends TypeAdapter<JobResultEntity> {
       ..writeByte(24)
       ..write(obj.assembleOrders)
       ..writeByte(25)
-      ..write(obj.apkPath);
+      ..write(obj.apkPath)
+      ..writeByte(26)
+      ..write(obj.expiredTime);
   }
 
   @override

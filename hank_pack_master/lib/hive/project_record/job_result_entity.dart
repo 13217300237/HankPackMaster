@@ -61,6 +61,9 @@ class JobResultEntity {
   @HiveField(25)
   String? apkPath; // apk产物所在位置
 
+  @HiveField(26)
+  DateTime? expiredTime; // 过期时间
+
   JobResultEntity({
     this.buildKey,
     this.buildType,
