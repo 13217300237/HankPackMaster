@@ -126,10 +126,7 @@ class OBSClient {
     headers["Content-MD5"] = contentMD5;
     headers["Date"] = date;
     headers["x-obs-acl"] = xObsAcl;
-    headers["x-obs-expires"] = expiresDays; // 找到一个设置过期时间的方法,但是貌似会使得 上传失败，待查
-    // 参考链接 https://support.huaweicloud.com/api-obs/obs_04_0080.html#section26
-    // https://obs-community.obs.cn-north-1.myhuaweicloud.com/sign/header_signature.html
-    // https://obs-community.obs.cn-north-1.myhuaweicloud.com/sign/query_signature.html
+    headers["x-obs-expires"] = expiresDays;
     headers["Authorization"] = _sign(
       "PUT",
       contentMD5,
@@ -176,8 +173,20 @@ class OBSClient {
     );
   }
 
-  static String _sign(String httpMethod, String contentMd5, String contentType,
-      String date, String acl, String expired, String res) {
+  // 参考链接 https://support.huaweicloud.com/api-obs/obs_04_0080.html#section26
+  // https://obs-community.obs.cn-north-1.myhuaweicloud.com/sign/header_signature.html
+  // https://obs-community.obs.cn-north-1.myhuaweicloud.com/sign/query_signature.html
+  /// 签名的生成
+  /// 注意：参与签名的字段内容和 请求头中的基本保持一致，比当时header中多了一个httpMethod
+  static String _sign(
+    String httpMethod,
+    String contentMd5,
+    String contentType,
+    String date,
+    String acl,
+    String expired,
+    String res,
+  ) {
     if (ak == null || sk == null) {
       throw "ak or sk is null";
     }
@@ -188,8 +197,9 @@ $date
 $acl
 $expired
 $res
-    '''.trim();
-        // "$httpMethod\n$contentMd5\n$contentType\n$date\n$acl\n$expired\n$res";
+    '''
+        .trim();
+    // "$httpMethod\n$contentMd5\n$contentType\n$date\n$acl\n$expired\n$res";
 
     return "OBS $ak:${signContent.toHmacSha1Base64(sk!)}";
   }

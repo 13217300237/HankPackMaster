@@ -68,24 +68,14 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('OBS文件直传',
-                  style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'STKAITI')),
+              Text('OBS文件直传', style: _textStyle2),
               const SizedBox(height: 12),
               _toolTip(),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(
-                    flex: 5,
-                    child: fileSelectorWidget(),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: actionBtnWidget(),
-                  )
+                  Expanded(flex: 5, child: fileSelectorWidget()),
+                  Expanded(flex: 1, child: actionBtnWidget())
                 ],
               )
             ],
@@ -138,107 +128,86 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
 
   // 每次仅仅支持一个文件
   Widget fileSelectorWidget() {
-    var text = _selectedFile == null
-        ? Center(
+    var toChooseWidget = GestureDetector(
+      onTap: () async => _doFileChoose(),
+      child: Container(
+        color: Colors.transparent,
+        width: double.infinity,
+        height: double.infinity,
+        child: Center(
             child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("拖拽文件放置到这里", style: _textStyle2),
-              Text('或者', style: _textStyle2.copyWith(fontSize: 17)),
-              GestureDetector(
-                child: Text(
-                  '浏览文件来选择',
-                  style: _textStyle2.copyWith(
-                      decoration: TextDecoration.underline),
-                ),
-                onTap: () async {
-                  FilePickerResult? result =
-                      await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['*'],
-                  );
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("拖拽文件放置到这里", style: _textStyle2),
+            Text('或者', style: _textStyle2.copyWith(fontSize: 17)),
+            Text('浏览文件来选择', style: _textStyle2)
+          ],
+        )),
+      ),
+    );
 
-                  if (result != null) {
-                    var f = result.files.single;
-                    debugPrint('选择了 $f');
-                    if (!f.path.empty()) {
-                      _selectedFile = XFile(f.path!);
-                      setState(() {});
-                    }
-                  }
-                },
-              )
-            ],
-          ))
-        : FutureBuilder(
-            future: _selectedFile?.detail(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Text('读取xFile错误');
-              } else {
-                if (snapshot.data == null) {
-                  return const SizedBox();
-                }
+    var choseWidget = FutureBuilder(
+        future: _selectedFile?.detail(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text('读取xFile错误');
+          } else {
+            if (snapshot.data == null) {
+              return const SizedBox();
+            }
 
-                return Row(
+            return Padding(
+                padding: const EdgeInsets.all(15),
+                child: Row(
                   children: [
                     Expanded(
-                      flex: 8,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ...snapshot.data!
-                                .map((e) => Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 2.0),
-                                      child: Text(
-                                        e,
-                                        style: _textStyle1,
-                                      ),
-                                    ))
-                                .toList(),
-                          ],
-                        ),
-                      ),
-                    ),
+                        flex: 8,
+                        child: SingleChildScrollView(
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                              ...snapshot.data!
+                                  .map((e) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 2.0),
+                                        child: Text(
+                                          e,
+                                          style: _textStyle1,
+                                        ),
+                                      ))
+                                  .toList()
+                            ]))),
                     const SizedBox(width: 10),
                     Expanded(
-                      flex: 1,
-                      child: GestureDetector(
-                        onTap: () {
-                          _selectedFile = null;
-                          setState(() {});
-                        },
-                        child: Tooltip(
-                          message: '重新选择',
-                          child: Card(
-                            backgroundColor: Colors.red.withOpacity(.5),
-                            child: const SizedBox(
-                              height: double.infinity,
-                              child: Icon(
-                                FluentIcons.cancel,
-                                size: 50,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
+                        flex: 1,
+                        child: GestureDetector(
+                            onTap: () {
+                              _selectedFile = null;
+                              setState(() {});
+                            },
+                            child: Tooltip(
+                                message: '重新选择',
+                                child: Card(
+                                    backgroundColor: Colors.red.withOpacity(.5),
+                                    child: const SizedBox(
+                                        height: double.infinity,
+                                        child: Icon(
+                                          FluentIcons.cancel,
+                                          size: 50,
+                                          color: Colors.white,
+                                        ))))))
                   ],
-                );
-              }
-            });
+                ));
+          }
+        });
+
+    var text = _selectedFile == null ? toChooseWidget : choseWidget;
 
     return m.Card(
       color: _dragging ? Colors.teal : Colors.teal.withOpacity(.2),
-      child: Container(
-          padding: const EdgeInsets.all(15),
-          width: double.infinity,
-          height: 200,
-          child: Center(child: text)),
+      child: SizedBox(
+          width: double.infinity, height: 200, child: Center(child: text)),
     );
   }
 
@@ -323,6 +292,22 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
             ),
           ],
         ));
+  }
+
+  void _doFileChoose() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['*'],
+    );
+
+    if (result != null) {
+      var f = result.files.single;
+      debugPrint('选择了 $f');
+      if (!f.path.empty()) {
+        _selectedFile = XFile(f.path!);
+        setState(() {});
+      }
+    }
   }
 }
 
