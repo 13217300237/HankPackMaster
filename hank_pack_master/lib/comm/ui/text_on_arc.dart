@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+
+/// 圆形印章
 class TextOnArcWidget extends StatelessWidget {
   final ArcStyle arcStyle;
 

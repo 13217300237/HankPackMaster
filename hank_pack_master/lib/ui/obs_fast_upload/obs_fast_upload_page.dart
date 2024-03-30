@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../comm/ui/info_bar.dart';
+import '../../comm/ui/text_on_arc.dart';
 
 /// 文件快传，选中一个文件，并且
 class ObsFastUploadPage extends StatefulWidget {
@@ -67,10 +68,17 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                   Expanded(
                       child: ListView.builder(
                           itemBuilder: (context, index) {
-                            var cur = FastObsUploadOperator.findAll().reversed.toList()[index];
+                            var cur = FastObsUploadOperator.findAll()
+                                .reversed
+                                .toList()[index];
+                            bool hasExpired =
+                                cur.expiredTime.isBefore(DateTime.now());
+
                             return Card(
                                 padding: const EdgeInsets.all(8),
-                                backgroundColor: Colors.green.withOpacity(.1),
+                                backgroundColor: !hasExpired
+                                    ? Colors.green.withOpacity(.4)
+                                    : Colors.grey.withOpacity(.4),
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10.0)),
                                 margin:
@@ -79,37 +87,59 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                   initiallyExpanded: false,
                                   header: Text(cur.filePath,
                                       style: style.copyWith(fontSize: 20)),
-                                  content: Row(
+                                  content: Stack(
                                     children: [
-                                      Expanded(
-                                        child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              hisCardText('文件大小',
-                                                  ' ${cur.fileSize.toMb()}'),
-                                              hisCardText(
-                                                  '最后修改时间',
-                                                  cur.fileLastModify
-                                                      .formatYYYMMDDHHmmSS()),
-                                              hisCardText(
-                                                  '上传时间',
-                                                  cur.uploadTime
-                                                      .formatYYYMMDDHHmmSS()),
-                                              hisCardText(
-                                                  '有效天数', '${cur.expiredDays}'),
-                                              hisCardText(
-                                                  '下载地址', cur.downloadUrl),
-                                              hisCardText(
-                                                  '过期时间',
-                                                  cur.expiredTime
-                                                      .formatYYYMMDDHHmmSS()),
-                                            ]),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  hisCardText('文件大小',
+                                                      ' ${cur.fileSize.toMb()}'),
+                                                  hisCardText(
+                                                      '最后修改时间',
+                                                      cur.fileLastModify
+                                                          .formatYYYMMDDHHmmSS()),
+                                                  hisCardText(
+                                                      '上传时间',
+                                                      cur.uploadTime
+                                                          .formatYYYMMDDHHmmSS()),
+                                                  hisCardText('有效天数',
+                                                      '${cur.expiredDays}'),
+                                                  hisCardText(
+                                                      '下载地址', cur.downloadUrl),
+                                                  hisCardText(
+                                                      '过期时间',
+                                                      cur.expiredTime
+                                                          .formatYYYMMDDHHmmSS()),
+                                                ]),
+                                          ),
+                                          QrImageView(
+                                            data: cur.downloadUrl,
+                                            size: 200,
+                                            version: QrVersions.auto,
+                                          )
+                                        ],
                                       ),
-                                      QrImageView(
-                                        data: cur.downloadUrl,
-                                        size: 200,
-                                        version: QrVersions.auto,
+                                      Visibility(
+                                        visible: true,
+                                        child: Positioned(
+                                          right: 240,
+                                          top: 10,
+                                          child: TextOnArcWidget(
+                                            arcStyle: ArcStyle(
+                                                text: '文件已过期',
+                                                strokeWidth: 4,
+                                                radius: 80,
+                                                textSize: 20,
+                                                sweepDegrees: 190,
+                                                textColor: Colors.red,
+                                                arcColor: Colors.red,
+                                                padding: 18),
+                                          ),
+                                        ),
                                       )
                                     ],
                                   ),
@@ -138,11 +168,9 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
           Expanded(
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
-                selectionColor:
-                Colors.green.withOpacity(.3),
+                selectionColor: Colors.green.withOpacity(.3),
                 // 修改选中文本的背景颜色
-                selectionHandleColor:
-                Colors.red, // 修改选中文本的选择手柄颜色
+                selectionHandleColor: Colors.red, // 修改选中文本的选择手柄颜色
               ),
               child: SelectableText(
                 content,
