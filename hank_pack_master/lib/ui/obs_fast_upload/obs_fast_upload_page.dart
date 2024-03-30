@@ -225,7 +225,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
     // 执行上传动作
     OBSResponse? oBSResponse = await OBSClient.putFile(
       objectName:
-          "${OBSClient.commonUploadFolder}/fastUpload/${Jiffy.now().format(pattern: "yyyyMMdd_HHmmss")}/${_selectedFile!.name}",
+          "${OBSClient.commonUploadFolder}/fastUpload/${Jiffy.now().format(pattern: "yyyyMMdd_HHmmss")}/${Uri.encodeComponent(_selectedFile!.name)}",
       file: File(_selectedFile!.path),
       expiresDays: 1, // 设置过期时间(天)，超过了之后会被自动删除
     );
@@ -317,7 +317,7 @@ extension XFileExt on XFile {
 
     res.add('文件路径： ${this.path} ');
     res.add('文件名：$name');
-    res.add('文件大小：${(await length() / 1024 / 1024).toStringAsFixed(2)} MB');
+    res.add('文件大小：${(await length() / 1024 / 1024).toStringAsPrecision(2)} MB');
     res.add(
         '最后修改时间：${Jiffy.parseFromDateTime(await lastModified()).format(pattern: 'yyyy-MM-dd HH:mm:ss')}');
 
