@@ -52,6 +52,20 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     _workShopVm = context.watch<WorkShopVm>();
     _appTheme = context.watch<AppTheme>();
 
+    var missingParametersStr = _envParamVm.isAndroidEnvOk();
+    if (missingParametersStr.isEmpty) {
+      return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+          decoration: BoxDecoration(gradient: mainPanelGradient),
+          child: _mainLayout());
+    } else {
+      return Center(
+          child: Text(missingParametersStr,
+              style: TextStyle(color: Colors.red, fontSize: 45)));
+    }
+  }
+
+  _mainLayout() {
     var grid = Expanded(
       child: Container(
         decoration: BoxDecoration(
