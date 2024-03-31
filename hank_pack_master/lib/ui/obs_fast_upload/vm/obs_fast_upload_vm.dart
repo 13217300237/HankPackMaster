@@ -5,11 +5,13 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
+import 'package:hank_pack_master/hive/env_config/env_config_operator.dart';
 import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_entity.dart';
 import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_operator.dart';
 import 'package:jiffy/jiffy.dart';
 
 import '../../../comm/hwobs/obs_client.dart';
+import '../../../comm/str_const.dart';
 import '../../../comm/toast_util.dart';
 
 class FastObsUploadVm extends ChangeNotifier {
@@ -19,7 +21,10 @@ class FastObsUploadVm extends ChangeNotifier {
 
   Color btnColor = Colors.orange;
 
-  int expiredDays = 7;
+  int get expiredDays {
+    var s =  EnvConfigOperator.searchEnvValue(Const.obsExpiredDays);
+    return int.parse(s);
+  }
 
   void onMouseExit() {
     btnColor = Colors.orange;

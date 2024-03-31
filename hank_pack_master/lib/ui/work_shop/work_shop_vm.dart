@@ -78,7 +78,10 @@ class WorkShopVm extends ChangeNotifier {
     notifyListeners();
   }
 
-  int obsExpiresDays = 7;
+  int get obsExpiresDays {
+    var s = EnvConfigOperator.searchEnvValue(Const.obsExpiredDays);
+    return int.parse(s);
+  }
 
   List<String> get cmdExecLog => _cmdExecLog;
 
@@ -669,7 +672,7 @@ class WorkShopVm extends ChangeNotifier {
           objectName:
               "${OBSClient.commonUploadFolder}/$childFolderName/$buildUpdated${path.basename(_apkToUpload!)}",
           file: fileToUpload,
-          expiresDays: 1, // 设置过期时间(天)，超过了之后会被自动删除
+          expiresDays: obsExpiresDays, // 设置过期时间(天)，超过了之后会被自动删除
         );
 
         _obsDownloadUrl = oBSResponse?.url;
