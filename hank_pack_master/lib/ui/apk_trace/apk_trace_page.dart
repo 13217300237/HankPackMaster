@@ -5,8 +5,11 @@ import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/ui/apk_trace/vm/apk_trace_vm.dart';
 import 'package:provider/provider.dart';
 
+import '../../comm/dialog_util.dart';
 import '../../comm/file_ext.dart';
+import '../../comm/ui/history_card.dart';
 import '../../comm/ui/info_bar.dart';
+import '../../hive/project_record/job_history_entity.dart';
 
 /// 文件快传，选中一个文件，并且
 class ApkTracePage extends StatefulWidget {
@@ -18,39 +21,102 @@ class ApkTracePage extends StatefulWidget {
 
 class _ApkTracePageState extends State<ApkTracePage> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  Widget traceResultWidget({
+    required double maxHeight,
+    required List<JobHistoryEntity> list,
+  }) {
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var e = list[index];
+        return HistoryCard(
+          historyEntity: e,
+          maxHeight: maxHeight,
+          projectRecordEntity: e.parentRecord,
+        );
+      },
+      itemCount: list.length,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       child: _mainBox(),
-      create: (BuildContext context) => ApkTraceVm(),
+      create: (BuildContext context) => ApkTraceVm(
+        func: (List<JobHistoryEntity> list) {
+          DialogUtil.showCustomDialog(
+              context: context,
+              title: '回溯結果',
+              maxWidth: 1200,
+              content: traceResultWidget(maxHeight: 700, list: list),
+              showCancel: false);
+        },
+      ),
     );
   }
 
   Widget _mainBox() {
     return Consumer<ApkTraceVm>(
       builder: (context, vm, child) {
-        return DropTarget(
-          onDragDone: vm.onDragDone,
-          onDragEntered: vm.onDragEntered,
-          onDragExited: vm.onDragExited,
-          child: Container(
-              decoration: BoxDecoration(gradient: mainPanelGradient),
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('APK回溯', style: vm.textStyle2),
-                  const SizedBox(height: 12),
-                  _toolTip(),
-                  const SizedBox(height: 12),
-                  Row(
+        return Stack(
+          children: [
+            DropTarget(
+              onDragDone: vm.onDragDone,
+              onDragEntered: vm.onDragEntered,
+              onDragExited: vm.onDragExited,
+              child: Container(
+                  decoration: BoxDecoration(gradient: mainPanelGradient),
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(flex: 5, child: _fileSelectorWidget(vm)),
+                      Text('APK回溯', style: vm.textStyle2),
+                      const SizedBox(height: 12),
+                      _toolTip(),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(flex: 5, child: _fileSelectorWidget(vm)),
+                        ],
+                      ),
                     ],
-                  ),
-                ],
-              )),
+                  )),
+            ),
+            vm.tracing ? _loadingDialog() : const SizedBox()
+          ],
         );
       },
+    );
+  }
+
+  _loadingDialog() {
+    return Container(
+      color: Colors.grey.withOpacity(.5),
+      width: double.infinity,
+      height: double.infinity,
+      child: const Center(
+          child: Card(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 29),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ProgressRing(
+                activeColor: m.Colors.blue,
+              ),
+              SizedBox(height: 20),
+              Text(
+                '回溯检索中...',
+                style: TextStyle(fontSize: 20, color: m.Colors.blue),
+              ),
+            ],
+          ),
+        ),
+      )),
     );
   }
 
@@ -100,13 +166,10 @@ class _ApkTracePageState extends State<ApkTracePage> {
                                 children: [
                               ...snapshot.data!
                                   .map((e) => Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 2.0),
-                                        child: Text(
-                                          e,
-                                          style: vm.textStyle1,
-                                        ),
-                                      ))
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 2.0,
+                                      ),
+                                      child: Text(e, style: vm.textStyle1)))
                                   .toList()
                             ]))),
                     const SizedBox(width: 10),

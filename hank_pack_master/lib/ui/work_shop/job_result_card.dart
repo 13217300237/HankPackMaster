@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../comm/ui/text_on_arc.dart';
 import '../../hive/project_record/job_result_entity.dart';
@@ -143,10 +144,33 @@ class JobResultCard extends StatelessWidget {
         );
       } else {
         return Center(
-          child: QrImageView(
-            data: '${jobResult.buildQRCodeURL}',
-            size: qrCodeSize,
-            version: QrVersions.auto,
+          child: Column(
+            children: [
+              QrImageView(
+                data: '${jobResult.buildQRCodeURL}',
+                size: qrCodeSize,
+                version: QrVersions.auto,
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  launchUrl(Uri.parse(jobResult.buildQRCodeURL!));
+                },
+                style: ButtonStyle(
+                    backgroundColor:
+                        ButtonState.resolveWith((states) => Colors.green),
+                    foregroundColor:
+                        ButtonState.resolveWith((states) => Colors.white)),
+                child: const Text(
+                  '马上下载',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       }

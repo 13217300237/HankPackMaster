@@ -1,23 +1,26 @@
-import 'dart:io';
-
 import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/file_ext.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
-import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_entity.dart';
-import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
-import 'package:jiffy/jiffy.dart';
 
-import '../../../comm/hwobs/obs_client.dart';
 import '../../../comm/toast_util.dart';
 import '../../../hive/project_record/job_history_entity.dart';
+
+typedef TraceResShownFunc = void Function(List<JobHistoryEntity> s);
 
 class ApkTraceVm extends ChangeNotifier {
   XFile? selectedFile;
   bool dragging = false;
-  bool uploading = false;
+  bool tracing = false;
+
+  late TraceResShownFunc traceResShownFunc;
+
+  ApkTraceVm({required TraceResShownFunc func}) {
+    traceResShownFunc = func;
+  }
 
   final textStyle1 = const TextStyle(
       fontSize: 22, fontWeight: FontWeight.w600, fontFamily: 'STKAITI');
@@ -33,6 +36,7 @@ class ApkTraceVm extends ChangeNotifier {
     } else {
       selectedFile = details.files[0];
     }
+    doTrace();
     notifyListeners();
   }
 
@@ -54,28 +58,37 @@ class ApkTraceVm extends ChangeNotifier {
   void onFileSelected(PlatformFile f) {
     selectedFile = XFile(f.path!);
     notifyListeners();
+    doTrace();
   }
 
-  void showLoading() {
-    uploading = true;
+  Future showLoading() async {
+    tracing = true;
     notifyListeners();
   }
 
   void hideLoading() {
-    uploading = false;
+    tracing = false;
     notifyListeners();
   }
 
-  /// 执行追踪动作
-  void doTrace({
-    required Function(String msg, TextStyle textStyle) showFailedDialog,
-    required Function(String msg, TextStyle textStyle) showSuccessDialog,
-  }) async {
-    showLoading();
+  List<JobHistoryEntity> findMd5List = [];
 
+  Future find() async {
     List<JobHistoryEntity> list = ProjectRecordOperator.findALlHis();
+    String thisMd5 = await selectedFile!.md5();
+    findMd5List = list.where((e) => e.md5 == thisMd5).toList();
+  }
 
+  Future wait3S() async {
+    await Future.delayed(const Duration(seconds: 2));
+  }
+
+  /// 执行追踪动作
+  void doTrace() async {
+    showLoading();
+    await Future.wait([find(), wait3S()]);
     hideLoading();
+    traceResShownFunc.call(findMd5List);
   }
 
   void doFileChoose() async {
