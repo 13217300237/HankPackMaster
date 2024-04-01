@@ -1,6 +1,8 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
@@ -110,7 +112,8 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                                   hisCardText('有效天数',
                                                       '${cur.expiredDays}'),
                                                   hisCardText(
-                                                      '下载地址', cur.downloadUrl),
+                                                      '下载地址', cur.downloadUrl,
+                                                      needCopy: true),
                                                   hisCardText(
                                                       '过期时间',
                                                       cur.expiredTime
@@ -160,7 +163,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
     fontFamily: 'STKAITI',
   );
 
-  Widget hisCardText(String title, String content) {
+  Widget hisCardText(String title, String content, {bool needCopy = false}) {
     return Padding(
         padding: const EdgeInsets.all(4.0),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -173,12 +176,31 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                 // 修改选中文本的背景颜色
                 selectionHandleColor: Colors.red, // 修改选中文本的选择手柄颜色
               ),
-              child: SelectableText(
-                content,
-                style: style.copyWith(fontWeight: FontWeight.w900),
+              child: Row(
+                children: [
+                  SelectableText(
+                    content,
+                    style: style.copyWith(
+                        fontWeight: FontWeight.w900,
+                        color: !needCopy ? Colors.black : Colors.blue,
+                        decoration: needCopy
+                            ? TextDecoration.underline
+                            : TextDecoration.none),
+                  ),
+                  needCopy
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: IconButton(
+                            icon: Icon(FluentIcons.copy, color: Colors.blue),
+                            onPressed: () => FlutterClipboard.copy(content)
+                                .then((value) => EasyLoading.showToast("拷贝成功")),
+                          ),
+                        )
+                      : const SizedBox()
+                ],
               ),
             ),
-          )
+          ),
         ]));
   }
 

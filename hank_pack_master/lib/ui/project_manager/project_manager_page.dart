@@ -625,6 +625,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     DialogUtil.showCustomDialog(
       context: context,
       title: '提示',
+      confirmText: '确定',
       content: '正在执行任务，是否进入工坊查看',
       onConfirm: () => context.go('/work_shop'),
     );
