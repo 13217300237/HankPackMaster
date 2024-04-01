@@ -68,6 +68,7 @@ class HistoryCard extends StatelessWidget {
                         JobSettingCard(historyEntity.jobSetting),
                         const SizedBox(height: 10),
                         JobResultCard(
+                          md5: historyEntity.md5,
                           jobResult: historyEntity.jobResultEntity,
                           initiallyExpanded: false,
                           maxHeight: maxHeight,

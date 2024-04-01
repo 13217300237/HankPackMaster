@@ -14,6 +14,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../../comm/gradients.dart';
 import '../../comm/url_check_util.dart';
+import '../../hive/project_record/job_history_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
@@ -640,7 +641,7 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
   }
 
   Widget getRecentJobResult({required double maxHeight}) {
-    var recentJobHistoryList =
+    List<JobHistoryEntity> recentJobHistoryList =
         ProjectRecordOperator.getRecentJobHistoryList(recentCount: -1);
 
     return ListView.builder(

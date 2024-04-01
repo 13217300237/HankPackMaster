@@ -13,12 +13,15 @@ class JobResultCard extends StatelessWidget {
   final JobResultEntity jobResult;
   final double maxHeight;
   final bool initiallyExpanded;
+  final String? md5; // 文件上传后的md5值
 
-  const JobResultCard(
-      {super.key,
-      required this.jobResult,
-      required this.initiallyExpanded,
-      required this.maxHeight});
+  const JobResultCard({
+    super.key,
+    required this.jobResult,
+    required this.initiallyExpanded,
+    required this.maxHeight,
+    this.md5,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,8 @@ class JobResultCard extends StatelessWidget {
         jobResult.assembleOrders!.isNotEmpty) {
       return _assembleOrderWidget(jobResult.assembleOrders);
     } else {
-      bool hasExpired = jobResult.expiredTime?.isBefore(DateTime.now()) ?? false;
+      bool hasExpired =
+          jobResult.expiredTime?.isBefore(DateTime.now()) ?? false;
       return Card(
         backgroundColor: Colors.blue.withOpacity(.1),
         borderRadius: BorderRadius.circular(10),
@@ -54,7 +58,9 @@ class JobResultCard extends StatelessWidget {
                     _line('更新日志', "${jobResult.buildUpdateDescription}"),
                     _line('更新时间', "${jobResult.buildUpdated}"),
                     _line('下载地址', "${jobResult.buildQRCodeURL}"),
-                    _line('过期时间', "${jobResult.expiredTime?.formatYYYMMDDHHmmSS()}"),
+                    _line('过期时间',
+                        "${jobResult.expiredTime?.formatYYYMMDDHHmmSS()}"),
+                    _line('md5', '$md5'),
                   ],
                 ),
                 qrCode(),
@@ -182,7 +188,7 @@ class JobResultCard extends StatelessWidget {
   }
 
   Widget _line(String title, String value) {
-    if (value.empty() || value == '[]') {
+    if (value.empty() || value == '[]' || value == 'null') {
       return const SizedBox();
     }
 

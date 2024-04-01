@@ -1186,6 +1186,7 @@ class WorkShopVm extends ChangeNotifier {
         taskName: taskName,
         jobResultEntity:
             JobResultEntity(errMessage: '${orderExecuteResult.msg}'),
+        md5: null,
       );
 
       ToastUtil.showPrettyToast("任务 ${runningTask!.projectName} 激活失败, 详情查看激活历史",
@@ -1408,8 +1409,8 @@ class WorkShopVm extends ChangeNotifier {
 
   Future<void> _deleteApkToUpload() async {
     try {
-      File(_apkToUpload!).delete();
       _apkToUploadMd5 = await getFileMd5Base64(File(_apkToUpload!));
+      File(_apkToUpload!).delete();
     } catch (e) {
       addNewLogLine("文件删除失败");
     }
