@@ -80,7 +80,7 @@ class ApkTraceVm extends ChangeNotifier {
   }
 
   Future wait3S() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   /// 执行追踪动作
