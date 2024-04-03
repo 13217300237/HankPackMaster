@@ -1,13 +1,21 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
+import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 
+import '../../../comm/str_const.dart';
 import '../../../comm/text_util.dart';
 import '../../../comm/ui/form_input.dart';
 import '../../../comm/upload_platforms.dart';
+import '../../../core/command_util.dart';
+import '../../../hive/env_config/env_config_operator.dart';
 import '../../../hive/env_group/env_check_result_entity.dart';
 import '../../../hive/project_record/package_setting_entity.dart';
 import '../../../hive/project_record/project_record_operator.dart';
@@ -55,12 +63,50 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   EnvCheckResultEntity? _jdk; // 当前使用的jdk版本
 
+  String get projectName {
+    var gitText = widget.projectRecordEntity.gitUrl;
+    var lastSepIndex = gitText.lastIndexOf("/");
+    var endIndex = gitText.length - 4;
+    assert(endIndex > 0);
+    String projectName = gitText.substring(lastSepIndex + 1, endIndex);
+    return projectName;
+  }
+
+  String get gitBranch {
+    return widget.projectRecordEntity.branch;
+  }
+
   @override
   void initState() {
     super.initState();
     _jdk = widget.javaHome; // 这里必须使用 激活时使用的jdk
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initSetting(widget.projectRecordEntity.packageSetting);
+
+      String projectWorkDir =
+          EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey) +
+              Platform.pathSeparator +
+              projectName +
+              Platform.pathSeparator +
+              Uri.encodeComponent(gitBranch) +
+              Platform.pathSeparator +
+              projectName +
+              Platform.pathSeparator; // 总目录\项目名\分支名\项目名
+
+      debugPrint("命令执行根目录为:$projectWorkDir");
+
+      CommandUtil.getInstance().gitBranchRemote(
+        projectWorkDir,
+        (s) {
+          debugPrint('获取本地分支:$s');
+
+          s.split("\n").forEach((element) {
+            _branchList.add(element);
+          });
+
+          setState(() {});
+        },
+      );
     });
   }
 
@@ -131,6 +177,9 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   String _errMsg = "";
 
+  final List<String> _branchList = [];
+  List<String> _selectedToMergeBranch = [];
+
   @override
   Widget build(BuildContext context) {
     Map<String, String> enableAssembleMap = {};
@@ -166,7 +215,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
           );
           ProjectRecordOperator.update(widget.projectRecordEntity);
 
-          String errMsg = widget.projectRecordEntity.settingToWorkshop!.readyToPackage();
+          String errMsg =
+              widget.projectRecordEntity.settingToWorkshop!.readyToPackage();
           if (errMsg.isNotEmpty) {
             setState(() => _errMsg = errMsg);
             return;
@@ -192,6 +242,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
               maxLines: 4,
               must: false,
               crossAxisAlignment: CrossAxisAlignment.center),
+          _branchMergeWidget(),
           input("合并分支", "输入打包前要合入的其他分支名...", _mergeBranchNameController,
               // 这些分支貌似不应该手动填，而是选择 TODO
               maxLines: 3,
@@ -290,6 +341,47 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
           ),
         )
       ]),
+    );
+  }
+
+  _branchMergeWidget() {
+    TextStyle textStyle = const TextStyle(
+        fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'STKAITI');
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Row(
+              children: [
+                Text(
+                  '合并分支',
+                  style: textStyle,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: MultiSelectDialogField<String>(
+                confirmText: Text('确定', style: textStyle),
+                cancelText: Text('取消', style: textStyle),
+                buttonIcon: const Icon(FluentIcons.add_work),
+                title: Text('选择你需要合并的分支', style: textStyle),
+                buttonText: Text('选择你需要合并的分支', style: textStyle),
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(8))),
+                searchable: true,
+                backgroundColor: Colors.white,
+                items: _branchList.map((e) => MultiSelectItem(e, e)).toList(),
+                listType: MultiSelectListType.CHIP,
+                onConfirm: (values) {
+                  _selectedToMergeBranch.addAll(values);
+                }),
+          ),
+        ],
+      ),
     );
   }
 }
