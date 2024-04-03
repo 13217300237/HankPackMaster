@@ -6,10 +6,12 @@ import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
+import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 
+import '../../../comm/gradients.dart';
 import '../../../comm/str_const.dart';
 import '../../../comm/text_util.dart';
 import '../../../comm/ui/form_input.dart';
@@ -363,22 +365,27 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             ),
           ),
           Expanded(
-            child: MultiSelectDialogField<String>(
-                confirmText: Text('确定', style: textStyle),
-                cancelText: Text('取消', style: textStyle),
-                buttonIcon: const Icon(FluentIcons.add_work),
-                title: Text('选择你需要合并的分支', style: textStyle),
-                buttonText: Text('选择你需要合并的分支', style: textStyle),
-                decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(8))),
-                searchable: true,
-                backgroundColor: Colors.white,
-                items: _branchList.map((e) => MultiSelectItem(e, e)).toList(),
-                listType: MultiSelectListType.CHIP,
-                onConfirm: (values) {
-                  _selectedToMergeBranch.addAll(values);
-                }),
+            child: Container(
+              padding: const EdgeInsets.only(top: 5, right: 2, bottom: 10),
+              decoration: BoxDecoration(
+                  gradient: mainPanelGradient,
+                  borderRadius: const BorderRadius.all(Radius.circular(8))),
+              child: MultiSelectDialogField<String>(
+                  confirmText: Text('确定', style: textStyle),
+                  cancelText: Text('取消', style: textStyle),
+                  buttonIcon: const Icon(FluentIcons.add_work),
+                  title: Text('选择你需要合并的分支', style: textStyle),
+                  buttonText: Text('选择你需要合并的分支', style: textStyle),
+                  decoration: const BoxDecoration(border: null),
+                  searchable: true,
+                  chipDisplay: MultiSelectChipDisplay(),
+                  backgroundColor: Colors.white,
+                  items: _branchList.map((e) => MultiSelectItem(e, e)).toList(),
+                  listType: MultiSelectListType.CHIP,
+                  onConfirm: (values) {
+                    _selectedToMergeBranch.addAll(values);
+                  }),
+            ),
           ),
         ],
       ),

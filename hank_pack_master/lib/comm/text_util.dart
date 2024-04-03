@@ -122,8 +122,25 @@ extension Max on int {
 // 文件size转换，将bytes单位转化成MB
 extension Bytes2Mb on int {
   String toMb() {
-    return '${(this / 1024 / 1024).toStringAsPrecision(2)} MB';
+    double mbValue = this / 1024 / 1024;
+    if (mbValue > 1) {
+      return "${formatDouble(mbValue, 2)} MB";
+    } else {
+      return '${(this / 1024 / 1024).toStringAsPrecision(2)} MB';
+    }
   }
+}
+
+String formatDouble(double number, int decimalPlaces) {
+  // 将 double 数字格式化为字符串并保留指定小数位数
+  String formattedNumber = number.toStringAsFixed(decimalPlaces);
+  // 移除末尾的0
+  formattedNumber = formattedNumber.replaceAll(RegExp(r'0*$'), '');
+  // 如果最后一位是小数点，则去除小数点
+  if (formattedNumber.endsWith('.')) {
+    formattedNumber = formattedNumber.substring(0, formattedNumber.length - 1);
+  }
+  return formattedNumber;
 }
 
 extension DateTimeFormatter on DateTime {

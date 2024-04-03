@@ -57,13 +57,15 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                   ),
                   Padding(
                     padding:
-                        const EdgeInsets.only(top: 12.0, bottom: 12, right: 20),
+                    const EdgeInsets.only(top: 12.0, bottom: 12, right: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text('上传历史', style: vm.textStyle2),
-                        Text('总数 ${FastObsUploadOperator.findAll().length}',
+                        Text('总数 ${FastObsUploadOperator
+                            .findAll()
+                            .length}',
                             style: vm.textStyle2.copyWith(fontSize: 18)),
                       ],
                     ),
@@ -71,11 +73,12 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                   Expanded(
                       child: ListView.builder(
                           itemBuilder: (context, index) {
-                            var cur = FastObsUploadOperator.findAll()
+                            var cur = FastObsUploadOperator
+                                .findAll()
                                 .reversed
                                 .toList()[index];
                             bool hasExpired =
-                                cur.expiredTime.isBefore(DateTime.now());
+                            cur.expiredTime.isBefore(DateTime.now());
 
                             return Card(
                                 padding: const EdgeInsets.all(8),
@@ -85,7 +88,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(10.0)),
                                 margin:
-                                    const EdgeInsets.only(bottom: 5, right: 20),
+                                const EdgeInsets.only(bottom: 5, right: 20),
                                 child: Expander(
                                   initiallyExpanded: false,
                                   header: Text(cur.filePath,
@@ -97,10 +100,11 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                           Expanded(
                                             child: Column(
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                                CrossAxisAlignment.start,
                                                 children: [
                                                   hisCardText('文件大小',
-                                                      ' ${cur.fileSize.toMb()}'),
+                                                      ' ${cur.fileSize
+                                                          .toMb()}'),
                                                   hisCardText(
                                                       '最后修改时间',
                                                       cur.fileLastModify
@@ -112,7 +116,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                                   hisCardText('有效天数',
                                                       '${cur.expiredDays}'),
                                                   hisCardText(
-                                                      '下载地址', cur.downloadUrl,
+                                                      '下载地址(双击拷贝)', cur.downloadUrl,
                                                       needCopy: true),
                                                   hisCardText(
                                                       '过期时间',
@@ -149,7 +153,9 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                   ),
                                 ));
                           },
-                          itemCount: FastObsUploadOperator.findAll().length)),
+                          itemCount: FastObsUploadOperator
+                              .findAll()
+                              .length)),
                 ],
               )),
         );
@@ -177,26 +183,30 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                 selectionHandleColor: Colors.red, // 修改选中文本的选择手柄颜色
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SelectableText(
-                    content,
-                    style: style.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: !needCopy ? Colors.black : Colors.blue,
-                        decoration: needCopy
-                            ? TextDecoration.underline
-                            : TextDecoration.none),
+                  Expanded(
+                    child: GestureDetector(
+                      onDoubleTap: () {
+                        if (!needCopy) {
+                          return;
+                        }
+                        FlutterClipboard.copy(content)
+                            .then((value) => EasyLoading.showToast("拷贝成功"));
+                      },
+                      child: SelectableText(
+                        content,
+                        style: style.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: !needCopy ? Colors.black : Colors.blue,
+                            decoration: needCopy
+                                ? TextDecoration.underline
+                                : TextDecoration.none),
+                      ),
+                    ),
                   ),
-                  needCopy
-                      ? Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: IconButton(
-                            icon: Icon(FluentIcons.copy, color: Colors.blue),
-                            onPressed: () => FlutterClipboard.copy(content)
-                                .then((value) => EasyLoading.showToast("拷贝成功")),
-                          ),
-                        )
-                      : const SizedBox()
+
                 ],
               ),
             ),
@@ -250,13 +260,13 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
         height: double.infinity,
         child: Center(
             child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("拖拽文件放置到这里", style: vm.textStyle2),
-            Text('或者', style: vm.textStyle2.copyWith(fontSize: 17)),
-            Text('浏览文件来选择', style: vm.textStyle2)
-          ],
-        )),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("拖拽文件放置到这里", style: vm.textStyle2),
+                Text('或者', style: vm.textStyle2.copyWith(fontSize: 17)),
+                Text('浏览文件来选择', style: vm.textStyle2)
+              ],
+            )),
       ),
     );
 
@@ -281,8 +291,9 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                              ...snapshot.data!
-                                  .map((e) => Padding(
+                                  ...snapshot.data!
+                                      .map((e) =>
+                                      Padding(
                                         padding: const EdgeInsets.symmetric(
                                             vertical: 2.0),
                                         child: Text(
@@ -290,8 +301,8 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                                           style: vm.textStyle1,
                                         ),
                                       ))
-                                  .toList()
-                            ]))),
+                                      .toList()
+                                ]))),
                     const SizedBox(width: 10),
                     Expanded(
                         flex: 1,
