@@ -275,7 +275,9 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Text('读取xFile错误');
-          } else {
+          } else if(snapshot.connectionState == ConnectionState.waiting){ // 加载中是什么状态
+            return const ProgressRing();
+          }else {
             if (snapshot.data == null) {
               return const SizedBox();
             }
