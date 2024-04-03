@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/ui/text_on_arc.dart';
-import 'package:jiffy/jiffy.dart';
 
 import '../../hive/project_record/job_history_entity.dart';
 import '../../hive/project_record/project_record_entity.dart';
@@ -8,6 +7,7 @@ import '../../hive/project_record/project_record_operator.dart';
 import '../../ui/project_manager/grid_datasource.dart';
 import '../../ui/project_manager/job_setting_card.dart';
 import '../../ui/work_shop/job_result_card.dart';
+import '../datetime_util.dart';
 import '../text_util.dart';
 
 class HistoryCard extends StatelessWidget {
@@ -30,7 +30,6 @@ class HistoryCard extends StatelessWidget {
     fontWeight: FontWeight.w600,
     fontFamily: 'STKAITI',
   );
-
 
   final bgColor = const Color(0xffe0e0e0);
 
@@ -58,12 +57,8 @@ class HistoryCard extends StatelessWidget {
                       children: [
                         _text("git地址", historyEntity.parentRecord.gitUrl ?? ''),
                         _text("分支名", historyEntity.parentRecord.branch ?? ''),
-                        _text(
-                            "构建时间",
-                            Jiffy.parseFromDateTime(
-                                    DateTime.fromMillisecondsSinceEpoch(
-                                        historyEntity.buildTime ?? 0))
-                                .format(pattern: "yyyy-MM-dd HH:mm:ss")),
+                        _text("构建时间",
+                            DateTimeUtil.format(historyEntity.buildTime)),
                         const SizedBox(height: 10),
                         JobSettingCard(historyEntity.jobSetting),
                         const SizedBox(height: 10),

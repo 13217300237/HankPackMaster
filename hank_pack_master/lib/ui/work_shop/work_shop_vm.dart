@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/apk_parser_result.dart';
+import 'package:hank_pack_master/comm/datetime_util.dart';
 import 'package:hank_pack_master/comm/hwobs/obs_client.dart';
 import 'package:hank_pack_master/comm/pgy/pgy_upload_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
@@ -650,10 +651,12 @@ class WorkShopVm extends ChangeNotifier {
 
   get uploadToObsTask => TaskStage("上传到华为obs", stageAction: () async {
         // 先获取当前git的最新提交记录
-        var executeRes = await CommandUtil.getInstance()
+        var gitLogValue = await CommandUtil.getInstance()
             .gitLog(projectWorkDir, addNewLogLine);
 
-        if (executeRes.exitCode != 0) {
+        gitLogController.text = gitLogValue.res.replaceAll("\"", '');
+
+        if (gitLogValue.exitCode != 0) {
           String gitLogFailed = '获取git最近提交记录失败...';
           var fastUploadEntity =
               UploadResultEntity(apkPath: _apkToUpload!, errMsg: gitLogFailed);
@@ -694,7 +697,7 @@ class WorkShopVm extends ChangeNotifier {
           return OrderExecuteResult(
             data: "OBS上传成功,下载地址为 $_obsDownloadUrl",
             succeed: true,
-            executeLog: executeRes.res,
+            executeLog: gitLogValue.res,
           );
         }
       });
@@ -718,10 +721,9 @@ class WorkShopVm extends ChangeNotifier {
             jobResult.buildIdentifier = data.packageName;
             jobResult.buildFileSize = fileSize;
             jobResult.buildQRCodeURL = _obsDownloadUrl;
-            jobResult.buildUpdated =
-                Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
+            jobResult.buildUpdated = DateTimeUtil.nowFormat();
             // 更新日志
-            jobResult.buildUpdateDescription = updateLog;
+            jobResult.buildUpdateDescription = gitLog;
             // 应用描述
             jobResult.buildDescription = projectAppDesc;
             jobResult.expiredTime =
@@ -906,8 +908,7 @@ class WorkShopVm extends ChangeNotifier {
     if (s.isEmpty) {
       _cmdExecLog.add(s);
     } else {
-      _cmdExecLog.add(
-          "${Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss")}        $s");
+      _cmdExecLog.add("${DateTimeUtil.nowFormat()}        $s");
     }
     notifyListeners();
     _scrollToBottom();
@@ -1400,11 +1401,11 @@ class WorkShopVm extends ChangeNotifier {
   }
 
   String _nowTime() {
-    return Jiffy.now().format(pattern: "yyyyMMdd_HHmmss_");
+    return DateTimeUtil.nowFormat2();
   }
 
   String _nowTime2() {
-    return Jiffy.now().format(pattern: "yyyy-MM-dd HH:mm:ss");
+    return DateTimeUtil.nowFormat();
   }
 
   Future<void> _deleteApkToUpload() async {

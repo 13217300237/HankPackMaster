@@ -50,6 +50,11 @@ class JobResultCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // _title(),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text('构建结果', style: _style.copyWith(fontSize: 28)),
+                    ),
                     _line('App名称', "${jobResult.buildName}"),
                     _line('App版本', "${jobResult.buildVersion}"),
                     _line('编译版本', "${jobResult.buildVersionNo}"),
