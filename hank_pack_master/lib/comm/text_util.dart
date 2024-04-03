@@ -126,7 +126,7 @@ extension Bytes2Mb on int {
     if (mbValue > 1) {
       return "${formatDouble(mbValue, 2)} MB";
     } else {
-      return '${(this / 1024 / 1024).toStringAsPrecision(2)} MB';
+      return '${mbValue.toStringAsPrecision(2)} MB';
     }
   }
 }
