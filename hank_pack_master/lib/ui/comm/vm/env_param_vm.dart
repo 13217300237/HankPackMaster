@@ -15,9 +15,9 @@ import '../../../hive/env_group/env_group_operator.dart';
 class EnvParamVm extends ChangeNotifier {
   /// 环境有问题时的错误提示
   final Map<String, String> envGuide = {
-    "git": "请在系统环境变量的path中插入git的可执行路径,形如 D:\\...\\git\\Git\\bin",
-    "adb": "请在系统环境变量的path中插入adb的可执行路径,形如：D:\\...\\Android\\Sdk\\platform-tools",
-    "java": "请在系统环境变量的path中插入java的可执行路径,形如 D:\\...\\as\\jbr\\bin",
+    "git": "如果下方存在可选的git路径，请手动选择一个作为git默认路径, \n如果下方不存在，请手动下载并安装git,并重启此软件",
+    "adb": "如果下方存在可选的adb可执行文件路径，请手动选择一个作为adb默认路径, \n如果下方不存在，请手动下载并安装AndroidSdk,并重启此软件",
+    "java": "如果下方存在可选的java可执行文件路径，请手动选择一个作为java默认路径, \n如果下方不存在，请手动下载并安装JDK,并重启此软件",
     "android": "请在系统环境变量中插入 ANDROID_HOME变量，值为 SDK根路径，形如：D:\\...\\Android\\SDK"
   };
 

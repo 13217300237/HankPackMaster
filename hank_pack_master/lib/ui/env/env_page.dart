@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/comm_font.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:hank_pack_master/comm/url_check_util.dart';
@@ -101,7 +102,7 @@ class _EnvPageState extends State<EnvPage> {
     return _card(
         title: title,
         muEnv: [
-          if (!_envParamModel.isEnvEmpty(title)) ...[
+          if (init().isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.only(bottom: 0),
               child: Tooltip(
@@ -113,6 +114,15 @@ class _EnvPageState extends State<EnvPage> {
                       fontWeight: FontWeight.w600, fontSize: 29),
                 ),
               ),
+            )
+          ] else ...[
+            Text(
+              "未指定",
+              style: TextStyle(
+                  fontSize: 28,
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: commFontFamily),
             )
           ],
         ],
@@ -170,7 +180,8 @@ class _EnvPageState extends State<EnvPage> {
   Widget envErrWidget(String title) {
     if (_envParamModel.isEnvEmpty(title)) {
       return Text("${_envParamModel.envGuide[title]}",
-          style: TextStyle(fontSize: 20, color: Colors.red));
+          style: TextStyle(
+              fontSize: 20, color: Colors.red, fontWeight: FontWeight.w600));
     } else {
       return const SizedBox();
     }
@@ -211,7 +222,7 @@ class _EnvPageState extends State<EnvPage> {
                                   Icon(FluentIcons.check_list_text, size: 28),
                                   SizedBox(width: 10),
                                   Text(
-                                    "更换路径",
+                                    "指定路径",
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w600),
@@ -300,7 +311,7 @@ class _EnvPageState extends State<EnvPage> {
   Widget _workspaceChoose() {
     return _envChooseWidget(
         title: "工作空间",
-        tips: "用于存放从远程仓库拉取的所有工程文件",
+        tips: "你必须指定一个本地磁盘目录作为安小助的工作目录,它将用于存放从远程仓库拉取的所有工程文件",
         init: () => _envParamModel.workSpaceRoot,
         action: (selectedDirectory) {
           DialogUtil.showInfo(
@@ -312,7 +323,7 @@ class _EnvPageState extends State<EnvPage> {
   Widget _androidSdkChoose() {
     return _envChooseWidget(
         title: "Android SDK",
-        tips: "这是安卓打包的核心环境",
+        tips: "你必须指定一个本地的安卓sdk安装路径，它安卓打包的核心环境",
         init: () => _envParamModel.androidSdkRoot,
         action: (selectedDirectory) async {
           String envKey = "ANDROID_HOME";
@@ -457,51 +468,69 @@ class _EnvPageState extends State<EnvPage> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("蒲公英平台设置", style: _cTextStyle),
           const SizedBox(height: 20),
-          _textInput(
-            '_api_key',
-            _envParamModel.pgyApiKeyController,
-            toolTip: "设置_api_key使得 apk文件可以上传到蒲公英平台",
-          ),
+          _textInput('_api_key', _envParamModel.pgyApiKeyController,
+              toolTip: "设置_api_key使得 apk文件可以上传到蒲公英平台,长度为32个字符", judge: (s) {
+            return s.isNotEmpty && s.length == 32;
+          }),
         ]))
       ]),
     );
   }
 
-  Widget _textInput(String label, TextEditingController controller,
-      {bool judgeHttpsReg = false, required String toolTip}) {
-    var dataCorrect = true;
-    if (judgeHttpsReg) {
-      dataCorrect = isHttpsUrl(controller.text);
-    }
-    return Row(children: [
-      Expanded(
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-            SizedBox(
-                width: 250,
-                child: Row(
+  Widget _textInput(
+    String label,
+    TextEditingController controller, {
+    required bool Function(String s) judge,
+    required String toolTip,
+  }) {
+    var dataCorrect = judge(controller.text);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(children: [
+          Expanded(
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label, style: _cTextStyle),
-                    toolTipIcon(msg: toolTip, iconColor: _appTheme.accentColor),
-                  ],
-                )),
-            Expanded(
-              child: TextBox(
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: dataCorrect ? Colors.white : Colors.red,
-                        width: 1)),
-                unfocusedColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                controller: controller,
-                textAlign: TextAlign.end,
-                style: _cTextStyle,
-              ),
-            )
-          ])),
-    ]);
+                SizedBox(
+                    width: 250,
+                    child: Row(
+                      children: [
+                        Text(label, style: _cTextStyle),
+                        toolTipIcon(
+                            msg: toolTip, iconColor: _appTheme.accentColor),
+                      ],
+                    )),
+                Expanded(
+                  child: TextBox(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: dataCorrect ? Colors.white : Colors.red,
+                            width: 1)),
+                    unfocusedColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    controller: controller,
+                    textAlign: TextAlign.end,
+                    style: _cTextStyle,
+                  ),
+                )
+              ])),
+        ]),
+        if (!dataCorrect)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              toolTip,
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: commFontFamily,
+                  color: Colors.red),
+            ),
+          ),
+      ],
+    );
   }
 
   _hwobsSetting() {
@@ -519,16 +548,28 @@ class _EnvPageState extends State<EnvPage> {
           _expiredDaysWidget(),
           const SizedBox(height: 20),
           _textInput('end point ', _envParamModel.obsEndPointController,
-              judgeHttpsReg: true, toolTip: "华为OBS的终端地址"),
+              judge: (s) => isHttpsUrl(s), toolTip: "华为OBS的终端地址"),
           const SizedBox(height: 10),
-          _textInput('access key', _envParamModel.obsAccessKeyController,
-              toolTip: "访问权限key"),
+          _textInput(
+            'access key',
+            _envParamModel.obsAccessKeyController,
+            toolTip: "访问权限key,长度为20个字符",
+            judge: (s) => s.isNotEmpty && s.length == 20,
+          ),
           const SizedBox(height: 10),
-          _textInput('secret key', _envParamModel.obsSecretKeyController,
-              toolTip: "秘钥key"),
+          _textInput(
+            'secret key',
+            _envParamModel.obsSecretKeyController,
+            toolTip: "秘钥key，长度为 40 个字符",
+            judge: (s) => s.isNotEmpty && s.length == 40,
+          ),
           const SizedBox(height: 10),
-          _textInput('bucket name', _envParamModel.obsBucketNameController,
-              toolTip: "桶名称"),
+          _textInput(
+            'bucket name',
+            _envParamModel.obsBucketNameController,
+            toolTip: "桶名称",
+            judge: (s) => s.isNotEmpty,
+          ),
         ]))
       ]),
     );
@@ -554,13 +595,14 @@ class _EnvPageState extends State<EnvPage> {
           const Spacer(),
           ComboBox<String>(
             value: _envParamModel.obsExpiredDays,
-            items: _envParamModel.obsExpiredDaysValues.map<ComboBoxItem<String>>((e) {
+            items: _envParamModel.obsExpiredDaysValues
+                .map<ComboBoxItem<String>>((e) {
               return ComboBoxItem<String>(
                   value: e.toString(),
                   child: Text(e.toString(), style: _cTextStyle));
             }).toList(),
-            onChanged: (c) => setState(
-                () => _envParamModel.obsExpiredDays = c!),
+            onChanged: (c) =>
+                setState(() => _envParamModel.obsExpiredDays = c!),
           ),
           const SizedBox(width: 20),
           Text("天", style: _cTextStyle),

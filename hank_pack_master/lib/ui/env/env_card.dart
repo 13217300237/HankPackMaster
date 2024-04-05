@@ -223,6 +223,7 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
         const SizedBox(height: 15),
         _infoWidget(),
         const SizedBox(height: 15),
+        envErrWidget(),
         if (!_isEnvGroupLoading) ...[
           SizedBox(
             width: double.infinity,
@@ -355,10 +356,15 @@ class _EnvGroupCardState extends State<EnvGroupCard> {
     }
   }
 
-  Widget envErrWidget(String title) {
-    if (_envParamModel.isEnvEmpty(title)) {
-      return Text("${_envParamModel.envGuide[title]}",
-          style: TextStyle(fontSize: 20, color: Colors.red));
+  Widget envErrWidget() {
+    var warning = _envParamModel.envGuide[widget.order];
+    if (_envParamModel.isEnvEmpty(widget.order) &&
+        (warning?.isNotEmpty ?? false)) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 15),
+        child:
+            Text("$warning", style: TextStyle(fontSize: 20, color: Colors.red)),
+      );
     } else {
       return const SizedBox();
     }
