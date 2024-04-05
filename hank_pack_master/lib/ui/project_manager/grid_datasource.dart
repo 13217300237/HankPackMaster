@@ -554,10 +554,11 @@ class ProjectEntityDataSource extends DataGridSource {
     return orders
         .map((e) => GestureDetector(
               onTap: () {
-                DialogUtil.showCustomDialog(
+                DialogUtil.showBlurDialog(
                     showCancel: false,
                     confirmText: "我知道了!",
                     context: buildContext,
+                    showXGate: true,
                     title: "可用变体",
                     content: SingleChildScrollView(
                       scrollDirection: Axis.vertical,

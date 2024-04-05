@@ -1,9 +1,46 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:hank_pack_master/comm/ui/blur_dialog.dart';
 import 'package:hank_pack_master/comm/ui/xGate_widget.dart';
 
 class DialogUtil {
+
+  /// 带毛玻璃效果的弹窗
+  static void showBlurDialog({
+    required BuildContext context,
+    Function? onConfirm,
+    bool Function()? judgePop,
+    required String title,
+    required dynamic content,
+    bool showCancel = true,
+    bool showActions = true,
+    String confirmText = "我知道了!",
+    String cancelText = "取消",
+    double maxWidth = 500,
+    double maxHeight = 700,
+    bool showXGate = false,
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BlurAlertDialog(
+          content: content,
+          onConfirm: onConfirm,
+          judgePop: judgePop,
+          title: title,
+          showCancel: showCancel,
+          showActions: showActions,
+          confirmText: confirmText,
+          cancelText: cancelText,
+          maxWidth: maxWidth,
+          maxHeight: maxHeight,
+          showXGate: showXGate,
+        ); // 弹窗组件
+      },
+    );
+  }
+
   ///
   ///
   /// [content] 动态类型，如果传 String，则解析成 Text，如果是Widget，则直接赋值
