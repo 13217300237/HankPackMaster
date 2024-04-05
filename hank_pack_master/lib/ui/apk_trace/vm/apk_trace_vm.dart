@@ -6,6 +6,7 @@ import 'package:hank_pack_master/comm/file_ext.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 
+import '../../../comm/comm_font.dart';
 import '../../../comm/toast_util.dart';
 import '../../../hive/project_record/job_history_entity.dart';
 
@@ -23,10 +24,10 @@ class ApkTraceVm extends ChangeNotifier {
   }
 
   final textStyle1 = const TextStyle(
-      fontSize: 22, fontWeight: FontWeight.w600, fontFamily: 'STKAITI');
+      fontSize: 22, fontWeight: FontWeight.w600, fontFamily: commFontFamily);
 
   final textStyle2 = const TextStyle(
-      fontSize: 30, fontWeight: FontWeight.w600, fontFamily: 'STKAITI');
+      fontSize: 30, fontWeight: FontWeight.w600, fontFamily: commFontFamily);
 
   void onDragDone(DropDoneDetails details) {
     if (details.files.isEmpty) {

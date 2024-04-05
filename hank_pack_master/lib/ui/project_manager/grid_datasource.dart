@@ -3,6 +3,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import '../../comm/comm_font.dart';
 import '../../comm/ui/history_card.dart';
 import '../../comm/url_check_util.dart';
 import '../../hive/project_record/job_history_entity.dart';
@@ -13,19 +14,19 @@ import 'dialog/edit_project_record_dialog.dart';
 
 const TextStyle gridTextStyle = TextStyle(
     color: Color(0xff2C473E),
-    fontFamily: 'STKAITI',
+    fontFamily: commFontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w600);
 
 const TextStyle gridTextStyle2 = TextStyle(
     color: Colors.black,
-    fontFamily: 'STKAITI',
+    fontFamily: commFontFamily,
     fontSize: 18,
     fontWeight: FontWeight.w600);
 
 TextStyle gridTextStyle3 = TextStyle(
     color: Colors.teal,
-    fontFamily: 'STKAITI',
+    fontFamily: commFontFamily,
     fontSize: 19,
     fontWeight: FontWeight.w700);
 

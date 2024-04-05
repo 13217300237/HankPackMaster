@@ -11,6 +11,7 @@ import 'package:hank_pack_master/ui/obs_fast_upload/vm/obs_fast_upload_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../comm/comm_font.dart';
 import '../../comm/ui/info_bar.dart';
 import '../../comm/ui/text_on_arc.dart';
 import '../../comm/file_ext.dart';
@@ -166,7 +167,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
   var style = const TextStyle(
     fontSize: 16,
     fontWeight: m.FontWeight.w600,
-    fontFamily: 'STKAITI',
+    fontFamily: commFontFamily,
   );
 
   Widget hisCardText(String title, String content, {bool needCopy = false}) {

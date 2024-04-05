@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import '../comm_font.dart';
+
 
 /// 圆形印章
 class TextOnArcWidget extends StatelessWidget {
@@ -68,7 +70,7 @@ class ArcStyle {
     this.startDegrees = 155,
     this.sweepDegrees = 150,
     this.textColor = Colors.teal,
-    this.textFamily = 'STKAITI',
+    this.textFamily = commFontFamily,
     this.textSize = 20,
     this.fontWeight = FontWeight.w600,
     this.padding = 30,

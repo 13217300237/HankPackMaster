@@ -7,6 +7,7 @@ import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 
+import '../comm/comm_font.dart';
 import '../routes/route.dart';
 
 /// 概念
@@ -52,7 +53,7 @@ class _AppState extends State<App> {
   var tooltipTheme = const TooltipThemeData(
       waitDuration: Duration(milliseconds: 200),
       textStyle: TextStyle(
-          fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'STKAITI'));
+          fontSize: 16, fontWeight: FontWeight.w600, fontFamily: commFontFamily));
 
   Widget fluentUi(BuildContext context) {
     var appTheme = context.watch<AppTheme>();
@@ -71,7 +72,7 @@ class _AppState extends State<App> {
           visualDensity: VisualDensity.standard,
           focusTheme:
               FocusThemeData(glowFactor: is10footScreen(context) ? 2.0 : 0.0),
-          fontFamily: 'STKAITI'),
+          fontFamily: commFontFamily),
       // 白天模式主题
       theme: FluentThemeData(
           tooltipTheme: tooltipTheme,
@@ -80,7 +81,7 @@ class _AppState extends State<App> {
           visualDensity: VisualDensity.standard,
           focusTheme:
               FocusThemeData(glowFactor: is10footScreen(context) ? 2.0 : 0.0),
-          fontFamily: 'STKAITI'),
+          fontFamily: commFontFamily),
       // 语言环境
       locale: appTheme.locale,
       // 子widget包装器

@@ -2,6 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:oktoast/oktoast.dart';
 
+import 'comm_font.dart';
+
 class CustomToast extends StatelessWidget {
   final String message;
 
@@ -31,12 +33,11 @@ class CustomToast extends StatelessWidget {
           const SizedBox(width: 10.0),
           Text(
             message,
-            style: const TextStyle(
-              fontSize: 20,
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'STKAITI'
-            ),
+            style: TextStyle(
+                fontSize: 20,
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                fontFamily: commFontFamily),
             overflow: TextOverflow.ellipsis,
           ),
         ],

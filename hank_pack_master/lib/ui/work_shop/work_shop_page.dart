@@ -8,6 +8,7 @@ import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../comm/comm_font.dart';
 import '../../comm/gradients.dart';
 import '../../comm/ui/form_input.dart';
 import '../comm/theme.dart';
@@ -33,7 +34,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
   Widget _mainTitleWidget(String title) {
     return Text(title,
         style: const TextStyle(
-            fontSize: 22, fontWeight: FontWeight.w600, fontFamily: 'STKAITI'));
+            fontSize: 22, fontWeight: FontWeight.w600, fontFamily: commFontFamily));
   }
 
   @override
@@ -206,7 +207,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
               style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'STKAITI'),
+                  fontFamily: commFontFamily),
             ),
           );
         },

@@ -7,6 +7,7 @@ import '../../hive/project_record/project_record_operator.dart';
 import '../../ui/project_manager/grid_datasource.dart';
 import '../../ui/project_manager/job_setting_card.dart';
 import '../../ui/work_shop/job_result_card.dart';
+import '../comm_font.dart';
 import '../datetime_util.dart';
 import '../text_util.dart';
 
@@ -16,7 +17,7 @@ class HistoryCard extends StatelessWidget {
   final double maxHeight;
   final bool showTitle;
 
-  const HistoryCard({
+  HistoryCard({
     super.key,
     required this.historyEntity,
     required this.maxHeight,
@@ -24,11 +25,11 @@ class HistoryCard extends StatelessWidget {
     required this.projectRecordEntity,
   });
 
-  final TextStyle _style = const TextStyle(
+  final TextStyle _style = TextStyle(
     fontSize: 15,
     color: Colors.black,
     fontWeight: FontWeight.w600,
-    fontFamily: 'STKAITI',
+    fontFamily: commFontFamily,
   );
 
   final bgColor = const Color(0xffe0e0e0);

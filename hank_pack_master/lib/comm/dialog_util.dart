@@ -7,7 +7,7 @@ import 'package:hank_pack_master/comm/ui/xGate_widget.dart';
 class DialogUtil {
 
   /// 带毛玻璃效果的弹窗
-  static void showBlurDialog({
+  static Future showBlurDialog({
     required BuildContext context,
     Function? onConfirm,
     bool Function()? judgePop,
@@ -21,7 +21,7 @@ class DialogUtil {
     double maxHeight = 700,
     bool showXGate = false,
   }) {
-    showDialog(
+    return showDialog(
       context: context,
       builder: (BuildContext context) {
         return BlurAlertDialog(

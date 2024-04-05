@@ -7,6 +7,7 @@ import 'package:hank_pack_master/ui/cash_files/cache_files_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../comm/comm_font.dart';
 import '../../comm/ui/download_button.dart';
 import '../../comm/ui/my_tool_tip_icon.dart';
 
@@ -47,7 +48,7 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
                       style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w600,
-                          fontFamily: 'STKAITI')),
+                          fontFamily: commFontFamily)),
                   const SizedBox(height: 12),
                   Card(
                     backgroundColor: Colors.successPrimaryColor.withOpacity(.2),
@@ -162,7 +163,7 @@ class _CacheFilesPageState extends State<CacheFilesPage> {
   }
 
   final _style = const TextStyle(
-      fontSize: 22, fontWeight: FontWeight.w600, fontFamily: "STKAITI");
+      fontSize: 22, fontWeight: FontWeight.w600, fontFamily: commFontFamily);
 
   Widget _textInput({
     required String toolTip,

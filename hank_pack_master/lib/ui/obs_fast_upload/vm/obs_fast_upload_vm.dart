@@ -10,6 +10,7 @@ import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_entity.dar
 import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_operator.dart';
 import 'package:jiffy/jiffy.dart';
 
+import '../../../comm/comm_font.dart';
 import '../../../comm/hwobs/obs_client.dart';
 import '../../../comm/str_const.dart';
 import '../../../comm/toast_util.dart';
@@ -37,10 +38,10 @@ class FastObsUploadVm extends ChangeNotifier {
   }
 
   final textStyle1 = const TextStyle(
-      fontSize: 22, fontWeight: FontWeight.w600, fontFamily: 'STKAITI');
+      fontSize: 22, fontWeight: FontWeight.w600, fontFamily: commFontFamily);
 
   final textStyle2 = const TextStyle(
-      fontSize: 30, fontWeight: FontWeight.w600, fontFamily: 'STKAITI');
+      fontSize: 30, fontWeight: FontWeight.w600, fontFamily: commFontFamily);
 
   void onDragDone(DropDoneDetails details) {
     if (details.files.isEmpty) {

@@ -5,6 +5,7 @@ import 'package:hank_pack_master/comm/gradients.dart';
 import 'package:hank_pack_master/ui/apk_trace/vm/apk_trace_vm.dart';
 import 'package:provider/provider.dart';
 
+import '../../comm/comm_font.dart';
 import '../../comm/dialog_util.dart';
 import '../../comm/file_ext.dart';
 import '../../comm/ui/history_card.dart';
@@ -121,7 +122,7 @@ class _ApkTracePageState extends State<ApkTracePage> {
   }
 
   var style = const TextStyle(
-      fontSize: 16, fontWeight: m.FontWeight.w600, fontFamily: 'STKAITI');
+      fontSize: 16, fontWeight: m.FontWeight.w600, fontFamily: commFontFamily);
 
   // 每次仅仅支持一个文件
   Widget _fileSelectorWidget(ApkTraceVm vm) {

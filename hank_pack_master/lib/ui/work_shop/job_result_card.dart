@@ -6,6 +6,7 @@ import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../comm/comm_font.dart';
 import '../../comm/ui/text_on_arc.dart';
 import '../../hive/project_record/job_result_entity.dart';
 
@@ -247,6 +248,6 @@ class JobResultCard extends StatelessWidget {
     fontSize: 16,
     color: Colors.black,
     fontWeight: FontWeight.w600,
-    fontFamily: 'STKAITI',
+    fontFamily: commFontFamily,
   );
 }

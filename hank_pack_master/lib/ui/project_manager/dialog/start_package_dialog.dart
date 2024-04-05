@@ -11,6 +11,7 @@ import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 
+import '../../../comm/comm_font.dart';
 import '../../../comm/gradients.dart';
 import '../../../comm/str_const.dart';
 import '../../../comm/text_util.dart';
@@ -348,7 +349,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   _branchMergeWidget() {
     TextStyle textStyle = const TextStyle(
-        fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'STKAITI');
+        fontSize: 18, fontWeight: FontWeight.w600, fontFamily: commFontFamily);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(

@@ -4,6 +4,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/ui/xGate_widget.dart';
 
+import '../comm_font.dart';
+
 class BlurAlertDialog extends StatelessWidget {
   final String title;
   final dynamic content;
@@ -32,8 +34,8 @@ class BlurAlertDialog extends StatelessWidget {
     this.showXGate = false,
   }) : super(key: key);
 
-  final _titleStyle = const TextStyle(
-      fontSize: 23, fontFamily: 'STKAITI', fontWeight: FontWeight.w600);
+  final _titleStyle =  const TextStyle(
+      fontSize: 23, fontFamily: commFontFamily, fontWeight: FontWeight.w600);
 
   @override
   Widget build(BuildContext context) {

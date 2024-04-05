@@ -4,6 +4,7 @@ import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 
 import '../../hive/project_record/upload_platforms.dart';
+import '../comm_font.dart';
 import '../upload_platforms.dart';
 import 'my_tool_tip_icon.dart';
 
@@ -32,13 +33,13 @@ Widget input(
     mustSpace = const SizedBox(width: 20);
   }
 
-  var textStyle = const TextStyle(
+  var textStyle = TextStyle(
       decoration: TextDecoration.none,
       fontSize: 15,
       height: 1.5,
       fontWeight: FontWeight.w600,
       color: Colors.black,
-      fontFamily: 'STKAITI');
+      fontFamily: commFontFamily);
 
   return Padding(
     padding: const EdgeInsets.only(bottom: 10),
@@ -50,10 +51,10 @@ Widget input(
           child: Row(
             children: [
               Text(title,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      fontFamily: 'STKAITI')),
+                      fontFamily: commFontFamily)),
               mustSpace
             ],
           ),
