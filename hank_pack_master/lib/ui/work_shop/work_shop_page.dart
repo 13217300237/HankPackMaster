@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/no_scroll_bar_ext.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
@@ -10,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../comm/comm_font.dart';
 import '../../comm/gradients.dart';
+import '../../comm/ui/env_error_widget.dart';
 import '../../comm/ui/form_input.dart';
 import '../comm/theme.dart';
 import '../comm/vm/env_param_vm.dart';
@@ -43,7 +45,7 @@ class _WorkShopPageState extends State<WorkShopPage> {
     _appTheme = context.watch<AppTheme>();
     _workShopVm = context.watch<WorkShopVm>();
 
-    var missingParametersStr = _envParamModel.isAndroidEnvOk();
+    var missingParametersStr = _envParamModel.isEnvOk();
 
     if (missingParametersStr.isEmpty) {
       return Container(
@@ -51,9 +53,25 @@ class _WorkShopPageState extends State<WorkShopPage> {
           decoration: BoxDecoration(gradient: mainPanelGradient),
           child: _mainLayout());
     } else {
-      return Center(
-          child: Text(missingParametersStr,
-              style: TextStyle(color: Colors.red, fontSize: 45)));
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: EnvErrWidget(errList: missingParametersStr)),
+            FilledButton(
+                child: const Text(
+                  '去环境参数模块看看',
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontFamily: commFontFamily,
+                      fontWeight: FontWeight.w600),
+                ),
+                onPressed: () => context.go('/env')),
+            const SizedBox(height: 30),
+          ],
+        ),
+      );
     }
   }
 

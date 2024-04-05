@@ -14,6 +14,12 @@ class EnvConfigOperator {
     _box ??= Hive.box<EnvConfigEntity>(_boxName);
   }
 
+
+  static void clear() {
+    _initBox();
+    _box!.clear();
+  }
+
   static void insertOrUpdate(EnvConfigEntity entity) {
     _initBox();
     int index =

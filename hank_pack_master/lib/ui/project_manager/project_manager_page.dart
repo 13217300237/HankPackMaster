@@ -1,8 +1,10 @@
 import 'package:badges/badges.dart' as badges;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hank_pack_master/comm/comm_font.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
+import 'package:hank_pack_master/comm/ui/env_error_widget.dart';
 import 'package:hank_pack_master/comm/ui/history_card.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_operator.dart';
 import 'package:hank_pack_master/ui/project_manager/dialog/active_dialog.dart';
@@ -53,16 +55,32 @@ class _ProjectManagerPageState extends State<ProjectManagerPage> {
     _workShopVm = context.watch<WorkShopVm>();
     _appTheme = context.watch<AppTheme>();
 
-    var missingParametersStr = _envParamVm.isAndroidEnvOk();
+    var missingParametersStr = _envParamVm.isEnvOk();
     if (missingParametersStr.isEmpty) {
       return Container(
           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
           decoration: BoxDecoration(gradient: mainPanelGradient),
           child: _mainLayout());
     } else {
-      return Center(
-          child: Text(missingParametersStr,
-              style: TextStyle(color: Colors.red, fontSize: 45)));
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: EnvErrWidget(errList: missingParametersStr)),
+            FilledButton(
+                child: const Text(
+                  '去环境参数模块看看',
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontFamily: commFontFamily,
+                      fontWeight: FontWeight.w600),
+                ),
+                onPressed: () => context.go('/env')),
+            const SizedBox(height: 30),
+          ],
+        ),
+      );
     }
   }
 

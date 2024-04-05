@@ -86,7 +86,7 @@ class BlurAlertDialog extends StatelessWidget {
                         if (showCancel)
                           Button(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: Text(cancelText),
+                            child: Text(cancelText,style: _titleStyle.copyWith(fontSize: 18,color: Colors.black),),
                           ),
                         const SizedBox(width: 10),
                         Button(

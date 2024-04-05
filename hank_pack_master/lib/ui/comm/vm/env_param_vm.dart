@@ -213,20 +213,41 @@ class EnvParamVm extends ChangeNotifier {
     notifyListeners();
   }
 
-  String isAndroidEnvOk() {
+  List<String> isEnvOk() {
+    List<String> errList = [];
+
+    if (javaRoot.isEmpty) {
+      errList.add('Jdk未设置');
+    }
+    if (gitRoot.isEmpty) {
+      errList.add('git未设置');
+    }
+    if (adbRoot.isEmpty) {
+      errList.add('adb未设置');
+    }
     if (workSpaceRoot.isEmpty) {
-      return '工作空间未设置';
+      errList.add('工作空间未设置');
     }
-
     if (androidSdkRoot.isEmpty) {
-      return '安卓SDK未设置';
+      errList.add('安卓SDK未设置');
     }
-
     if (pgyApiKey.isEmpty) {
-      return 'pgy key 未设置';
+      errList.add('pgy key 未设置');
+    }
+    if (obsEndPoint.isEmpty) {
+      errList.add('obs endpoint 未设置');
+    }
+    if (obsBucketName.isEmpty) {
+      errList.add('obs bucketName 未设置');
+    }
+    if (obsSecretKey.isEmpty) {
+      errList.add('obs sk 未设置');
+    }
+    if (obsAccessKey.isEmpty) {
+      errList.add('obs ak 未设置');
     }
 
-    return '';
+    return errList;
   }
 
   TextEditingController stageTaskExecuteMaxPeriodController =
@@ -411,6 +432,7 @@ class EnvParamVm extends ChangeNotifier {
 
   void clearEnvGroupBox() {
     EnvGroupOperator.clear();
+    EnvConfigOperator.clear();
     notifyListeners();
   }
 
@@ -504,5 +526,11 @@ class EnvParamVm extends ChangeNotifier {
 
   void cancelXGateListen() {
     _streamSubscription?.cancel();
+  }
+
+  /// 检查安卓环境是否就绪，如果没就绪，就弹出报告
+  Future<List<String>> checkEnv() async {
+    await Future.delayed(const Duration(milliseconds: 1000));
+    return isEnvOk();
   }
 }

@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
@@ -7,6 +10,8 @@ import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../comm/comm_font.dart';
+import '../comm/ui/env_error_widget.dart';
 import '../comm/ui/xGate_widget.dart';
 import 'app.dart';
 import 'comm/vm/env_param_vm.dart';
@@ -64,24 +69,6 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       title: Text('作业工坊', style: w600TextStyle),
       body: const SizedBox.shrink(),
     ),
-    PaneItem(
-      key: const ValueKey('/cash_files'),
-      icon: const Icon(FluentIcons.temporary_access_pass),
-      title: Text('缓存文件管理', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/obs_fast_upload'),
-      icon: const Icon(FluentIcons.upload),
-      title: Text('OBS快传', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
-    PaneItem(
-      key: const ValueKey('/trace'),
-      icon: const Icon(FluentIcons.trackers),
-      title: Text('应用包回溯', style: w600TextStyle),
-      body: const SizedBox.shrink(),
-    ),
     // PaneItem(
     //   key: const ValueKey('/device'),
     //   icon: const Icon(FluentIcons.analytics_query),
@@ -136,30 +123,71 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
       );
     }
     return buildPaneItem(e);
-
-    return e;
   }).toList();
 
-  // TODO
   late final List<NavigationPaneItem> footerItems = [
-    // PaneItemSeparator(),
-    // PaneItem(
-    //   key: const ValueKey('/settings'),
-    //   icon: const Icon(FluentIcons.settings),
-    //   title: const Text('Settings'),
-    //   body: const SizedBox.shrink(),
-    //   onTap: () {
-    //     if (GoRouterState.of(context).uri.toString() != '/settings') {
-    //       context.go('/settings');
-    //     }
-    //   },
-    // ),
+    PaneItemSeparator(),
+    PaneItem(
+      key: const ValueKey('/cash_files'),
+      icon: const Icon(FluentIcons.temporary_access_pass),
+      title: Text('缓存文件管理', style: w600TextStyle),
+      body: const SizedBox.shrink(),
+      onTap: () {
+        if (GoRouterState.of(context).uri.toString() != '/cash_files') {
+          context.go('/cash_files');
+        }
+      },
+    ),
+    PaneItem(
+      key: const ValueKey('/obs_fast_upload'),
+      icon: const Icon(FluentIcons.upload),
+      title: Text('OBS快传', style: w600TextStyle),
+      body: const SizedBox.shrink(),
+      onTap: () {
+        if (GoRouterState.of(context).uri.toString() != '/obs_fast_upload') {
+          context.go('/obs_fast_upload');
+        }
+      },
+    ),
+    PaneItem(
+      key: const ValueKey('/trace'),
+      icon: const Icon(FluentIcons.trackers),
+      title: Text('应用包回溯', style: w600TextStyle),
+      body: const SizedBox.shrink(),
+      onTap: () {
+        if (GoRouterState.of(context).uri.toString() != '/trace') {
+          context.go('/trace');
+        }
+      },
+    ),
   ];
 
   @override
   void initState() {
     windowManager.addListener(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // 弹出loading
+
+      var progress = ProgressHUD.of(_hudContext);
+      progress?.showWithText("环境检测中");
+
+      _envParamVm.checkEnv().then((errList) {
+        progress?.dismiss();
+
+        if (errList.isNotEmpty) {
+          DialogUtil.showBlurDialog(
+              context: context,
+              title: '环境监测结果',
+              content: EnvErrWidget(errList: errList),
+              cancelText: '现在不要!',
+              confirmText: '去环境设置模块看看',
+              onConfirm: () {
+                context.go('/env');
+              });
+        }
+      });
+
+      // 检查待上传任务
       showFastUploadDialogFunc() {
         DialogUtil.showCustomDialog(
             context: context,
@@ -220,127 +248,136 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     }
   }
 
+  var _hudContext;
+
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
     _envParamVm = context.watch<EnvParamVm>();
     _workShopVm = context.watch<WorkShopVm>();
-    return NavigationView(
-      key: viewKey,
-      appBar: NavigationAppBar(
-        automaticallyImplyLeading: false,
-        title: const DragToMoveArea(
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: null,
-          ),
-        ),
-        actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          Expanded(
-              child: Center(
-                  child: Text(
-            "工作空间: ${_envParamVm.workSpaceRoot}",
-            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
-          ))),
-          const Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(end: 8.0),
-              child: NetworkStateWidget(),
-            ),
-          ),
-          const WindowButtons(),
-        ]),
-      ),
-      paneBodyBuilder: (item, child) {
-        final name =
-            item?.key is ValueKey ? (item!.key as ValueKey).value : null;
-        return FocusTraversalGroup(
-          key: ValueKey('body$name'),
-          child: widget.navigationShell,
-        );
-      },
-      pane: NavigationPane(
-        size: const NavigationPaneSize(
-            openMaxWidth: 220,
-            openWidth: 220,
-            compactWidth: 100,
-            openMinWidth: 200),
-        selected: _calculateSelectedIndex(context),
-        header: const SizedBox(
-          height: kOneLineTileHeight,
-          child: Text(
-            appTitle,
-            style: TextStyle(fontSize: 20),
-          ),
-        ),
-        displayMode: appTheme.displayMode,
-        indicator: () {
-          switch (appTheme.indicator) {
-            case NavigationIndicators.end:
-              return const EndNavigationIndicator();
-            case NavigationIndicators.sticky:
-            default:
-              return const StickyNavigationIndicator();
-          }
-        }(),
-        items: originalItems,
-        autoSuggestBox: Builder(builder: (context) {
-          return AutoSuggestBox(
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            key: searchKey,
-            focusNode: searchFocusNode,
-            controller: searchController,
-            unfocusedColor: Colors.transparent,
-            // also need to include sub items from [PaneItemExpander] items
-            items: <PaneItem>[
-              ...originalItems
-                  .whereType<PaneItemExpander>()
-                  .expand<PaneItem>((item) {
-                return [
-                  item,
-                  ...item.items.whereType<PaneItem>(),
-                ];
-              }),
-              ...originalItems
-                  .where(
-                    (item) => item is PaneItem && item is! PaneItemExpander,
-                  )
-                  .cast<PaneItem>(),
-            ].map((item) {
-              assert(item.title is Text);
-              final text = (item.title as Text).data!;
-              return AutoSuggestBoxItem(
-                label: text,
-                value: text,
-                onSelected: () {
-                  item.onTap?.call();
-                  searchController.clear();
-                  searchFocusNode.unfocus();
-                  final view = NavigationView.of(context);
-                  if (view.compactOverlayOpen) {
-                    view.compactOverlayOpen = false;
-                  } else if (view.minimalPaneOpen) {
-                    view.minimalPaneOpen = false;
-                  }
-                },
-              );
-            }).toList(),
-            trailingIcon: IgnorePointer(
-              child: IconButton(
-                onPressed: () {},
-                icon: const Icon(FluentIcons.search),
+    return ProgressHUD(
+      child: Builder(builder: (context) {
+        _hudContext = context;
+        return NavigationView(
+          key: viewKey,
+          appBar: NavigationAppBar(
+            automaticallyImplyLeading: false,
+            title: const DragToMoveArea(
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: null,
               ),
             ),
-            placeholder: 'Search',
-            placeholderStyle:
-                const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          );
-        }),
-        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-        footerItems: footerItems,
-      ),
-      onOpenSearch: searchFocusNode.requestFocus,
+            actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              Expanded(
+                  child: Center(
+                      child: Text(
+                "工作空间: ${_envParamVm.workSpaceRoot}",
+                style:
+                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+              ))),
+              const Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(end: 8.0),
+                  child: NetworkStateWidget(),
+                ),
+              ),
+              const WindowButtons(),
+            ]),
+          ),
+          paneBodyBuilder: (item, child) {
+            final name =
+                item?.key is ValueKey ? (item!.key as ValueKey).value : null;
+            return FocusTraversalGroup(
+              key: ValueKey('body$name'),
+              child: widget.navigationShell,
+            );
+          },
+          pane: NavigationPane(
+            size: const NavigationPaneSize(
+                openMaxWidth: 220,
+                openWidth: 220,
+                compactWidth: 100,
+                openMinWidth: 200),
+            selected: _calculateSelectedIndex(context),
+            header: const SizedBox(
+              height: kOneLineTileHeight,
+              child: Text(
+                appTitle,
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+            displayMode: appTheme.displayMode,
+            indicator: () {
+              switch (appTheme.indicator) {
+                case NavigationIndicators.end:
+                  return const EndNavigationIndicator();
+                case NavigationIndicators.sticky:
+                default:
+                  return const StickyNavigationIndicator();
+              }
+            }(),
+            items: originalItems,
+            autoSuggestBox: Builder(builder: (context) {
+              return AutoSuggestBox(
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                key: searchKey,
+                focusNode: searchFocusNode,
+                controller: searchController,
+                unfocusedColor: Colors.transparent,
+                // also need to include sub items from [PaneItemExpander] items
+                items: <PaneItem>[
+                  ...originalItems
+                      .whereType<PaneItemExpander>()
+                      .expand<PaneItem>((item) {
+                    return [
+                      item,
+                      ...item.items.whereType<PaneItem>(),
+                    ];
+                  }),
+                  ...originalItems
+                      .where(
+                        (item) => item is PaneItem && item is! PaneItemExpander,
+                      )
+                      .cast<PaneItem>(),
+                ].map((item) {
+                  assert(item.title is Text);
+                  final text = (item.title as Text).data!;
+                  return AutoSuggestBoxItem(
+                    label: text,
+                    value: text,
+                    onSelected: () {
+                      item.onTap?.call();
+                      searchController.clear();
+                      searchFocusNode.unfocus();
+                      final view = NavigationView.of(context);
+                      if (view.compactOverlayOpen) {
+                        view.compactOverlayOpen = false;
+                      } else if (view.minimalPaneOpen) {
+                        view.minimalPaneOpen = false;
+                      }
+                    },
+                  );
+                }).toList(),
+                trailingIcon: IgnorePointer(
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: const Icon(FluentIcons.search),
+                  ),
+                ),
+                placeholder: 'Search',
+                placeholderStyle:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              );
+            }),
+            autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+            footerItems: footerItems,
+          ),
+          onOpenSearch: searchFocusNode.requestFocus,
+        );
+      }),
     );
   }
 

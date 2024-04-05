@@ -546,7 +546,7 @@ class _EnvPageState extends State<EnvPage> {
             children: [
               Text("文件默认保存天数", style: _cTextStyle),
               toolTipIcon(
-                msg: "阶段任务执行超时或执行失败时会尝试重试,超过设定的最大重试次数则会被认为阶段任务执行失败",
+                msg: "上传成功后开始计时，如果超出最大天数，OBS会自动删除该文件",
                 iconColor: _appTheme.accentColor,
               ),
             ],
