@@ -548,7 +548,7 @@ class _EnvPageState extends State<EnvPage> {
           _expiredDaysWidget(),
           const SizedBox(height: 20),
           _textInput('end point ', _envParamModel.obsEndPointController,
-              judge: (s) => isHttpsUrl(s), toolTip: "华为OBS的终端地址"),
+              judge: (s) => isHttpsUrl(s), toolTip: "华为OBS的终端地址，必须是http/https地址"),
           const SizedBox(height: 10),
           _textInput(
             'access key',
