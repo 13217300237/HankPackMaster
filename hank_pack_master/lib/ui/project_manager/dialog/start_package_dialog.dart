@@ -102,10 +102,13 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         projectWorkDir,
         (s) {
           debugPrint('获取本地分支:$s');
-
-          s.split("\n").forEach((element) {
-            _branchList.add(element);
+          s.split("\n").forEach((e) {
+            _branchList.add(e);
           });
+
+          _branchList.removeWhere((e) =>
+          e.contains("origin/HEAD") ||
+              Uri.encodeComponent(e.trim()) == Uri.encodeComponent(gitBranch));
 
           setState(() {});
         },
@@ -181,7 +184,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
   String _errMsg = "";
 
   final List<String> _branchList = [];
-  List<String> _selectedToMergeBranch = [];
+  final List<String> _selectedToMergeBranch = [];
 
   @override
   Widget build(BuildContext context) {
@@ -355,16 +358,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
       child: Row(
         children: [
           SizedBox(
-            width: 100,
-            child: Row(
-              children: [
-                Text(
-                  '合并分支',
-                  style: textStyle,
-                ),
-              ],
-            ),
-          ),
+              width: 100,
+              child: Row(children: [Text('合并分支', style: textStyle)])),
           Expanded(
             child: Container(
               padding: const EdgeInsets.only(top: 5, right: 2, bottom: 10),
@@ -383,9 +378,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                   backgroundColor: Colors.white,
                   items: _branchList.map((e) => MultiSelectItem(e, e)).toList(),
                   listType: MultiSelectListType.CHIP,
-                  onConfirm: (values) {
-                    _selectedToMergeBranch.addAll(values);
-                  }),
+                  onConfirm: (values) => _selectedToMergeBranch.addAll(values)),
             ),
           ),
         ],
