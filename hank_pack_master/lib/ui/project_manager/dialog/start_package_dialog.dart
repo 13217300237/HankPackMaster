@@ -1,18 +1,14 @@
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
 import 'package:hank_pack_master/hive/project_record/project_record_entity.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
-import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
-import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
-import 'package:multi_select_flutter/util/multi_select_item.dart';
-import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 
 import '../../../comm/comm_font.dart';
-import '../../../comm/gradients.dart';
 import '../../../comm/str_const.dart';
 import '../../../comm/text_util.dart';
 import '../../../comm/ui/form_input.dart';
@@ -55,8 +51,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
   var errStyle = TextStyle(fontSize: 16, color: Colors.red);
 
   final TextEditingController _updateLogController = TextEditingController();
-  final TextEditingController _mergeBranchNameController =
-      TextEditingController();
 
   final TextEditingController _apkLocationController = TextEditingController();
 
@@ -85,7 +79,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
     _jdk = widget.javaHome; // 这里必须使用 激活时使用的jdk
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initSetting(widget.projectRecordEntity.packageSetting);
-
       String projectWorkDir =
           EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey) +
               Platform.pathSeparator +
@@ -98,21 +91,29 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
       debugPrint("命令执行根目录为:$projectWorkDir");
 
-      CommandUtil.getInstance().gitBranchRemote(
-        projectWorkDir,
-        (s) {
-          debugPrint('获取本地分支:$s');
-          s.split("\n").forEach((e) {
-            _branchList.add(e);
-          });
+      CommandUtil.getInstance()
+          .gitBranchRemote(projectWorkDir, (s) {})
+          .then((s) {
+        String commandsStr = s.res;
 
-          _branchList.removeWhere((e) =>
-          e.contains("origin/HEAD") ||
-              Uri.encodeComponent(e.trim()) == Uri.encodeComponent(gitBranch));
+        List<String> commands = commandsStr.split("\n");
 
-          setState(() {});
-        },
-      );
+        String originTag = "origin/";
+
+        commands.removeWhere((e) => e.contains("${originTag}HEAD"));
+        commands.removeWhere((e) =>
+            Uri.encodeComponent(e.trim()) ==
+            Uri.encodeComponent('$originTag$gitBranch'));
+
+        for (var s in commands) {
+          var sx = s.substring(s.indexOf(originTag) + originTag.length);
+          _branchList[sx] = false;
+        }
+
+        initSetting(widget.projectRecordEntity.packageSetting);
+
+        setState(() {});
+      });
     });
   }
 
@@ -121,12 +122,11 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
       return;
     }
 
-    StringBuffer sb = StringBuffer();
     packageSetting.mergeBranchList?.forEach((e) {
-      sb.writeln(e);
+      _branchList[e] = true;
     });
 
-    _mergeBranchNameController.text = sb.toString().trim();
+    // _mergeBranchNameController.text = sb.toString().trim();
     _selectedOrder = packageSetting.selectedOrder;
     _selectedUploadPlatform = packageSetting.selectedUploadPlatform;
     _apkLocationController.text = packageSetting.apkLocation ?? '';
@@ -183,8 +183,17 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
   String _errMsg = "";
 
-  final List<String> _branchList = [];
-  final List<String> _selectedToMergeBranch = [];
+  final Map<String, bool> _branchList = {};
+
+  List<String> get _selectedToMergeBranch {
+    List<String> selected = [];
+    _branchList.forEach((key, value) {
+      if (value == true) {
+        selected.add(key);
+      }
+    });
+    return selected;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -198,13 +207,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         onPressed: () {
           // 收集信息,并返回出去
           String appUpdateStr = _updateLogController.text;
-          List<String> mergeBranchList = _mergeBranchNameController.text
-              .trim()
-              .split("\n")
-              .map((e) => e.trim())
-              .toList();
-          mergeBranchList.removeWhere((e) => e.trim().isEmpty);
-
           String apkLocation = _apkLocationController.text;
           String? selectedOrder = _selectedOrder;
           UploadPlatform? selectedUploadPlatform = _selectedUploadPlatform;
@@ -217,7 +219,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
             selectedOrder: selectedOrder,
             selectedUploadPlatform: selectedUploadPlatform,
             jdk: _jdk,
-            mergeBranchList: mergeBranchList,
+            mergeBranchList: _selectedToMergeBranch,
           );
           ProjectRecordOperator.update(widget.projectRecordEntity);
 
@@ -249,12 +251,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
               must: false,
               crossAxisAlignment: CrossAxisAlignment.center),
           _branchMergeWidget(),
-          input("合并分支", "输入打包前要合入的其他分支名...", _mergeBranchNameController,
-              // 这些分支貌似不应该手动填，而是选择 TODO
-              maxLines: 3,
-              must: false,
-              toolTip: "注意：多个分支换行为分隔",
-              crossAxisAlignment: CrossAxisAlignment.center),
           Row(
             children: [
               choose('打包命令', enableAssembleMap, setSelectedOrder: (order) {
@@ -356,33 +352,143 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
               width: 100,
-              child: Row(children: [Text('合并分支', style: textStyle)])),
+              child: Row(children: [
+                FilledButton(
+                  child: const Text(
+                    "合并分支",
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: commFontFamily,
+                        color: Colors.white),
+                  ),
+                  onPressed: () {
+                    // 弹窗，显示所有的可选分支
+                    DialogUtil.showCustomDialog(
+                      context: context,
+                      title: '可选分支',
+                      maxHeight: 600,
+                      maxWidth: 900,
+                      content: BranchListLayout(branchList: _branchList),
+                      showActions: false,
+                    ).then((value) => setState(() {}));
+                  },
+                ),
+              ])),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.only(top: 5, right: 2, bottom: 10),
-              decoration: BoxDecoration(
-                  gradient: mainPanelGradient,
-                  borderRadius: const BorderRadius.all(Radius.circular(8))),
-              child: MultiSelectDialogField<String>(
-                  confirmText: Text('确定', style: textStyle),
-                  cancelText: Text('取消', style: textStyle),
-                  buttonIcon: const Icon(FluentIcons.add_work),
-                  title: Text('选择你需要合并的分支', style: textStyle),
-                  buttonText: Text('选择你需要合并的分支', style: textStyle),
-                  decoration: const BoxDecoration(border: null),
-                  searchable: true,
-                  chipDisplay: MultiSelectChipDisplay(),
-                  backgroundColor: Colors.white,
-                  items: _branchList.map((e) => MultiSelectItem(e, e)).toList(),
-                  listType: MultiSelectListType.CHIP,
-                  onConfirm: (values) => _selectedToMergeBranch.addAll(values)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  children: [
+                    ..._selectedToMergeBranch.map((e) => Card(
+                          margin: const EdgeInsets.only(right: 10, bottom: 5),
+                          backgroundColor: Colors.blue,
+                          child: Text(
+                            e,
+                            style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: commFontFamily,
+                                color: Colors.white),
+                          ),
+                        )),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class BranchListLayout extends StatefulWidget {
+  final Map<String, bool> branchList;
+
+  const BranchListLayout({super.key, required this.branchList});
+
+  @override
+  State<BranchListLayout> createState() => _BranchListLayoutState();
+}
+
+class _BranchListLayoutState extends State<BranchListLayout> {
+  // 记住刚刚传进来的 branchList,因为点取消的时候要还原
+  late Map<String, bool> old;
+
+  @override
+  void initState() {
+    super.initState();
+    old = {};
+    old.addAll(widget.branchList);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Wrap(
+              children: [
+                ...widget.branchList.keys.toList().map(
+                      (e) => GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            widget.branchList[e] = !widget.branchList[e]!;
+                          });
+                        },
+                        child: Card(
+                          margin: const EdgeInsets.all(5),
+                          backgroundColor: widget.branchList[e]!
+                              ? Colors.blue
+                              : Colors.white,
+                          child: Text(
+                            e,
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: commFontFamily,
+                                color: widget.branchList[e]!
+                                    ? Colors.white
+                                    : Colors.black),
+                          ),
+                        ),
+                      ),
+                    )
+              ],
+            ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            OutlinedButton(
+              child: const Text('取消',
+                  style: TextStyle(fontSize: 22, fontFamily: commFontFamily)),
+              onPressed: () {
+                widget.branchList.clear();
+                widget.branchList.addAll(old);
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(width: 10),
+            FilledButton(
+              child: const Text('确定',
+                  style: TextStyle(fontSize: 22, fontFamily: commFontFamily)),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            )
+          ],
+        )
+      ],
     );
   }
 }
