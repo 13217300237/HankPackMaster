@@ -10,7 +10,6 @@ import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
 import '../../../comm/comm_font.dart';
-import '../../../comm/gradients.dart';
 import '../../../comm/str_const.dart';
 import '../../../comm/text_util.dart';
 import '../../../comm/ui/form_input.dart';
@@ -94,7 +93,10 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
       debugPrint("命令执行根目录为:$projectWorkDir");
 
       // showLoading 正在获取
-      EasyLoading.show(status: '正在获取远程分支状态...',dismissOnTap: false,maskType: EasyLoadingMaskType.black);
+      EasyLoading.show(
+          status: '正在获取远程分支状态...',
+          dismissOnTap: false,
+          maskType: EasyLoadingMaskType.black);
       CommandUtil.getInstance()
           .gitBranchRemote(projectWorkDir, (s) {})
           .then((s) {
@@ -454,7 +456,7 @@ class _BranchListLayoutState extends State<BranchListLayout> {
       fontSize: 15,
       height: 1.5,
       fontWeight: FontWeight.w600,
-      color: Colors.black,
+      color: Colors.white,
       fontFamily: commFontFamily);
 
   @override
@@ -506,21 +508,34 @@ class _BranchListLayoutState extends State<BranchListLayout> {
           children: [
             Expanded(
               child: TextBox(
+                padding: const EdgeInsets.all(10),
                 controller: _textController,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    gradient: cardGradient,
+                    color: const Color(0xff3c8981),
                     border: Border.all(color: Colors.transparent, width: 1.35)),
                 unfocusedColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 style: textStyle,
+                cursorColor: Colors.white,
                 placeholder: '输入过滤关键字',
+                placeholderStyle: textStyle.copyWith(color: Colors.white),
                 expands: false,
                 maxLines: 1,
                 enabled: true,
+                suffix: _textController.text.isEmpty
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsets.only(right: 10.0),
+                        child: IconButton(
+                          icon: const Icon(FluentIcons.clear,
+                              color: Colors.white, size: 20),
+                          onPressed: _textController.clear,
+                        ),
+                      ),
               ),
             ),
-            const SizedBox(width: 30),
+            const SizedBox(width: 90),
             OutlinedButton(
               child: const Text('取消',
                   style: TextStyle(fontSize: 22, fontFamily: commFontFamily)),
