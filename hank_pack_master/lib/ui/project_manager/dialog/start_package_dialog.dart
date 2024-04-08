@@ -347,8 +347,17 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
   }
 
   _branchMergeWidget() {
-    TextStyle textStyle = const TextStyle(
-        fontSize: 18, fontWeight: FontWeight.w600, fontFamily: commFontFamily);
+    showDialog() {
+      DialogUtil.showCustomDialog(
+        context: context,
+        title: '可选分支',
+        maxHeight: 600,
+        maxWidth: 900,
+        content: BranchListLayout(branchList: _branchList),
+        showActions: false,
+      ).then((value) => setState(() {}));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -358,6 +367,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
               width: 100,
               child: Row(children: [
                 FilledButton(
+                  onPressed: showDialog,
                   child: const Text(
                     "合并分支",
                     style: TextStyle(
@@ -366,17 +376,6 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                         fontFamily: commFontFamily,
                         color: Colors.white),
                   ),
-                  onPressed: () {
-                    // 弹窗，显示所有的可选分支
-                    DialogUtil.showCustomDialog(
-                      context: context,
-                      title: '可选分支',
-                      maxHeight: 600,
-                      maxWidth: 900,
-                      content: BranchListLayout(branchList: _branchList),
-                      showActions: false,
-                    ).then((value) => setState(() {}));
-                  },
                 ),
               ])),
           Expanded(
@@ -388,18 +387,22 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                   children: [
                     Wrap(
                       children: [
-                        ..._selectedToMergeBranch.map((e) => Card(
-                              margin: const EdgeInsets.only(right: 10, bottom: 5),
-                              backgroundColor: Colors.blue,
-                              child: Text(
-                                e,
-                                style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: commFontFamily,
-                                    color: Colors.white),
+                        ..._selectedToMergeBranch.map((e) => GestureDetector(
+                          onTap: showDialog,
+                          child: Card(
+                                margin:
+                                    const EdgeInsets.only(right: 10, bottom: 5),
+                                backgroundColor: Colors.blue,
+                                child: Text(
+                                  e,
+                                  style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: commFontFamily,
+                                      color: Colors.white),
+                                ),
                               ),
-                            )),
+                        )),
                       ],
                     ),
                   ],
@@ -471,6 +474,7 @@ class _BranchListLayoutState extends State<BranchListLayout> {
             ),
           ),
         ),
+        const SizedBox(height: 18),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

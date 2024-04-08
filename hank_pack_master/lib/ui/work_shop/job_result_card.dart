@@ -117,8 +117,8 @@ class JobResultCard extends StatelessWidget {
         headerBackgroundColor:
             ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
         header: Text('查看错误详情', style: _style),
-        content: SizedBox(
-          height: 500,
+        content: Container(
+          constraints: const BoxConstraints(maxHeight: 350),
           child: ex,
         ),
       );

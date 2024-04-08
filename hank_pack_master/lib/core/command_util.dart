@@ -645,7 +645,7 @@ $sb"""
     return ExecuteResult(res, exitCode!);
   }
 
-  /// 合并其他分支
+  /// 获取远程仓库的变动
   Future<ExecuteResult> gitFetch(
     String gitProjectDir,
     Function(String s) logOutput,
@@ -739,6 +739,9 @@ $sb"""
     Function(String s) logOutput,
   ) async {
     StringBuffer sb = StringBuffer();
+
+    // 必须先感知远程的变动，然后再获取
+    await gitFetch(gitProjectDir, logOutput);
 
     var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
     var process = await execute(

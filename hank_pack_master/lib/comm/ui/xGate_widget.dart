@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/comm_font.dart';
 import 'package:hank_pack_master/ui/comm/vm/env_param_vm.dart';
 import 'package:provider/provider.dart';
 
@@ -34,10 +35,10 @@ class _NetworkStateWidgetState extends State<NetworkStateWidget> {
       child: Text(
         text,
         style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            fontFamily: commFontFamily),
       ),
     );
   }
@@ -53,10 +54,10 @@ class _NetworkStateWidgetState extends State<NetworkStateWidget> {
       child: Text(
         envParamVm.networkName,
         style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            fontFamily: commFontFamily),
       ),
     );
   }

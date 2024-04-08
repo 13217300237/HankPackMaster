@@ -561,14 +561,18 @@ class ProjectEntityDataSource extends DataGridSource {
                     context: buildContext,
                     showXGate: true,
                     title: "可用变体",
-                    content: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 20),
-                        child: Wrap(
-                          alignment: WrapAlignment.start,
-                          crossAxisAlignment: WrapCrossAlignment.start,
-                          children: [...orders.map((e) => card(e))],
+                    maxWidth: 1200,
+                    content: Container(
+                      constraints: const BoxConstraints(maxHeight: 550),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: Wrap(
+                            alignment: WrapAlignment.start,
+                            crossAxisAlignment: WrapCrossAlignment.start,
+                            children: [...orders.map((e) => card(e))],
+                          ),
                         ),
                       ),
                     ));
