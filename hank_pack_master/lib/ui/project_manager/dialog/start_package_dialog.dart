@@ -380,26 +380,31 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                 ),
               ])),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ..._selectedToMergeBranch.map((e) => Card(
-                          margin: const EdgeInsets.only(right: 10, bottom: 5),
-                          backgroundColor: Colors.blue,
-                          child: Text(
-                            e,
-                            style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: commFontFamily,
-                                color: Colors.white),
-                          ),
-                        )),
+                    Wrap(
+                      children: [
+                        ..._selectedToMergeBranch.map((e) => Card(
+                              margin: const EdgeInsets.only(right: 10, bottom: 5),
+                              backgroundColor: Colors.blue,
+                              child: Text(
+                                e,
+                                style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: commFontFamily,
+                                    color: Colors.white),
+                              ),
+                            )),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ],
