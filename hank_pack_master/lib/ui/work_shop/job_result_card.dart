@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:hank_pack_master/comm/dialog_util.dart';
+import 'package:hank_pack_master/comm/pdf/pdf_util.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
+import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,7 +17,7 @@ import '../../comm/ui/text_on_arc.dart';
 import '../../hive/project_record/job_result_entity.dart';
 
 /// 流水线最终成果展示卡片
-class JobResultCard extends StatelessWidget {
+class JobResultCard extends StatefulWidget {
   final JobResultEntity jobResult;
   final double maxHeight;
   final bool initiallyExpanded;
@@ -26,16 +32,77 @@ class JobResultCard extends StatelessWidget {
   });
 
   @override
+  State<JobResultCard> createState() => _JobResultCardState();
+}
+
+class _JobResultCardState extends State<JobResultCard> {
+  Widget _buildResWidget(JobResultEntity jobResult) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text('构建结果', style: _style.copyWith(fontSize: 28))),
+            _line('App名称', "${jobResult.buildName}"),
+            _line('App版本', "${jobResult.buildVersion}"),
+            _line('编译版本', "${jobResult.buildVersionNo}"),
+            _line('上传批次', "${jobResult.buildBuildVersion}"),
+            _line('App包名', "${jobResult.buildIdentifier}"),
+            _line('应用描述', "${jobResult.buildDescription}"),
+            _line('更新日志', "${jobResult.buildUpdateDescription}"),
+            _line('更新时间', "${jobResult.buildUpdated}"),
+            _line('下载地址', "${jobResult.buildQRCodeURL}"),
+            _line(
+                '过期时间', "${jobResult.expiredTime?.formatYYYMMDDHHmmSS()}"),
+            _line('md5', '${widget.md5}'),
+          ],
+        ),
+        Column(
+          children: [
+            qrCode(),
+            const SizedBox(height: 15),
+            FilledButton(
+                child:
+                Text('保存pdf', style: _style.copyWith(color: Colors.white)),
+                onPressed: () async {
+                  String file = "D:\\pdfs\\b.pdf";
+                  EasyLoading.show(status: "正在保存");
+                  await PdfUtil.addBuildResWidget(
+                    saveFile: File(file),
+                    jobResult: jobResult,
+                    md5: widget.md5!,
+                  );
+                  EasyLoading.dismiss();
+                  showSaveRes(file);
+                })
+          ],
+        ),
+      ],
+    );
+  }
+
+  showSaveRes(String file) {
+    DialogUtil.showBlurDialog(context: context,
+        title: "保存成功",
+        content: "保存成功,位置在:${file}");
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!jobResult.errMessage.empty()) {
+    if (!widget.jobResult.errMessage.empty()) {
       // 这里有问题，上传失败时，这个errMessage是空的.
       return msgWidget();
-    } else if (jobResult.assembleOrders != null &&
-        jobResult.assembleOrders!.isNotEmpty) {
-      return _assembleOrderWidget(jobResult.assembleOrders);
+    } else if (widget.jobResult.assembleOrders != null &&
+        widget.jobResult.assembleOrders!.isNotEmpty) {
+      return _assembleOrderWidget(widget.jobResult.assembleOrders);
     } else {
       bool hasExpired =
-          jobResult.expiredTime?.isBefore(DateTime.now()) ?? false;
+          widget.jobResult.expiredTime?.isBefore(DateTime.now()) ?? false;
       return Card(
         backgroundColor: Colors.blue.withOpacity(.1),
         borderRadius: BorderRadius.circular(10),
@@ -43,36 +110,7 @@ class JobResultCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: Stack(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // _title(),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text('构建结果', style: _style.copyWith(fontSize: 28)),
-                    ),
-                    _line('App名称', "${jobResult.buildName}"),
-                    _line('App版本', "${jobResult.buildVersion}"),
-                    _line('编译版本', "${jobResult.buildVersionNo}"),
-                    _line('上传批次', "${jobResult.buildBuildVersion}"),
-                    _line('App包名', "${jobResult.buildIdentifier}"),
-                    _line('应用描述', "${jobResult.buildDescription}"),
-                    _line('更新日志', "${jobResult.buildUpdateDescription}"),
-                    _line('更新时间', "${jobResult.buildUpdated}"),
-                    _line('下载地址', "${jobResult.buildQRCodeURL}"),
-                    _line('过期时间',
-                        "${jobResult.expiredTime?.formatYYYMMDDHHmmSS()}"),
-                    _line('md5', '$md5'),
-                  ],
-                ),
-                qrCode(),
-              ],
-            ),
+            _buildResWidget(widget.jobResult),
             Visibility(
               visible: hasExpired,
               child: Positioned(
@@ -98,8 +136,9 @@ class JobResultCard extends StatelessWidget {
   }
 
   Widget msgWidget() {
-    if (jobResult.errMessage != null && jobResult.errMessage!.isNotEmpty) {
-      List<String> listString = jobResult.errMessage!.split("\n");
+    if (widget.jobResult.errMessage != null &&
+        widget.jobResult.errMessage!.isNotEmpty) {
+      List<String> listString = widget.jobResult.errMessage!.split("\n");
       var ex = ListView.builder(
         itemBuilder: (context, index) {
           return Padding(
@@ -113,9 +152,9 @@ class JobResultCard extends StatelessWidget {
         itemCount: listString.length,
       );
       return Expander(
-        initiallyExpanded: initiallyExpanded,
+        initiallyExpanded: widget.initiallyExpanded,
         headerBackgroundColor:
-            ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
+        ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
         header: Text('查看错误详情', style: _style),
         content: Container(
           constraints: const BoxConstraints(maxHeight: 350),
@@ -129,23 +168,25 @@ class JobResultCard extends StatelessWidget {
   }
 
   Widget qrCode() {
-    if (jobResult.errMessage != null && jobResult.errMessage!.isNotEmpty) {
+    if (widget.jobResult.errMessage != null &&
+        widget.jobResult.errMessage!.isNotEmpty) {
       return const SizedBox();
-    } else if (jobResult.buildQRCodeURL.empty()) {
+    } else if (widget.jobResult.buildQRCodeURL.empty()) {
       return const SizedBox();
     } else {
-      if (jobResult.uploadPlatform == '${UploadPlatform.pgy.index}') {
+      if (widget.jobResult.uploadPlatform == '${UploadPlatform.pgy.index}') {
         return Center(
           child: CachedNetworkImage(
             width: qrCodeSize,
             height: qrCodeSize,
-            imageUrl: "${jobResult.buildQRCodeURL}",
-            placeholder: (context, url) => const Center(
+            imageUrl: "${widget.jobResult.buildQRCodeURL}",
+            placeholder: (context, url) =>
+            const Center(
                 child: m.CircularProgressIndicator(
-              strokeWidth: 2,
-            )),
+                  strokeWidth: 2,
+                )),
             errorWidget: (context, url, error) =>
-                const Icon(m.Icons.error_outline),
+            const Icon(m.Icons.error_outline),
           ),
         );
       } else {
@@ -153,19 +194,19 @@ class JobResultCard extends StatelessWidget {
           child: Column(
             children: [
               QrImageView(
-                data: '${jobResult.buildQRCodeURL}',
+                data: '${widget.jobResult.buildQRCodeURL}',
                 size: qrCodeSize,
                 version: QrVersions.auto,
               ),
               OutlinedButton(
                 onPressed: () {
-                  launchUrl(Uri.parse(jobResult.buildQRCodeURL!));
+                  launchUrl(Uri.parse(widget.jobResult.buildQRCodeURL!));
                 },
                 style: ButtonStyle(
                     backgroundColor:
-                        ButtonState.resolveWith((states) => Colors.green),
+                    ButtonState.resolveWith((states) => Colors.green),
                     foregroundColor:
-                        ButtonState.resolveWith((states) => Colors.white)),
+                    ButtonState.resolveWith((states) => Colors.white)),
                 child: const Text(
                   '马上下载',
                   style: TextStyle(
@@ -189,26 +230,27 @@ class JobResultCard extends StatelessWidget {
     }
 
     return Expander(
-      initiallyExpanded: initiallyExpanded,
+      initiallyExpanded: widget.initiallyExpanded,
       headerBackgroundColor:
-          ButtonState.resolveWith((states) => Colors.green.withOpacity(.1)),
+      ButtonState.resolveWith((states) => Colors.green.withOpacity(.1)),
       header: Text('可用变体', style: _style),
       content: SizedBox(
-        height: maxHeight - 229,
+        height: widget.maxHeight - 229,
         child: SingleChildScrollView(
           child: Wrap(
             children: [
               ...assembleOrders
-                  .map((e) => Card(
-                        backgroundColor: Colors.green.withOpacity(.4),
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 2, horizontal: 3),
-                        child: Text(
-                          e.replaceAll("assemble", ""),
-                          style:
-                              _style.copyWith(color: const Color(0xff24292E)),
-                        ),
-                      ))
+                  .map((e) =>
+                  Card(
+                    backgroundColor: Colors.green.withOpacity(.4),
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 2, horizontal: 3),
+                    child: Text(
+                      e.replaceAll("assemble", ""),
+                      style:
+                      _style.copyWith(color: const Color(0xff24292E)),
+                    ),
+                  ))
                   .toList()
             ],
           ),
