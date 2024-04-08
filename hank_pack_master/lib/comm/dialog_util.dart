@@ -24,18 +24,21 @@ class DialogUtil {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
-        return BlurAlertDialog(
-          content: content,
-          onConfirm: onConfirm,
-          judgePop: judgePop,
-          title: title,
-          showCancel: showCancel,
-          showActions: showActions,
-          confirmText: confirmText,
-          cancelText: cancelText,
-          maxWidth: maxWidth,
-          maxHeight: maxHeight,
-          showXGate: showXGate,
+        return PopScope(
+          canPop: false,
+          child: BlurAlertDialog(
+            content: content,
+            onConfirm: onConfirm,
+            judgePop: judgePop,
+            title: title,
+            showCancel: showCancel,
+            showActions: showActions,
+            confirmText: confirmText,
+            cancelText: cancelText,
+            maxWidth: maxWidth,
+            maxHeight: maxHeight,
+            showXGate: showXGate,
+          ),
         ); // 弹窗组件
       },
     );
@@ -62,60 +65,63 @@ class DialogUtil {
     return showDialog(
       context: context,
       builder: (context) {
-        return ContentDialog(
-          style: ContentDialogThemeData(
-            actionsDecoration: BoxDecoration(
-              color: const Color(0xFFF6EFE9),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            decoration: BoxDecoration(
+        return PopScope(
+          canPop: false,
+          child: ContentDialog(
+            style: ContentDialogThemeData(
+              actionsDecoration: BoxDecoration(
+                color: const Color(0xFFF6EFE9),
                 borderRadius: BorderRadius.circular(10),
-                color: const Color(0xFFF6EFE9)),
-          ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
-              showXGate ? const NetworkStateWidget() : const SizedBox(),
-            ],
-          ),
-          constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-          content: content is Widget
-              ? Row(children: [Expanded(child: content)])
-              : SingleChildScrollView(
-                  child: Text(
-                    content,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xFFF6EFE9)),
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style:
+                      const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                 ),
-          actions: showActions
-              ? [
-                  FilledButton(
+                showXGate ? const NetworkStateWidget() : const SizedBox(),
+              ],
+            ),
+            constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+            content: content is Widget
+                ? Row(children: [Expanded(child: content)])
+                : SingleChildScrollView(
                     child: Text(
-                      confirmText,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      content,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w600),
                     ),
-                    onPressed: () {
-                      if (judgePop == null || judgePop()) {
-                        Navigator.pop(context);
-                      }
-                      onConfirm?.call();
-                    },
                   ),
-                  if (showCancel)
-                    Button(
-                      child: Text(cancelText),
+            actions: showActions
+                ? [
+                    FilledButton(
+                      child: Text(
+                        confirmText,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       onPressed: () {
-                        Navigator.pop(context);
+                        if (judgePop == null || judgePop()) {
+                          Navigator.pop(context);
+                        }
+                        onConfirm?.call();
                       },
                     ),
-                ]
-              : null,
+                    if (showCancel)
+                      Button(
+                        child: Text(cancelText),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                  ]
+                : null,
+          ),
         );
       },
     );

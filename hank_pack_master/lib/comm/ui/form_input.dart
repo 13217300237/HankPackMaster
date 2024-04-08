@@ -33,7 +33,7 @@ Widget input(
     mustSpace = const SizedBox(width: 20);
   }
 
-  var textStyle = TextStyle(
+  var textStyle = const TextStyle(
       decoration: TextDecoration.none,
       fontSize: 15,
       height: 1.5,
@@ -51,7 +51,7 @@ Widget input(
           child: Row(
             children: [
               Text(title,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       fontFamily: commFontFamily)),

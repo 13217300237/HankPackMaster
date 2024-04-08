@@ -11,7 +11,7 @@ import '../comm/str_const.dart';
 import '../hive/env_config/env_config_operator.dart';
 import '../ui/work_shop/temp_log_cache_entity.dart';
 
-bool cmdDebug = false;
+bool cmdDebug = true;
 
 debugCmdPrint(String msg) {
   if (cmdDebug) {
@@ -740,8 +740,10 @@ $sb"""
   ) async {
     StringBuffer sb = StringBuffer();
 
+    debugCmdPrint('开始获取remote变动');
     // 必须先感知远程的变动，然后再获取
     await gitFetch(gitProjectDir, logOutput);
+    debugCmdPrint('获取remote变动成功,现在获取所有的远程分支');
 
     var binRoot = EnvConfigOperator.searchEnvValue(Const.envGitKey);
     var process = await execute(

@@ -1,7 +1,5 @@
-import 'dart:ui';
-
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/ui/comm/theme.dart';
@@ -10,7 +8,6 @@ import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../comm/comm_font.dart';
 import '../comm/ui/env_error_widget.dart';
 import '../comm/ui/xGate_widget.dart';
 import 'app.dart';
@@ -168,11 +165,13 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       // 弹出loading
 
-      var progress = ProgressHUD.of(_hudContext);
-      progress?.showWithText("环境检测中");
+      EasyLoading.show(
+          status: '环境检测中...',
+          dismissOnTap: false,
+          maskType: EasyLoadingMaskType.black);
 
       _envParamVm.checkEnv().then((errList) {
-        progress?.dismiss();
+        EasyLoading.dismiss();
 
         if (errList.isNotEmpty) {
           DialogUtil.showBlurDialog(
@@ -248,136 +247,127 @@ class _FrameworkPageState extends State<FrameworkPage> with WindowListener {
     }
   }
 
-  var _hudContext;
-
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
     _envParamVm = context.watch<EnvParamVm>();
     _workShopVm = context.watch<WorkShopVm>();
-    return ProgressHUD(
-      child: Builder(builder: (context) {
-        _hudContext = context;
-        return NavigationView(
-          key: viewKey,
-          appBar: NavigationAppBar(
-            automaticallyImplyLeading: false,
-            title: const DragToMoveArea(
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: null,
-              ),
-            ),
-            actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              Expanded(
-                  child: Center(
-                      child: Text(
-                "工作空间: ${_envParamVm.workSpaceRoot}",
-                style:
-                    const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
-              ))),
-              const Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: Padding(
-                  padding: EdgeInsetsDirectional.only(end: 8.0),
-                  child: NetworkStateWidget(),
-                ),
-              ),
-              const WindowButtons(),
-            ]),
+    return NavigationView(
+      key: viewKey,
+      appBar: NavigationAppBar(
+        automaticallyImplyLeading: false,
+        title: const DragToMoveArea(
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: null,
           ),
-          paneBodyBuilder: (item, child) {
-            final name =
-                item?.key is ValueKey ? (item!.key as ValueKey).value : null;
-            return FocusTraversalGroup(
-              key: ValueKey('body$name'),
-              child: widget.navigationShell,
-            );
-          },
-          pane: NavigationPane(
-            size: const NavigationPaneSize(
-                openMaxWidth: 220,
-                openWidth: 220,
-                compactWidth: 100,
-                openMinWidth: 200),
-            selected: _calculateSelectedIndex(context),
-            header: const SizedBox(
-              height: kOneLineTileHeight,
-              child: Text(
-                appTitle,
-                style: TextStyle(fontSize: 20),
-              ),
+        ),
+        actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          Expanded(
+              child: Center(
+                  child: Text(
+            "工作空间: ${_envParamVm.workSpaceRoot}",
+            style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+          ))),
+          const Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(end: 8.0),
+              child: NetworkStateWidget(),
             ),
-            displayMode: appTheme.displayMode,
-            indicator: () {
-              switch (appTheme.indicator) {
-                case NavigationIndicators.end:
-                  return const EndNavigationIndicator();
-                case NavigationIndicators.sticky:
-                default:
-                  return const StickyNavigationIndicator();
-              }
-            }(),
-            items: originalItems,
-            autoSuggestBox: Builder(builder: (context) {
-              return AutoSuggestBox(
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                key: searchKey,
-                focusNode: searchFocusNode,
-                controller: searchController,
-                unfocusedColor: Colors.transparent,
-                // also need to include sub items from [PaneItemExpander] items
-                items: <PaneItem>[
-                  ...originalItems
-                      .whereType<PaneItemExpander>()
-                      .expand<PaneItem>((item) {
-                    return [
-                      item,
-                      ...item.items.whereType<PaneItem>(),
-                    ];
-                  }),
-                  ...originalItems
-                      .where(
-                        (item) => item is PaneItem && item is! PaneItemExpander,
-                      )
-                      .cast<PaneItem>(),
-                ].map((item) {
-                  assert(item.title is Text);
-                  final text = (item.title as Text).data!;
-                  return AutoSuggestBoxItem(
-                    label: text,
-                    value: text,
-                    onSelected: () {
-                      item.onTap?.call();
-                      searchController.clear();
-                      searchFocusNode.unfocus();
-                      final view = NavigationView.of(context);
-                      if (view.compactOverlayOpen) {
-                        view.compactOverlayOpen = false;
-                      } else if (view.minimalPaneOpen) {
-                        view.minimalPaneOpen = false;
-                      }
-                    },
-                  );
-                }).toList(),
-                trailingIcon: IgnorePointer(
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: const Icon(FluentIcons.search),
-                  ),
-                ),
-                placeholder: 'Search',
-                placeholderStyle:
-                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              );
-            }),
-            autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-            footerItems: footerItems,
           ),
-          onOpenSearch: searchFocusNode.requestFocus,
+          const WindowButtons(),
+        ]),
+      ),
+      paneBodyBuilder: (item, child) {
+        final name =
+            item?.key is ValueKey ? (item!.key as ValueKey).value : null;
+        return FocusTraversalGroup(
+          key: ValueKey('body$name'),
+          child: widget.navigationShell,
         );
-      }),
+      },
+      pane: NavigationPane(
+        size: const NavigationPaneSize(
+            openMaxWidth: 220,
+            openWidth: 220,
+            compactWidth: 100,
+            openMinWidth: 200),
+        selected: _calculateSelectedIndex(context),
+        header: const SizedBox(
+          height: kOneLineTileHeight,
+          child: Text(
+            appTitle,
+            style: TextStyle(fontSize: 20),
+          ),
+        ),
+        displayMode: appTheme.displayMode,
+        indicator: () {
+          switch (appTheme.indicator) {
+            case NavigationIndicators.end:
+              return const EndNavigationIndicator();
+            case NavigationIndicators.sticky:
+            default:
+              return const StickyNavigationIndicator();
+          }
+        }(),
+        items: originalItems,
+        autoSuggestBox: Builder(builder: (context) {
+          return AutoSuggestBox(
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            key: searchKey,
+            focusNode: searchFocusNode,
+            controller: searchController,
+            unfocusedColor: Colors.transparent,
+            // also need to include sub items from [PaneItemExpander] items
+            items: <PaneItem>[
+              ...originalItems
+                  .whereType<PaneItemExpander>()
+                  .expand<PaneItem>((item) {
+                return [
+                  item,
+                  ...item.items.whereType<PaneItem>(),
+                ];
+              }),
+              ...originalItems
+                  .where(
+                    (item) => item is PaneItem && item is! PaneItemExpander,
+                  )
+                  .cast<PaneItem>(),
+            ].map((item) {
+              assert(item.title is Text);
+              final text = (item.title as Text).data!;
+              return AutoSuggestBoxItem(
+                label: text,
+                value: text,
+                onSelected: () {
+                  item.onTap?.call();
+                  searchController.clear();
+                  searchFocusNode.unfocus();
+                  final view = NavigationView.of(context);
+                  if (view.compactOverlayOpen) {
+                    view.compactOverlayOpen = false;
+                  } else if (view.minimalPaneOpen) {
+                    view.minimalPaneOpen = false;
+                  }
+                },
+              );
+            }).toList(),
+            trailingIcon: IgnorePointer(
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(FluentIcons.search),
+              ),
+            ),
+            placeholder: 'Search',
+            placeholderStyle:
+                const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          );
+        }),
+        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+        footerItems: footerItems,
+      ),
+      onOpenSearch: searchFocusNode.requestFocus,
     );
   }
 

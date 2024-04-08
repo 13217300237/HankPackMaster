@@ -24,10 +24,10 @@ class NetUtil {
     try {
       var response = await _dio.get("https://codehub-g.huawei.com/");
       if (response.statusCode == 200) {
-        debugPrint("checkCodehub: 200,已连上xGate");
+        // debugPrint("checkCodehub: 200,已连上xGate");
         onXGateConnect(true);
       } else {
-        debugPrint("checkCodehub: ${response.statusCode}");
+        // debugPrint("checkCodehub: ${response.statusCode}");
         onXGateConnect(false);
       }
     } catch (e) {

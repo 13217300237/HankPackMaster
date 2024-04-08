@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/env_group/env_group_operator.dart';
@@ -9,6 +10,7 @@ import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:hank_pack_master/ui/work_shop/work_shop_vm.dart';
 
 import '../../../comm/comm_font.dart';
+import '../../../comm/gradients.dart';
 import '../../../comm/str_const.dart';
 import '../../../comm/text_util.dart';
 import '../../../comm/ui/form_input.dart';
@@ -91,6 +93,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
 
       debugPrint("命令执行根目录为:$projectWorkDir");
 
+      // showLoading 正在获取
+      EasyLoading.show(status: '正在获取远程分支状态...',dismissOnTap: false,maskType: EasyLoadingMaskType.black);
       CommandUtil.getInstance()
           .gitBranchRemote(projectWorkDir, (s) {})
           .then((s) {
@@ -111,8 +115,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
         }
 
         initSetting(widget.projectRecordEntity.packageSetting);
-
-        setState(() {});
+        EasyLoading.dismiss(animation: true);
       });
     });
   }
@@ -132,7 +135,9 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
     _apkLocationController.text = packageSetting.apkLocation ?? '';
     _jdk = packageSetting.jdk;
 
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Widget chooseRadio(String title) {
@@ -388,8 +393,8 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                     Wrap(
                       children: [
                         ..._selectedToMergeBranch.map((e) => GestureDetector(
-                          onTap: showDialog,
-                          child: Card(
+                              onTap: showDialog,
+                              child: Card(
                                 margin:
                                     const EdgeInsets.only(right: 10, bottom: 5),
                                 backgroundColor: Colors.blue,
@@ -402,7 +407,7 @@ class _StartPackageDialogWidgetState extends State<StartPackageDialogWidget> {
                                       color: Colors.white),
                                 ),
                               ),
-                        )),
+                            )),
                       ],
                     ),
                   ],
@@ -429,12 +434,28 @@ class _BranchListLayoutState extends State<BranchListLayout> {
   // 记住刚刚传进来的 branchList,因为点取消的时候要还原
   late Map<String, bool> old;
 
+  final _textController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     old = {};
     old.addAll(widget.branchList);
+
+    debugPrint("length->${widget.branchList.length}");
+
+    _textController.addListener(() {
+      setState(() {});
+    });
   }
+
+  var textStyle = const TextStyle(
+      decoration: TextDecoration.none,
+      fontSize: 15,
+      height: 1.5,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
+      fontFamily: commFontFamily);
 
   @override
   Widget build(BuildContext context) {
@@ -446,26 +467,31 @@ class _BranchListLayoutState extends State<BranchListLayout> {
             child: Wrap(
               children: [
                 ...widget.branchList.keys.toList().map(
-                      (e) => GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            widget.branchList[e] = !widget.branchList[e]!;
-                          });
-                        },
-                        child: Card(
-                          margin: const EdgeInsets.all(5),
-                          backgroundColor: widget.branchList[e]!
-                              ? Colors.blue
-                              : Colors.white,
-                          child: Text(
-                            e,
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: commFontFamily,
-                                color: widget.branchList[e]!
-                                    ? Colors.white
-                                    : Colors.black),
+                      (e) => Visibility(
+                        visible: _textController.text.isEmpty
+                            ? true
+                            : e.contains(_textController.text),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              widget.branchList[e] = !widget.branchList[e]!;
+                            });
+                          },
+                          child: Card(
+                            margin: const EdgeInsets.all(5),
+                            backgroundColor: widget.branchList[e]!
+                                ? Colors.blue
+                                : Colors.white,
+                            child: Text(
+                              e,
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: commFontFamily,
+                                  color: widget.branchList[e]!
+                                      ? Colors.white
+                                      : Colors.black),
+                            ),
                           ),
                         ),
                       ),
@@ -478,6 +504,23 @@ class _BranchListLayoutState extends State<BranchListLayout> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            Expanded(
+              child: TextBox(
+                controller: _textController,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    gradient: cardGradient,
+                    border: Border.all(color: Colors.transparent, width: 1.35)),
+                unfocusedColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                style: textStyle,
+                placeholder: '输入过滤关键字',
+                expands: false,
+                maxLines: 1,
+                enabled: true,
+              ),
+            ),
+            const SizedBox(width: 30),
             OutlinedButton(
               child: const Text('取消',
                   style: TextStyle(fontSize: 22, fontFamily: commFontFamily)),
@@ -491,9 +534,7 @@ class _BranchListLayoutState extends State<BranchListLayout> {
             FilledButton(
               child: const Text('确定',
                   style: TextStyle(fontSize: 22, fontFamily: commFontFamily)),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
             )
           ],
         )
