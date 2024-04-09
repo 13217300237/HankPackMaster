@@ -71,6 +71,7 @@ dependencies:
   dio_smart_retry: 6.0.0
   flutter_svg: 2.0.10+1
   desktop_drop: 0.4.4
+  printing: 5.12.0
 
 dev_dependencies:
   flutter_test:
