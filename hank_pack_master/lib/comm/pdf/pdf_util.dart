@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart' as m;
@@ -16,6 +17,17 @@ class PdfUtil {
     fontWeight: FontWeight.bold,
   );
 
+  static Future<Uint8List> createPdf(
+      {required JobResultEntity jobResult, required String md5}) async {
+    final ttf = await fontFromAssetBundle('fonts/STKAITI.TTF');
+    final doc = Document();
+    doc.addPage(Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (context) => _buildResWidget(jobResult, md5, ttf))); //
+
+    return doc.save();
+  }
+
   /// 只能这样
   /// 将数据传进来，在这里构建布局
   static Future addBuildResWidget({
@@ -23,12 +35,8 @@ class PdfUtil {
     required JobResultEntity jobResult,
     required String md5,
   }) async {
-    final ttf = await fontFromAssetBundle('fonts/STKAITI.TTF');
-    final doc = Document();
-    doc.addPage(Page(
-        pageFormat: PdfPageFormat.a4,
-        build: (context) => _buildResWidget(jobResult, md5, ttf))); //
-    await saveFile.writeAsBytes(await doc.save());
+    await saveFile
+        .writeAsBytes(await createPdf(jobResult: jobResult, md5: md5));
     m.debugPrint("保存在：${saveFile.path}");
   }
 
