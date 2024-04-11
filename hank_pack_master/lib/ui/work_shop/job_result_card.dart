@@ -1,13 +1,15 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:hank_pack_master/comm/datetime_util.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/pdf/pdf_util.dart';
+import 'package:hank_pack_master/comm/selected_text_ext.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
-import 'package:hank_pack_master/comm/toast_util.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -36,60 +38,8 @@ class JobResultCard extends StatefulWidget {
 }
 
 class _JobResultCardState extends State<JobResultCard> {
-  Widget _buildResWidget(JobResultEntity jobResult) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text('构建结果', style: _style.copyWith(fontSize: 28))),
-            _line('App名称', "${jobResult.buildName}"),
-            _line('App版本', "${jobResult.buildVersion}"),
-            _line('编译版本', "${jobResult.buildVersionNo}"),
-            _line('上传批次', "${jobResult.buildBuildVersion}"),
-            _line('App包名', "${jobResult.buildIdentifier}"),
-            _line('应用描述', "${jobResult.buildDescription}"),
-            _line('更新日志', "${jobResult.buildUpdateDescription}"),
-            _line('更新时间', "${jobResult.buildUpdated}"),
-            _line('下载地址', "${jobResult.buildQRCodeURL}"),
-            _line(
-                '过期时间', "${jobResult.expiredTime?.formatYYYMMDDHHmmSS()}"),
-            _line('md5', '${widget.md5}'),
-          ],
-        ),
-        Column(
-          children: [
-            qrCode(),
-            const SizedBox(height: 15),
-            FilledButton(
-                child:
-                Text('保存pdf', style: _style.copyWith(color: Colors.white)),
-                onPressed: () async {
-                  String file = "D:\\pdfs\\b.pdf";
-                  EasyLoading.show(status: "正在保存");
-                  await PdfUtil.addBuildResWidget(
-                    saveFile: File(file),
-                    jobResult: jobResult,
-                    md5: widget.md5!,
-                  );
-                  EasyLoading.dismiss();
-                  showSaveRes(file);
-                })
-          ],
-        ),
-      ],
-    );
-  }
-
-  showSaveRes(String file) {
-    DialogUtil.showBlurDialog(context: context,
-        title: "保存成功",
-        content: "保存成功,位置在:${file}");
+  String get pdfFileName {
+    return "${widget.jobResult.buildName}_${DateTimeUtil.nowFormat2()}.pdf";
   }
 
   @override
@@ -135,6 +85,80 @@ class _JobResultCardState extends State<JobResultCard> {
     }
   }
 
+  Widget _buildResWidget(JobResultEntity jobResult) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text('构建结果', style: _style.copyWith(fontSize: 28))),
+            _line('App名称', "${jobResult.buildName}"),
+            _line('App版本', "${jobResult.buildVersion}"),
+            _line('编译版本', "${jobResult.buildVersionNo}"),
+            _line('上传批次', "${jobResult.buildBuildVersion}"),
+            _line('App包名', "${jobResult.buildIdentifier}"),
+            _line('应用描述', "${jobResult.buildDescription}"),
+            _line('更新日志', "${jobResult.buildUpdateDescription}"),
+            _line('更新时间', "${jobResult.buildUpdated}"),
+            _line('下载地址', "${jobResult.buildQRCodeURL}"),
+            _line('过期时间', "${jobResult.expiredTime?.formatYYYMMDDHHmmSS()}"),
+            _line('md5', '${widget.md5}'),
+          ],
+        ),
+        Column(
+          children: [
+            qrCode(),
+            const SizedBox(height: 15),
+            FilledButton(
+                child:
+                    Text('保存pdf', style: _style.copyWith(color: Colors.white)),
+                onPressed: () async {
+                  String? selectedDirectory =
+                      await FilePicker.platform.getDirectoryPath();
+                  if (selectedDirectory == null) {
+                    return;
+                  }
+
+                  String file =
+                      "$selectedDirectory${Platform.pathSeparator}$pdfFileName";
+                  EasyLoading.show(status: "正在保存");
+                  await PdfUtil.addBuildResWidget(
+                    saveFile: File(file),
+                    jobResult: jobResult,
+                    md5: widget.md5!,
+                  );
+                  EasyLoading.dismiss();
+                  showSaveRes(file);
+                })
+          ],
+        ),
+      ],
+    );
+  }
+
+  showSaveRes(String file) {
+    DialogUtil.showBlurDialog(
+        context: context,
+        title: "保存成功",
+        content: Row(
+          children: [
+            Expanded(
+              child: m.SelectableText(
+                file,
+                style: _style.copyWith(color: Colors.blue),
+              ).style1(),
+            )
+          ],
+        ),
+        maxHeight: 200,
+        showCancel: false);
+  }
+
   Widget msgWidget() {
     if (widget.jobResult.errMessage != null &&
         widget.jobResult.errMessage!.isNotEmpty) {
@@ -154,7 +178,7 @@ class _JobResultCardState extends State<JobResultCard> {
       return Expander(
         initiallyExpanded: widget.initiallyExpanded,
         headerBackgroundColor:
-        ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
+            ButtonState.resolveWith((states) => Colors.red.withOpacity(.1)),
         header: Text('查看错误详情', style: _style),
         content: Container(
           constraints: const BoxConstraints(maxHeight: 350),
@@ -180,13 +204,12 @@ class _JobResultCardState extends State<JobResultCard> {
             width: qrCodeSize,
             height: qrCodeSize,
             imageUrl: "${widget.jobResult.buildQRCodeURL}",
-            placeholder: (context, url) =>
-            const Center(
+            placeholder: (context, url) => const Center(
                 child: m.CircularProgressIndicator(
-                  strokeWidth: 2,
-                )),
+              strokeWidth: 2,
+            )),
             errorWidget: (context, url, error) =>
-            const Icon(m.Icons.error_outline),
+                const Icon(m.Icons.error_outline),
           ),
         );
       } else {
@@ -204,9 +227,9 @@ class _JobResultCardState extends State<JobResultCard> {
                 },
                 style: ButtonStyle(
                     backgroundColor:
-                    ButtonState.resolveWith((states) => Colors.green),
+                        ButtonState.resolveWith((states) => Colors.green),
                     foregroundColor:
-                    ButtonState.resolveWith((states) => Colors.white)),
+                        ButtonState.resolveWith((states) => Colors.white)),
                 child: const Text(
                   '马上下载',
                   style: TextStyle(
@@ -232,7 +255,7 @@ class _JobResultCardState extends State<JobResultCard> {
     return Expander(
       initiallyExpanded: widget.initiallyExpanded,
       headerBackgroundColor:
-      ButtonState.resolveWith((states) => Colors.green.withOpacity(.1)),
+          ButtonState.resolveWith((states) => Colors.green.withOpacity(.1)),
       header: Text('可用变体', style: _style),
       content: SizedBox(
         height: widget.maxHeight - 229,
@@ -240,17 +263,16 @@ class _JobResultCardState extends State<JobResultCard> {
           child: Wrap(
             children: [
               ...assembleOrders
-                  .map((e) =>
-                  Card(
-                    backgroundColor: Colors.green.withOpacity(.4),
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 2, horizontal: 3),
-                    child: Text(
-                      e.replaceAll("assemble", ""),
-                      style:
-                      _style.copyWith(color: const Color(0xff24292E)),
-                    ),
-                  ))
+                  .map((e) => Card(
+                        backgroundColor: Colors.green.withOpacity(.4),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 2, horizontal: 3),
+                        child: Text(
+                          e.replaceAll("assemble", ""),
+                          style:
+                              _style.copyWith(color: const Color(0xff24292E)),
+                        ),
+                      ))
                   .toList()
             ],
           ),
