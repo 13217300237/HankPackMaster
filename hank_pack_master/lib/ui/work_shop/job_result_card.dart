@@ -113,54 +113,63 @@ class _JobResultCardState extends State<JobResultCard> {
           ],
         ),
         Column(
+          mainAxisSize: MainAxisSize.max,
           children: [
             qrCode(),
-            const SizedBox(height: 15),
-            FilledButton(
-                child:
-                    Text('保存pdf', style: _style.copyWith(color: Colors.white)),
-                onPressed: () async {
-                  String? selectedDirectory =
-                      await FilePicker.platform.getDirectoryPath();
-                  if (selectedDirectory == null) {
-                    return;
-                  }
+            const SizedBox(height: 20),
+            Row(children: [
+              Tooltip(
+                message: '打开默认浏览器预览PDF内容',
+                child: FilledButton(
+                    child: Text('预览PDF',
+                        style: _style.copyWith(color: Colors.white)),
+                    onPressed: () async {
+                      String file =
+                          "${EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey)}${Platform.pathSeparator}temp${Platform.pathSeparator}$pdfFileName";
+                      EasyLoading.show(status: "正在生成文件");
 
-                  String file =
-                      "$selectedDirectory${Platform.pathSeparator}$pdfFileName";
-                  EasyLoading.show(status: "正在保存");
-                  await PdfUtil.savePdf(
-                    saveFile: File(file),
-                    jobResult: jobResult,
-                    md5: widget.md5!,
-                  );
-                  EasyLoading.dismiss();
-                  showSaveRes(file);
-                }),
-            const SizedBox(height: 5),
-            FilledButton(
-                child:
-                    Text('预览pdf', style: _style.copyWith(color: Colors.white)),
-                onPressed: () async {
-                  String file =
-                      "${EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey)}${Platform.pathSeparator}temp${Platform.pathSeparator}$pdfFileName";
-                  EasyLoading.show(status: "正在生成文件");
+                      var f = File(file);
+                      f.parent.createSync(recursive: true);
 
-                  var f = File(file);
-                  f.parent.createSync(recursive: true);
+                      await PdfUtil.savePdf(
+                        saveFile: File(file),
+                        jobResult: jobResult,
+                        md5: widget.md5!,
+                      );
+                      EasyLoading.dismiss();
+                      try {
+                        await launchUrl(Uri.parse(file)); // 通过资源管理器打开该目录
+                      } catch (e) {
+                        _showErr(file);
+                      }
+                    }),
+              ),
+              const SizedBox(width: 10),
+              Tooltip(
+                message: '保存PDF到本地磁盘',
+                child: FilledButton(
+                    child: Text('保存PDF',
+                        style: _style.copyWith(color: Colors.white)),
+                    onPressed: () async {
+                      String? selectedDirectory =
+                          await FilePicker.platform.getDirectoryPath();
+                      if (selectedDirectory == null) {
+                        return;
+                      }
 
-                  await PdfUtil.savePdf(
-                    saveFile: File(file),
-                    jobResult: jobResult,
-                    md5: widget.md5!,
-                  );
-                  EasyLoading.dismiss();
-                  try {
-                    await launchUrl(Uri.parse(file)); // 通过资源管理器打开该目录
-                  } catch (e) {
-                    _showErr(file);
-                  }
-                })
+                      String file =
+                          "$selectedDirectory${Platform.pathSeparator}$pdfFileName";
+                      EasyLoading.show(status: "正在保存");
+                      await PdfUtil.savePdf(
+                        saveFile: File(file),
+                        jobResult: jobResult,
+                        md5: widget.md5!,
+                      );
+                      EasyLoading.dismiss();
+                      showSaveRes(file);
+                    }),
+              ),
+            ]),
           ],
         ),
       ],
@@ -254,6 +263,7 @@ class _JobResultCardState extends State<JobResultCard> {
                 size: qrCodeSize,
                 version: QrVersions.auto,
               ),
+              const SizedBox(height: 5),
               OutlinedButton(
                 onPressed: () {
                   launchUrl(Uri.parse(widget.jobResult.buildQRCodeURL!));
@@ -262,14 +272,17 @@ class _JobResultCardState extends State<JobResultCard> {
                     backgroundColor:
                         ButtonState.resolveWith((states) => Colors.green),
                     foregroundColor:
-                        ButtonState.resolveWith((states) => Colors.white)),
-                child: const Text(
-                  '马上下载',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.underline,
+                        ButtonState.resolveWith((states) => Colors.blue)),
+                child: Tooltip(
+                  message: '马上下载文件 ${widget.jobResult.buildQRCodeURL!}',
+                  child: const Text(
+                    '马上下载',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ),
