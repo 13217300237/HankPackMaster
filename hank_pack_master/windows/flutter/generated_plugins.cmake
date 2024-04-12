@@ -6,7 +6,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_drop
   flutter_acrylic
-  pdfx
   screen_retriever
   system_theme
   url_launcher_windows
