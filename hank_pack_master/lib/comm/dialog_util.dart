@@ -1,6 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:hank_pack_master/comm/selected_text_ext.dart';
 import 'package:hank_pack_master/comm/ui/blur_dialog.dart';
 import 'package:hank_pack_master/comm/ui/xGate_widget.dart';
 
@@ -142,7 +143,7 @@ class DialogUtil {
             style: const TextStyle(color: Colors.black, fontSize: 30),
           ),
           content: SelectableText(content,
-              style: const TextStyle(color: Colors.grey, fontSize: 16)),
+              style: const TextStyle(color: Colors.grey, fontSize: 16)).style1(),
           actions: [
             Button(
               child: const Text(

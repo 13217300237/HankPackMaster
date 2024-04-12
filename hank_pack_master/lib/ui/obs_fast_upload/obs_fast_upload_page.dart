@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' as m;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/gradients.dart';
+import 'package:hank_pack_master/comm/selected_text_ext.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/hive/fast_obs_upload/fast_obs_upload_operator.dart';
 import 'package:hank_pack_master/ui/obs_fast_upload/vm/obs_fast_upload_vm.dart';
@@ -204,7 +205,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
                             decoration: needCopy
                                 ? TextDecoration.underline
                                 : TextDecoration.none),
-                      ),
+                      ).style1(),
                     ),
                   ),
 
@@ -348,7 +349,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
         showCancel: false,
         content: SingleChildScrollView(
           child: Column(children: [
-            SelectableText(errMsg, style: textStyle.copyWith(fontSize: 18))
+            SelectableText(errMsg, style: textStyle.copyWith(fontSize: 18)).style1()
           ]),
         ));
   }
@@ -375,7 +376,7 @@ class _ObsFastUploadPageState extends State<ObsFastUploadPage> {
             ),
             SelectableText(obsDownloadUrl,
                 style: textStyle.copyWith(
-                    fontSize: 18, decoration: m.TextDecoration.underline)),
+                    fontSize: 18, decoration: m.TextDecoration.underline)).style1(),
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.center,

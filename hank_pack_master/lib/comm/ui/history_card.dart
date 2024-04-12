@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:hank_pack_master/comm/selected_text_ext.dart';
 import 'package:hank_pack_master/comm/ui/text_on_arc.dart';
 
 import '../../hive/project_record/job_history_entity.dart';
@@ -217,7 +218,7 @@ class HistoryCard extends StatelessWidget {
                                     ),
                                     child: SelectableText(
                                         "${stageRecord.resultStr?.formatJson()}",
-                                        style: _style),
+                                        style: _style).style1(),
                                   ),
                                 ),
                               ),
