@@ -1,29 +1,34 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart' as m;
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
-import 'package:printing/printing.dart';
 
 import '../../hive/project_record/job_result_entity.dart';
 
 class PdfUtil {
+  static const String _defaultFont = "fonts/STKAITI.TTF"; // 华文楷体
+
   static final TextStyle _style = TextStyle(
     fontSize: 16,
     color: PdfColors.black,
     fontWeight: FontWeight.bold,
   );
 
+  static ttf() {
+    final Uint8List fontData = File(_defaultFont).readAsBytesSync();
+    final ttf = Font.ttf(fontData.buffer.asByteData());
+    return ttf;
+  }
+
   static Future<Uint8List> createPdf(
       {required JobResultEntity jobResult, required String md5}) async {
-    final ttf = await fontFromAssetBundle('fonts/STKAITI.TTF');
     final doc = Document();
     doc.addPage(Page(
         pageFormat: PdfPageFormat.a4,
-        build: (context) => _buildResWidget(jobResult, md5, ttf))); //
+        build: (context) => _buildResWidget(jobResult, md5, ttf()))); //
 
     return doc.save();
   }
