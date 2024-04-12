@@ -323,7 +323,7 @@ class _EnvPageState extends State<EnvPage> {
   Widget _androidSdkChoose() {
     return _envChooseWidget(
         title: "Android SDK",
-        tips: "你必须指定一个本地的安卓sdk安装路径，它安卓打包的核心环境",
+        tips: "你必须指定一个本地的安卓sdk安装路径\n它是安卓打包的核心环境",
         init: () => _envParamModel.androidSdkRoot,
         action: (selectedDirectory) async {
           String envKey = "ANDROID_HOME";

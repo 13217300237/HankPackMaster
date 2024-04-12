@@ -35,7 +35,7 @@ class PdfUtil {
 
   /// 只能这样
   /// 将数据传进来，在这里构建布局
-  static Future addBuildResWidget({
+  static Future savePdf({
     required File saveFile,
     required JobResultEntity jobResult,
     required String md5,

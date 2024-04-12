@@ -10,11 +10,13 @@ import 'package:hank_pack_master/comm/dialog_util.dart';
 import 'package:hank_pack_master/comm/pdf/pdf_util.dart';
 import 'package:hank_pack_master/comm/selected_text_ext.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
+import 'package:hank_pack_master/hive/env_config/env_config_operator.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../comm/comm_font.dart';
+import '../../comm/str_const.dart';
 import '../../comm/ui/text_on_arc.dart';
 import '../../hive/project_record/job_result_entity.dart';
 
@@ -127,7 +129,7 @@ class _JobResultCardState extends State<JobResultCard> {
                   String file =
                       "$selectedDirectory${Platform.pathSeparator}$pdfFileName";
                   EasyLoading.show(status: "正在保存");
-                  await PdfUtil.addBuildResWidget(
+                  await PdfUtil.savePdf(
                     saveFile: File(file),
                     jobResult: jobResult,
                     md5: widget.md5!,
@@ -139,12 +141,24 @@ class _JobResultCardState extends State<JobResultCard> {
             FilledButton(
                 child:
                     Text('预览pdf', style: _style.copyWith(color: Colors.white)),
-                onPressed: () async{
-                  String pdfFilePath = "C:/Users/zwx1245985/Desktop/wangzhi/test20240204_20240412_160402_.pdf";
+                onPressed: () async {
+                  String file =
+                      "${EnvConfigOperator.searchEnvValue(Const.envWorkspaceRootKey)}${Platform.pathSeparator}temp${Platform.pathSeparator}$pdfFileName";
+                  EasyLoading.show(status: "正在生成文件");
+
+                  var f = File(file);
+                  f.parent.createSync(recursive: true);
+
+                  await PdfUtil.savePdf(
+                    saveFile: File(file),
+                    jobResult: jobResult,
+                    md5: widget.md5!,
+                  );
+                  EasyLoading.dismiss();
                   try {
-                    await launchUrl(Uri.parse(pdfFilePath)); // 通过资源管理器打开该目录
+                    await launchUrl(Uri.parse(file)); // 通过资源管理器打开该目录
                   } catch (e) {
-                    _showErr(pdfFilePath);
+                    _showErr(file);
                   }
                 })
           ],
