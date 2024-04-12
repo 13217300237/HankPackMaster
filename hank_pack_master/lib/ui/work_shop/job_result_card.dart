@@ -11,6 +11,7 @@ import 'package:hank_pack_master/comm/pdf/pdf_util.dart';
 import 'package:hank_pack_master/comm/selected_text_ext.dart';
 import 'package:hank_pack_master/comm/text_util.dart';
 import 'package:hank_pack_master/hive/project_record/upload_platforms.dart';
+import 'package:pdfx/pdfx.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -135,24 +136,29 @@ class _JobResultCardState extends State<JobResultCard> {
                   EasyLoading.dismiss();
                   showSaveRes(file);
                 }),
+            const SizedBox(height: 5),
             FilledButton(
-                child: const Text('预览pdf'),
+                child:
+                    Text('预览pdf', style: _style.copyWith(color: Colors.white)),
                 onPressed: () {
-                  // DialogUtil.showBlurDialog(
-                  //     context: context,
-                  //     title: "pdf预览",
-                  //     maxWidth: 1200,
-                  //     maxHeight: 900,
-                  //     content: Center(
-                  //       child: SizedBox(
-                  //         width: 900,
-                  //         height: 700,
-                  //         child: PdfPreview(
-                  //           build: (format) => PdfUtil.createPdf(
-                  //               jobResult: jobResult, md5: widget.md5!),
-                  //         ),
-                  //       ),
-                  //     ));
+                  final pdfPinchController = PdfController(
+                      document: PdfDocument.openFile(
+                          'C:/Users/zwx1245985/Desktop/wangzhi/test20240204_20240412_113615_.pdf'));
+
+                  DialogUtil.showBlurDialog(
+                      context: context,
+                      title: "pdf预览",
+                      maxWidth: 1200,
+                      maxHeight: 900,
+                      content: Center(
+                        child: SizedBox(
+                          width: 900,
+                          height: 700,
+                          child: PdfView(
+                            controller: pdfPinchController,
+                          ),
+                        ),
+                      ));
                 })
           ],
         ),

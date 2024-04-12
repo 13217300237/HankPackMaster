@@ -72,6 +72,7 @@ dependencies:
   flutter_svg: 2.0.10+1
   desktop_drop: 0.4.4
   pdf: 3.10.8
+  pdfx: 2.6.0
 
 dev_dependencies:
   flutter_test:
