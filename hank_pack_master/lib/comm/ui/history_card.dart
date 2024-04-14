@@ -69,6 +69,7 @@ class HistoryCard extends StatelessWidget {
                           jobResult: historyEntity.jobResultEntity,
                           initiallyExpanded: false,
                           maxHeight: maxHeight,
+                          projectName:historyEntity.parentRecord.projectName,
                         ),
                         const SizedBox(height: 10),
                         _stageListCard(historyEntity),

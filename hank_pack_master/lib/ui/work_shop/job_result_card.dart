@@ -26,6 +26,7 @@ class JobResultCard extends StatefulWidget {
   final double maxHeight;
   final bool initiallyExpanded;
   final String? md5; // 文件上传后的md5值
+  final String? projectName;
 
   const JobResultCard({
     super.key,
@@ -33,6 +34,7 @@ class JobResultCard extends StatefulWidget {
     required this.initiallyExpanded,
     required this.maxHeight,
     this.md5,
+    this.projectName,
   });
 
   @override
@@ -41,7 +43,7 @@ class JobResultCard extends StatefulWidget {
 
 class _JobResultCardState extends State<JobResultCard> {
   String get pdfFileName {
-    return "${widget.jobResult.buildName}_${DateTimeUtil.nowFormat2()}.pdf";
+    return "${widget.projectName}_${DateTimeUtil.nowFormat2()}.pdf";
   }
 
   @override
@@ -140,6 +142,7 @@ class _JobResultCardState extends State<JobResultCard> {
                       try {
                         await launchUrl(Uri.parse(file)); // 通过资源管理器打开该目录
                       } catch (e) {
+                        debugPrint("e->$e");
                         _showErr(file);
                       }
                     }),
