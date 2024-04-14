@@ -94,12 +94,14 @@ class _EnvPageState extends State<EnvPage> {
     });
   }
 
-  Widget _envChooseWidget(
-      {required String title,
-      required String Function() init,
-      required Function(String r) action,
-      required String tips}) {
+  Widget _envChooseWidget({
+    required String title,
+    required String Function() init,
+    required Function(String r) action,
+    required String tips,
+  }) {
     return _card(
+        init: init,
         title: title,
         muEnv: [
           if (init().isNotEmpty) ...[
@@ -192,13 +194,14 @@ class _EnvPageState extends State<EnvPage> {
     required List<Widget> muEnv,
     required Function(String r) action,
     required String tips,
+    required String Function() init,
   }) {
     return Row(mainAxisSize: MainAxisSize.max, children: [
       Expanded(
           child: Container(
               padding: const EdgeInsets.all(20),
               margin: const EdgeInsets.all(10),
-              decoration: _boxBorder(title),
+              decoration: _boxBorder(init()),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -245,9 +248,9 @@ class _EnvPageState extends State<EnvPage> {
     ]);
   }
 
-  BoxDecoration _boxBorder(String title) {
+  BoxDecoration _boxBorder(String value) {
     var boxColor = _appTheme.bgColorErr;
-    if (!_envParamModel.isEnvEmpty(title)) {
+    if (value.isNotEmpty) {
       boxColor = _appTheme.bgColorSucc;
     }
 
@@ -457,22 +460,35 @@ class _EnvPageState extends State<EnvPage> {
 
   /// 阶段任务执行设置
   _pgySetting() {
+    bool judge(String s) {
+      return s.length == 32;
+    }
+
+    bool isOk = judge(_envParamModel.pgyApiKeyController.text);
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 9),
       borderColor: Colors.transparent,
-      backgroundColor: _appTheme.bgColorSucc,
+      backgroundColor: isOk ? _appTheme.bgColorSucc : _appTheme.bgColorErr,
       borderRadius: BorderRadius.circular(5),
       child: Row(children: [
         Expanded(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("蒲公英平台设置", style: _cTextStyle),
-          const SizedBox(height: 20),
-          _textInput('_api_key', _envParamModel.pgyApiKeyController,
-              toolTip: "设置_api_key使得 apk文件可以上传到蒲公英平台,长度为32个字符", judge: (s) {
-            return s.isNotEmpty && s.length == 32;
-          }),
-        ]))
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "蒲公英平台设置",
+              style: _cTextStyle,
+            ),
+            const SizedBox(height: 20),
+            _textInput(
+              '_api_key',
+              _envParamModel.pgyApiKeyController,
+              toolTip: "设置_api_key使得 apk文件可以上传到蒲公英平台,长度为32个字符",
+              judge: judge,
+            ),
+          ],
+        ))
       ]),
     );
   }
@@ -534,10 +550,22 @@ class _EnvPageState extends State<EnvPage> {
   }
 
   _hwobsSetting() {
+    bool judge() {
+      bool endPointOk = isHttpsUrl(_envParamModel.obsEndPointController.text);
+      bool isAkOk = _envParamModel.obsAccessKeyController.text.isNotEmpty &&
+          _envParamModel.obsAccessKeyController.text.length == 20;
+      bool isSkOk = _envParamModel.obsSecretKeyController.text.isNotEmpty &&
+          _envParamModel.obsSecretKeyController.text.length == 40;
+      bool isBucketNameOk =
+          _envParamModel.obsBucketNameController.text.isNotEmpty;
+
+      return endPointOk && isAkOk && isSkOk && isBucketNameOk;
+    }
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 9),
       borderColor: Colors.transparent,
-      backgroundColor: _appTheme.bgColorSucc,
+      backgroundColor: judge() ? _appTheme.bgColorSucc : _appTheme.bgColorErr,
       borderRadius: BorderRadius.circular(5),
       child: Row(children: [
         Expanded(
@@ -548,7 +576,8 @@ class _EnvPageState extends State<EnvPage> {
           _expiredDaysWidget(),
           const SizedBox(height: 20),
           _textInput('end point ', _envParamModel.obsEndPointController,
-              judge: (s) => isHttpsUrl(s), toolTip: "华为OBS的终端地址，必须是http/https地址"),
+              judge: (s) => isHttpsUrl(s),
+              toolTip: "华为OBS的终端地址，必须是http/https地址"),
           const SizedBox(height: 10),
           _textInput(
             'access key',

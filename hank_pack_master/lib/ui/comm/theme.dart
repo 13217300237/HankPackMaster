@@ -22,7 +22,7 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
-  Color _bgColorErr = Colors.errorSecondaryColor.lightest; // 背景色1
+  Color _bgColorErr = Colors.errorSecondaryColor.withOpacity(.9); // 背景色1
   Color get bgColorErr {
     return _bgColorErr;
   }
